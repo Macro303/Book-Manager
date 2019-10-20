@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="WARN">
+	<Appenders>
+		<Console name="Console">
+			<PatternLayout disableAnsi="false"
+			               pattern="[%highlight{%d{yyyy-MMM-dd HH:mm:ss:SSS}}{FATAL=Magenta,INFO=WHITE}] [%highlight{%-5level}{FATAL=Magenta,INFO=WHITE}] {%style{%c}{Blue}} - %highlight{%msg%n%throwable}{FATAL=Magenta,INFO=WHITE}"/>
+		</Console>
+		<RollingFile name="File" fileName="logs/Book-Manager.log" filePattern="logs/Book-Manager-%i.log">
+			<PatternLayout pattern="[%d{yyyy-MMM-dd HH:mm:ss:SSS}] [%-5level] {%c} - %msg%n%throwable"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="5MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="5"/>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Root level="TRACE">
+			<AppenderRef ref="Console" level="INFO"/>
+			<AppenderRef ref="File" level="DEBUG"/>
+		</Root>
+	</Loggers>
+</Configuration>
