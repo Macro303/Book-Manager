@@ -89,19 +89,19 @@ public abstract class Console {
 			if (isbnSize < 4)
 				isbnSize = 4;
 		}
-		var titleSize = 6;
+		var titleSize = 5;
 		var maxTitle = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getTitle()).length()));
 		if (maxTitle.isPresent()) {
 			titleSize = String.valueOf(maxTitle.get().getTitle()).length();
-			if (titleSize < 6)
-				titleSize = 6;
+			if (titleSize < 5)
+				titleSize = 5;
 		}
-		var subtitleSize = 9;
+		var subtitleSize = 8;
 		var maxSubtitle = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getSubtitle()).length()));
 		if (maxSubtitle.isPresent()) {
 			subtitleSize = String.valueOf(maxSubtitle.get().getSubtitle()).length();
-			if (subtitleSize < 9)
-				subtitleSize = 9;
+			if (subtitleSize < 8)
+				subtitleSize = 8;
 		}
 		var authorSize = 6;
 		var maxAuthor = books.stream().max(Comparator.comparing(it -> it.getAuthor().length()));
@@ -110,12 +110,12 @@ public abstract class Console {
 			if (authorSize < 6)
 				authorSize = 6;
 		}
-		var publisherSize = 10;
+		var publisherSize = 9;
 		var maxPublisher = books.stream().max(Comparator.comparing(it -> it.getPublisher().length()));
 		if (maxPublisher.isPresent()) {
 			publisherSize = maxPublisher.get().getPublisher().length();
-			if (publisherSize < 10)
-				publisherSize = 10;
+			if (publisherSize < 9)
+				publisherSize = 9;
 		}
 		var formatSize = 6;
 		var maxFormat = books.stream().max(Comparator.comparing(it -> it.getFormat().getDisplay().length()));
