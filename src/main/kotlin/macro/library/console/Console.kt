@@ -20,16 +20,20 @@ object Console {
 		}
 	}
 
+	@JvmStatic
 	internal fun displayHeader(text: String) {
 		colourConsole(text = "=".repeat(text.length + 4), colour = Colour.BLUE)
 		displaySubHeader(text = text)
 		colourConsole(text = "=".repeat(text.length + 4), colour = Colour.BLUE)
 	}
 
+	@JvmStatic
 	internal fun displaySubHeader(text: String) {
 		colourConsole(text = "  $text  ", colour = Colour.BLUE)
 	}
 
+	@JvmStatic
+	@JvmOverloads
 	internal fun displayMenu(header: String, options: Set<String>, exit: String? = "Back"): Int {
 		displayHeader(text = header)
 		if (options.isEmpty()) return 0
@@ -41,33 +45,55 @@ object Console {
 		return displayPrompt(text = "Option").toIntOrNull() ?: 0
 	}
 
+	@JvmStatic
+	@JvmOverloads
+	internal fun displayMenu(header: String, options: Array<String>, exit: String? = "Back"): Int {
+		return displayMenu(header, options.toHashSet(), exit)
+	}
+
+	@JvmStatic
 	internal fun displayPrompt(text: String): String {
 		return Reader.readConsole(text = text).trim()
 	}
 
+	@JvmStatic
 	internal fun displayAgreement(text: String): Boolean {
 		val input = displayPrompt(text = "$text (Y/N)")
 		return input.equals("y", ignoreCase = true)
 	}
 
+	@JvmStatic
 	internal fun displayItemValue(item: String, value: Any?) {
 		colourConsole(text = "$item: ", colour = Colour.BLUE, newLine = false)
 		colourConsole(text = value.toString())
 	}
 
+	@JvmStatic
+	@JvmOverloads
 	internal fun display(text: String, colour: Colour = Colour.WHITE) {
 		colourConsole(text = text, colour = colour)
 	}
 
+	@JvmStatic
 	internal fun displayTable(books: List<Book>) {
-		var isbnSize = Util.displayISBN(books.maxBy { Util.displayISBN(it.isbn).length }?.isbn).length
+		var isbnSize = books.maxBy { it.isbn.toString().length }?.isbn.toString().length
 		if (isbnSize < 4)
 			isbnSize = 4
-		val nameSize = books.maxBy { it.name.length }?.name?.length ?: 4
-		val authorSize = books.maxBy { it.author?.length ?: 6 }?.author?.length ?: 6
-		val seriesSize = books.maxBy { it.series?.length ?: 6 }?.series?.length ?: 6
-		val seriesNumSize = books.maxBy { it.seriesNum?.toString()?.length ?: 8 }?.seriesNum?.toString()?.length ?: 8
-		val formatSize = books.maxBy { it.format.name.length }?.format?.name?.length ?: 6
+		var nameSize = books.maxBy { it.name.length }?.name?.length ?: 4
+		if (nameSize < 4)
+			nameSize = 4
+		var authorSize = books.maxBy { it.author?.length ?: 6 }?.author?.length ?: 6
+		if (authorSize < 6)
+			authorSize = 6
+		var seriesSize = books.maxBy { it.series?.length ?: 6 }?.series?.length ?: 6
+		if (seriesSize < 6)
+			seriesSize = 6
+		var seriesNumSize = books.maxBy { it.seriesNum?.toString()?.length ?: 8 }?.seriesNum?.toString()?.length ?: 8
+		if (seriesNumSize < 8)
+			seriesNumSize = 8
+		var formatSize = books.maxBy { it.format.name.length }?.format?.name?.length ?: 6
+		if (formatSize < 6)
+			formatSize = 6
 		val titles = listOf(
 			Pair("ISBN", isbnSize),
 			Pair("Name", nameSize),
@@ -80,7 +106,7 @@ object Console {
 		colourConsole(text = titles.joinToString(" | ") { "-".repeat(it.second) }, colour = Colour.BLUE)
 		books.sorted().forEach {
 			colourConsole(
-				text = (Util.displayISBN(it.isbn)).padStart(isbnSize) + " | " +
+				text = (it.isbn?.toString() ?: "").padStart(isbnSize) + " | " +
 						it.name.padEnd(nameSize) + " | " +
 						(it.author ?: "").padEnd(authorSize) + " | " +
 						(it.series ?: "").padEnd(seriesSize) + " | " +
