@@ -10,8 +10,8 @@ _TODO_
 
 ## Built Using
  - JDK: 11
- - [Gradle: 5.6](https://gradle.org/)
- - [kotlin-stdlib-jdk8: 1.3.41](https://kotlinlang.org/)
+ - [Gradle: 5.6.3](https://gradle.org/)
+ - [annotations: 17.0.0](https://www.jetbrains.com/)
  - [snakeyaml: 1.25](https://bitbucket.org/asomov/snakeyaml)
  - [log4j-api: 2.12.1](https://logging.apache.org/log4j/2.x/)
  - [log4j-core: 2.12.1 (Runtime)](https://logging.apache.org/log4j/2.x/)
