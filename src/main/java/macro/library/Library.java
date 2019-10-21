@@ -1,9 +1,9 @@
 package macro.library;
 
 import macro.library.book.Book;
-import macro.library.book.BookTable;
 import macro.library.book.Format;
 import macro.library.console.Console;
+import macro.library.database.BookTable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +20,6 @@ class Library {
 
 	public Library() {
 		LOGGER.info("Initializing Book Manager");
-		BookTable.INSTANCE.searchAll().forEach(Book::push);
 		mainMenu();
 	}
 
@@ -60,6 +59,8 @@ class Library {
 		var isbn = Isbn.of(Console.displayPrompt("ISBN").replace("-", ""));
 		var title = Console.displayPrompt("Title");
 		var subtitle = Console.displayPrompt("Subtitle");
+		if (subtitle.isBlank())
+			subtitle = null;
 		var author = Console.displayPrompt("Author");
 		var publisher = Console.displayPrompt("Publisher");
 		var options = Format.values();

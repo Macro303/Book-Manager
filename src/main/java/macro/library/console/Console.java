@@ -83,16 +83,16 @@ public abstract class Console {
 
 	public static void displayTable(List<Book> books) {
 		var isbnSize = 4;
-		var maxISBN = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getIsbn()).length()));
+		var maxISBN = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getISBN()).length()));
 		if (maxISBN.isPresent()) {
-			isbnSize = String.valueOf(maxISBN.get().getIsbn()).length();
+			isbnSize = String.valueOf(maxISBN.get().getISBN()).length();
 			if (isbnSize < 4)
 				isbnSize = 4;
 		}
 		var titleSize = 5;
-		var maxTitle = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getTitle()).length()));
+		var maxTitle = books.stream().max(Comparator.comparing(it -> it.getTitle().length()));
 		if (maxTitle.isPresent()) {
-			titleSize = String.valueOf(maxTitle.get().getTitle()).length();
+			titleSize = maxTitle.get().getTitle().length();
 			if (titleSize < 5)
 				titleSize = 5;
 		}
@@ -143,7 +143,7 @@ public abstract class Console {
 		Collections.sort(books);
 		for (var book : books) {
 			var bookOutput = Colour.BLUE + "| " + Colour.WHITE;
-			bookOutput += Util.padStr(String.valueOf(book.getIsbn()), isbnSize) + Colour.BLUE + " | " + Colour.WHITE;
+			bookOutput += Util.padStr(String.valueOf(book.getISBN()), isbnSize) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getTitle(), titleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getSubtitle(), subtitleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getAuthor(), authorSize * -1) + Colour.BLUE + " | " + Colour.WHITE;

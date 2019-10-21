@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -20,4 +21,6 @@ public abstract class Util {
 			str = "";
 		return String.format("%" + count + "s", str);
 	}
+
+	public static Comparator<String> nullSafeComparator = Comparator.nullsLast(String::compareToIgnoreCase);
 }
