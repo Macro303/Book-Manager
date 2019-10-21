@@ -89,33 +89,33 @@ public abstract class Console {
 			if (isbnSize < 4)
 				isbnSize = 4;
 		}
-		var nameSize = 4;
-		var maxName = books.stream().max(Comparator.comparing(it -> it.getName().length()));
-		if (maxName.isPresent()) {
-			nameSize = maxName.get().getName().length();
-			if (nameSize < 4)
-				nameSize = 4;
+		var titleSize = 6;
+		var maxTitle = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getTitle()).length()));
+		if (maxTitle.isPresent()) {
+			titleSize = String.valueOf(maxTitle.get().getTitle()).length();
+			if (titleSize < 6)
+				titleSize = 6;
+		}
+		var subtitleSize = 9;
+		var maxSubtitle = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getSubtitle()).length()));
+		if (maxSubtitle.isPresent()) {
+			subtitleSize = String.valueOf(maxSubtitle.get().getSubtitle()).length();
+			if (subtitleSize < 9)
+				subtitleSize = 9;
 		}
 		var authorSize = 6;
-		var maxAuthor = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getAuthor()).length()));
+		var maxAuthor = books.stream().max(Comparator.comparing(it -> it.getAuthor().length()));
 		if (maxAuthor.isPresent()) {
-			authorSize = String.valueOf(maxAuthor.get().getAuthor()).length();
+			authorSize = maxAuthor.get().getAuthor().length();
 			if (authorSize < 6)
 				authorSize = 6;
 		}
-		var seriesSize = 6;
-		var maxSeries = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getSeries()).length()));
-		if (maxSeries.isPresent()) {
-			seriesSize = String.valueOf(maxSeries.get().getSeries()).length();
-			if (seriesSize < 6)
-				seriesSize = 6;
-		}
-		var seriesNumSize = 8;
-		var maxSeriesNum = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getSeriesNum()).length()));
-		if (maxSeriesNum.isPresent()) {
-			seriesNumSize = String.valueOf(maxSeriesNum.get().getSeriesNum()).length();
-			if (seriesNumSize < 8)
-				seriesNumSize = 8;
+		var publisherSize = 10;
+		var maxPublisher = books.stream().max(Comparator.comparing(it -> it.getPublisher().length()));
+		if (maxPublisher.isPresent()) {
+			publisherSize = maxPublisher.get().getPublisher().length();
+			if (publisherSize < 10)
+				publisherSize = 10;
 		}
 		var formatSize = 6;
 		var maxFormat = books.stream().max(Comparator.comparing(it -> it.getFormat().getDisplay().length()));
@@ -124,30 +124,30 @@ public abstract class Console {
 			if (formatSize < 6)
 				formatSize = 6;
 		}
-		var titleOutput = "";
+		var titleOutput = "| ";
 		titleOutput += Util.padStr("ISBN", isbnSize * -1) + " | ";
-		titleOutput += Util.padStr("Name", nameSize * -1) + " | ";
+		titleOutput += Util.padStr("Title", titleSize * -1) + " | ";
+		titleOutput += Util.padStr("Subtitle", subtitleSize * -1) + " | ";
 		titleOutput += Util.padStr("Author", authorSize * -1) + " | ";
-		titleOutput += Util.padStr("Series", seriesSize * -1) + " | ";
-		titleOutput += Util.padStr("Series #", seriesNumSize - 1) + " | ";
+		titleOutput += Util.padStr("Publisher", publisherSize * -1) + " | ";
 		titleOutput += Util.padStr("Format", formatSize * -1) + " | ";
 		colourConsole(titleOutput, Colour.BLUE);
-		var tableOutput = "";
+		var tableOutput = "| ";
 		tableOutput += "-".repeat(isbnSize) + " | ";
-		tableOutput += "-".repeat(nameSize) + " | ";
+		tableOutput += "-".repeat(titleSize) + " | ";
+		tableOutput += "-".repeat(subtitleSize) + " | ";
 		tableOutput += "-".repeat(authorSize) + " | ";
-		tableOutput += "-".repeat(seriesSize) + " | ";
-		tableOutput += "-".repeat(seriesNumSize) + " | ";
+		tableOutput += "-".repeat(publisherSize) + " | ";
 		tableOutput += "-".repeat(formatSize) + " | ";
 		colourConsole(tableOutput, Colour.BLUE);
 		Collections.sort(books);
 		for (var book : books) {
-			var bookOutput = "";
+			var bookOutput = Colour.BLUE + "| " + Colour.WHITE;
 			bookOutput += Util.padStr(String.valueOf(book.getIsbn()), isbnSize) + Colour.BLUE + " | " + Colour.WHITE;
-			bookOutput += Util.padStr(book.getName(), nameSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
-			bookOutput += Util.padStr(String.valueOf(book.getAuthor()), authorSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
-			bookOutput += Util.padStr(String.valueOf(book.getSeries()), seriesSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
-			bookOutput += Util.padStr(String.valueOf(book.getSeriesNum()), seriesNumSize) + Colour.BLUE + " | " + Colour.WHITE;
+			bookOutput += Util.padStr(book.getTitle(), titleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
+			bookOutput += Util.padStr(book.getSubtitle(), subtitleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
+			bookOutput += Util.padStr(book.getAuthor(), authorSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
+			bookOutput += Util.padStr(book.getPublisher(), publisherSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getFormat().getDisplay(), formatSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			colourConsole(bookOutput, Colour.WHITE);
 		}

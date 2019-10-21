@@ -5,6 +5,6 @@ package macro.library.book
  */
 enum class Format(val display: String) {
 	PAPERBACK(display = "Paperback"),
-	TRADE_PAPERBACK(display = "Trade Paperback"),
-	HARDBACK(display = "Hardback")
+	HARDCOVER(display = "Hardcover"),
+	MASS_MARKET_PAPERBACK(display = "Mass Market Paperback")
 }
