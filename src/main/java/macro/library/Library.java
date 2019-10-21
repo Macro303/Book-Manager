@@ -41,7 +41,7 @@ class Library {
 
 	private void mainMenu() {
 		var options = new String[]{"List Books", "Add Book"};
-		var selection = Console.displayMenu$Book_Manager("Book Manager", options, "Exit");
+		var selection = Console.displayMenu("Book Manager", options, "Exit");
 		if (selection == 0)
 			return;
 		else if (selection == 1)
@@ -53,21 +53,21 @@ class Library {
 
 	private void listBooks() {
 		var books = BookTable.INSTANCE.searchAll();
-		Console.displayTable$Book_Manager(books);
+		Console.displayTable(books);
 	}
 
 	private void addBook() {
-		Console.displaySubHeader$Book_Manager("Add Book");
-		var isbn = Isbn.of(Console.displayPrompt$Book_Manager("ISBN").replace("-", ""));
-		var name = Console.displayPrompt$Book_Manager("Name");
-		var author = Console.displayPrompt$Book_Manager("Author");
-		var series = Console.displayPrompt$Book_Manager("Series");
+		Console.displaySubHeader("Add Book");
+		var isbn = Isbn.of(Console.displayPrompt("ISBN").replace("-", ""));
+		var name = Console.displayPrompt("Name");
+		var author = Console.displayPrompt("Author");
+		var series = Console.displayPrompt("Series");
 		var seriesNum = -1;
 		try {
-			seriesNum = Integer.parseInt(Console.displayPrompt$Book_Manager("Series #"));
+			seriesNum = Integer.parseInt(Console.displayPrompt("Series #"));
 		}catch (NumberFormatException ignored){}
 		var options = Format.values();
-		var selection = Console.displayMenu$Book_Manager("Format", Arrays.stream(options).map(Format::getDisplay).toArray(String[]::new), null);
+		var selection = Console.displayMenu("Format", Arrays.stream(options).map(Format::getDisplay).toArray(String[]::new), null);
 		var format = options[selection - 1];
 		var entry = BookTable.INSTANCE.selectUnique(isbn);
 		if(entry == null)

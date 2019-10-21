@@ -12,4 +12,8 @@ public abstract class Util {
 	private static final Logger LOGGER = LogManager.getLogger(Util.class);
 	public static final String SQLITE_DATABASE = "Book-Manager.sqlite";
 	public static final String DATABASE_URL = "jdbc:sqlite:" + SQLITE_DATABASE;
+
+	public static String padStr(@NotNull String str, int count){
+		return String.format("%" + count + "s", str);
+	}
 }
