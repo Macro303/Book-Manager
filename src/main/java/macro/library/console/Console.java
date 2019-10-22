@@ -83,9 +83,9 @@ public abstract class Console {
 
 	public static void displayTable(List<Book> books) {
 		var isbnSize = 4;
-		var maxISBN = books.stream().max(Comparator.comparing(it -> String.valueOf(it.getISBN()).length()));
+		var maxISBN = books.stream().max(Comparator.comparing(it -> it.getISBN().getDisplay().length()));
 		if (maxISBN.isPresent()) {
-			isbnSize = String.valueOf(maxISBN.get().getISBN()).length();
+			isbnSize = maxISBN.get().getISBN().getDisplay().length();
 			if (isbnSize < 4)
 				isbnSize = 4;
 		}
@@ -143,7 +143,7 @@ public abstract class Console {
 		Collections.sort(books);
 		for (var book : books) {
 			var bookOutput = Colour.BLUE + "| " + Colour.WHITE;
-			bookOutput += Util.padStr(String.valueOf(book.getISBN()), isbnSize) + Colour.BLUE + " | " + Colour.WHITE;
+			bookOutput += Util.padStr(book.getISBN().getDisplay(), isbnSize) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getTitle(), titleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getSubtitle(), subtitleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getAuthor(), authorSize * -1) + Colour.BLUE + " | " + Colour.WHITE;

@@ -47,7 +47,7 @@ class Library {
 	}
 
 	private void mainMenu() {
-		var options = new String[]{"List Books", "Add Book", "Load Book"};
+		var options = new String[]{"List Books", "Add Book", "Load Book", "Reload Book"};
 		var selection = Console.displayMenu("Book Manager", options, "Exit");
 		switch (selection) {
 			case 0:
@@ -61,6 +61,9 @@ class Library {
 			case 3:
 				loadBook();
 				break;
+			case 4:
+				reloadBook();
+				break;
 		}
 		mainMenu();
 	}
@@ -70,9 +73,59 @@ class Library {
 		Console.displayTable(books);
 	}
 
-	private void addBook() {
-		Console.displaySubHeader("Add Book");
+	private void reloadBook(@NotNull Isbn ISBN) {
+		var book = OpenLibrary.searchBook(ISBN);
+		if (book != null) {
+			var options = Format.values();
+			var selection = Console.displayMenu("Format", Arrays.stream(options).map(Format::getDisplay).toArray(String[]::new), null);
+			var format = options[selection - 1];
+			book.setFormat(format);
+			book.push();
+		} else
+			Console.display("Unable to find Book on Open Library", Colour.YELLOW);
+	}
+
+	private void reloadBook() {
+		Console.displaySubHeader("Load Book");
 		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
+		var entry = BookTable.INSTANCE.selectUnique(isbn);
+		if (entry == null) {
+			Console.display("Unable to find Book", Colour.YELLOW);
+			if (Console.displayAgreement("Load Book"))
+				loadBook(isbn);
+		} else
+			reloadBook(isbn);
+	}
+
+	private void loadBook(@NotNull Isbn ISBN) {
+		var book = OpenLibrary.searchBook(ISBN);
+		if (book != null) {
+			var options = Format.values();
+			var selection = Console.displayMenu("Format", Arrays.stream(options).map(Format::getDisplay).toArray(String[]::new), null);
+			var format = options[selection - 1];
+			book.setFormat(format);
+			book.add();
+		} else {
+			Console.display("Unable to find Book on Open Library", Colour.YELLOW);
+			if (Console.displayAgreement("Add Manually"))
+				addBook(ISBN);
+		}
+	}
+
+	private void loadBook() {
+		Console.displaySubHeader("Load Book");
+		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
+		var entry = BookTable.INSTANCE.selectUnique(isbn);
+		if (entry == null)
+			loadBook(isbn);
+		else {
+			Console.display("A Book with that ISBN already exists", Colour.YELLOW);
+			if (Console.displayAgreement("Reload Book"))
+				reloadBook(isbn);
+		}
+	}
+
+	private void addBook(@NotNull Isbn ISBN) {
 		var title = Console.displayPrompt("Title");
 		var subtitle = Console.displayPrompt("Subtitle");
 		if (subtitle.isBlank())
@@ -82,25 +135,19 @@ class Library {
 		var options = Format.values();
 		var selection = Console.displayMenu("Format", Arrays.stream(options).map(Format::getDisplay).toArray(String[]::new), null);
 		var format = options[selection - 1];
-		var entry = BookTable.INSTANCE.selectUnique(isbn);
-		if (entry == null)
-			new Book(isbn, title, subtitle, author, publisher, format).add();
+		new Book(ISBN, title, subtitle, author, publisher, format).add();
 	}
 
-	private void loadBook() {
-		Console.displaySubHeader("Load Book");
+	private void addBook() {
+		Console.displaySubHeader("Add Book");
 		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
-		var book = OpenLibrary.searchBook(isbn);
-		if (book != null) {
-			var options = Format.values();
-			var selection = Console.displayMenu("Format", Arrays.stream(options).map(Format::getDisplay).toArray(String[]::new), null);
-			var format = options[selection - 1];
-			book.setFormat(format);
-			book.push();
-		} else {
-			Console.display("Unable to find Book on Open Library", Colour.RED);
-			if (Console.displayAgreement("Add Manually"))
-				addBook();
+		var entry = BookTable.INSTANCE.selectUnique(isbn);
+		if (entry == null)
+			addBook(isbn);
+		else {
+			Console.display("A Book with that ISBN already exists", Colour.YELLOW);
+			if (Console.displayAgreement("Reload Book"))
+				reloadBook(isbn);
 		}
 	}
 }

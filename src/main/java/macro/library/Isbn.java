@@ -101,12 +101,16 @@ public class Isbn implements Comparable<Isbn> {
 		return normalizedIsbn.equals(isbn.normalizedIsbn);
 	}
 
+	@Override
+	public String toString() {
+		return normalizedIsbn;
+	}
+
 	/**
 	 * @return description of ISBN. It includes hyphens like ###-##-####-###-#.
 	 */
-	@Override
-	public String toString() {
-		return normalizedIsbn.substring(0, 3) + "-" + normalizedIsbn.substring(3,5) + "-" + normalizedIsbn.substring(5, 9) + "-" + normalizedIsbn.substring(9, 12) + "-" + normalizedIsbn.charAt(12);
+	public String getDisplay() {
+		return normalizedIsbn.substring(0, 3) + "-" + normalizedIsbn.substring(3, 5) + "-" + normalizedIsbn.substring(5, 9) + "-" + normalizedIsbn.substring(9, 12) + "-" + normalizedIsbn.charAt(12);
 	}
 
 	@Override

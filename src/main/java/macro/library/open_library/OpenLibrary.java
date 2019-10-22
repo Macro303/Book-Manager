@@ -3,7 +3,6 @@ package macro.library.open_library;
 import macro.library.Isbn;
 import macro.library.Util;
 import macro.library.book.Book;
-import macro.library.database.BookTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -43,9 +42,6 @@ public abstract class OpenLibrary {
 				publisherStr.append(";");
 			publisherStr.append(((JSONObject) publisher).getString("name"));
 		}
-		var book = BookTable.INSTANCE.selectUnique(isbn);
-		if (book == null)
-			book = new Book(isbn, title, subtitle, authorStr.toString(), publisherStr.toString()).add();
-		return book;
+		return new Book(isbn, title, subtitle, authorStr.toString(), publisherStr.toString());
 	}
 }
