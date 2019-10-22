@@ -8,7 +8,7 @@ import java.sql.ResultSet
 /**
  * Created by Macro303 on 2019-Oct-22
  */
-object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
+object BookTable : IdTable<Book, Isbn>("book", "isbn") {
 	override fun insert(item: Book): Boolean {
 		val query =
 			"INSERT INTO $tableName(isbn, title, subtitle, author, publisher, format) VALUES(?, ?, ?, ?, ?, ?);"
@@ -52,10 +52,5 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 			result.getString("publisher"),
 			Format.values()[result.getInt("format")]
 		)
-	}
-
-	fun selectUnique(isbn: Isbn?): Book? {
-		val query = "SELECT * FROM $tableName WHERE isbn LIKE ?;"
-		return search(query, isbn).firstOrNull()
 	}
 }

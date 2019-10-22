@@ -63,6 +63,7 @@ public class Book implements Comparable<Book> {
 		return comparator.compare(this, other);
 	}
 
+	//<editor-fold desc="Getters and Setters" defaultstate="collapsed">
 	@NotNull
 	public Isbn getISBN() {
 		return isbn;
@@ -112,4 +113,5 @@ public class Book implements Comparable<Book> {
 	public void setFormat(@NotNull Format format) {
 		this.format = format;
 	}
+	//</editor-fold>
 }
