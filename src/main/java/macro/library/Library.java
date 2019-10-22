@@ -2,13 +2,16 @@ package macro.library;
 
 import macro.library.book.Book;
 import macro.library.book.Format;
+import macro.library.config.Config;
 import macro.library.console.Console;
 import macro.library.database.BookTable;
+import macro.library.open_library.OpenLibrary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 
 /**
@@ -20,6 +23,11 @@ class Library {
 
 	public Library() {
 		LOGGER.info("Initializing Book Manager");
+		try {
+			Config.CONFIG = Config.loadConfig();
+		}catch (FileNotFoundException fnfe){
+			Config.CONFIG = new Config().saveConfig();
+		}
 		mainMenu();
 	}
 
@@ -38,14 +46,21 @@ class Library {
 	}
 
 	private void mainMenu() {
-		var options = new String[]{"List Books", "Add Book"};
+		var options = new String[]{"List Books", "Add Book", "Load Book"};
 		var selection = Console.displayMenu("Book Manager", options, "Exit");
-		if (selection == 0)
-			return;
-		else if (selection == 1)
-			listBooks();
-		else if (selection == 2)
-			addBook();
+		switch (selection) {
+			case 0:
+				return;
+			case 1:
+				listBooks();
+				break;
+			case 2:
+				addBook();
+				break;
+			case 3:
+				loadBook();
+				break;
+		}
 		mainMenu();
 	}
 
@@ -56,7 +71,7 @@ class Library {
 
 	private void addBook() {
 		Console.displaySubHeader("Add Book");
-		var isbn = Isbn.of(Console.displayPrompt("ISBN").replace("-", ""));
+		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
 		var title = Console.displayPrompt("Title");
 		var subtitle = Console.displayPrompt("Subtitle");
 		if (subtitle.isBlank())
@@ -69,5 +84,18 @@ class Library {
 		var entry = BookTable.INSTANCE.selectUnique(isbn);
 		if (entry == null)
 			new Book(isbn, title, subtitle, author, publisher, format).add();
+	}
+
+	private void loadBook() {
+		Console.displaySubHeader("Load Book");
+		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
+		var book = OpenLibrary.searchBook(isbn);
+		if (book != null) {
+			var options = Format.values();
+			var selection = Console.displayMenu("Format", Arrays.stream(options).map(Format::getDisplay).toArray(String[]::new), null);
+			var format = options[selection - 1];
+			book.setFormat(format);
+			book.push();
+		}
 	}
 }
