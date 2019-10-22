@@ -38,7 +38,7 @@ public class BookTable extends IdTable<Book, Isbn> {
 
 	@Override
 	protected void createTable() {
-		var query = String.format("CREATE TABLE %s(isbn TEXT PRIMARY KEY NOT NULL UNIQUE, title TEXT, subtitle TEXT, author TEXT NOT NULL, publisher TEXT NOT NULL, format INTEGER NOT NULL DEFAULT(0));", tableName);
+		var query = String.format("CREATE TABLE %s(isbn TEXT PRIMARY KEY NOT NULL UNIQUE, title TEXT NOT NULL, subtitle TEXT, author TEXT NOT NULL, publisher TEXT NOT NULL, format INTEGER NOT NULL DEFAULT(0));", tableName);
 		insert(query);
 	}
 
