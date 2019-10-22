@@ -3,6 +3,7 @@ package macro.library;
 import macro.library.book.Book;
 import macro.library.book.Format;
 import macro.library.config.Config;
+import macro.library.console.Colour;
 import macro.library.console.Console;
 import macro.library.database.BookTable;
 import macro.library.open_library.OpenLibrary;
@@ -25,7 +26,7 @@ class Library {
 		LOGGER.info("Initializing Book Manager");
 		try {
 			Config.CONFIG = Config.loadConfig();
-		}catch (FileNotFoundException fnfe){
+		} catch (FileNotFoundException fnfe) {
 			Config.CONFIG = new Config().saveConfig();
 		}
 		mainMenu();
@@ -96,6 +97,10 @@ class Library {
 			var format = options[selection - 1];
 			book.setFormat(format);
 			book.push();
+		} else {
+			Console.display("Unable to find Book on Open Library", Colour.RED);
+			if (Console.displayAgreement("Add Manually"))
+				addBook();
 		}
 	}
 }

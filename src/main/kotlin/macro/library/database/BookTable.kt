@@ -4,7 +4,6 @@ import macro.library.Isbn
 import macro.library.book.Book
 import macro.library.book.Format
 import java.sql.ResultSet
-import java.util.*
 
 /**
  * Created by Macro303 on 2019-Oct-22
@@ -14,13 +13,13 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 		val query =
 			"INSERT INTO $tableName(isbn, title, subtitle, author, publisher, format) VALUES(?, ?, ?, ?, ?, ?);"
 		return insert(
+			query,
 			item.isbn,
 			item.title,
 			item.subtitle,
 			item.author,
 			item.publisher,
-			item.format.ordinal,
-			query = query
+			item.format.ordinal
 		)
 	}
 
@@ -28,20 +27,20 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 		val query =
 			"UPDATE $tableName SET title = ?, subtitle = ?, author = ?, publisher = ?, format = ? WHERE isbn = ?;"
 		return update(
+			query,
 			item.title,
 			item.subtitle,
 			item.author,
 			item.publisher,
 			item.format.ordinal,
-			item.isbn,
-			query = query
+			item.isbn
 		)
 	}
 
 	override fun createTable() {
 		val query =
 			"CREATE TABLE $tableName(isbn TEXT PRIMARY KEY NOT NULL UNIQUE, title TEXT, subtitle TEXT, author TEXT NOT NULL, publisher TEXT NOT NULL, format INTEGER NOT NULL DEFAULT(0));"
-		insert(query = query)
+		insert(query)
 	}
 
 	override fun parse(result: ResultSet): Book {
@@ -57,6 +56,6 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 
 	fun selectUnique(isbn: Isbn?): Book? {
 		val query = "SELECT * FROM $tableName WHERE isbn LIKE ?;"
-		return search(isbn, query = query).firstOrNull()
+		return search(query, isbn).firstOrNull()
 	}
 }
