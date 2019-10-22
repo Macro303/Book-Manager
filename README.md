@@ -13,6 +13,7 @@ _TODO_
  - [Gradle: 5.6.3](https://gradle.org/)
  - [annotations: 17.0.0](https://www.jetbrains.com/)
  - [snakeyaml: 1.25](https://bitbucket.org/asomov/snakeyaml)
+ - [unirest-java: 1.4.9](http://unirest.io/java.html)
  - [log4j-api: 2.12.1](https://logging.apache.org/log4j/2.x/)
  - [log4j-core: 2.12.1 (Runtime)](https://logging.apache.org/log4j/2.x/)
  - [sqlite-jdbc: 3.28.0 (Runtime)](https://github.com/xerial/sqlite-jdbc)

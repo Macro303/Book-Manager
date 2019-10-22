@@ -96,7 +96,7 @@ public abstract class Table<T> {
 	}
 
 	@Nullable
-	protected abstract T parse(ResultSet result) throws SQLException;
+	protected abstract T parse(@NotNull ResultSet result) throws SQLException;
 
 	protected boolean insert(@NotNull String query, @Nullable Object... values) {
 		return update(query, values);
