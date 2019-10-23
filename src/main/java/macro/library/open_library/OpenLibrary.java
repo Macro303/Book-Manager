@@ -5,6 +5,7 @@ import macro.library.Util;
 import macro.library.book.Book;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -29,6 +30,8 @@ public abstract class OpenLibrary {
 		if (subtitle.isBlank())
 			subtitle = null;
 		var authors = bookObj.optJSONArray("authors");
+		if (authors == null)
+			authors = new JSONArray();
 		StringBuilder authorStr = new StringBuilder();
 		for (var author : authors) {
 			if (authorStr.length() != 0)
@@ -36,6 +39,8 @@ public abstract class OpenLibrary {
 			authorStr.append(((JSONObject) author).getString("name"));
 		}
 		var publishers = bookObj.optJSONArray("publishers");
+		if (publishers == null)
+			publishers = new JSONArray();
 		StringBuilder publisherStr = new StringBuilder();
 		for (var publisher : publishers) {
 			if (publisherStr.length() != 0)
