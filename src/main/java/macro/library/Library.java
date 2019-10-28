@@ -2,6 +2,8 @@ package macro.library;
 
 import macro.library.config.Config;
 import macro.library.console.Console;
+import macro.library.menu.CollectionMenu;
+import macro.library.menu.WishlistMenu;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -47,11 +49,10 @@ class Library {
 			case 0:
 				return;
 			case 1:
-				Collection.mainMenu();
+				CollectionMenu.mainMenu();
 				break;
 			case 2:
-//				Wishlist.mainMenu();
-				LOGGER.warn("Wishlist Not Yet Implemented");
+				WishlistMenu.mainMenu();
 				break;
 			default:
 				LOGGER.warn("Invalid Selection");

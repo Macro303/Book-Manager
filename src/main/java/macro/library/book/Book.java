@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Created by Macro303 on 2019-Oct-22
@@ -112,6 +113,46 @@ public class Book implements Comparable<Book> {
 
 	public void setFormat(@NotNull Format format) {
 		this.format = format;
+	}
+	//</editor-fold>
+
+	//<editor-fold desc="Object Functions" defaultstate="collapsed">
+	@Override
+	public int hashCode() {
+		int result = isbn.hashCode();
+		result = 31 * result + title.hashCode();
+		result = 31 * result + (subtitle != null ? subtitle.hashCode() : 0);
+		result = 31 * result + author.hashCode();
+		result = 31 * result + publisher.hashCode();
+		result = 31 * result + format.hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Book)) return false;
+
+		Book book = (Book) o;
+
+		if (!isbn.equals(book.isbn)) return false;
+		if (!title.equals(book.title)) return false;
+		if (!Objects.equals(subtitle, book.subtitle)) return false;
+		if (!author.equals(book.author)) return false;
+		if (!publisher.equals(book.publisher)) return false;
+		return format == book.format;
+	}
+
+	@Override
+	public String toString() {
+		return "Book{" +
+				"isbn=" + isbn +
+				", title='" + title + '\'' +
+				", subtitle='" + subtitle + '\'' +
+				", author='" + author + '\'' +
+				", publisher='" + publisher + '\'' +
+				", format=" + format +
+				'}';
 	}
 	//</editor-fold>
 }
