@@ -39,7 +39,7 @@ abstract class AuthorMenu {
 		}
 	}
 
-	public static void editAuthors(@NotNull Isbn isbn){
+	public static void editAuthors(@NotNull Isbn isbn) {
 		var authors = BookAuthorTable.INSTANCE.searchBook(isbn);
 	}
 }

@@ -3,7 +3,6 @@ package macro.library.menu;
 import macro.library.book.Book;
 import macro.library.book.CollectionBook;
 import macro.library.book.Isbn;
-import macro.library.console.Colour;
 import macro.library.console.Console;
 import macro.library.database.BookTable;
 import macro.library.database.CollectionTable;

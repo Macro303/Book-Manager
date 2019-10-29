@@ -25,11 +25,12 @@ public abstract class IdTable<T, S> extends Table<T> {
 		return search(query, unique).stream().findFirst().orElse(null);
 	}
 
-	public boolean delete(@NotNull S unique){
+	public boolean delete(@NotNull S unique) {
 		var query = String.format("DELETE FROM %s WHERE %s = ?;", tableName, idName);
 		return delete(query, unique);
 	}
 
 	public abstract boolean insert(@NotNull T item);
+
 	public abstract boolean update(@NotNull T item);
 }

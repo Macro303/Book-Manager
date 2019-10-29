@@ -40,6 +40,17 @@ public class Author implements Comparable<Author> {
 		this.otherNames = otherNames;
 	}
 
+	@NotNull
+	public static Author parseName(@NotNull String name) {
+		var nameParts = new ArrayList<>(Arrays.asList(name.split(" ")));
+		var first = nameParts.remove(0).trim();
+		var last = nameParts.remove(nameParts.size() - 1).trim();
+		var otherNames = nameParts.toArray(String[]::new);
+		if (nameParts.size() == 0)
+			otherNames = null;
+		return new Author(first, last, otherNames);
+	}
+
 	public Author add() {
 		AuthorTable.INSTANCE.insert(this);
 		return this;
@@ -65,17 +76,6 @@ public class Author implements Comparable<Author> {
 
 	public String getDisplay() {
 		return this.lastName + ", " + this.firstName + (this.otherNames == null ? "" : " " + String.join(" ", this.otherNames));
-	}
-
-	@NotNull
-	public static Author parseName(@NotNull String name){
-		var nameParts = new ArrayList<>(Arrays.asList(name.split(" ")));
-		var first = nameParts.remove(0).trim();
-		var last = nameParts.remove(nameParts.size() - 1).trim();
-		var otherNames = nameParts.toArray(String[]::new);
-		if (nameParts.size() == 0)
-			otherNames = null;
-		return new Author(first, last, otherNames);
 	}
 
 	//<editor-fold desc="Getters and Setters" defaultstate="collapsed">

@@ -10,13 +10,31 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 /**
  * Created by Macro303 on 2019-Oct-29
  */
 public abstract class BookMenu {
 	private static final Logger LOGGER = LogManager.getLogger(BookMenu.class);
+
+	public static void editBook() {
+		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
+		var book = BookTable.INSTANCE.selectUnique(isbn);
+		if (book != null)
+			book = loadBook(isbn);
+		assert book != null;
+		var title = Console.displayEdit("Title", book.getTitle());
+		if (title != null)
+			book.setTitle(title);
+		var subtitle = Console.displayEdit("Subtitle", book.getSubtitle());
+		if (subtitle != null)
+			book.setSubtitle(subtitle);
+		var publisher = Console.displayEdit("Publisher", book.getPublisher());
+		if (publisher != null)
+			book.setPublisher(publisher);
+		book.setFormat(Format.selection());
+		AuthorMenu.editAuthors(isbn);
+		book.push();
+	}
 
 	@NotNull
 	static Book loadBook(@NotNull Isbn isbn) {
@@ -38,25 +56,5 @@ public abstract class BookMenu {
 			subtitle = null;
 		var publisher = Console.displayPrompt("Publisher");
 		return new Book(isbn, title, subtitle, publisher, Format.PAPERBACK);
-	}
-
-	public static void editBook() {
-		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
-		var book = BookTable.INSTANCE.selectUnique(isbn);
-		if (book != null)
-			book = loadBook(isbn);
-		assert book != null;
-		var title = Console.displayEdit("Title", book.getTitle());
-		if (title != null)
-			book.setTitle(title);
-		var subtitle = Console.displayEdit("Subtitle", book.getSubtitle());
-		if (subtitle != null)
-			book.setSubtitle(subtitle);
-		var publisher = Console.displayEdit("Publisher", book.getPublisher());
-		if (publisher != null)
-			book.setPublisher(publisher);
-		book.setFormat(Format.selection());
-		AuthorMenu.editAuthors(isbn);
-		book.push();
 	}
 }
