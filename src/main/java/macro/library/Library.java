@@ -2,6 +2,7 @@ package macro.library;
 
 import macro.library.config.Config;
 import macro.library.console.Console;
+import macro.library.menu.BookMenu;
 import macro.library.menu.CollectionMenu;
 import macro.library.menu.WishlistMenu;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +44,7 @@ class Library {
 	}
 
 	private void mainMenu() {
-		var options = new String[]{"Collection", "Wishlist"};
+		var options = new String[]{"Collection", "Wishlist", "Edit Book"};
 		var selection = Console.displayMenu("Book Manager", options, "Exit");
 		switch (selection) {
 			case 0:
@@ -54,6 +55,8 @@ class Library {
 			case 2:
 				WishlistMenu.mainMenu();
 				break;
+			case 3:
+				BookMenu.editBook();
 			default:
 				LOGGER.warn("Invalid Selection");
 		}

@@ -1,6 +1,5 @@
 package macro.library.book;
 
-import macro.library.Isbn;
 import macro.library.database.BookTable;
 import macro.library.database.CollectionTable;
 import org.jetbrains.annotations.NotNull;

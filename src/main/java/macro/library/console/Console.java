@@ -1,6 +1,7 @@
 package macro.library.console;
 
 import macro.library.Util;
+import macro.library.author.Author;
 import macro.library.book.Book;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Macro303 on 2019-Oct-21
@@ -57,11 +59,6 @@ public abstract class Console {
 		return Reader.readConsole(text).trim();
 	}
 
-	public static void displayItemValue(@NotNull String item, @Nullable Object value) {
-		colourConsole(item + ": ", Colour.BLUE, false);
-		colourConsole(String.valueOf(value), Colour.WHITE);
-	}
-
 	public static void display(@Nullable String text) {
 		display(text, Colour.WHITE);
 	}
@@ -104,9 +101,9 @@ public abstract class Console {
 				subtitleSize = 8;
 		}
 		var authorSize = 6;
-		var maxAuthor = books.stream().max(Comparator.comparing(it -> it.getAuthor().length()));
+		var maxAuthor = books.stream().max(Comparator.comparing(it -> it.getAuthors().stream().map(Author::getDisplay).collect(Collectors.joining("; ")).length()));
 		if (maxAuthor.isPresent()) {
-			authorSize = maxAuthor.get().getAuthor().length();
+			authorSize = maxAuthor.get().getAuthors().stream().map(Author::getDisplay).collect(Collectors.joining("; ")).length();
 			if (authorSize < 6)
 				authorSize = 6;
 		}
@@ -146,10 +143,24 @@ public abstract class Console {
 			bookOutput += Util.padStr(book.getISBN().getDisplay(), isbnSize) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getTitle(), titleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getSubtitle(), subtitleSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
-			bookOutput += Util.padStr(book.getAuthor(), authorSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
+			bookOutput += Util.padStr(book.getAuthors().stream().map(Author::getDisplay).collect(Collectors.joining("; ")), authorSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getPublisher(), publisherSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			bookOutput += Util.padStr(book.getFormat().getDisplay(), formatSize * -1) + Colour.BLUE + " | " + Colour.WHITE;
 			colourConsole(bookOutput, Colour.WHITE);
 		}
+	}
+
+	@Nullable
+	public static String displayEdit(@NotNull String title, @Nullable String current) {
+		displayItemValue(title, current);
+		var input = displayPrompt("New Value (Blank to skip)");
+		if (input.isBlank())
+			return null;
+		return input;
+	}
+
+	public static void displayItemValue(@NotNull String item, @Nullable Object value) {
+		colourConsole(item + ": ", Colour.BLUE, false);
+		colourConsole(String.valueOf(value), Colour.WHITE);
 	}
 }

@@ -1,4 +1,4 @@
-package macro.library;
+package macro.library.book;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +22,7 @@ public class Isbn implements Comparable<Isbn> {
 	@NotNull
 	public static Isbn of(@NotNull String number) throws IllegalArgumentException {
 		if (!isValid(number))
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Invalid ISBN: " + number);
 
 		return number.replaceAll("-", "").length() == 10 ? new Isbn(toIsbn13(number)) : new Isbn(number);
 	}

@@ -1,12 +1,14 @@
 package macro.library.book;
 
-import macro.library.Isbn;
 import macro.library.Util;
+import macro.library.author.Author;
+import macro.library.database.BookAuthorTable;
 import macro.library.database.BookTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -26,21 +28,18 @@ public class Book implements Comparable<Book> {
 	@Nullable
 	private String subtitle;
 	@NotNull
-	private String author;
-	@NotNull
 	private String publisher;
 	@NotNull
 	private Format format;
 
-	public Book(@NotNull Isbn isbn, @NotNull String title, @Nullable String subtitle, @NotNull String author, @NotNull String publisher) {
-		this(isbn, title, subtitle, author, publisher, Format.PAPERBACK);
+	public Book(@NotNull Isbn isbn, @NotNull String title, @Nullable String subtitle, @NotNull String publisher) {
+		this(isbn, title, subtitle, publisher, Format.PAPERBACK);
 	}
 
-	public Book(@NotNull Isbn isbn, @NotNull String title, @Nullable String subtitle, @NotNull String author, @NotNull String publisher, @NotNull Format format) {
+	public Book(@NotNull Isbn isbn, @NotNull String title, @Nullable String subtitle, @NotNull String publisher, @NotNull Format format) {
 		this.isbn = isbn;
 		this.title = title;
 		this.subtitle = subtitle;
-		this.author = author;
 		this.publisher = publisher;
 		this.format = format;
 	}
@@ -89,12 +88,8 @@ public class Book implements Comparable<Book> {
 	}
 
 	@NotNull
-	public String getAuthor() {
-		return author;
-	}
-
-	public void setAuthor(@NotNull String author) {
-		this.author = author;
+	public List<Author> getAuthors() {
+		return BookAuthorTable.INSTANCE.searchBook(isbn);
 	}
 
 	@NotNull
@@ -122,7 +117,6 @@ public class Book implements Comparable<Book> {
 		int result = isbn.hashCode();
 		result = 31 * result + title.hashCode();
 		result = 31 * result + (subtitle != null ? subtitle.hashCode() : 0);
-		result = 31 * result + author.hashCode();
 		result = 31 * result + publisher.hashCode();
 		result = 31 * result + format.hashCode();
 		return result;
@@ -138,7 +132,6 @@ public class Book implements Comparable<Book> {
 		if (!isbn.equals(book.isbn)) return false;
 		if (!title.equals(book.title)) return false;
 		if (!Objects.equals(subtitle, book.subtitle)) return false;
-		if (!author.equals(book.author)) return false;
 		if (!publisher.equals(book.publisher)) return false;
 		return format == book.format;
 	}
@@ -149,7 +142,6 @@ public class Book implements Comparable<Book> {
 				"isbn=" + isbn +
 				", title='" + title + '\'' +
 				", subtitle='" + subtitle + '\'' +
-				", author='" + author + '\'' +
 				", publisher='" + publisher + '\'' +
 				", format=" + format +
 				'}';

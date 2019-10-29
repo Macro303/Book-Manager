@@ -1,6 +1,6 @@
 package macro.library.database;
 
-import macro.library.Isbn;
+import macro.library.book.Isbn;
 import macro.library.book.CollectionBook;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

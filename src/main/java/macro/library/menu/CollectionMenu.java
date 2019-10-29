@@ -1,8 +1,9 @@
 package macro.library.menu;
 
-import macro.library.Isbn;
 import macro.library.book.Book;
 import macro.library.book.CollectionBook;
+import macro.library.book.Isbn;
+import macro.library.console.Colour;
 import macro.library.console.Console;
 import macro.library.database.BookTable;
 import macro.library.database.CollectionTable;
@@ -20,26 +21,19 @@ public abstract class CollectionMenu {
 	private static final Logger LOGGER = LogManager.getLogger(CollectionMenu.class);
 
 	public static void mainMenu() {
-		var options = new String[]{"List", "Add", "Import"};
+		var options = new String[]{"List", "Import"};
 		var selection = Console.displayMenu("Collection", options);
-		try {
-			switch (selection) {
-				case 0:
-					return;
-				case 1:
-					listCollection();
-					break;
-				case 2:
-					addToCollection(false);
-					break;
-				case 3:
-					addToCollection(true);
-					break;
-				default:
-					LOGGER.warn("Invalid Selection");
-			}
-		} catch (IllegalArgumentException iae) {
-			LOGGER.warn("Invalid Field", iae);
+		switch (selection) {
+			case 0:
+				return;
+			case 1:
+				listCollection();
+				break;
+			case 2:
+				addToCollection();
+				break;
+			default:
+				LOGGER.warn("Invalid Selection");
 		}
 		mainMenu();
 	}
@@ -51,16 +45,14 @@ public abstract class CollectionMenu {
 		Console.displayTable(books);
 	}
 
-	private static void addToCollection(boolean load) throws IllegalArgumentException {
+	private static void addToCollection() {
 		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
 		var book = BookTable.INSTANCE.selectUnique(isbn);
 		if (book == null)
-			BookMenu.addBook(isbn, load);
-		else if (Console.displayAgreement("A Book with that ISBN already exists, Update Entry"))
-			BookMenu.updateBook(isbn, load);
+			BookMenu.loadBook(isbn);
 		var entry = CollectionTable.INSTANCE.selectUnique(isbn);
 		if (entry != null) {
-			if (Console.displayAgreement("A Book with that ISBN already exists in your collection, Increase Count")) {
+			if (Console.displayAgreement("This book already exists in your collection, Add Another Copy")) {
 				entry.setCount(entry.getCount() + 1);
 				entry.push();
 			}
