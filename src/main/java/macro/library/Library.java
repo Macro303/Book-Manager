@@ -44,7 +44,7 @@ class Library {
 	}
 
 	private void mainMenu() {
-		var options = new String[]{"Collection", "Wishlist", "Edit Book"};
+		var options = new String[]{"Collection", "Wishlist"};
 		var selection = Console.displayMenu("Book Manager", options, "Exit");
 		switch (selection) {
 			case 0:
@@ -55,8 +55,6 @@ class Library {
 			case 2:
 				WishlistMenu.mainMenu();
 				break;
-			case 3:
-				BookMenu.editBook();
 			default:
 				LOGGER.warn("Invalid Selection");
 		}

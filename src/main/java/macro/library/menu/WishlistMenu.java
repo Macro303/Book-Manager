@@ -20,42 +20,63 @@ public abstract class WishlistMenu {
 	private static final Logger LOGGER = LogManager.getLogger(WishlistMenu.class);
 
 	public static void mainMenu() {
-		var options = new String[]{"List", "Import"};
+		var options = new String[]{"List", "Add", "Remove"};
 		var selection = Console.displayMenu("Wishlist", options);
-		switch (selection) {
-			case 0:
-				return;
-			case 1:
-				listWishlist();
-				break;
-			case 2:
-				addToWishlist();
-				break;
-			default:
-				LOGGER.warn("Invalid Selection");
+		try {
+			switch (selection) {
+				case 0:
+					return;
+				case 1:
+					list();
+					break;
+				case 2:
+					add();
+					break;
+				case 3:
+					remove();
+					break;
+				default:
+					LOGGER.warn("Invalid Selection");
+			}
+		} catch (IllegalArgumentException iae) {
+			LOGGER.error(iae.getLocalizedMessage());
 		}
 		mainMenu();
 	}
 
-	private static void listWishlist() {
+	private static void list() {
 		var books = new ArrayList<Book>();
 		WishlistTable.INSTANCE.searchAll().forEach(book -> IntStream.range(0, book.getCount()).mapToObj(count -> book.getBook()).forEach(books::add));
 		Collections.sort(books);
 		Console.displayTable(books);
 	}
 
-	private static void addToWishlist() throws IllegalArgumentException {
+	private static void add() {
 		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
 		var book = BookTable.INSTANCE.selectUnique(isbn);
 		if (book == null)
-			BookMenu.loadBook(isbn);
-		var entry = WishlistTable.INSTANCE.selectUnique(isbn);
-		if (entry != null) {
-			if (Console.displayAgreement("This book already exists in your collection, Add Another Copy")) {
-				entry.setCount(entry.getCount() + 1);
-				entry.push();
-			}
+			book = BookMenu.loadBook(isbn);
+		if (book == null)
+			return;
+		var entry = WishlistTable.INSTANCE.selectUnique(book.getISBN());
+		if (entry == null)
+			entry = new WishlistBook(book.getISBN(), 0).add();
+		entry.setCount(entry.getCount() + 1);
+		entry.push();
+	}
+
+	private static void remove() {
+		var isbn = Isbn.of(Console.displayPrompt("ISBN"));
+		var book = BookTable.INSTANCE.selectUnique(isbn);
+		if (book == null)
+			return;
+		var entry = WishlistTable.INSTANCE.selectUnique(book.getISBN());
+		if (entry == null)
+			return;
+		if (entry.getCount() > 1) {
+			entry.setCount(entry.getCount() - 1);
+			entry.push();
 		} else
-			new WishlistBook(isbn).add();
+			entry.remove();
 	}
 }
