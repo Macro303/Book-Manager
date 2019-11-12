@@ -10,11 +10,15 @@ _TODO_
 
 ## Built Using
  - JDK: 11
- - [Gradle: 5.6](https://gradle.org/)
- - [kotlin-stdlib-jdk8: 1.3.41](https://kotlinlang.org/)
+ - [Gradle: 5.6.3](https://gradle.org/)
+ - [kotlin-stdlib-jdk8: 1.3.50](https://kotlinlang.org/)
  - [snakeyaml: 1.25](https://bitbucket.org/asomov/snakeyaml)
+ - [unirest-java: 1.4.9](http://unirest.io/java.html)
+ - [ktor-server-netty: 1.3.0-beta-1](https://ktor.io/)
+ - [ktor-gson: 1.3.0-beta-1](https://ktor.io/)
+ - [ktor-freemarker: 1.3.0-beta-1](https://ktor.io/)
  - [log4j-api: 2.12.1](https://logging.apache.org/log4j/2.x/)
- - [log4j-core: 2.12.1 (Runtime)](https://logging.apache.org/log4j/2.x/)
+ - [log4j-slf4j-impl: 2.12.1 (Runtime)](https://logging.apache.org/log4j/2.x/)
  - [sqlite-jdbc: 3.28.0 (Runtime)](https://github.com/xerial/sqlite-jdbc)
  
 ## Running

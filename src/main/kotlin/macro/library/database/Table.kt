@@ -8,10 +8,9 @@ import java.sql.SQLException
 import java.util.*
 
 /**
- * Created by Macro303 on 2019-Oct-01
+ * Created by Macro303 on 2019-Oct-30
  */
-abstract class Table<T>(internal val tableName: String) {
-	private val LOGGER = LogManager.getLogger(Table::class.java)
+abstract class Table<T> protected constructor(protected val tableName: String) {
 
 	init {
 		if (!this.exists())
@@ -21,8 +20,8 @@ abstract class Table<T>(internal val tableName: String) {
 	private fun exists(): Boolean {
 		val query = "SELECT name FROM sqlite_master WHERE type = ? AND name = ?;"
 		try {
-			DriverManager.getConnection(Util.DATABASE_URL).use { connection ->
-				connection.prepareStatement(query).use { statement ->
+			DriverManager.getConnection(Util.DATABASE_URL).use { conn ->
+				conn.prepareStatement(query).use { statement ->
 					statement.setString(1, "table")
 					statement.setString(2, tableName)
 					val results = statement.executeQuery()
@@ -32,31 +31,42 @@ abstract class Table<T>(internal val tableName: String) {
 		} catch (sqle: SQLException) {
 			return false
 		}
+
 	}
+
+	protected abstract fun createTable()
 
 	fun dropTable() {
 		val query = "DROP TABLE $tableName"
 		delete(query = query)
 	}
 
-	protected fun search(vararg values: Any?, query: String): List<T> {
-		val items = ArrayList<T>()
+	protected fun delete(vararg values: Any?, query: String): Boolean = update(values = *values, query = query)
+	protected fun insert(vararg values: Any?, query: String): Boolean = update(values = *values, query = query)
+
+	protected fun update(vararg values: Any?, query: String): Boolean {
+		LOGGER.debug("$query, ${values.contentToString()}")
 		try {
-			DriverManager.getConnection(Util.DATABASE_URL).use { connection ->
-				connection.prepareStatement(query).use { statement ->
-					values.forEachIndexed { index, value ->
-						statement.setObject(index + 1, value)
+			DriverManager.getConnection(Util.DATABASE_URL).use { conn ->
+				conn.autoCommit = false
+				try {
+					conn.prepareStatement(query).use { statement ->
+						values.forEachIndexed { index, value ->
+							statement.setObject(index + 1, value)
+						}
+						statement.executeUpdate()
+						conn.commit()
+						return true
 					}
-					val results = statement.executeQuery()
-					while (results.next())
-						items.add(parse(result = results))
+				} catch (sqle: SQLException) {
+					conn.rollback()
+					throw sqle
 				}
 			}
 		} catch (sqle: SQLException) {
-			LOGGER.error("Unable to Execute: $query, ${values.contentToString()} => $sqle")
-			items.clear()
+			LOGGER.error("Unable to Execute: $query, ${values.contentToString()} => ${sqle.localizedMessage}")
 		}
-		return items
+		return false
 	}
 
 	fun searchAll(): List<T> {
@@ -64,35 +74,30 @@ abstract class Table<T>(internal val tableName: String) {
 		return search(query = query)
 	}
 
-	protected fun update(vararg values: Any?, query: String): Boolean {
-		LOGGER.debug("$query, ${values.contentToString()}")
+	protected fun search(vararg values: Any?, query: String): List<T> {
+		val items = ArrayList<T>()
 		try {
-			DriverManager.getConnection(Util.DATABASE_URL).use { connection ->
-				connection.autoCommit = false
-				try {
-					connection.prepareStatement(query).use { statement ->
-						values.forEachIndexed { index, value ->
-							statement.setObject(index + 1, value)
-						}
-						statement.executeUpdate()
-						connection.commit()
-						return true
+			DriverManager.getConnection(Util.DATABASE_URL).use { conn ->
+				conn.prepareStatement(query).use { statement ->
+					values.forEachIndexed { index, value ->
+						statement.setObject(index + 1, value)
 					}
-				} catch (sqle: SQLException) {
-					connection.rollback()
-					throw sqle
+					val results = statement.executeQuery()
+					while (results.next())
+						items.add(parse(results))
 				}
 			}
 		} catch (sqle: SQLException) {
-			LOGGER.error("Unable to Execute: $query, ${values.contentToString()} => $sqle")
+			LOGGER.error("Unable to Execute: $query, ${values.contentToString()} => ${sqle.localizedMessage}")
+			items.clear()
 		}
-		return false
+		return items
 	}
 
-	protected fun insert(vararg values: Any?, query: String): Boolean = update(*values, query = query)
-	protected fun delete(vararg values: Any?, query: String): Boolean = update(*values, query = query)
-
-	abstract fun createTable()
 	@Throws(SQLException::class)
-	abstract fun parse(result: ResultSet): T
+	protected abstract fun parse(result: ResultSet): T
+
+	companion object {
+		private val LOGGER = LogManager.getLogger(Table::class.java)
+	}
 }

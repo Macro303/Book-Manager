@@ -1,100 +1,113 @@
 package macro.library.console
 
-import macro.library.Util
 import macro.library.book.Book
 import org.apache.logging.log4j.LogManager
 
 /**
- * Created by Macro303 on 2019-Oct-02
+ * Created by Macro303 on 2019-Oct-30
  */
 object Console {
 	private val LOGGER = LogManager.getLogger(Console::class.java)
 
-	init {
-		colourTest()
+	fun displayHeader(text: String) {
+		colourConsole("=".repeat(text.length + 4), Colour.BLUE)
+		displaySubHeader(text)
+		colourConsole("=".repeat(text.length + 4), Colour.BLUE)
 	}
 
-	private fun colourTest() {
-		Colour.values().forEach {
-			LOGGER.debug("${it.name} => ${it.ansicode}Test Message${Colour.RESET.ansicode}")
-		}
+	fun displaySubHeader(text: String) {
+		colourConsole("  $text  ", Colour.BLUE)
 	}
 
-	internal fun displayHeader(text: String) {
-		colourConsole(text = "=".repeat(text.length + 4), colour = Colour.BLUE)
-		displaySubHeader(text = text)
-		colourConsole(text = "=".repeat(text.length + 4), colour = Colour.BLUE)
-	}
-
-	internal fun displaySubHeader(text: String) {
-		colourConsole(text = "  $text  ", colour = Colour.BLUE)
-	}
-
-	internal fun displayMenu(header: String, options: Set<String>, exit: String? = "Back"): Int {
-		displayHeader(text = header)
-		if (options.isEmpty()) return 0
+	fun displayMenu(header: String, options: List<String>, exit: String? = "Back"): Int {
+		displayHeader(header)
+		if (options.isEmpty())
+			return 0
 		val padCount = options.size.toString().length
-		options.forEachIndexed { index, option ->
-			displayItemValue(item = (index + 1).toString().padStart(padCount), value = option)
-		}
-		if (exit != null) displayItemValue(item = "0".padStart(padCount), value = exit)
-		return displayPrompt(text = "Option").toIntOrNull() ?: 0
+		for (i in options.indices)
+			displayItemValue((i + 1).toString().padStart(padCount), options[i])
+		if (exit != null)
+			displayItemValue("0".padStart(padCount), exit)
+		return displayPrompt("Option").toIntOrNull() ?: 0
 	}
 
-	internal fun displayPrompt(text: String): String {
-		return Reader.readConsole(text = text).trim()
-	}
-
-	internal fun displayAgreement(text: String): Boolean {
-		val input = displayPrompt(text = "$text (Y/N)")
+	fun displayAgreement(text: String): Boolean {
+		val input = displayPrompt("$text (Y/N)")
 		return input.equals("y", ignoreCase = true)
 	}
 
-	internal fun displayItemValue(item: String, value: Any?) {
-		colourConsole(text = "$item: ", colour = Colour.BLUE, newLine = false)
-		colourConsole(text = value.toString())
+	fun displayPrompt(text: String): String {
+		return Reader.readConsole(text).trim()
 	}
 
-	internal fun display(text: String, colour: Colour = Colour.WHITE) {
-		colourConsole(text = text, colour = colour)
+	fun display(text: String?, colour: Colour = Colour.WHITE) {
+		colourConsole(text, colour)
 	}
 
-	internal fun displayTable(books: List<Book>) {
-		var isbnSize = Util.displayISBN(books.maxBy { Util.displayISBN(it.isbn).length }?.isbn).length
+	private fun colourConsole(text: String?, colour: Colour, newLine: Boolean = true) {
+		if (newLine)
+			println("$colour$text${Colour.RESET}")
+		else
+			print("$colour$text${Colour.RESET}")
+	}
+
+	fun displayTable(books: List<Book>) {
+		var isbnSize = books.maxBy { it.isbn.toString().length }?.isbn?.toString()?.length ?: 4
 		if (isbnSize < 4)
 			isbnSize = 4
-		val nameSize = books.maxBy { it.name.length }?.name?.length ?: 4
-		val authorSize = books.maxBy { it.author?.length ?: 6 }?.author?.length ?: 6
-		val seriesSize = books.maxBy { it.series?.length ?: 6 }?.series?.length ?: 6
-		val seriesNumSize = books.maxBy { it.seriesNum?.toString()?.length ?: 8 }?.seriesNum?.toString()?.length ?: 8
-		val formatSize = books.maxBy { it.format.name.length }?.format?.name?.length ?: 6
-		val titles = listOf(
-			Pair("ISBN", isbnSize),
-			Pair("Name", nameSize),
-			Pair("Author", authorSize),
-			Pair("Series", seriesSize),
-			Pair("Series #", seriesNumSize),
-			Pair("Format", formatSize)
-		)
-		colourConsole(text = titles.joinToString(" | ") { it.first.padEnd(it.second) }, colour = Colour.BLUE)
-		colourConsole(text = titles.joinToString(" | ") { "-".repeat(it.second) }, colour = Colour.BLUE)
-		books.sorted().forEach {
-			colourConsole(
-				text = (Util.displayISBN(it.isbn)).padStart(isbnSize) + " | " +
-						it.name.padEnd(nameSize) + " | " +
-						(it.author ?: "").padEnd(authorSize) + " | " +
-						(it.series ?: "").padEnd(seriesSize) + " | " +
-						(it.seriesNum?.toString() ?: "").padStart(seriesNumSize) + " | " +
-						it.format.display.padEnd(formatSize),
-				colour = Colour.WHITE
-			)
+		var titleSize = books.maxBy { it.title.length }?.title?.length ?: 5
+		if (titleSize < 5)
+			titleSize = 5
+		var subtitleSize = books.maxBy { it.subtitle?.length ?: 8 }?.subtitle?.length ?: 8
+		if (subtitleSize < 8)
+			subtitleSize = 8
+		var authorSize = books.maxBy {
+			it.authors.joinToString(separator = "; ").length
+		}?.authors?.joinToString(separator = "; ")?.length ?: 6
+		if (authorSize < 6)
+			authorSize = 6
+		var publisherSize = books.maxBy { it.publisher.length }?.publisher?.length ?: 9
+		if (publisherSize < 9)
+			publisherSize = 9
+		var formatSize = books.maxBy { it.format.getDisplay().length }?.format?.getDisplay()?.length ?: 6
+		if (formatSize < 6)
+			formatSize = 6
+		var titleOutput = "| "
+		titleOutput += "ISBN".padStart(isbnSize) + " | "
+		titleOutput += "Title".padEnd(titleSize) + " | "
+		titleOutput += "Subtitle".padEnd(subtitleSize) + " | "
+		titleOutput += "Author".padEnd(authorSize) + " | "
+		titleOutput += "Publisher".padEnd(publisherSize) + " | "
+		titleOutput += "Format".padEnd(formatSize) + " | "
+		colourConsole(titleOutput, Colour.BLUE)
+		var tableOutput = "| "
+		tableOutput += "-".repeat(isbnSize) + " | "
+		tableOutput += "-".repeat(titleSize) + " | "
+		tableOutput += "-".repeat(subtitleSize) + " | "
+		tableOutput += "-".repeat(authorSize) + " | "
+		tableOutput += "-".repeat(publisherSize) + " | "
+		tableOutput += "-".repeat(formatSize) + " | "
+		colourConsole(tableOutput, Colour.BLUE)
+		for (book in books.sorted()) {
+			var bookOutput = "${Colour.BLUE}| ${Colour.WHITE}"
+			bookOutput += book.isbn.toString().padStart(isbnSize) + Colour.BLUE + " | " + Colour.WHITE
+			bookOutput += book.title.padEnd(titleSize) + Colour.BLUE + " | " + Colour.WHITE
+			bookOutput += (book.subtitle ?: "").padEnd(subtitleSize) + Colour.BLUE + " | " + Colour.WHITE
+			bookOutput += book.authors.joinToString(separator = "; ").padEnd(authorSize) + Colour.BLUE + " | " + Colour.WHITE
+			bookOutput += book.publisher.padEnd(publisherSize) + Colour.BLUE + " | " + Colour.WHITE
+			bookOutput += book.format.getDisplay().padEnd(formatSize) + Colour.BLUE + " | " + Colour.WHITE
+			colourConsole(bookOutput, Colour.WHITE)
 		}
 	}
 
-	private fun colourConsole(text: String?, colour: Colour = Colour.WHITE, newLine: Boolean = true) {
-		if (newLine)
-			println("${colour.ansicode}$text${Colour.RESET.ansicode}")
-		else
-			print("${colour.ansicode}$text${Colour.RESET.ansicode}")
+	fun displayEdit(title: String, current: String?): String? {
+		displayItemValue(title, current)
+		val input = displayPrompt("New Value (Blank to skip)")
+		return if (input.isBlank()) null else input
+	}
+
+	fun displayItemValue(item: String, value: Any?) {
+		colourConsole("$item: ", Colour.BLUE, false)
+		colourConsole(value.toString(), Colour.WHITE)
 	}
 }
