@@ -20,7 +20,18 @@
 	</div>
 	<div class="pusher">
 		<div class="ui basic segment" id="content">
-			<div id="wishlist-grid" class="ui doubling six column grid container">
+			<div class="ui center aligned basic segment">
+				<div class="ui input">
+					<input id="wishlist_isbn" type="text" placeholder="ISBN">
+				</div>
+				<select id="wishlist_format" class="ui selection dropdown">
+					<option value="Paperback">Paperback</option>
+					<option value="Hardback">Hardback</option>
+					<option value="Mass Media Paperback">Mass Media Paperback</option>
+				</select>
+				<button id="wishlistAddButton" class="ui inverted blue button" onclick="addToWishlist()">Add</button>
+			</div>
+			<div class="ui doubling six column grid container" id="wishlist-grid">
 			</div>
 		</div>
 	</div>
@@ -30,6 +41,7 @@
 <script src="/js/script.js"></script>
 <script type="text/javascript">
 	$(document).ready(function () {
+		$('select.dropdown').dropdown();
 		$("#navbar").load("/navbar.html");
 		loadWishlist();
 	});
