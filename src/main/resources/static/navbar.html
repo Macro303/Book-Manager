@@ -1,0 +1,31 @@
+<div class="ui grid">
+
+	<div class="computer only row">
+		<div class="column">
+			<div class="ui menu inverted fixed">
+				<h4 class="ui orange inverted header item">Book Manager</h4>
+				<a class="item" href="/"><i class="home icon"></i>Home</a>
+				<a class="item" href="/collection.html"><i class="book icon"></i>Collection</a>
+				<a class="item" href="/wishlist.html"><i class="clipboard list icon"></i>Wishlist</a>
+				<a class="item" href="/loan.html"><i class="address book icon"></i>Loans</a>
+				<a class="item" href="/about.html"><i class="info circle icon"></i>About</a>
+			</div>
+		</div>
+	</div>
+
+	<div class="tablet mobile only row">
+		<div class="column">
+			<div class="ui menu inverted fixed">
+				<a id="mobile_item" class="item"><i class="bars icon"></i></a>
+				<h4 class="ui orange inverted header item">Book Manager</h4>
+			</div>
+		</div>
+	</div>
+
+</div>
+<script type="text/javascript">
+	$('.ui.sidebar').sidebar({
+		context: $('.ui.pushable.segment'),
+		transition: 'overlay'
+	}).sidebar('attach events', '#mobile_item');
+</script>
