@@ -1,6 +1,5 @@
-body {
+body{
 	background-color: grey;
-	padding-top: 50px;
 }
 
 .opacity {
@@ -9,6 +8,7 @@ body {
 
 #content {
 	min-height: 100px;
+	padding-top: 75px;
 }
 .ui.grid{
 	padding: 0 !important;

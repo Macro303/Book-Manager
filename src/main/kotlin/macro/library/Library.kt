@@ -251,9 +251,15 @@ fun Application.module() {
 			}
 		}
 		static {
-			defaultResource(resource = "static/index.html")
-			resources(resourcePackage = "static")
-			resource(remotePath = "/favicon.ico", resource = "static/images/favicon.ico")
+			defaultResource(resource = "/static/index.html")
+			resources(resourcePackage = "static/css")
+			resources(resourcePackage = "static/images")
+			resources(resourcePackage = "static/js")
+			resource(remotePath = "/navbar.html", resource = "static/navbar.html")
+			resource(remotePath = "/collection", resource = "static/collection.html")
+			resource(remotePath = "/wishlist", resource = "static/wishlist.html")
+			resource(remotePath = "/loan", resource = "static/loan.html")
+			resource(remotePath = "/about", resource = "static/about.html")
 		}
 	}
 }
