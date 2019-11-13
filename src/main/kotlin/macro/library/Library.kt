@@ -22,10 +22,10 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.toMap
 import macro.library.book.*
 import macro.library.config.Config.Companion.CONFIG
-import macro.library.database.AuthorTable
 import macro.library.database.BookTable
 import macro.library.database.CollectionTable
 import macro.library.database.WishlistTable
+import macro.library.external.GoogleBooks
 import macro.library.external.OpenLibrary
 import macro.library.requests.NewBookRequest
 import org.apache.logging.log4j.LogManager
@@ -159,31 +159,8 @@ fun Application.module() {
 				val request = receiveOrNull<NewBookRequest>()
 					?: throw BadRequestException("A Body is Required")
 				val isbn = Isbn.of(request.isbn) ?: throw BadRequestException("Invalid ISBN")
-				return BookTable.selectUnique(isbn) ?: OpenLibrary.searchBook(isbn)?.add() ?: throw NotFoundException("Unable to find book on Open Library under ISBN: $isbn")
-			}
-			route("/authors") {
-				get {
-					val firstParam = call.request.queryParameters["FirstName"]
-					val lastParam = call.request.queryParameters["LastName"]
-					val authors = AuthorTable.search(firstParam, lastParam)
-					call.respond(message = authors.map { it.toJson(full = false, showUnique = true) })
-				}
-				post {
-					throw NotImplementedException()
-				}
-				route(path = "/{uuid}") {
-					get {
-						val author = AuthorTable.selectUnique(call.getUUID())
-							?: throw NotFoundException("Unable to find Author in Database")
-						call.respond(message = author.toJson(full = true, showUnique = true))
-					}
-					put {
-						throw NotImplementedException()
-					}
-					delete {
-						throw NotImplementedException()
-					}
-				}
+				val format = Format.parse(request.format ?: "")
+				return Book.create(isbn, format) ?: throw NotFoundException("Unable to find Book")
 			}
 			route("/books") {
 				get {
@@ -195,7 +172,7 @@ fun Application.module() {
 					).sorted()
 					val bookMaps = books.map {
 						val output = mutableMapOf<String, Any?>(
-							"Book" to it.toJson(full = false, showUnique = true),
+							"Book" to it.toJson(),
 							"Collection" to (CollectionTable.selectUnique(it.isbn)?.count ?: 0),
 							"Wishlist" to (WishlistTable.selectUnique(it.isbn)?.count ?: 0)
 						)
@@ -208,10 +185,8 @@ fun Application.module() {
 						?: throw BadRequestException("A Body is Required")
 					if (request.format == "")
 						throw BadRequestException("Invalid Format")
-					val book = call.getBook()
-					book.format = Format.parse(request.format!!)
 					call.respond(
-						message = book.push().toJson(full = true, showUnique = true),
+						message = call.getBook().toJson(),
 						status = HttpStatusCode.Created
 					)
 				}
@@ -220,7 +195,7 @@ fun Application.module() {
 						val book = BookTable.selectUnique(call.getISBN())
 							?: throw NotFoundException("Unable to find book in Database")
 						val bookMap = mutableMapOf<String, Any?>(
-							"Book" to book.toJson(full = true, showUnique = true),
+							"Book" to book.toJson(),
 							"Collection" to (CollectionTable.selectUnique(book.isbn)?.count ?: 0),
 							"Wishlist" to (WishlistTable.selectUnique(book.isbn)?.count ?: 0)
 						)
@@ -241,14 +216,14 @@ fun Application.module() {
 							subtitle = queryParams["subtitle"],
 							author = queryParams["author"]
 						).sorted()
-						call.respond(message = books.map { it.toJson(full = false) })
+						call.respond(message = books.map { it.toJson() })
 					}
 					post {
 						val book = call.getBook()
 						val entry = CollectionTable.selectUnique(book.isbn) ?: CollectionBook(book.isbn, 0).add()
 						entry.count = entry.count + 1
 						call.respond(
-							message = entry.push().toJson(full = true, showUnique = true),
+							message = entry.push().toJson(),
 							status = HttpStatusCode.Created
 						)
 					}
@@ -261,14 +236,14 @@ fun Application.module() {
 							subtitle = queryParams["subtitle"],
 							author = queryParams["author"]
 						).sorted()
-						call.respond(message = books.map { it.toJson(full = false) })
+						call.respond(message = books.map { it.toJson() })
 					}
 					post {
 						val book = call.getBook()
 						val entry = WishlistTable.selectUnique(book.isbn) ?: WishlistBook(book.isbn, 0).add()
 						entry.count = entry.count + 1
 						call.respond(
-							message = entry.push().toJson(full = true, showUnique = true),
+							message = entry.push().toJson(),
 							status = HttpStatusCode.Created
 						)
 					}

@@ -57,12 +57,13 @@ function addToCollection() {
 		success: function (data) {
 			console.log("Response: " + data);
 			document.getElementById("collectionAddButton").className = "ui inverted blue button";
+			document.getElementById("collection_isbn").value = '';
+			document.getElementById("collection_format").value = '';
 			location.reload();
 		},
 		error: function (xhr, status, error) {
 			alert("#ERR: xhr.status=" + xhr.status + ", xhr.statusText=" + xhr.statusText + "\nstatus=" + status + ", error=" + error);
 			document.getElementById("collectionAddButton").className = "ui inverted blue button";
-			location.reload();
 		}
 	});
 }
@@ -104,12 +105,13 @@ function addToWishlist() {
 		success: function (data) {
 			console.log("Response: " + data);
 			document.getElementById("wishlistAddButton").className = "ui inverted blue button";
+			document.getElementById("wishlist_isbn").value = '';
+			document.getElementById("wishlist_format").value = '';
 			location.reload();
 		},
 		error: function (xhr, status, error) {
 			alert("#ERR: xhr.status=" + xhr.status + ", xhr.statusText=" + xhr.statusText + "\nstatus=" + status + ", error=" + error);
 			document.getElementById("wishlistAddButton").className = "ui inverted blue button";
-			location.reload();
 		}
 	});
 }
@@ -120,15 +122,15 @@ function bookToHTML(book) {
 	let segment = document.createElement('div');
 	segment.className = 'ui segment inverted';
 	let imageDiv = document.createElement('div');
-	imageDiv.className = 'ui small image';
+	imageDiv.className = 'ui centered small rounded image';
 	let label = null;
 	if (book.Count !== 1) {
-		label = document.createElement('a');
+		label = document.createElement('div');
 		label.className = 'ui small teal right ribbon label';
-		label.textContent = book.Count;
+		label.innerHTML = "<i class='archive icon'></i>" + book.Count;
 	}
 	let image = document.createElement('img');
-	image.className = 'ui small image';
+	image.className = 'ui centered small rounded image';
 	image.src = book.Book.Images.Medium;
 	let header = document.createElement('div');
 	header.className = 'ui center aligned small inverted header';

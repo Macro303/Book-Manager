@@ -19,19 +19,20 @@
 		<a class="item" href="/about.html"><i class="info circle icon"></i>About</a>
 	</div>
 	<div class="pusher">
-		<div class="ui basic segment" id="content">
-			<div class="ui center aligned basic segment">
-				<div class="ui input">
-					<input id="collection_isbn" type="text" placeholder="ISBN">
+		<div class="ui container">
+			<div class="ui basic segment" id="content">
+				<div class="ui center aligned basic segment">
+					<div class="ui input">
+						<input id="collection_isbn" type="text" placeholder="ISBN">
+					</div>
+					<select id="collection_format" class="ui selection dropdown">
+						<option value="Paperback">Paperback</option>
+						<option value="Hardcover">Hardcover</option>
+						<option value="Mass Media Paperback">Mass Media Paperback</option>
+					</select>
+					<button id="collectionAddButton" class="ui inverted blue button" onclick="addToCollection()">Add</button>
 				</div>
-				<select id="collection_format" class="ui selection dropdown">
-					<option value="Paperback">Paperback</option>
-					<option value="Hardback">Hardback</option>
-					<option value="Mass Media Paperback">Mass Media Paperback</option>
-				</select>
-				<button id="collectionAddButton" class="ui inverted blue button" onclick="addToCollection()">Add</button>
-			</div>
-			<div class="ui doubling six column grid container" id="collection-grid">
+				<div class="ui doubling five column grid" id="collection-grid"></div>
 			</div>
 		</div>
 	</div>

@@ -13,7 +13,7 @@ It's a book catalogue.... for cataloging books.
  - [Gradle: 5.6.3](https://gradle.org/)
  - [kotlin-stdlib-jdk8: 1.3.50](https://kotlinlang.org/)
  - [snakeyaml: 1.25](https://bitbucket.org/asomov/snakeyaml)
- - [unirest-java: 1.4.9](http://unirest.io/java.html)
+ - [unirest-java: 3.1.02](https://github.com/Kong/unirest-java)
  - [ktor-server-netty: 1.3.0-beta-1](https://ktor.io/)
  - [ktor-gson: 1.3.0-beta-1](https://ktor.io/)
  - [ktor-freemarker: 1.3.0-beta-1](https://ktor.io/)
