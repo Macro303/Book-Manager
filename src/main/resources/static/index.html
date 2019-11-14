@@ -3,12 +3,71 @@
 <head>
 	<meta charset="UTF-8">
 	<meta content="Macro303" name="author">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Book Manager</title>
-	<link href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
 	<link href="/style.css" rel="stylesheet"/>
+	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
-<body>
-<div id="navbar"></div>
+<body class="has-navbar-fixed-top">
+<nav class="navbar is-fixed-top is-dark" role="navigation" aria-label="main navigation">
+	<div class="container is-fluid">
+	<div class="navbar-brand">
+		<span class="navbar-item">
+			<img src="/logo.png" alt="">
+			Book Manager
+		</span>
+		<a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
+			<span aria-hidden="true"></span>
+			<span aria-hidden="true"></span>
+			<span aria-hidden="true"></span>
+		</a>
+	</div>
+	<div class="navbar-menu" id="navMenu">
+		<div class="navbar-start">
+			<a class="navbar-item" href="/">
+				<span class="icon">
+					<i class="fas fa-home"></i>
+				</span>
+				<span>Home</span>
+			</a>
+			<a class="navbar-item" href="/collection">
+				<span class="icon">
+					<i class="fas fa-book"></i>
+				</span>
+				<span>Collection</span>
+			</a>
+			<a class="navbar-item" href="/wishlist">
+				<span class="icon">
+					<i class="fas fa-clipboard-list"></i>
+				</span>
+				<span>Wishlist</span>
+			</a>
+			<a class="navbar-item" href="/loan">
+				<span class="icon">
+					<i class="fas fa-address-book"></i>
+				</span>
+				<span>Loans</span>
+			</a>
+			<a class="navbar-item" href="/about">
+				<span class="icon">
+					<i class="fas fa-info-circle"></i>
+				</span>
+				<span>About</span>
+			</a>
+		</div>
+	</div>
+	</div>
+</nav>
+<section class="hero is-dark is-bold">
+	<div class="hero-body">
+		<div class="container">
+			<h1 class="title">Book Manager</h1>
+			<h2 class="subtitle">It's a book catalogue.... for cataloging books.</h2>
+		</div>
+	</div>
+</section>
+<!--<div id="navbar"></div>
 <div class="ui pushable segment basic">
 	<div class="ui sidebar vertical menu fixed">
 		<a class="item" href="/"><i class="home icon"></i>Home</a>
@@ -36,13 +95,19 @@
 			</div>
 		</div>
 	</div>
-</div>
+</div>-->
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 <script src="/script.js"></script>
 <script type="text/javascript">
+	$(document).ready(function() {
+		$(".navbar-burger").click(function() {
+			$(".navbar-burger").toggleClass("is-active");
+			$(".navbar-menu").toggleClass("is-active");
+		});
+	});
 	$(document).ready(function () {
-		$("#navbar").load("/navbar.html");
+		// $("#navbar").load("/navbar.html");
 		loadNewest();
 		loadRead();
 	});
