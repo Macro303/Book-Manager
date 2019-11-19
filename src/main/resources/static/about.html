@@ -3,41 +3,46 @@
 <head>
 	<meta charset="UTF-8">
 	<meta content="Macro303" name="author">
-	<title>About</title>
-	<link href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" rel="stylesheet">
+	<meta content="width=device-width, initial-scale=1" name="viewport">
+	<title>Book Manager - About</title>
+	<link href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" rel="stylesheet">
 	<link href="/style.css" rel="stylesheet"/>
+	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
 <body>
 <div id="navbar"></div>
-<div class="ui pushable segment basic">
-	<div class="ui sidebar vertical menu fixed">
-		<a class="item" href="/"><i class="home icon"></i>Home</a>
-		<a class="item" href="/collection"><i class="book icon"></i>Collection</a>
-		<a class="item" href="/wishlist"><i class="clipboard list icon"></i>Wishlist</a>
-		<a class="item" href="/loan"><i class="address book icon"></i>Loans</a>
-		<a class="item" href="/about"><i class="info circle icon"></i>About</a>
-	</div>
-	<div class="pusher">
-		<div class="ui container">
-			<div class="ui basic segment" id="content">
-				<h1 class="ui center aligned header">Contributors</h1>
-				<div class="ui doubling five column grid container">
-					<div class="column">
-						<div class="ui segment inverted">
-							<img alt="" class="ui centered circular tiny image" src="/avatar-macro303.png">
-							<h3 class="ui header inverted">
-								Macro303
-								<div class="sub header">Creator and Maintainer</div>
-							</h3>
+<div class="container has-text-centered">
+	<h3 class="title is-3">Contributors</h3>
+	<div class="columns is-centered is-multiline">
+		<div class="column">
+			<div class="card">
+				<div class="card-content">
+					<div class="media">
+						<div class="media-left">
+							<figure class="image is-128x128">
+								<img alt="" src="/avatar-macro303.png">
+							</figure>
+						</div>
+						<div class="media-content">
+							<p class="title is-4">Macro303</p>
+							<p class="subtitle is-6">Creator and Maintainer</p>
 						</div>
 					</div>
-					<div class="column">
-						<div class="ui segment inverted">
-							<img alt="" class="ui centered circular tiny image" src="/avatar-misst.jpg">
-							<h3 class="ui header inverted">
-								Miss T
-								<div class="sub header">Supporter and Loving Fiance</div>
-							</h3>
+				</div>
+			</div>
+		</div>
+		<div class="column">
+			<div class="card">
+				<div class="card-content">
+					<div class="media">
+						<div class="media-left">
+							<figure class="image is-128x128">
+								<img alt="" src="/avatar-misst.jpg">
+							</figure>
+						</div>
+						<div class="media-content">
+							<p class="title is-4">Miss. T</p>
+							<p class="subtitle is-6">Supporter and Loving Fiance</p>
 						</div>
 					</div>
 				</div>
@@ -46,7 +51,6 @@
 	</div>
 </div>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 <script src="/script.js"></script>
 <script type="text/javascript">
 	$(document).ready(function () {

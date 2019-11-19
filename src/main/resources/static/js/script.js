@@ -1,21 +1,49 @@
 function loadNewest() {
-	for (var i = 0; i < 5; i++) {
-		var column = document.createElement('div');
-		column.className = 'column';
-		var segment = document.createElement('div');
-		segment.className = 'ui placeholder segment inverted';
-		column.appendChild(segment);
+	for (let i = 0; i < 5; i++) {
+		let column = document.createElement('div');
+		column.className = 'column is-narrow';
+		column.innerHTML = '<div class="card">' +
+			'<div class="card-image">' +
+			'<figure class="image is-3by4">' +
+			'<img src="https://bulma.io/images/placeholders/480x640.png" alt="Placeholder">' +
+			'</figure>' +
+			'</div>' +
+			'<div class="card-content">' +
+			'<div class="media">' +
+			'<div class="media-content">' +
+			'<p class="title is-4">Book Title</p>' +
+			'<p class="subtitle is-6">Subtitle</p>' +
+			'</div>' +
+			'</div>' +
+			'<div class="content">Book Description</div>' +
+			'</div>' +
+			'</div>';
+
 		document.getElementById('newest-grid').appendChild(column)
 	}
 }
 
 function loadRead() {
-	for (var i = 0; i < 5; i++) {
-		var column = document.createElement('div');
-		column.className = 'column';
-		var segment = document.createElement('div');
-		segment.className = 'ui placeholder segment inverted';
-		column.appendChild(segment);
+	for (let i = 0; i < 5; i++) {
+		let column = document.createElement('div');
+		column.className = 'column is-narrow';
+		column.innerHTML = '<div class="card">' +
+			'<div class="card-image">' +
+			'<figure class="image is-3by4">' +
+			'<img src="https://bulma.io/images/placeholders/480x640.png" alt="Placeholder">' +
+			'</figure>' +
+			'</div>' +
+			'<div class="card-content">' +
+			'<div class="media">' +
+			'<div class="media-content">' +
+			'<p class="title is-4">Book Title</p>' +
+			'<p class="subtitle is-6">Subtitle</p>' +
+			'</div>' +
+			'</div>' +
+			'<div class="content">Book Description</div>' +
+			'</div>' +
+			'</div>';
+
 		document.getElementById('read-grid').appendChild(column)
 	}
 }
@@ -118,35 +146,23 @@ function addToWishlist() {
 
 function bookToHTML(book) {
 	let column = document.createElement('div');
-	column.className = 'column';
-	let segment = document.createElement('div');
-	segment.className = 'ui segment inverted';
-	let imageDiv = document.createElement('div');
-	imageDiv.className = 'ui centered small rounded image';
-	let label = null;
-	if (book.Count !== 1) {
-		label = document.createElement('div');
-		label.className = 'ui small teal right ribbon label';
-		label.innerHTML = "<i class='archive icon'></i>" + book.Count;
-	}
-	let image = document.createElement('img');
-	image.className = 'ui centered small rounded image';
-	image.src = book.Book.Images.Medium;
-	let header = document.createElement('div');
-	header.className = 'ui center aligned small inverted header';
-	header.textContent = book.Book.Title;
-	let subheader = document.createElement('div');
-	subheader.className = 'sub header';
-	subheader.textContent = book.Book.Subtitle;
-
-	header.appendChild(subheader);
-	imageDiv.appendChild(image);
-	if (book.Count !== 1) {
-		imageDiv.appendChild(label);
-	}
-	segment.appendChild(imageDiv);
-	segment.appendChild(header);
-	column.appendChild(segment);
+	column.className = 'column is-narrow';
+	column.innerHTML = '<div class="card">' +
+		'<div class="card-image">' +
+		'<figure class="image is-3by4">' +
+		'<img src="https://bulma.io/images/placeholders/480x640.png" alt="Placeholder">' +
+		'</figure>' +
+		'</div>' +
+		'<div class="card-content">' +
+		'<div class="media">' +
+		'<div class="media-content">' +
+		`<p class="title is-4">${book.Book.Title}</p>` +
+		`<p class="subtitle is-6">${book.Book.Subtitle}</p>` +
+		'</div>' +
+		'</div>' +
+		'<div class="content">Book Description</div>' +
+		'</div>' +
+		'</div>';
 	return column
 }
 

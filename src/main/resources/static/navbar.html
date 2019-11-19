@@ -1,38 +1,57 @@
-<div class="ui grid">
-
-	<div class="computer only row">
-		<div class="column">
-			<div class="ui menu inverted fixed">
-				<div class="ui container">
-					<h3 class="ui orange inverted header item">
-						<img alt="" class="ui centered rounded small image" src="/logo.png">
-						Book Manager
-					</h3>
-					<a class="item" href="/"><i class="home icon"></i>Home</a>
-					<a class="item" href="/collection"><i class="book icon"></i>Collection</a>
-					<a class="item" href="/wishlist"><i class="clipboard list icon"></i>Wishlist</a>
-					<a class="item" href="/loan"><i class="address book icon"></i>Loans</a>
-					<a class="item" href="/about"><i class="info circle icon"></i>About</a>
-				</div>
+<nav class="navbar">
+	<div class="container">
+		<div class="navbar-brand">
+			<span class="navbar-item">
+				<img alt="" src="/logo.png">
+				Book Manager
+			</span>
+			<span class="navbar-burger burger" data-target="navbarMenuHero">
+				<span></span>
+				<span></span>
+				<span></span>
+			</span>
+		</div>
+		<div class="navbar-menu" id="navbarMenuHero">
+			<div class="navbar-end">
+				<a class="navbar-item" href="/">
+					<span class="icon">
+						<i class="fas fa-home"></i>
+					</span>
+					<span>Home</span>
+				</a>
+				<a class="navbar-item" href="/collection">
+					<span class="icon">
+						<i class="fas fa-book"></i>
+					</span>
+					<span>Collection</span>
+				</a>
+				<a class="navbar-item" href="/wishlist">
+					<span class="icon">
+						<i class="fas fa-clipboard-list"></i>
+					</span>
+					<span>Wishlist</span>
+				</a>
+				<a class="navbar-item" href="/loan">
+					<span class="icon">
+						<i class="fas fa-address-book"></i>
+					</span>
+					<span>Loans</span>
+				</a>
+				<a class="navbar-item" href="/about">
+					<span class="icon">
+						<i class="fas fa-info-circle"></i>
+					</span>
+					<span>About</span>
+				</a>
 			</div>
 		</div>
 	</div>
-
-	<div class="tablet mobile only row">
-		<div class="column">
-			<div class="ui menu inverted fixed">
-				<h3 class="ui orange inverted header item" id="mobile_item">
-					<img alt="" class="ui centered rounded small image" src="/logo.png">
-					Book Manager
-				</h3>
-			</div>
-		</div>
-	</div>
-
-</div>
+</nav>
 <script type="text/javascript">
-	$('.ui.sidebar').sidebar({
-		context: $('.ui.pushable.segment'),
-		transition: 'overlay'
-	}).sidebar('attach events', '#mobile_item');
+	$(document).ready(function () {
+		$(".navbar-burger").click(function () {
+			$(".navbar-burger").toggleClass("is-active");
+			$(".navbar-menu").toggleClass("is-active");
+		});
+	});
 </script>
