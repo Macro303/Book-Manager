@@ -3,30 +3,18 @@
 <head>
 	<meta charset="UTF-8">
 	<meta content="Macro303" name="author">
-	<title>Loans</title>
-	<link href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" rel="stylesheet">
+	<meta content="width=device-width, initial-scale=1" name="viewport">
+	<title>Book Manager - Loans</title>
+	<link href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" rel="stylesheet">
 	<link href="/style.css" rel="stylesheet"/>
+	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
 <body>
 <div id="navbar"></div>
-<div class="ui pushable segment basic">
-	<div class="ui sidebar vertical menu fixed">
-		<a class="item" href="/"><i class="home icon"></i>Home</a>
-		<a class="item" href="/collection"><i class="book icon"></i>Collection</a>
-		<a class="item" href="/wishlist"><i class="clipboard list icon"></i>Wishlist</a>
-		<a class="item" href="/loan"><i class="address book icon"></i>Loans</a>
-		<a class="item" href="/about"><i class="info circle icon"></i>About</a>
-	</div>
-	<div class="pusher">
-		<div class="ui container">
-			<div class="ui basic segment" id="content">
-				<div class="ui doubling five column grid" id="loan-grid"></div>
-			</div>
-		</div>
-	</div>
+<div class="container has-text-centered">
+	<div class="columns is-centered is-multiline" id="loan-grid"></div>
 </div>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 <script src="/script.js"></script>
 <script type="text/javascript">
 	$(document).ready(function () {
