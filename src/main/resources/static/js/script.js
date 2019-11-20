@@ -1,7 +1,7 @@
 function loadNewest() {
 	for (let i = 0; i < 5; i++) {
 		let column = document.createElement('div');
-		column.className = 'column is-narrow';
+		column.className = 'column is-one-fifth';
 		column.innerHTML = '<div class="card">' +
 			'<div class="card-image">' +
 			'<figure class="image is-3by4">' +
@@ -26,7 +26,7 @@ function loadNewest() {
 function loadRead() {
 	for (let i = 0; i < 5; i++) {
 		let column = document.createElement('div');
-		column.className = 'column is-narrow';
+		column.className = 'column is-one-fifth';
 		column.innerHTML = '<div class="card">' +
 			'<div class="card-image">' +
 			'<figure class="image is-3by4">' +
@@ -146,11 +146,11 @@ function addToWishlist() {
 
 function bookToHTML(book) {
 	let column = document.createElement('div');
-	column.className = 'column is-narrow';
+	column.className = 'column is-2';
 	column.innerHTML = '<div class="card">' +
 		'<div class="card-image">' +
 		'<figure class="image is-3by4">' +
-		'<img src="https://bulma.io/images/placeholders/480x640.png" alt="Placeholder">' +
+		`<img src="${book.Book.Images.Medium}" alt="Placeholder">` +
 		'</figure>' +
 		'</div>' +
 		'<div class="card-content">' +
@@ -169,7 +169,7 @@ function bookToHTML(book) {
 function loadLoans() {
 	for (var i = 0; i < 10; i++) {
 		let column = document.createElement('div');
-		column.className = 'column is-narrow';
+		column.className = 'column is-2';
 		column.innerHTML = '<div class="card">' +
 			'<div class="card-image">' +
 			'<figure class="image is-3by4">' +
