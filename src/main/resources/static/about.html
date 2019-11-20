@@ -10,69 +10,17 @@
 	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
 <body class="has-navbar-fixed-top">
-<nav id="navbar" class="navbar is-dark is-fixed-top"></nav>
+<nav class="navbar is-dark is-fixed-top" id="navbar"></nav>
 <section class="section is-medium">
 	<div class="container has-text-centered">
 		<h3 class="title is-3">Contributors</h3>
-		<div class="columns is-centered is-multiline">
-			<div class="column is-one-third">
-				<div class="card">
-					<div class="card-content">
-						<div class="media">
-							<div class="media-left">
-								<figure class="image is-128x128">
-									<img class="is-rounded" alt="Macro303 Avatar" src="/avatar-macro303.png">
-								</figure>
-							</div>
-							<div class="media-content">
-								<p class="title is-4">Macro303</p>
-								<p class="subtitle is-6">Creator and Maintainer</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="column is-one-third">
-				<div class="card">
-					<div class="card-content">
-						<div class="media">
-							<div class="media-left">
-								<figure class="image is-128x128">
-									<img class="is-rounded" alt="Miss. T Avatar" src="/avatar-misst.jpg">
-								</figure>
-							</div>
-							<div class="media-content">
-								<p class="title is-4">Miss. T</p>
-								<p class="subtitle is-6">Supporter and Loving Fiance</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="column is-one-third">
-				<div class="card">
-					<div class="card-content">
-						<div class="media">
-							<div class="media-left">
-								<figure class="image is-128x128">
-									<img class="is-rounded" alt="T1nyTim Avatar" src="https://ui-avatars.com/api/?name=T1ny+Tim&size=512&bold=true&background=4682B4&color=FFF">
-								</figure>
-							</div>
-							<div class="media-content">
-								<p class="title is-4">T1ny Tim</p>
-								<p class="subtitle is-6">Support Staff</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+		<div class="columns is-centered is-multiline" id="contributor-grid"></div>
 	</div>
 </section>
 <footer class="footer">
 	<div class="content has-text-centered">
 		<a href="https://bulma.io">
-			<img src="https://bulma.io/images/made-with-bulma--dark.png" alt="Made with Bulma" width="128" height="24">
+			<img alt="Made with Bulma" height="24" src="https://bulma.io/images/made-with-bulma--dark.png" width="128">
 		</a>
 	</div>
 </footer>
@@ -81,6 +29,7 @@
 <script type="text/javascript">
 	$(document).ready(function () {
 		$("#navbar").load("/navbar.html");
+		loadContributors()
 	});
 </script>
 </body>

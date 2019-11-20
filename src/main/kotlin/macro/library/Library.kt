@@ -249,6 +249,33 @@ fun Application.module() {
 					}
 				}
 			}
+			route("/contributors"){
+				get{
+					val contributors = listOf(
+						mapOf<String, Any?>(
+							"Title" to "Macro303",
+							"Image" to "macro303.png",
+							"Role" to "Creator and Maintainer"
+						).toSortedMap(),
+						mapOf<String, Any?>(
+							"Title" to "Miss. T",
+							"Image" to "misst.jpg",
+							"Role" to "Supporter and Loving Fiance"
+						).toSortedMap(),
+						mapOf<String, Any?>(
+							"Title" to "T1nyTim",
+							"Image" to "t1nytim.png",
+							"Role" to "Support Staff"
+						).toSortedMap(),
+						mapOf<String, Any?>(
+							"Title" to "Rocky",
+							"Image" to "rocky.png",
+							"Role" to "Quality Tester"
+						).toSortedMap()
+					)
+					call.respond(contributors)
+				}
+			}
 		}
 		static {
 			defaultResource(resource = "/static/index.html")
