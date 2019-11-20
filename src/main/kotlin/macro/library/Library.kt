@@ -271,7 +271,12 @@ fun Application.module() {
 							"Title" to "Rocky",
 							"Image" to "rocky.png",
 							"Role" to "Quality Tester"
-						).toSortedMap()
+						).toSortedMap(),
+						mapOf<String, Any?>(
+							"Title" to "Img Bot App",
+							"Image" to "imgbotapp.png",
+							"Role" to "Image Processor"
+						)
 					)
 					call.respond(contributors)
 				}
