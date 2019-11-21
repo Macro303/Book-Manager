@@ -1,4 +1,4 @@
-name: Java CI
+name: Book Manager - Gradle Build
 
 on:
   pull_request:
