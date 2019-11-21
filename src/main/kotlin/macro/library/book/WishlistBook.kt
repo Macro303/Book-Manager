@@ -26,9 +26,9 @@ data class WishlistBook(val bookId: Isbn, var count: Int = 1) : Comparable<Wishl
 	}
 
 	override fun compareTo(other: WishlistBook): Int = comparator.compare(this, other)
-	override fun toJson(full: Boolean, showUnique: Boolean): Map<String, Any?> {
+	override fun toJson(full: Boolean): Map<String, Any?> {
 		val output = mutableMapOf<String, Any?>(
-			"Book" to getBook().toJson(full = full, showUnique = true),
+			"Book" to getBook().toJson(),
 			"Count" to count
 		)
 		return output.toSortedMap()

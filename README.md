@@ -10,16 +10,18 @@ It's a book catalogue.... for cataloging books.
 
 ## Built Using
  - JDK: 11
- - [Gradle: 5.6.3](https://gradle.org/)
- - [kotlin-stdlib-jdk8: 1.3.50](https://kotlinlang.org/)
+ - [Gradle: 6.0.1](https://gradle.org/)
+ - [kotlin-stdlib-jdk8: 1.3.60](https://kotlinlang.org/)
  - [snakeyaml: 1.25](https://bitbucket.org/asomov/snakeyaml)
- - [unirest-java: 1.4.9](http://unirest.io/java.html)
+ - [unirest-java: 3.1.04](https://github.com/Kong/unirest-java)
  - [ktor-server-netty: 1.3.0-beta-1](https://ktor.io/)
  - [ktor-gson: 1.3.0-beta-1](https://ktor.io/)
  - [ktor-freemarker: 1.3.0-beta-1](https://ktor.io/)
+ - [json: 20190722](https://github.com/stleary/JSON-java)
  - [log4j-api: 2.12.1](https://logging.apache.org/log4j/2.x/)
  - [log4j-slf4j-impl: 2.12.1 (Runtime)](https://logging.apache.org/log4j/2.x/)
  - [sqlite-jdbc: 3.28.0 (Runtime)](https://github.com/xerial/sqlite-jdbc)
+ - [bulma: 0.8.0 (CSS Framework)](https://bulma.io)
  
 ## Running
 **To run from source:**

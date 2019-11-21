@@ -1,14 +1,11 @@
 package macro.library.external
 
+import kong.unirest.json.JSONArray
+import kong.unirest.json.JSONObject
 import macro.library.Util
 import macro.library.book.Book
 import macro.library.book.Isbn
-import macro.library.book.author.Author
-import macro.library.database.AuthorTable
 import org.apache.logging.log4j.LogManager
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.*
 
 /**
  * Created by Macro303 on 2019-Nov-12
@@ -35,38 +32,22 @@ object OpenLibrary {
 				publisherStr.append(";")
 			publisherStr.append((publisher as JSONObject).getString("name"))
 		}
-		val imageSmall = bookObj.getJSONObject("cover").getString("small")
-		val imageMedium = bookObj.getJSONObject("cover").getString("medium")
-		val imageLarge = bookObj.getJSONObject("cover").getString("large")
-		searchAuthors(isbn)
+		val idObj = bookObj.getJSONObject("identifiers")
+		val googleBooksId = idObj.optJSONArray("google")?.map { it?.toString() }?.firstOrNull()
+		val goodreadsId = idObj.optJSONArray("goodreads")?.map { it?.toString() }?.firstOrNull()
+		val openLibraryId = idObj.optJSONArray("openlibrary")?.map { it?.toString() }?.firstOrNull()
 		return Book(
 			isbn = isbn,
 			title = title,
 			subtitle = subtitle,
 			publisher = publisherStr.toString(),
-			imageSmall = imageSmall,
-			imageMedium = imageMedium,
-			imageLarge = imageLarge
-		)
+			googleBooksId = googleBooksId,
+			goodreadsId = goodreadsId,
+			openLibraryId = openLibraryId
+		).add()
 	}
 
-	fun searchAuthors(isbn: Isbn): List<Author> {
-		val authorList = ArrayList<Author>()
-		val url = "$URL?bibkeys=ISBN:$isbn&format=json&jscmd=data"
-		val request = Util.httpRequest(url) ?: return authorList
-		val response = request.getObject()
-		val bookObj = response.optJSONObject("ISBN:$isbn") ?: return authorList
-		var authors: JSONArray? = bookObj.optJSONArray("authors")
-		if (authors == null)
-			authors = JSONArray()
-		for (authorName in authors) {
-			val name = (authorName as JSONObject).getString("name")
-			var author = Author.parseName(name)
-			val found = AuthorTable.select(author.firstName, author.lastName)
-			if (found == null)
-				author = author.add()
-			authorList.add(author)
-		}
-		return authorList
+	fun selectBook(book: Book): Book{
+		return book
 	}
 }

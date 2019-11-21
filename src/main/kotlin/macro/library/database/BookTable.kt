@@ -15,13 +15,13 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 	private val LOGGER = LogManager.getLogger(BookTable::class.java)
 
 	override fun insert(item: Book): Boolean {
-		val query = "INSERT INTO $tableName(isbn, title, subtitle, publisher, format, image_small, image_medium, image_large) VALUES(?, ?, ?, ?, ?, ?, ?, ?);"
-		return insert(item.isbn, item.title, item.subtitle, item.publisher, item.format.ordinal, item.imageSmall, item.imageMedium, item.imageLarge, query = query)
+		val query = "INSERT INTO $tableName(isbn, title, subtitle, publisher, format, open_library_id, google_books_id, goodreads_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?);"
+		return insert(item.isbn, item.title, item.subtitle, item.publisher, item.format.ordinal, item.openLibraryId, item.googleBooksId, item.goodreadsId, query = query)
 	}
 
 	override fun update(item: Book): Boolean {
-		val query = "UPDATE $tableName SET title = ?, subtitle = ?, publisher = ?, format = ?, image_small = ?, image_medium = ?, image_large = ? WHERE isbn = ?;"
-		return update(item.title, item.subtitle, item.publisher, item.format.ordinal, item.imageSmall, item.imageMedium, item.imageLarge, item.isbn, query = query)
+		val query = "UPDATE $tableName SET title = ?, subtitle = ?, publisher = ?, format = ?, open_library_id = ?, google_books_id = ?, goodreads_id = ? WHERE isbn = ?;"
+		return update(item.title, item.subtitle, item.publisher, item.format.ordinal, item.openLibraryId, item.googleBooksId, item.goodreadsId, item.isbn, query = query)
 	}
 
 	override fun createTable() {
@@ -31,23 +31,23 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 				"subtitle TEXT, " +
 				"publisher TEXT NOT NULL, " +
 				"format INTEGER NOT NULL DEFAULT(0)," +
-				"image_small TEXT," +
-				"image_medium TEXT," +
-				"image_large TEXT);"
+				"open_library_id TEXT," +
+				"google_books_id TEXT," +
+				"goodreads_id TEXT);"
 		insert(query = query)
 	}
 
 	@Throws(SQLException::class)
 	override fun parse(result: ResultSet): Book {
 		return Book(
-			Isbn.of(result.getString("isbn"))!!,
-			result.getString("title"),
-			result.getString("subtitle"),
-			result.getString("publisher"),
-			Format.values()[result.getInt("format")],
-			result.getString("image_small"),
-			result.getString("image_medium"),
-			result.getString("image_large")
+			isbn = Isbn.of(result.getString("isbn"))!!,
+			title=result.getString("title"),
+			subtitle = result.getString("subtitle"),
+			publisher = result.getString("publisher"),
+			format = Format.values()[result.getInt("format")],
+			openLibraryId = result.getString("open_library_id"),
+			googleBooksId = result.getString("google_books_id"),
+			goodreadsId = result.getString("goodreads_id")
 		)
 	}
 

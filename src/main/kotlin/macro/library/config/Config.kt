@@ -13,6 +13,7 @@ import java.nio.file.Paths
 class Config {
 	var proxy: Connection = Connection()
 	var server: Connection = Connection("localhost", 6606)
+	var goodreads: String? = null
 
 	fun saveConfig(): Config {
 		Files.newBufferedWriter(Paths.get("config.yaml")).use {

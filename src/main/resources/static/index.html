@@ -3,49 +3,96 @@
 <head>
 	<meta charset="UTF-8">
 	<meta content="Macro303" name="author">
+	<meta content="width=device-width, initial-scale=1" name="viewport">
 	<title>Book Manager</title>
-	<link href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" rel="stylesheet">
-	<link href="/css/style.css" rel="stylesheet"/>
+	<link href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" rel="stylesheet">
+	<link href="/style.css" rel="stylesheet"/>
+	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
 <body>
-<div id="navbar"></div>
-<div class="ui pushable segment basic">
-	<div class="ui sidebar vertical menu inverted fixed">
-		<h4 class="ui orange inverted header item">Book Manager</h4>
-		<a class="item" href="/"><i class="home icon"></i>Home</a>
-		<a class="item" href="/collection.html"><i class="book icon"></i>Collection</a>
-		<a class="item" href="/wishlist.html"><i class="clipboard list icon"></i>Wishlist</a>
-		<a class="item" href="/loan.html"><i class="address book icon"></i>Loans</a>
-		<a class="item" href="/about.html"><i class="info circle icon"></i>About</a>
+<section class="hero is-dark">
+	<div class="hero-head">
+		<nav class="navbar">
+			<div class="container">
+				<div class="navbar-brand">
+					<span class="navbar-burger burger" data-target="navbarMenuHero">
+						<span></span>
+						<span></span>
+						<span></span>
+					</span>
+				</div>
+				<div class="navbar-menu" id="navbarMenuHero">
+					<div class="navbar-end">
+						<a class="navbar-item" href="/">
+							<span class="icon">
+								<i class="fas fa-home"></i>
+							</span>
+							<span>Home</span>
+						</a>
+						<a class="navbar-item" href="/collection">
+							<span class="icon">
+								<i class="fas fa-book"></i>
+							</span>
+							<span>Collection</span>
+						</a>
+						<a class="navbar-item" href="/wishlist">
+							<span class="icon">
+								<i class="fas fa-clipboard-list"></i>
+							</span>
+							<span>Wishlist</span>
+						</a>
+						<a class="navbar-item" href="/loan">
+							<span class="icon">
+								<i class="fas fa-address-book"></i>
+							</span>
+							<span>Loans</span>
+						</a>
+						<a class="navbar-item" href="/about">
+							<span class="icon">
+								<i class="fas fa-info-circle"></i>
+							</span>
+							<span>About</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</nav>
 	</div>
-	<div class="pusher">
-		<div class="ui basic segment" id="content">
-			<div class="ui basic segment">
-				<img alt="" class="ui centered rounded small image" src="/images/logo.png">
-				<h1 class="ui center aligned header">
-					Book Manager
-					<div class="sub header">It's a book catalogue.... for cataloging books.</div>
-				</h1>
-			</div>
-			<h3 class="ui center aligned header">
-				Newest Books
-			</h3>
-			<div class="ui doubling five column grid container" id="newest-grid">
-			</div>
-			<h3 class="ui center aligned header">
-				Recently Read Books
-			</h3>
-			<div class="ui doubling five column grid container" id="read-grid">
-			</div>
+	<div class="hero-body">
+		<div class="container has-text-centered">
+			<h1 class="title is-1">
+				<img alt="" src="/logo.png">
+				Book Manager
+			</h1>
+			<h2 class="subtitle is-3">
+				It's a book catalogue.... for cataloging books.
+			</h2>
 		</div>
 	</div>
-</div>
+</section>
+<section class="section is-medium">
+	<div class="container has-text-centered">
+		<h3 class="title is-3">Recently Added Books</h3>
+		<div class="columns is-centered" id="newest-grid"></div>
+		<h3 class="title is-3">Recently Read Books</h3>
+		<div class="columns is-centered" id="read-grid"></div>
+	</div>
+</section>
+<footer class="footer">
+	<div class="content has-text-centered">
+		<a href="https://bulma.io">
+			<img src="https://bulma.io/images/made-with-bulma--dark.png" alt="Made with Bulma" width="128" height="24">
+		</a>
+	</div>
+</footer>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
-<script src="/js/script.js"></script>
+<script src="/script.js"></script>
 <script type="text/javascript">
 	$(document).ready(function () {
-		$("#navbar").load("/navbar.html");
+		$(".navbar-burger").click(function () {
+			$(".navbar-burger").toggleClass("is-active");
+			$(".navbar-menu").toggleClass("is-active");
+		});
 		loadNewest();
 		loadRead();
 	});
