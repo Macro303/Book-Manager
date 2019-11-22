@@ -263,11 +263,6 @@ fun Application.module() {
 							"Role" to "Supporter and Loving Fiance"
 						).toSortedMap(),
 						mapOf<String, Any?>(
-							"Title" to "T1nyTim",
-							"Image" to "t1nytim.png",
-							"Role" to "Support Staff"
-						).toSortedMap(),
-						mapOf<String, Any?>(
 							"Title" to "Rocky",
 							"Image" to "rocky.png",
 							"Role" to "Quality Tester"
