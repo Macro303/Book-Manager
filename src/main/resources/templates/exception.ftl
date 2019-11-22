@@ -12,7 +12,7 @@
 <body class="has-navbar-fixed-top">
 <nav class="navbar is-dark is-fixed-top" id="navbar"></nav>
 <section class="section is-medium">
-	<div class="container has-text-centered">
+	<div class="container has-text-centered is-large">
 		<article class="message is-danger">
 			<div class="message-header">${code}: ${request}</div>
 			<div class="message-body">${message}</div>
