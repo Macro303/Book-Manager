@@ -20,7 +20,7 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 	implementation group: 'org.yaml', name: 'snakeyaml', version: "1.25"
 	implementation group: 'com.konghq', name: 'unirest-java', version: "3.1.04"
-	implementation group: 'org.json', name: 'json', version: "20190722"
+	implementation group: 'org.json', name: 'json', version: "20200518"
 	implementation group: 'io.ktor', name: 'ktor-server-netty', version: "$ktorVersion"
 	implementation group: 'io.ktor', name: 'ktor-gson', version: "$ktorVersion"
 	implementation group: 'io.ktor', name: 'ktor-freemarker', version: "$ktorVersion"
