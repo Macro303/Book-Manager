@@ -1,8 +1,8 @@
-package macro.library.database
+package github.macro.database
 
-import macro.library.book.Book
-import macro.library.book.Format
-import macro.library.book.Isbn
+import github.macro.book.Book
+import github.macro.book.Format
+import github.macro.book.Isbn
 import org.apache.logging.log4j.LogManager
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -15,13 +15,35 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 	private val LOGGER = LogManager.getLogger(BookTable::class.java)
 
 	override fun insert(item: Book): Boolean {
-		val query = "INSERT INTO $tableName(isbn, title, subtitle, publisher, format, open_library_id, google_books_id, goodreads_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?);"
-		return insert(item.isbn, item.title, item.subtitle, item.publisher, item.format.ordinal, item.openLibraryId, item.googleBooksId, item.goodreadsId, query = query)
+		val query =
+			"INSERT INTO $tableName(isbn, title, subtitle, publisher, format, open_library_id, google_books_id, goodreads_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?);"
+		return insert(
+			item.isbn,
+			item.title,
+			item.subtitle,
+			item.publisher,
+			item.format.ordinal,
+			item.openLibraryId,
+			item.googleBooksId,
+			item.goodreadsId,
+			query = query
+		)
 	}
 
 	override fun update(item: Book): Boolean {
-		val query = "UPDATE $tableName SET title = ?, subtitle = ?, publisher = ?, format = ?, open_library_id = ?, google_books_id = ?, goodreads_id = ? WHERE isbn = ?;"
-		return update(item.title, item.subtitle, item.publisher, item.format.ordinal, item.openLibraryId, item.googleBooksId, item.goodreadsId, item.isbn, query = query)
+		val query =
+			"UPDATE $tableName SET title = ?, subtitle = ?, publisher = ?, format = ?, open_library_id = ?, google_books_id = ?, goodreads_id = ? WHERE isbn = ?;"
+		return update(
+			item.title,
+			item.subtitle,
+			item.publisher,
+			item.format.ordinal,
+			item.openLibraryId,
+			item.googleBooksId,
+			item.goodreadsId,
+			item.isbn,
+			query = query
+		)
 	}
 
 	override fun createTable() {
@@ -41,7 +63,7 @@ object BookTable : IdTable<Book, Isbn>(tableName = "book", idName = "isbn") {
 	override fun parse(result: ResultSet): Book {
 		return Book(
 			isbn = Isbn.of(result.getString("isbn"))!!,
-			title=result.getString("title"),
+			title = result.getString("title"),
 			subtitle = result.getString("subtitle"),
 			publisher = result.getString("publisher"),
 			format = Format.values()[result.getInt("format")],

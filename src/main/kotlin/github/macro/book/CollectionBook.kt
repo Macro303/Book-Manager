@@ -1,8 +1,8 @@
-package macro.library.book
+package github.macro.book
 
-import macro.library.ISendable
-import macro.library.database.BookTable
-import macro.library.database.CollectionTable
+import github.macro.ISendable
+import github.macro.database.BookTable
+import github.macro.database.CollectionTable
 
 /**
  * Created by Macro303 on 2019-Oct-31

@@ -1,9 +1,9 @@
-package macro.library.book
+package github.macro.book
 
-import macro.library.ISendable
-import macro.library.database.BookTable
-import macro.library.external.GoogleBooks
-import macro.library.external.OpenLibrary
+import github.macro.ISendable
+import github.macro.database.BookTable
+import github.macro.external.GoogleBooks
+import github.macro.external.OpenLibrary
 import org.apache.logging.log4j.LogManager
 
 /**

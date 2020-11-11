@@ -1,4 +1,4 @@
-package macro.library
+package github.macro
 
 /**
  * Created by Macro303 on 2019-Oct-31

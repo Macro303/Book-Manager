@@ -1,6 +1,12 @@
-package macro.library
+package github.macro
 
 import freemarker.cache.ClassTemplateLoader
+import github.macro.book.*
+import github.macro.config.Config.Companion.CONFIG
+import github.macro.database.BookTable
+import github.macro.database.CollectionTable
+import github.macro.database.WishlistTable
+import github.macro.requests.NewBookRequest
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.freemarker.FreeMarker
@@ -20,14 +26,8 @@ import io.ktor.routing.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.toMap
-import macro.library.book.*
-import macro.library.config.Config.Companion.CONFIG
-import macro.library.database.BookTable
-import macro.library.database.CollectionTable
-import macro.library.database.WishlistTable
-import macro.library.external.GoogleBooks
-import macro.library.external.OpenLibrary
-import macro.library.requests.NewBookRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.slf4j.event.Level
 import java.util.*
@@ -65,7 +65,7 @@ object Library {
 
 fun Application.module() {
 	install(ContentNegotiation) {
-		register(contentType = ContentType.Application.Json, converter = GsonConverter(gson = Util.GSON))
+		register(contentType = ContentType.Application.Json, converter = GsonConverter(gson = Utils.GSON))
 	}
 	install(DefaultHeaders) {
 		header(name = HttpHeaders.Server, value = "Ktor-Book-Manager")
@@ -155,12 +155,14 @@ fun Application.module() {
 
 			fun ApplicationCall.getQueryParams() = request.queryParameters.lowerCase()
 
-			suspend fun ApplicationCall.getBook(): Book{
-				val request = receiveOrNull<NewBookRequest>()
-					?: throw BadRequestException("A Body is Required")
-				val isbn = Isbn.of(request.isbn) ?: throw BadRequestException("Invalid ISBN")
-				val format = Format.parse(request.format ?: "")
-				return Book.create(isbn, format) ?: throw NotFoundException("Unable to find Book")
+			suspend fun ApplicationCall.getBook(): Book {
+				return withContext(Dispatchers.IO) {
+					val request = receiveOrNull<NewBookRequest>()
+						?: throw BadRequestException("A Body is Required")
+					val isbn = Isbn.of(request.isbn) ?: throw BadRequestException("Invalid ISBN")
+					val format = Format.parse(request.format ?: "")
+					return@withContext Book.create(isbn, format) ?: throw NotFoundException("Unable to find Book")
+				}
 			}
 			route("/books") {
 				get {
@@ -181,10 +183,6 @@ fun Application.module() {
 					call.respond(message = bookMaps)
 				}
 				post {
-					val request = call.receiveOrNull<NewBookRequest>()
-						?: throw BadRequestException("A Body is Required")
-					if (request.format == "")
-						throw BadRequestException("Invalid Format")
 					call.respond(
 						message = call.getBook().toJson(),
 						status = HttpStatusCode.Created
@@ -249,23 +247,13 @@ fun Application.module() {
 					}
 				}
 			}
-			route("/contributors"){
-				get{
+			route("/contributors") {
+				get {
 					val contributors = listOf(
 						mapOf<String, Any?>(
 							"Title" to "Macro303",
 							"Image" to "macro303.png",
 							"Role" to "Creator and Maintainer"
-						).toSortedMap(),
-						mapOf<String, Any?>(
-							"Title" to "Miss. T",
-							"Image" to "misst.jpg",
-							"Role" to "Supporter and Loving Fiance"
-						).toSortedMap(),
-						mapOf<String, Any?>(
-							"Title" to "Rocky",
-							"Image" to "rocky.png",
-							"Role" to "Quality Tester"
 						).toSortedMap(),
 						mapOf<String, Any?>(
 							"Title" to "Img Bot App",
@@ -293,19 +281,19 @@ fun Application.module() {
 
 suspend fun ApplicationCall.respond(error: ErrorMessage) {
 	if (request.local.uri.startsWith("/api"))
-		respond(message = error, status = error.code)
+		respond(message = error.toJson(), status = error.code)
 	else
 		respond(
 			message = FreeMarkerContent(template = "exception.ftl", model = error),
 			status = error.code
 		)
 	when {
-		error.code.value < 100 -> application.log.error("${request.httpMethod.value.padEnd(6)}: ${error.code} - ${request.uri} => ${error.message}")
-		error.code.value in (100 until 200) -> application.log.info("${request.httpMethod.value.padEnd(6)}: ${error.code} - ${request.uri} => ${error.message}")
-		error.code.value in (200 until 300) -> application.log.info("${request.httpMethod.value.padEnd(6)}: ${error.code} - ${request.uri}")
-		error.code.value in (300 until 400) -> application.log.debug("${request.httpMethod.value.padEnd(6)}: ${error.code} - ${request.uri} => ${error.message}")
-		error.code.value in (400 until 500) -> application.log.warn("${request.httpMethod.value.padEnd(6)}: ${error.code} - ${request.uri} => ${error.message}")
-		error.code.value >= 500 -> application.log.error("${request.httpMethod.value.padEnd(6)}: ${error.code} - ${request.uri} => ${error.message}")
+		error.code.value < 100 -> application.log.error("${error.code}: ${request.httpMethod.value} - ${request.uri} => ${error.message}")
+		error.code.value in (100 until 200) -> application.log.info("${error.code}: ${request.httpMethod.value} - ${request.uri} => ${error.message}")
+		error.code.value in (200 until 300) -> application.log.info("${error.code}: ${request.httpMethod.value} - ${request.uri}")
+		error.code.value in (300 until 400) -> application.log.debug("${error.code}: ${request.httpMethod.value} - ${request.uri} => ${error.message}")
+		error.code.value in (400 until 500) -> application.log.warn("${error.code}: ${request.httpMethod.value} - ${request.uri} => ${error.message}")
+		error.code.value >= 500 -> application.log.error("${error.code}: ${request.httpMethod.value} - ${request.uri} => ${error.message}")
 	}
 }
 

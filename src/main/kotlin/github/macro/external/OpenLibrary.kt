@@ -1,10 +1,10 @@
-package macro.library.external
+package github.macro.external
 
+import github.macro.Utils
+import github.macro.book.Book
 import kong.unirest.json.JSONArray
 import kong.unirest.json.JSONObject
-import macro.library.Util
-import macro.library.book.Book
-import macro.library.book.Isbn
+import github.macro.book.Isbn
 import org.apache.logging.log4j.LogManager
 
 /**
@@ -16,7 +16,7 @@ object OpenLibrary {
 
 	fun searchBook(isbn: Isbn): Book? {
 		val url = "$URL?bibkeys=ISBN:$isbn&format=json&jscmd=data"
-		val request = Util.httpRequest(url) ?: return null
+		val request = Utils.httpRequest(url) ?: return null
 		val response = request.getObject()
 		val bookObj = response.optJSONObject("ISBN:$isbn") ?: return null
 		val title = bookObj.getString("title")
@@ -47,7 +47,7 @@ object OpenLibrary {
 		).add()
 	}
 
-	fun selectBook(book: Book): Book{
+	fun selectBook(book: Book): Book {
 		return book
 	}
 }

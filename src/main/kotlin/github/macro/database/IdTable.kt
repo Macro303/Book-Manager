@@ -1,4 +1,4 @@
-package macro.library.database
+package github.macro.database
 
 import org.apache.logging.log4j.LogManager
 

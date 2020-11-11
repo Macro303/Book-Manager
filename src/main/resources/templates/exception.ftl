@@ -5,7 +5,7 @@
 	<meta content="Macro303" name="author">
 	<meta content="width=device-width, initial-scale=1" name="viewport">
 	<title>Book Manager - Exception</title>
-	<link href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css" rel="stylesheet">
 	<link href="/style.css" rel="stylesheet"/>
 	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>

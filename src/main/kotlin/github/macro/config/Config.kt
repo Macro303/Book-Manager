@@ -1,4 +1,4 @@
-package macro.library.config
+package github.macro.config
 
 import org.apache.logging.log4j.LogManager
 import org.yaml.snakeyaml.DumperOptions

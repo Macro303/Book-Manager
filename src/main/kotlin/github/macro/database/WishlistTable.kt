@@ -1,7 +1,7 @@
-package macro.library.database
+package github.macro.database
 
-import macro.library.book.Isbn
-import macro.library.book.WishlistBook
+import github.macro.book.Isbn
+import github.macro.book.WishlistBook
 import org.apache.logging.log4j.LogManager
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -39,11 +39,9 @@ object WishlistTable : IdTable<WishlistBook, Isbn>(tableName = "wishlist", idNam
 
 	fun search(title: String? = null, subtitle: String? = null, author: String? = null): List<WishlistBook> {
 		val books = BookTable.search(title, subtitle, author).map { it.isbn }
-		val query = "SELECT * FROM $tableName WHERE bookId IN (${books.joinToString(
-			separator = "', '",
-			prefix = "'",
-			postfix = "'"
-		)});"
+		val query = "SELECT * FROM $tableName WHERE bookId IN (${
+			books.joinToString(separator = "', '", prefix = "'", postfix = "'")
+		});"
 		return search(query = query)
 	}
 }

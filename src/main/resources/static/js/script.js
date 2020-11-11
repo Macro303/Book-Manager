@@ -191,7 +191,7 @@ function loadLoans() {
 	}
 }
 
-function loadContributors(){
+function loadContributors() {
 	$.ajax({
 		async: false,
 		url: '/api/contributors',
@@ -213,7 +213,7 @@ function loadContributors(){
 	});
 }
 
-function contributorToHTML(item){
+function contributorToHTML(item) {
 	let column = document.createElement('div');
 	column.className = 'column is-one-third';
 	column.innerHTML = '<div class="card">' +

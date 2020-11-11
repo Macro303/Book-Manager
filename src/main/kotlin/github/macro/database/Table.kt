@@ -1,6 +1,6 @@
-package macro.library.database
+package github.macro.database
 
-import macro.library.Util
+import github.macro.Utils
 import org.apache.logging.log4j.LogManager
 import java.sql.DriverManager
 import java.sql.ResultSet
@@ -20,7 +20,7 @@ abstract class Table<T> protected constructor(protected val tableName: String) {
 	private fun exists(): Boolean {
 		val query = "SELECT name FROM sqlite_master WHERE type = ? AND name = ?;"
 		try {
-			DriverManager.getConnection(Util.DATABASE_URL).use { conn ->
+			DriverManager.getConnection(Utils.DATABASE_URL).use { conn ->
 				conn.prepareStatement(query).use { statement ->
 					statement.setString(1, "table")
 					statement.setString(2, tableName)
@@ -47,7 +47,7 @@ abstract class Table<T> protected constructor(protected val tableName: String) {
 	protected fun update(vararg values: Any?, query: String): Boolean {
 		LOGGER.debug("$query, ${values.contentToString()}")
 		try {
-			DriverManager.getConnection(Util.DATABASE_URL).use { conn ->
+			DriverManager.getConnection(Utils.DATABASE_URL).use { conn ->
 				conn.autoCommit = false
 				try {
 					conn.prepareStatement(query).use { statement ->
@@ -77,7 +77,7 @@ abstract class Table<T> protected constructor(protected val tableName: String) {
 	protected fun search(vararg values: Any?, query: String): List<T> {
 		val items = ArrayList<T>()
 		try {
-			DriverManager.getConnection(Util.DATABASE_URL).use { conn ->
+			DriverManager.getConnection(Utils.DATABASE_URL).use { conn ->
 				conn.prepareStatement(query).use { statement ->
 					values.forEachIndexed { index, value ->
 						statement.setObject(index + 1, value)

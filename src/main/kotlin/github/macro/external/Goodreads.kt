@@ -1,9 +1,9 @@
-package macro.library.external
+package github.macro.external
 
-import macro.library.Util
-import macro.library.book.Book
-import macro.library.book.Isbn
-import macro.library.config.Config.Companion.CONFIG
+import github.macro.Utils
+import github.macro.book.Book
+import github.macro.book.Isbn
+import github.macro.config.Config.Companion.CONFIG
 import org.apache.logging.log4j.LogManager
 import org.json.XML
 
@@ -17,13 +17,13 @@ object Goodreads {
 	fun searchBook(isbn: Isbn): Book? {
 		val bookId = searchBookId(isbn) ?: return null
 		val url = "$URL/show/$bookId.json?key=${CONFIG.goodreads}"
-		val request = XML.toJSONObject(Util.httpStrRequest(url) ?: return null)
+		val request = XML.toJSONObject(Utils.httpStrRequest(url) ?: return null)
 		LOGGER.info("Request: $request")
 		return null
 	}
 
-	private fun searchBookId(isbn: Isbn): Int?{
+	private fun searchBookId(isbn: Isbn): Int? {
 		val url = "$URL/isbn_to_id/$isbn?key=${CONFIG.goodreads}"
-		return Util.httpStrRequest(url)?.toIntOrNull()
+		return Utils.httpStrRequest(url)?.toIntOrNull()
 	}
 }

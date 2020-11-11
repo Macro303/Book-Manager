@@ -14,8 +14,8 @@ out/
 .project
 *.db
 *.sqlite
-
-# =====Project=====
 *.yaml
 *.json
 *.csv
+
+# =====Project=====

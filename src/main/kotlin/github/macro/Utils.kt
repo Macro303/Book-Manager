@@ -1,4 +1,4 @@
-package macro.library
+package github.macro
 
 import com.google.gson.GsonBuilder
 import io.ktor.http.ContentType
@@ -7,7 +7,7 @@ import kong.unirest.HttpResponse
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import kong.unirest.UnirestException
-import macro.library.config.Config.Companion.CONFIG
+import github.macro.config.Config.Companion.CONFIG
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import java.nio.charset.Charset
@@ -15,8 +15,8 @@ import java.nio.charset.Charset
 /**
  * Created by Macro303 on 2019-Oct-30
  */
-object Util {
-	private val LOGGER = LogManager.getLogger(Util::class.java)
+object Utils {
+	private val LOGGER = LogManager.getLogger(Utils::class.java)
 	private val HEADERS = mapOf(
 		"Accept" to ContentType.Application.Json.withCharset(Charset.forName("UTF-8")).toString(),
 		"User-Agent" to "Book-Manager"
@@ -31,7 +31,7 @@ object Util {
 
 	init {
 		Unirest.config().enableCookieManagement(false)
-		if(CONFIG.proxy.hostName != null && CONFIG.proxy.port != null)
+		if (CONFIG.proxy.hostName != null && CONFIG.proxy.port != null)
 			Unirest.config().proxy(CONFIG.proxy.hostName, CONFIG.proxy.port!!)
 	}
 

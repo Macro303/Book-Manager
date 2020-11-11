@@ -1,9 +1,9 @@
-package macro.library.external
+package github.macro.external
 
+import github.macro.Utils
+import github.macro.book.Book
 import kong.unirest.json.JSONObject
-import macro.library.Util
-import macro.library.book.Book
-import macro.library.book.Isbn
+import github.macro.book.Isbn
 import org.apache.logging.log4j.LogManager
 
 /**
@@ -17,15 +17,15 @@ object GoogleBooks {
 		var request: JSONObject? = null
 		if (book.googleBooksId != null) {
 			val url = "$URL/${book.googleBooksId}"
-			request = Util.httpRequest(url)?.`object`
+			request = Utils.httpRequest(url)?.`object`
 		}
 		if (request == null) {
 			val url = "$URL?q=isbn:${book.isbn}"
-			request = Util.httpRequest(url)?.`object`?.optJSONArray("items")?.optJSONObject(0) ?: return book
+			request = Utils.httpRequest(url)?.`object`?.optJSONArray("items")?.optJSONObject(0) ?: return book
 			book.googleBooksId = request.getString("id")
 		}
 		val bookObj = request.getJSONObject("volumeInfo")
-		if(book.subtitle == null)
+		if (book.subtitle == null)
 			book.subtitle = bookObj.optString("subtitle")
 		if (book.publisher == null)
 			book.publisher = bookObj.optString("publisher")
@@ -34,7 +34,7 @@ object GoogleBooks {
 
 	fun searchBook(isbn: Isbn): Book? {
 		val url = "$URL?q=isbn:${isbn}"
-		val request = Util.httpRequest(url)?.`object`?.optJSONArray("items")?.optJSONObject(0) ?: return null
+		val request = Utils.httpRequest(url)?.`object`?.optJSONArray("items")?.optJSONObject(0) ?: return null
 		val googleBooksId = request.getString("id")
 		val bookObj = request.getJSONObject("volumeInfo")
 		val title = bookObj.getString("title")
