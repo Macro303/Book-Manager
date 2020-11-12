@@ -12,7 +12,7 @@ import org.apache.logging.log4j.LogManager
 data class Book(
 	val isbn: Isbn,
 	var title: String,
-	var subtitle: String?,
+	var subtitle: String? = null,
 	var publisher: String?,
 	var format: Format = Format.PAPERBACK,
 	var openLibraryId: String? = null,
@@ -37,7 +37,7 @@ data class Book(
 	override fun compareTo(other: Book): Int = comparator.compare(this, other)
 
 	override fun toJson(full: Boolean): Map<String, Any?> {
-		val output = mutableMapOf<String, Any?>(
+		val output = mutableMapOf(
 			"ISBN" to isbn.toString(),
 			"Title" to title,
 			"Subtitle" to subtitle,
@@ -46,7 +46,7 @@ data class Book(
 				"Small" to (if (openLibraryId != null) "https://covers.openlibrary.org/b/OLID/$openLibraryId-S.jpg" else if (googleBooksId != null) "http://books.google.com/books/content?id=$googleBooksId&printsec=frontcover&img=1&zoom=1" else null),
 				"Medium" to (if (openLibraryId != null) "https://covers.openlibrary.org/b/OLID/$openLibraryId-M.jpg" else if (googleBooksId != null) "http://books.google.com/books/content?id=$googleBooksId&printsec=frontcover&img=1&zoom=5" else null),
 				"Large" to (if (openLibraryId != null) "https://covers.openlibrary.org/b/OLID/$openLibraryId-L.jpg" else if (googleBooksId != null) "http://books.google.com/books/content?id=$googleBooksId&printsec=frontcover&img=1&zoom=10" else null)
-			).toSortedMap()
+			)
 		)
 		if (full) {
 			output["Publisher"] = publisher
@@ -55,6 +55,9 @@ data class Book(
 				"Google Books" to googleBooksId,
 				"Goodreads" to goodreadsId
 			).toSortedMap()
+		}
+		if(subtitle != null){
+			output["subtitle"] = subtitle
 		}
 		return output.toSortedMap()
 	}
@@ -66,7 +69,7 @@ data class Book(
 			.thenBy(Book::format)
 			.thenBy(Book::isbn)
 
-		fun create(isbn: Isbn, format: Format = Format.PAPERBACK): Book? {
+		fun create(isbn: Isbn): Book? {
 			var book = BookTable.selectUnique(isbn)
 			if (book == null) {
 				LOGGER.info("Book not found in DB")
@@ -84,7 +87,6 @@ data class Book(
 				book = OpenLibrary.selectBook(book)
 				book = GoogleBooks.selectBook(book)
 			}
-			book.format = format
 			return book.push()
 		}
 	}

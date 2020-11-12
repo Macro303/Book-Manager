@@ -51,7 +51,7 @@ function loadRead() {
 function loadCollection() {
 	$.ajax({
 		async: false,
-		url: '/api/books/collection',
+		url: '/api/v1/books/collection',
 		type: 'GET',
 		headers: {
 			accept: 'application/json',
@@ -74,7 +74,7 @@ function addToCollection() {
 	document.getElementById("collectionAddButton").className = "ui loading inverted blue button";
 	$.ajax({
 		async: true,
-		url: '/api/books/collection',
+		url: '/api/v1/books/collection',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({
@@ -99,7 +99,7 @@ function addToCollection() {
 function loadWishlist() {
 	$.ajax({
 		async: false,
-		url: '/api/books/wishlist',
+		url: '/api/v1/books/wishlist',
 		type: 'GET',
 		headers: {
 			accept: 'application/json',
@@ -122,7 +122,7 @@ function addToWishlist() {
 	document.getElementById("wishlistAddButton").className = "ui loading inverted blue button";
 	$.ajax({
 		async: true,
-		url: '/api/books/wishlist',
+		url: '/api/v1/books/wishlist',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({
@@ -194,7 +194,7 @@ function loadLoans() {
 function loadContributors() {
 	$.ajax({
 		async: false,
-		url: '/api/contributors',
+		url: '/api/v1/contributors',
 		type: 'GET',
 		headers: {
 			accept: 'application/json',
@@ -221,7 +221,7 @@ function contributorToHTML(item) {
 		'<div class="media">' +
 		'<div class="media-left">' +
 		'<figure class="image is-128x128">' +
-		`<img alt="${item.Title} Avatar" class="is-rounded" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${item.Title}&size=512&bold=true&background=4682B4&color=FFF'" src="/avatar-${item.Image}">` +
+		`<img alt="${item.Title} Avatar" class="is-rounded" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/v1/?name=${item.Title}&size=512&bold=true&background=4682B4&color=FFF'" src="/avatar-${item.Image}">` +
 		'</figure>' +
 		'</div>' +
 		'<div class="media-content">' +
