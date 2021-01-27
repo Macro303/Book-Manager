@@ -17,7 +17,7 @@ dependencies {
 	implementation(group = "com.konghq", name = "unirest-java", version = "3.11.05")
 	implementation(group = "org.json", name = "json", version = "20200518")
 	implementation(group = "org.yaml", name = "snakeyaml", version = "1.27")
-	runtimeOnly(group = "org.xerial", name = "sqlite-jdbc", version = "3.32.3.2")
+	runtimeOnly(group = "org.xerial", name = "sqlite-jdbc", version = "3.34.0")
 
 	//Ktor
 	val ktorVersion = "1.4.2"
