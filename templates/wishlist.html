@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>Book Manager</title>
+  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">-->
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
+  <link href="/static/styles.css" rel="stylesheet">
+  <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+  <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js" type="module"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</head>
+<body class="has-navbar-fixed-top">
+<nav class="navbar is-fixed-top is-dark">
+  <div class="navbar-brand">
+    <a class="navbar-item icon-text" href="/Book-Manager">
+      <span class="icon is-large">
+        <ion-icon name="home-outline"></ion-icon>
+      </span>
+      <span>Home</span>
+    </a>
+    <a class="navbar-item icon-text" href="/Book-Manager/collection?username={{ username }}">
+      <span class="icon is-large">
+        <ion-icon name="file-tray-full-outline"></ion-icon>
+      </span>
+      <span>Collection</span>
+    </a>
+    <a class="navbar-item icon-text" href="/Book-Manager/wishlist?username={{ username }}">
+      <span class="icon is-large">
+        <ion-icon name="list-outline"></ion-icon>
+      </span>
+      <span>Wishlist</span>
+    </a>
+  </div>
+</nav>
+<section class="section">
+  <div class="container is-fluid">
+    <h1 class="title has-text-centered">{{ username }}'s Wishlist</h1>
+    <div class="columns is-multiline is-centered">
+      <div class="column is-narrow">
+        <div class="card has-text-light has-background-dark">
+          <div class="card-content">
+            <label class="label">
+              <input class="input" id="isbnEntry" placeholder="Isbn" type="text">
+            </label>
+          </div>
+          <footer class="card-footer">
+            <a class="card-footer-item" onclick="addBook()">Add Book</a>
+            <a class="card-footer-item" onclick="removeBook()">Remove Book</a>
+          </footer>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-multiline is-centered">
+      {% for book in books %}
+      <div class="column is-narrow" style="width:300px">
+        <div class="card has-text-light has-background-dark">
+          <div class="card-image">
+            <figure class="image is-2by3">
+              <img loading="lazy" alt="{{ book.title }} by {{ '; '.join(book.authors) }}" src="{{ book.images.large }}" onerror="this.src='/static/missing.png'" />
+            </figure>
+          </div>
+          <header class="card-header">
+            <p class="card-header-title is-capitalized">{{ book.title }}</p>
+          </header>
+          <div class="card-content">
+            <div class="content">
+              <p class="wrap-text"><strong><u>Authors:</u></strong> {{ "; ".join(book.authors) }}</p>
+              <p class="wrap-text is-capitalized"><strong><u>Format:</u></strong> {{ book.format }}</p>
+              <p class="wrap-text is-capitalized"><strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
+              <p class="wrap-text is-capitalized"><strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
+              <p class="wrap-text"><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
+              <p class="wrap-text"><strong><u>Wished:</u></strong> {{ book.wished }}</p>
+            </div>
+          </div>
+          <footer class="card-footer">
+            <a class="card-footer-item" onclick="acquiredBook('{{ book.isbn }}')">Acquired Book</a>
+          </footer>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<script src="/static/scripts.js" type="text/javascript"></script>
+</body>
+</html>
