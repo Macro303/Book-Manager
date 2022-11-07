@@ -31,7 +31,7 @@ class BookTable(db.Entity):
     isbn = PrimaryKey(str)
     publisher = Required(str)
     title = Required(str)
-    page_count = Required(int)
+    page_count = Optional(int, nullable=True)
     format = Optional(str, nullable=True)
     publish_date = Required(str)
     series = Set("SeriesTable", table="Book_Series")
@@ -76,6 +76,39 @@ class BookTable(db.Entity):
         output.authors = author_list
         return output
 
+    @staticmethod
+    def update(book: Book) -> "BookTable":
+        output = BookTable.get(isbn=book.isbn)
+        output.publisher = book.publisher
+        output.title = book.title
+        output.page_count = book.page_count
+        output.format = book.format
+        output.publish_date = book.publish_date
+        output.description = book.description
+        output.open_library_id = book.identifiers.open_library_id
+        output.google_books_id = book.identifiers.google_books_id
+        output.goodreads_id = book.identifiers.goodreads_id
+        output.library_thing_id = book.identifiers.library_thing_id
+        output.wished = UserTable.create_or_get(book.wished) if book.wished else None
+
+        series_list = []
+        for series in book.series:
+            series_list.append(SeriesTable.create_or_get(series))
+        output.series = series_list
+        subject_list = []
+        for subject in book.subjects:
+            subject_list.append(SubjectTable.create_or_get(subject))
+        output.subjects = subject_list
+        author_list = []
+        for author in book.authors:
+            author_list.append(AuthorTable.create_or_get(author))
+        output.authors = author_list
+        read_list = []
+        for reader in book.read:
+            read_list.append(UserTable.create_or_get(reader))
+        output.read = read_list
+        return output
+
     def to_model(self) -> Book:
         return Book(
             isbn=to_isbn(self.isbn),
@@ -117,6 +150,26 @@ class BookTable(db.Entity):
             wished=self.wished.username if self.wished else None,
             read=sorted(x.username for x in self.read),
         )
+
+    def __lt__(self, other):
+        if not isinstance(other, BookTable):
+            raise NotImplementedError()
+
+        self_author = sorted(self.authors)
+        self_author = self_author[0].value if self_author else None
+        other_author = sorted(other.authors)
+        other_author = other_author[0].value if other_author else None
+        if self_author != other_author:
+            return self_author < other_author
+
+        self_series = sorted(self.series)
+        self_series = self_series[0].value if self_series else None
+        other_series = sorted(other.series)
+        other_series = other_series[0].value if other_series else None
+        if self_series != other_series:
+            return self_series != other_series
+
+        return self.title < other.title
 
 
 class SeriesTable(db.Entity):

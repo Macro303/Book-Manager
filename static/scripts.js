@@ -55,8 +55,22 @@ function addBook(){
   });
 }
 
-function removeBook(){
-  let isbn = document.getElementById("isbnEntry").value;
+function refreshBook(isbn){
+  $.ajax({
+    url: "/api/v0/books/" + isbn,
+    type: "POST",
+    dataType: "json",
+    contentType: "application/json; charset=UTF-8",
+    success: function(){
+      window.location.reload();
+    },
+    error: function(xhr){
+      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+    },
+  });
+}
+
+function removeBook(isbn){
   $.ajax({
     url: "/api/v0/books/" + isbn,
     type: "DELETE",

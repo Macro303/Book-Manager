@@ -20,7 +20,7 @@ class Book(BaseModel):
     isbn: str
     publisher: str
     title: str
-    page_count: int
+    page_count: int | None = None
     format: str | None = None
     publish_date: str
     series: list[str] = Field(default_factory=list)

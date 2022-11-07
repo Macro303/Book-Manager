@@ -47,18 +47,17 @@
           </div>
           <footer class="card-footer">
             <a class="card-footer-item" onclick="addBook()">Add Book</a>
-            <a class="card-footer-item" onclick="removeBook()">Remove Book</a>
           </footer>
         </div>
       </div>
     </div>
     <div class="columns is-multiline is-centered">
       {% for book in books %}
-      <div class="column is-narrow" style="width:300px">
-        <div class="card has-text-light has-background-dark">
+      <div class="column is-narrow">
+        <div class="card has-text-light has-background-dark" style="width:350px">
           <div class="card-image">
             <figure class="image is-2by3">
-              <img loading="lazy" alt="{{ book.title }} by {{ '; '.join(book.authors) }}" src="{{ book.images.large }}" onerror="this.src='/static/missing.png'" />
+              <img alt="{{ book.title }} by {{ '; '.join(book.authors) }}" loading="lazy" onerror="this.src='/static/missing.png'" src="{{ book.images.large }}"/>
             </figure>
           </div>
           <header class="card-header">
@@ -68,15 +67,24 @@
             <div class="content">
               <p class="wrap-text"><strong><u>Authors:</u></strong> {{ "; ".join(book.authors) }}</p>
               <p class="wrap-text is-capitalized"><strong><u>Format:</u></strong> {{ book.format }}</p>
-              <p class="wrap-text is-capitalized"><strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
-              <p class="wrap-text is-capitalized"><strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
+              <p class="wrap-text is-capitalized">
+                <strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
+              <p class="wrap-text is-capitalized">
+                <strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
               <p class="wrap-text"><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
               <p class="wrap-text"><strong><u>Wished:</u></strong> {{ book.wished }}</p>
             </div>
+            <div class="buttons is-centered">
+              <a class="card-footer-item button" onclick="acquiredBook('{{ book.isbn }}')">Acquire Book</a>
+              <a class="card-footer-item button" onclick="refreshBook('{{ book.isbn }}')">Refresh Book</a>
+              <a class="card-footer-item button" onclick="removeBook('{{ book.isbn }}')">Remove Book</a>
+            </div>
+            <div class="buttons is-centered">
+              <a class="card-footer-item button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+              <a class="card-footer-item button" href="https://openlibrary.org/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Open Library</a>
+              <a class="card-footer-item button" href="https://www.goodreads.com/book/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+            </div>
           </div>
-          <footer class="card-footer">
-            <a class="card-footer-item" onclick="acquiredBook('{{ book.isbn }}')">Acquired Book</a>
-          </footer>
         </div>
       </div>
       {% endfor %}
