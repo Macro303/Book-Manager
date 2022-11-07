@@ -22,7 +22,7 @@ def collection(username: str, request: Request):
             "collection.html",
             {
                 "username": username,
-                "books": sorted(x.to_model() for x in BookTable.select(lambda x: not x.wished)),
+                "books": sorted(x.to_model() for x in BookTable.select(lambda x: not x.wished)[:]),
                 "request": request,
             },
         )
@@ -35,7 +35,7 @@ def wishlist(username: str, request: Request):
             "wishlist.html",
             {
                 "username": username,
-                "books": sorted(x.to_model() for x in BookTable.select(lambda x: x.wished)),
+                "books": sorted(x.to_model() for x in BookTable.select(lambda x: x.wished)[:]),
                 "request": request,
             },
         )

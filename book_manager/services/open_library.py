@@ -56,7 +56,7 @@ def lookup_book(isbn: str) -> Book:
 
     return Book(
         publisher="; ".join(edition["publishers"]),
-        page_count=edition["number_of_pages"],
+        page_count=edition["number_of_pages"] if "number_of_pages" in edition else None,
         title=edition["title"],
         format=edition["physical_format"] if "physical_format" in edition else None,
         publish_date=edition["publish_date"],

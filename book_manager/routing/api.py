@@ -70,6 +70,19 @@ def get_book(isbn: str) -> Book:
         return book.to_model()
 
 
+@router.post(path="/books/{isbn}", response_model=Book, responses={404: {"model": ErrorResponse}})
+def refresh_book(isbn: str) -> Book:
+    with db_session:
+        isbn = to_isbn(isbn)
+        if not (book := BookTable.get(isbn=isbn)):
+            raise HTTPException(status_code=404, detail="Book not added")
+        book = book.to_model()
+        temp = lookup_book(isbn)
+        temp.wished = book.wished
+        temp.read = book.read
+        return BookTable.update(temp).to_model()
+
+
 @router.put(path="/books/{isbn}", response_model=Book, responses={404: {"model": ErrorResponse}})
 def update_book(
     isbn: str,
