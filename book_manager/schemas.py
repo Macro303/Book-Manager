@@ -1,6 +1,8 @@
-__all__ = ["Book", "Identifiers", "Images"]
-
 from pydantic import BaseModel, Field
+
+
+class User(BaseModel):
+    username: str
 
 
 class Identifiers(BaseModel):
@@ -18,19 +20,15 @@ class Images(BaseModel):
 
 class Book(BaseModel):
     isbn: str
-    publisher: str
     title: str
-    page_count: int | None = None
-    format: str | None = None
-    publish_date: str
-    series: list[str] = Field(default_factory=list)
-    description: str | None = None
-    subjects: list[str] = Field(default_factory=list)
     authors: list[str] = Field(default_factory=list)
+    format: str | None = None
+    series: list[str] = Field(default_factory=list)
+    publisher: str
+    wisher: str | None = None
+    readers: list[str] = Field(default_factory=list)
     identifiers: Identifiers
     images: Images = Images()
-    wished: str | None = "Jonah"
-    read: list[str] = Field(default_factory=list)
 
     def __lt__(self, other):
         if not isinstance(other, Book):
@@ -48,6 +46,6 @@ class Book(BaseModel):
         other_series = sorted(other.series)
         other_series = other_series[0] if other_series else None
         if self_series != other_series:
-            return self_series != other_series
+            return self_series < other_series
 
         return self.title < other.title

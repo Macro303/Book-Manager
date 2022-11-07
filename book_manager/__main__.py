@@ -11,10 +11,13 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from book_manager import __version__, get_project_root
 from book_manager.console import CONSOLE
+from book_manager.database import engine
+from book_manager.models import Base
 from book_manager.routing.api import router as api_router
 from book_manager.routing.html import router as html_router
 
 LOGGER = logging.getLogger("Book-Manager")
+Base.metadata.create_all(bind=engine)
 
 
 def setup_logging(debug: bool = False):

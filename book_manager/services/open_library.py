@@ -1,4 +1,4 @@
-__all__ = ["lookup_book"]
+__all__ = ["retrieve_book"]
 
 import logging
 import platform
@@ -8,8 +8,8 @@ from requests import get
 from requests.exceptions import ConnectionError, HTTPError, JSONDecodeError, ReadTimeout
 
 from book_manager import __version__
-from book_manager.models.book import Book, Identifiers
-from book_manager.models.isbn import to_isbn
+from book_manager.isbn import to_isbn
+from book_manager.schemas import Book, Identifiers
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,12 +40,12 @@ def _perform_get_request(endpoint: str, params: dict[str, str] = None) -> dict[s
         LOGGER.error("Service took too long to respond")
 
 
-def lookup_book(isbn: str) -> Book:
+def retrieve_book(isbn: str) -> Book:
     book = search_book(isbn)
     edition_id = book["identifiers"]["openlibrary"][0]
     edition = get_book(edition_id)
     work_id = edition["works"][0]["key"].split("/")[-1]
-    work = get_work(work_id)
+    _ = get_work(work_id)
 
     isbn = None
     if "isbn_13" in edition:
@@ -55,20 +55,12 @@ def lookup_book(isbn: str) -> Book:
     authors = [x["name"] for x in book["authors"]]
 
     return Book(
-        publisher="; ".join(edition["publishers"]),
-        page_count=edition["number_of_pages"] if "number_of_pages" in edition else None,
-        title=edition["title"],
-        format=edition["physical_format"] if "physical_format" in edition else None,
-        publish_date=edition["publish_date"],
         isbn=to_isbn(isbn) if isbn else None,
-        series=edition["series"] if "series" in edition else [],
-        description=work["description"]
-        if "description" in work and isinstance(work["description"], str)
-        else work["description"]["value"]
-        if "description" in work and "value" in work["description"]
-        else None,
-        subjects=work["subjects"] if "subjects" in work else [],
+        title=edition["title"],
         authors=authors,
+        format=edition["physical_format"] if "physical_format" in edition else None,
+        series=edition["series"] if "series" in edition else [],
+        publisher="; ".join(edition["publishers"]),
         identifiers=Identifiers(
             open_library_id=edition_id,
             google_books_id=book["identifiers"]["google"][0]
