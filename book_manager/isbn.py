@@ -1,5 +1,9 @@
 __all__ = ["convert_to_isbn"]
 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
 
 def convert_to_isbn(value: str | None) -> str | None:
     if not value:
@@ -13,6 +17,7 @@ def convert_to_isbn(value: str | None) -> str | None:
 
 
 def _to_isbn_13(isbn_10: str) -> str | None:
+    LOGGER.info(f"Converting Isbn 10 to Isbn 13: {isbn_10}")
     value = f"978{isbn_10[:-1]}"
     check_digit = _get_check_digit(value)
     isbn_13 = value + str(check_digit)
