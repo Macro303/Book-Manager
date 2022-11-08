@@ -3,6 +3,7 @@ __all__ = ["retrieve_book"]
 import logging
 import platform
 from typing import Any
+from urllib.parse import urlencode
 
 from fastapi.exceptions import HTTPException
 from requests import get
@@ -25,21 +26,28 @@ def _perform_get_request(endpoint: str, params: dict[str, str] = None) -> dict[s
     }
 
     url = f"https://openlibrary.org{endpoint}"
+    full_url = url
+    if params:
+        full_url += f"?{urlencode({k: params[k] for k in sorted(params)})}"
     try:
         response = get(url, params=params, headers=headers, timeout=30)
         response.raise_for_status()
         return response.json()
     except ConnectionError:
-        LOGGER.error(f"Unable to connect to `{url}`")
+        raise HTTPException(status_code=500, detail=f"Unable to connect to '{full_url}'")
     except HTTPError as err:
         try:
-            LOGGER.error(err.response.json()["error"])
+            raise HTTPException(status_code=500, detail=err.response.json()["error"])
         except JSONDecodeError:
-            LOGGER.error(f"Unable to parse response from `{url}` as Json")
+            raise HTTPException(
+                status_code=500, detail=f"Unable to parse response from '{full_url}' as Json"
+            )
     except JSONDecodeError:
-        LOGGER.error(f"Unable to parse response from `{url}` as Json")
+        raise HTTPException(
+            status_code=500, detail=f"Unable to parse response from '{full_url}' as Json"
+        )
     except ReadTimeout:
-        LOGGER.error("Service took too long to respond")
+        raise HTTPException(status_code=500, detail="Open Library took too long to respond")
 
 
 def retrieve_book(db: Session, isbn: str) -> Book:
