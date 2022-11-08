@@ -3,10 +3,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from book_manager import controller, get_project_root
-from book_manager.database import SessionLocal
+from book_catalogue import controller, get_project_root
+from book_catalogue.database import SessionLocal
 
-router = APIRouter(prefix="/Book-Manager", tags=["WebInterface"], include_in_schema=False)
+router = APIRouter(prefix="/book-catalogue", tags=["WebInterface"], include_in_schema=False)
 templates = Jinja2Templates(directory=get_project_root() / "templates")
 
 

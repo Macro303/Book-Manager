@@ -33,7 +33,7 @@ description = ""
 dynamic = []
 keywords = []
 license = "MIT"
-name = "book-manager"
+name = "book-catalogue"
 readme = "README.md"
 requires-python = ">= 3.11"
 version = "0.1.0b0"
@@ -46,10 +46,10 @@ dev = [
 [project.scripts]
 
 [project.urls]
-Documentation = "https://github.com/Buried-In-Code/Book-Manager#readme"
-Homepage = "https://pypi.org/project/Book-Manager"
-Issues = "https://github.com/Buried-In-Code/Book-Manager/issues"
-Source = "https://github.com/Buried-In-Code/Book-Manager"
+Documentation = "https://github.com/Buried-In-Code/Book-Catalogue#readme"
+Homepage = "https://pypi.org/project/Book-Catalogue"
+Issues = "https://github.com/Buried-In-Code/Book-Catalogue/issues"
+Source = "https://github.com/Buried-In-Code/Book-Catalogue"
 
 [tool.bandit]
 recursive = true

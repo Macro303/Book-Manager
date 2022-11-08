@@ -16,8 +16,8 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from book_manager.models import Author, Book, Series, User
-from book_manager.services.open_library import retrieve_book
+from book_catalogue.models import Author, Book, Series, User
+from book_catalogue.services.open_library import retrieve_book
 
 LOGGER = logging.getLogger(__name__)
 

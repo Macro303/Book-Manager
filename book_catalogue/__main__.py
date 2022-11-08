@@ -8,17 +8,17 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from book_manager import __version__, get_project_root
-from book_manager.database import Base, engine
-from book_manager.routing.api import router as api_router
-from book_manager.routing.html import router as html_router
+from book_catalogue import __version__, get_project_root
+from book_catalogue.database import Base, engine
+from book_catalogue.routing.api import router as api_router
+from book_catalogue.routing.html import router as html_router
 
-LOGGER = logging.getLogger("book_manager")
+LOGGER = logging.getLogger("book_catalogue")
 Base.metadata.create_all(bind=engine)
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(name="Book-Manager", version=__version__)
+    app = FastAPI(name="Book Catalogue", version=__version__)
     app.include_router(html_router)
     app.include_router(api_router)
     return app
@@ -30,7 +30,7 @@ app.mount("/static", StaticFiles(directory=get_project_root() / "static"), name=
 
 @app.get("/")
 def redirect():
-    return RedirectResponse(url="/Book-Manager")
+    return RedirectResponse(url="/book-catalogue")
 
 
 @app.exception_handler(StarletteHTTPException)

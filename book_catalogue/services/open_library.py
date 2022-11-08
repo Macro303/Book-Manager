@@ -9,9 +9,9 @@ from requests import get
 from requests.exceptions import ConnectionError, HTTPError, JSONDecodeError, ReadTimeout
 from sqlalchemy.orm import Session
 
-from book_manager import __version__, controller
-from book_manager.isbn import convert_to_isbn
-from book_manager.models import Book
+from book_catalogue import __version__, controller
+from book_catalogue.isbn import convert_to_isbn
+from book_catalogue.models import Book
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def _perform_get_request(endpoint: str, params: dict[str, str] = None) -> dict[s
         params = {}
     headers = {
         "Accept": "application/json",
-        "User-Agent": f"Book-Manager/{__version__}/{platform.system()}: {platform.version()}",
+        "User-Agent": f"Book-Catalogue/{__version__}/{platform.system()}: {platform.version()}",
     }
 
     url = f"https://openlibrary.org{endpoint}"

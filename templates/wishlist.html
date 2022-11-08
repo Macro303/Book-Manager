@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1" name="viewport">
-  <title>Book Manager</title>
+  <title>Book Catalogue</title>
   <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">-->
   <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
   <link href="/static/styles.css" rel="stylesheet">
@@ -14,19 +14,19 @@
 <body class="has-navbar-fixed-top">
 <nav class="navbar is-fixed-top is-dark">
   <div class="navbar-brand">
-    <a class="navbar-item icon-text" href="/Book-Manager">
+    <a class="navbar-item icon-text" href="/book-catalogue">
       <span class="icon is-large">
         <ion-icon name="home-outline"></ion-icon>
       </span>
       <span>Home</span>
     </a>
-    <a class="navbar-item icon-text" href="/Book-Manager/collection?username={{ username }}">
+    <a class="navbar-item icon-text" href="/book-catalogue/collection?username={{ username }}">
       <span class="icon is-large">
         <ion-icon name="file-tray-full-outline"></ion-icon>
       </span>
       <span>Collection</span>
     </a>
-    <a class="navbar-item icon-text" href="/Book-Manager/wishlist?username={{ username }}">
+    <a class="navbar-item icon-text" href="/book-catalogue/wishlist?username={{ username }}">
       <span class="icon is-large">
         <ion-icon name="list-outline"></ion-icon>
       </span>
@@ -36,18 +36,20 @@
 </nav>
 <section class="section">
   <div class="container is-fluid">
-    <h1 class="title has-text-centered">{{ username }}'s Wishlist</h1>
+    <h1 class="title has-text-centered">Wishlist</h1>
     <div class="columns is-multiline is-centered">
       <div class="column is-narrow">
         <div class="card has-text-light has-background-dark">
           <div class="card-content">
-            <label class="label">
-              <input class="input" id="isbnEntry" placeholder="Isbn" type="text">
-            </label>
+            <div class="content">
+              <label class="label">
+                <input class="input" id="isbnEntry" placeholder="Isbn" type="text">
+              </label>
+            </div>
+            <div class="buttons is-centered has-addons">
+              <a id="addBookButton" class="card-footer-item button" onclick="addBook('addBookButton')">Add Book</a>
+            </div>
           </div>
-          <footer class="card-footer">
-            <a class="card-footer-item" onclick="addBook()">Add Book</a>
-          </footer>
         </div>
       </div>
     </div>
@@ -74,12 +76,12 @@
               <p class="wrap-text"><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
               <p class="wrap-text"><strong><u>Wisher:</u></strong> {{ book.wisher }}</p>
             </div>
-            <div class="buttons is-centered">
-              <a class="card-footer-item button" onclick="acquiredBook('{{ book.isbn }}')">Acquire Book</a>
-              <a class="card-footer-item button" onclick="refreshBook('{{ book.isbn }}')">Refresh Book</a>
-              <a class="card-footer-item button" onclick="removeBook('{{ book.isbn }}')">Remove Book</a>
+            <div class="buttons is-centered has-addons">
+              <a id="acquireBookButton" class="card-footer-item button" onclick="acquiredBook('acquireBookButton', '{{ book.isbn }}')">Acquire Book</a>
+              <a id="refreshBookButton" class="card-footer-item button" onclick="refreshBook('refreshBookButton', '{{ book.isbn }}')">Refresh Book</a>
+              <a id="removeBookButton" class="card-footer-item button" onclick="removeBook('removeBookButton', '{{ book.isbn }}')">Remove Book</a>
             </div>
-            <div class="buttons is-centered">
+            <div class="buttons is-centered has-addons">
               <a class="card-footer-item button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
               <a class="card-footer-item button" href="https://openlibrary.org/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Open Library</a>
               <a class="card-footer-item button" href="https://www.goodreads.com/book/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>

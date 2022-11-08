@@ -2,11 +2,11 @@ from fastapi import APIRouter, Body, Depends
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 
-from book_manager import __version__, controller
-from book_manager.database import SessionLocal
-from book_manager.isbn import convert_to_isbn
-from book_manager.responses import ErrorResponse
-from book_manager.schemas import Book, User
+from book_catalogue import __version__, controller
+from book_catalogue.database import SessionLocal
+from book_catalogue.isbn import convert_to_isbn
+from book_catalogue.responses import ErrorResponse
+from book_catalogue.schemas import Book, User
 
 router = APIRouter(
     prefix=f"/api/v{__version__.split('.')[0]}",
