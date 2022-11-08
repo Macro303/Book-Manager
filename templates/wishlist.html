@@ -47,7 +47,7 @@
               </label>
             </div>
             <div class="buttons is-centered has-addons">
-              <a id="addBookButton" class="card-footer-item button" onclick="addBook('addBookButton')">Add Book</a>
+              <a class="card-footer-item button" id="addBookButton" onclick="addBook('addBookButton')">Add Book</a>
             </div>
           </div>
         </div>
@@ -77,9 +77,9 @@
               <p class="wrap-text"><strong><u>Wisher:</u></strong> {{ book.wisher }}</p>
             </div>
             <div class="buttons is-centered has-addons">
-              <a id="acquireBookButton" class="card-footer-item button" onclick="acquiredBook('acquireBookButton', '{{ book.isbn }}')">Acquire Book</a>
-              <a id="refreshBookButton" class="card-footer-item button" onclick="refreshBook('refreshBookButton', '{{ book.isbn }}')">Refresh Book</a>
-              <a id="removeBookButton" class="card-footer-item button" onclick="removeBook('removeBookButton', '{{ book.isbn }}')">Remove Book</a>
+              <a class="card-footer-item button" id="acquireBookButton" onclick="acquiredBook('acquireBookButton', '{{ book.isbn }}')">Acquire Book</a>
+              <a class="card-footer-item button" id="refreshBookButton" onclick="refreshBook('refreshBookButton', '{{ book.isbn }}')">Refresh Book</a>
+              <a class="card-footer-item button" id="removeBookButton" onclick="removeBook('removeBookButton', '{{ book.isbn }}')">Remove Book</a>
             </div>
             <div class="buttons is-centered has-addons">
               <a class="card-footer-item button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
