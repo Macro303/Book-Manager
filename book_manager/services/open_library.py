@@ -6,10 +6,11 @@ from typing import Any
 
 from requests import get
 from requests.exceptions import ConnectionError, HTTPError, JSONDecodeError, ReadTimeout
+from sqlalchemy.orm import Session
 
-from book_manager import __version__
+from book_manager import __version__, controller
 from book_manager.isbn import to_isbn
-from book_manager.schemas import Book, Identifiers
+from book_manager.models import Book
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ def _perform_get_request(endpoint: str, params: dict[str, str] = None) -> dict[s
         LOGGER.error("Service took too long to respond")
 
 
-def retrieve_book(isbn: str) -> Book:
+def retrieve_book(db: Session, isbn: str) -> Book:
     book = search_book(isbn)
     edition_id = book["identifiers"]["openlibrary"][0]
     edition = get_book(edition_id)
@@ -52,27 +53,33 @@ def retrieve_book(isbn: str) -> Book:
         isbn = edition["isbn_13"][0]
     elif "isbn_10" in edition:
         isbn = edition["isbn_10"][0]
-    authors = [x["name"] for x in book["authors"]]
+    authors = [
+        controller.get_author(db, x["name"]) or controller.create_author(db, x["name"])
+        for x in book["authors"]
+    ]
+    series = (
+        [controller.get_series(db, x) or controller.create_series(db, x) for x in edition["series"]]
+        if "series" in edition
+        else []
+    )
 
     return Book(
         isbn=to_isbn(isbn) if isbn else None,
         title=edition["title"],
         authors=authors,
         format=edition["physical_format"] if "physical_format" in edition else None,
-        series=edition["series"] if "series" in edition else [],
+        series=series,
         publisher="; ".join(edition["publishers"]),
-        identifiers=Identifiers(
-            open_library_id=edition_id,
-            google_books_id=book["identifiers"]["google"][0]
-            if "google" in book["identifiers"]
-            else None,
-            goodreads_id=book["identifiers"]["goodreads"][0]
-            if "goodreads" in book["identifiers"]
-            else None,
-            library_thing_id=book["identifiers"]["librarything"][0]
-            if "librarything" in book["identifiers"]
-            else None,
-        ),
+        open_library_id=edition_id,
+        google_books_id=book["identifiers"]["google"][0]
+        if "google" in book["identifiers"]
+        else None,
+        goodreads_id=book["identifiers"]["goodreads"][0]
+        if "goodreads" in book["identifiers"]
+        else None,
+        library_thing_id=book["identifiers"]["librarything"][0]
+        if "librarything" in book["identifiers"]
+        else None,
     )
 
 

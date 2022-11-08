@@ -1,8 +1,31 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+__all__ = ["User", "Book", "Author", "Series"]
+
+from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
 from book_manager import schemas
 from book_manager.database import Base
+
+readers_table = Table(
+    "Readers",
+    Base.metadata,
+    Column("user_id", ForeignKey("Users.user_id"), primary_key=True),
+    Column("book_id", ForeignKey("Books.isbn"), primary_key=True),
+)
+
+book_authors_table = Table(
+    "BookAuthors",
+    Base.metadata,
+    Column("book_id", ForeignKey("Books.isbn"), primary_key=True),
+    Column("author_id", ForeignKey("Authors.author_id"), primary_key=True),
+)
+
+book_series_table = Table(
+    "BookSeries",
+    Base.metadata,
+    Column("book_id", ForeignKey("Books.isbn"), primary_key=True),
+    Column("series_id", ForeignKey("Series.series_id"), primary_key=True),
+)
 
 
 class User(Base):
@@ -10,12 +33,8 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
-    wished_books = relationship(
-        "Books", back_populates="wisher", cascade="all, delete, delete-orphan"
-    )
-    read_books = relationship(
-        "Books", secondary="Readers", back_populates="Users", cascade="all, delete, delete-orphan"
-    )
+    wished_books = relationship("Book", back_populates="wisher")
+    read_books = relationship("Book", secondary=readers_table, back_populates="readers")
 
     def to_schema(self) -> schemas.User:
         return schemas.User(username=self.username)
@@ -26,12 +45,13 @@ class Book(Base):
 
     isbn = Column(String, primary_key=True)
     title = Column(String, nullable=False)
-    authors = relationship("Authors", secondary="BookAuthors", back_populates="Books")
+    authors = relationship("Author", secondary=book_authors_table, back_populates="books_written")
     format = Column(String)
-    series = relationship("Series", secondary="BookSeries", back_populates="Books")
+    series = relationship("Series", secondary=book_series_table, back_populates="books")
     publisher = Column(String, nullable=False)
-    readers = relationship("Users", secondary="Readers", back_populates="Books")
-    wisher = Column(Integer, ForeignKey("Users.user_id"))
+    wisher_id = Column(Integer, ForeignKey("Users.user_id"))
+    wisher = relationship("User", back_populates="wished_books")
+    readers = relationship("User", secondary=readers_table, back_populates="read_books")
     open_library_id = Column(String, nullable=False)
     google_books_id = Column(String)
     goodreads_id = Column(String)
@@ -45,8 +65,8 @@ class Book(Base):
             format=self.format,
             series=sorted(x.name for x in self.series),
             publisher=self.publisher,
-            readers=sorted(x.name for x in self.readers),
-            wisher=self.wisher.name if self.wisher else None,
+            readers=sorted(x.username for x in self.readers),
+            wisher=self.wisher.username if self.wisher else None,
             identifiers=schemas.Identifiers(
                 open_library_id=self.open_library_id,
                 google_books_id=self.google_books_id,
@@ -76,28 +96,12 @@ class Book(Base):
         )
 
 
-class Reader(Base):
-    __tablename__ = "Readers"
-
-    row_id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("Users.user_id"))
-    book_id = Column(String, ForeignKey("Books.isbn"))
-
-
 class Author(Base):
     __tablename__ = "Authors"
 
     author_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    written = relationship("Books", secondary="BookAuthors", back_populates="Authors")
-
-
-class BookAuthor(Base):
-    __tablename__ = "BookAuthors"
-
-    row_id = Column(Integer, primary_key=True)
-    author_id = Column(Integer, ForeignKey("Authors.author_id"))
-    book_id = Column(String, ForeignKey("Books.isbn"))
+    books_written = relationship("Book", secondary=book_authors_table, back_populates="authors")
 
 
 class Series(Base):
@@ -105,12 +109,4 @@ class Series(Base):
 
     series_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    books = relationship("Books", secondary="BookSeries", back_populates="Series")
-
-
-class BookSeries(Base):
-    __tablename__ = "BookSeries"
-
-    row_id = Column(Integer, primary_key=True)
-    series_id = Column(Integer, ForeignKey("Series.series_id"))
-    book_id = Column(String, ForeignKey("Books.isbn"))
+    books = relationship("Book", secondary=book_series_table, back_populates="series")
