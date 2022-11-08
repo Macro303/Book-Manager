@@ -33,7 +33,7 @@ It's a book catalogue.... for cataloging books.
 
 ## Execution
 
-- `uvicorn book-manager.__main__:app --use-colors --no-server-header --reload`
+- `python run.py`
 
 ## Socials
 

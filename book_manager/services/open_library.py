@@ -24,7 +24,7 @@ def _perform_get_request(endpoint: str, params: dict[str, str] = None) -> dict[s
         "User-Agent": f"Book-Manager/{__version__}/{platform.system()}: {platform.version()}",
     }
 
-    url = f"https://openlibrary.org/{endpoint}"
+    url = f"https://openlibrary.org{endpoint}"
     try:
         response = get(url, params=params, headers=headers, timeout=30)
         response.raise_for_status()
@@ -45,7 +45,7 @@ def _perform_get_request(endpoint: str, params: dict[str, str] = None) -> dict[s
 def retrieve_book(db: Session, isbn: str) -> Book:
     book = search_book(isbn)
     edition_id = book["identifiers"]["openlibrary"][0]
-    edition = get_book(edition_id)
+    edition = get_edition(edition_id)
     work_id = edition["works"][0]["key"].split("/")[-1]
     _ = get_work(work_id)
 
@@ -88,17 +88,20 @@ def retrieve_book(db: Session, isbn: str) -> Book:
 
 
 def search_book(isbn: str) -> dict[str, Any]:
+    LOGGER.info(f"Searching for book: {isbn}")
     response = _perform_get_request(
         endpoint="/api/books", params={"bibkeys": f"ISBN:{isbn}", "format": "json", "jscmd": "data"}
     )
     return list(response.values())[0]
 
 
-def get_book(edition_id: str) -> dict[str, Any]:
+def get_edition(edition_id: str) -> dict[str, Any]:
+    LOGGER.info(f"Getting edition: {edition_id}")
     response = _perform_get_request(endpoint=f"/books/{edition_id}.json")
     return response
 
 
-def get_work(work_id: str):
+def get_work(work_id: str) -> dict[str, Any]:
+    LOGGER.info(f"Getting work: {work_id}")
     response = _perform_get_request(endpoint=f"/works/{work_id}.json")
     return response
