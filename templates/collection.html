@@ -72,13 +72,13 @@
               <p class="wrap-text is-capitalized">
                 <strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
               <p class="wrap-text"><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
-              <p class="wrap-text"><strong><u>Readers:</u></strong> {{ "; ".join(book.read) }}</p>
+              <p class="wrap-text"><strong><u>Readers:</u></strong> {{ "; ".join(book.readers) }}</p>
             </div>
             <div class="buttons is-centered">
-              {% if username in book.read %}
-              <a class="card-footer-item button" onclick="unreadBook('{{ book.isbn }}', {{ book.read }})">Unread Book</a>
+              {% if username in book.readers %}
+              <a class="card-footer-item button" onclick="unreadBook('{{ book.isbn }}', {{ book.readers }})">Unread Book</a>
               {% else %}
-              <a class="card-footer-item button" onclick="readBook('{{ book.isbn }}', {{ book.read }})">Read Book</a>
+              <a class="card-footer-item button" onclick="readBook('{{ book.isbn }}', {{ book.readers }})">Read Book</a>
               {% endif %}
               <a class="card-footer-item button" onclick="refreshBook('{{ book.isbn }}')">Refresh Book</a>
               <a class="card-footer-item button" onclick="removeBook('{{ book.isbn }}')">Remove Book</a>

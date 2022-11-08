@@ -44,7 +44,7 @@ function addBook(){
     contentType: "application/json; charset=UTF-8",
     data: JSON.stringify({
       "isbn": isbn,
-      "wished": username
+      "wisher": username
     }),
     success: function(){
       window.location = "/Book-Manager/wishlist?username=" + username;
@@ -85,18 +85,18 @@ function removeBook(isbn){
   });
 }
 
-function readBook(isbn, existing_readers){
+function readBook(isbn, readers){
   let params = new URLSearchParams(window.location.search);
   let username = params.get("username");
-  existing_readers.push(username)
+  readers.push(username);
   $.ajax({
     url: "/api/v0/books/" + isbn,
     type: "PUT",
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     data: JSON.stringify({
-      "wished": "",
-      "read": existing_readers
+      "wisher": "",
+      "readers": readers
     }),
     success: function(){
       window.location.reload();
@@ -107,18 +107,18 @@ function readBook(isbn, existing_readers){
   });
 }
 
-function unreadBook(isbn, existing_readers){
+function unreadBook(isbn, readers){
   let params = new URLSearchParams(window.location.search);
   let username = params.get("username");
-  existing_readers = existing_readers.filter(e => e !== username)
+  readers = readers.filter(e => e !== username);
   $.ajax({
     url: "/api/v0/books/" + isbn,
     type: "PUT",
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     data: JSON.stringify({
-      "wished": "",
-      "read": existing_readers
+      "wisher": "",
+      "readers": readers
     }),
     success: function(){
       window.location.reload();
@@ -138,8 +138,8 @@ function acquiredBook(isbn){
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     data: JSON.stringify({
-      "wished": "",
-      "read": []
+      "wisher": "",
+      "readers": []
     }),
     success: function(){
       window.location = "/Book-Manager/collection?username=" + username;
