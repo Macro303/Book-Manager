@@ -3,8 +3,8 @@ __all__ = ["User", "Book", "Author", "Series"]
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
-from book_manager import schemas
-from book_manager.database import Base
+from book_catalogue import schemas
+from book_catalogue.database import Base
 
 readers_table = Table(
     "Readers",

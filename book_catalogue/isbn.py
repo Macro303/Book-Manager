@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 def convert_to_isbn(value: str | None) -> str | None:
     if not value:
         return None
-    value = value.replace("-", "")
+    value = value.replace("-", "").strip()
     if len(value) == 10:
         return _to_isbn_13(value)
     if _validate_isbn_13(value):

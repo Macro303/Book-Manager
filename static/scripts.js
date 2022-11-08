@@ -1,4 +1,15 @@
-function addUser(){
+function addLoading(caller){
+  let element = document.getElementById(caller);
+  element.classList.add("is-loading");
+}
+
+function removeLoading(caller){
+  let element = document.getElementById(caller);
+  element.classList.remove("is-loading");
+}
+
+function addUser(caller){
+  addLoading(caller);
   let username = document.getElementById("usernameEntry").value;
   $.ajax({
     url: "/api/v0/users",
@@ -9,15 +20,17 @@ function addUser(){
       "username": username
     }),
     success: function(){
-      window.location = "/Book-Manager/collection?username=" + username;
+      window.location = "/book-catalogue/collection?username=" + username;
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }
 
-function selectUser(){
+function selectUser(caller){
+  addLoading(caller);
   let username = document.getElementById("usernameEntry").value;
   $.ajax({
     url: "/api/v0/users/" + username,
@@ -25,15 +38,17 @@ function selectUser(){
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     success: function(){
-      window.location = "/Book-Manager/collection?username=" + username;
+      window.location = "/book-catalogue/collection?username=" + username;
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }
 
-function addBook(){
+function addBook(caller){
+  addLoading(caller);
   let params = new URLSearchParams(window.location.search);
   let username = params.get("username");
   let isbn = document.getElementById("isbnEntry").value;
@@ -47,15 +62,17 @@ function addBook(){
       "wisher": username
     }),
     success: function(){
-      window.location = "/Book-Manager/wishlist?username=" + username;
+      window.location = "/book-catalogue/wishlist?username=" + username;
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }
 
-function refreshBook(isbn){
+function refreshBook(caller, isbn){
+  addLoading(caller);
   $.ajax({
     url: "/api/v0/books/" + isbn,
     type: "POST",
@@ -66,11 +83,13 @@ function refreshBook(isbn){
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }
 
-function removeBook(isbn){
+function removeBook(caller, isbn){
+  addLoading(caller);
   $.ajax({
     url: "/api/v0/books/" + isbn,
     type: "DELETE",
@@ -81,11 +100,13 @@ function removeBook(isbn){
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }
 
-function readBook(isbn, readers){
+function readBook(caller, isbn, readers){
+  addLoading(caller);
   let params = new URLSearchParams(window.location.search);
   let username = params.get("username");
   readers.push(username);
@@ -103,11 +124,13 @@ function readBook(isbn, readers){
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }
 
-function unreadBook(isbn, readers){
+function unreadBook(caller, isbn, readers){
+  addLoading(caller);
   let params = new URLSearchParams(window.location.search);
   let username = params.get("username");
   readers = readers.filter(e => e !== username);
@@ -125,11 +148,13 @@ function unreadBook(isbn, readers){
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }
 
-function acquiredBook(isbn){
+function acquiredBook(caller, isbn){
+  addLoading(caller);
   let params = new URLSearchParams(window.location.search);
   let username = params.get("username");
   $.ajax({
@@ -142,10 +167,11 @@ function acquiredBook(isbn){
       "readers": []
     }),
     success: function(){
-      window.location = "/Book-Manager/collection?username=" + username;
+      window.location = "/book-catalogue/collection?username=" + username;
     },
     error: function(xhr){
       alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
     },
   });
 }

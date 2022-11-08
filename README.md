@@ -1,6 +1,6 @@
 <img src="./static/logo.png" align="left" width="128" height="128" alt="Book Manager Logo"/>
 
-# Book-Manager
+# Book Catalogue
 
 ![Python](https://img.shields.io/badge/Python-3.11-green?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Beta-yellowgreen?style=flat-square)
@@ -11,10 +11,10 @@
 [![isort](https://img.shields.io/badge/Imports-isort-informational?style=flat-square)](https://pycqa.github.io/isort/)
 [![Flake8](https://img.shields.io/badge/Linter-Flake8-informational?style=flat-square)](https://github.com/PyCQA/flake8)
 
-[![Github - Version](https://img.shields.io/github/v/tag/Buried-In-Code/Book-Manager?logo=Github&label=Version&style=flat-square)](https://github.com/Buried-In-Code/Book-Manager/tags)
-[![Github - License](https://img.shields.io/github/license/Buried-In-Code/Book-Manager?logo=Github&label=License&style=flat-square)](https://opensource.org/licenses/MIT)
-[![Github - Contributors](https://img.shields.io/github/contributors/Buried-In-Code/Book-Manager?logo=Github&label=Contributors&style=flat-square)](https://github.com/Buried-In-Code/Book-Manager/graphs/contributors)
-[![Github Action - Code Analysis](https://img.shields.io/github/workflow/status/Buried-In-Code/Book-Manager/Code%20Analysis?logo=Github-Actions&label=Code-Analysis&style=flat-square)](https://github.com/Buried-In-Code/Book-Manager/actions/workflows/code-analysis.yaml)
+[![Github - Version](https://img.shields.io/github/v/tag/Buried-In-Code/Book-Catalogue?logo=Github&label=Version&style=flat-square)](https://github.com/Buried-In-Code/Book-Catalogue/tags)
+[![Github - License](https://img.shields.io/github/license/Buried-In-Code/Book-Catalogue?logo=Github&label=License&style=flat-square)](https://opensource.org/licenses/MIT)
+[![Github - Contributors](https://img.shields.io/github/contributors/Buried-In-Code/Book-Catalogue?logo=Github&label=Contributors&style=flat-square)](https://github.com/Buried-In-Code/Book-Catalogue/graphs/contributors)
+[![Github Action - Code Analysis](https://img.shields.io/github/workflow/status/Buried-In-Code/Book-Catalogue/Code%20Analysis?logo=Github-Actions&label=Code-Analysis&style=flat-square)](https://github.com/Buried-In-Code/Book-Catalogue/actions/workflows/code-analysis.yaml)
 
 It's a book catalogue.... for cataloging books.
 
@@ -23,12 +23,12 @@ It's a book catalogue.... for cataloging books.
 ### PyPI
 
 1. Make sure you have [Python](https://www.python.org/) installed: `python --version`
-2. Install the project from PyPI: `pip install book-manager`
+2. Install the project from PyPI: `pip install book-catalogue`
 
 ### Github
 
 1. Make sure you have [Python](https://www.python.org/) installed: `python --version`
-2. Clone the repo: `git clone https://github.com/Buried-In-Code/Book-Manager`
+2. Clone the repo: `git clone https://github.com/Buried-In-Code/Book-Catalogue`
 3. Install the project: `pip install .`
 
 ## Execution
