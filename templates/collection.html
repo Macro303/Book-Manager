@@ -78,12 +78,12 @@
             </div>
             <div class="buttons is-centered has-addons">
               {% if username in book.readers %}
-              <a class="card-footer-item button" id="unreadBookButton" onclick="unreadBook('unreadBookButton', '{{ book.isbn }}', {{ book.readers }})">Unread Book</a>
+              <a class="card-footer-item button" id="{{ book.isbn }}-unreadBookButton" onclick="unreadBook('{{ book.isbn }}-unreadBookButton', '{{ book.isbn }}', {{ book.readers }})">Unread Book</a>
               {% else %}
-              <a class="card-footer-item button" id="readBookButton" onclick="readBook('readBookButton', '{{ book.isbn }}', {{ book.readers }})">Read Book</a>
+              <a class="card-footer-item button" id="{{ book.isbn }}-readBookButton" onclick="readBook('{{ book.isbn }}-readBookButton', '{{ book.isbn }}', {{ book.readers }})">Read Book</a>
               {% endif %}
-              <a class="card-footer-item button" id="refreshBookButton" onclick="refreshBook('refreshBookButton', '{{ book.isbn }}')">Refresh Book</a>
-              <a class="card-footer-item button" id="removeBookButton" onclick="removeBook('removeBookButton', '{{ book.isbn }}')">Remove Book</a>
+              <a class="card-footer-item button" id="{{ book.isbn }}-refreshBookButton" onclick="refreshBook('{{ book.isbn }}-refreshBookButton', '{{ book.isbn }}')">Refresh Book</a>
+              <a class="card-footer-item button" id="{{ book.isbn }}-removeBookButton" onclick="removeBook('{{ book.isbn }}-removeBookButton', '{{ book.isbn }}')">Remove Book</a>
             </div>
             <div class="buttons is-centered has-addons">
               <a class="card-footer-item button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
