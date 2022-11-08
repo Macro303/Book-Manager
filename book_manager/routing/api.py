@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from book_manager import __version__, controller
 from book_manager.database import SessionLocal
-from book_manager.isbn import to_isbn
+from book_manager.isbn import convert_to_isbn
 from book_manager.responses import ErrorResponse
 from book_manager.schemas import Book, User
 
@@ -49,14 +49,20 @@ def get_user(username: str, db: Session = Depends(get_db)) -> User:
     path="/books",
     status_code=201,
     response_model=Book,
-    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+    responses={
+        400: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+    },
 )
 def add_book(
     isbn: str = Body(embed=True),
     wisher: str | None = Body(embed=True),
     db: Session = Depends(get_db),
 ) -> Book:
-    isbn = to_isbn(isbn)
+    isbn = convert_to_isbn(isbn)
+    if not isbn:
+        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
     db_wisher = controller.get_user(db, wisher)
     if not db_wisher:
         raise HTTPException(status_code=404, detail="User doesn't exist.")
@@ -71,32 +77,50 @@ def list_books(db: Session = Depends(get_db)) -> list[Book]:
     return sorted(x.to_schema() for x in controller.list_books(db))
 
 
-@router.get(path="/books/{isbn}", response_model=Book, responses={404: {"model": ErrorResponse}})
+@router.get(
+    path="/books/{isbn}",
+    response_model=Book,
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
 def get_book(isbn: str, db: Session = Depends(get_db)) -> Book:
-    isbn = to_isbn(isbn)
+    isbn = convert_to_isbn(isbn)
+    if not isbn:
+        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
     db_book = controller.get_book(db, isbn)
     if not db_book:
         raise HTTPException(status_code=404, detail="Book not added.")
     return db_book.to_schema()
 
 
-@router.post(path="/books/{isbn}", response_model=Book, responses={404: {"model": ErrorResponse}})
+@router.post(
+    path="/books/{isbn}",
+    response_model=Book,
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
 def refresh_book(isbn: str, db: Session = Depends(get_db)) -> Book:
-    isbn = to_isbn(isbn)
+    isbn = convert_to_isbn(isbn)
+    if not isbn:
+        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
     db_book = controller.get_book(db, isbn)
     if not db_book:
         raise HTTPException(status_code=404, detail="Book not added.")
     return controller.refresh_book(db, db_book).to_schema()
 
 
-@router.put(path="/books/{isbn}", response_model=Book, responses={404: {"model": ErrorResponse}})
+@router.put(
+    path="/books/{isbn}",
+    response_model=Book,
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
 def update_book(
     isbn: str,
     wisher: str | None = Body(embed=True),
     readers: list[str] = Body(embed=True),
     db: Session = Depends(get_db),
 ) -> Book:
-    isbn = to_isbn(isbn)
+    isbn = convert_to_isbn(isbn)
+    if not isbn:
+        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
     db_book = controller.get_book(db, isbn)
     if not db_book:
         raise HTTPException(status_code=404, detail="Book not added.")
@@ -114,9 +138,15 @@ def update_book(
     return controller.update_book(db, db_book, db_wisher, db_readers).to_schema()
 
 
-@router.delete(path="/books/{isbn}", status_code=204, responses={404: {"model": ErrorResponse}})
+@router.delete(
+    path="/books/{isbn}",
+    status_code=204,
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
 def remove_book(isbn: str, db: Session = Depends(get_db)):
-    isbn = to_isbn(isbn)
+    isbn = convert_to_isbn(isbn)
+    if not isbn:
+        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
     db_book = controller.get_book(db, isbn)
     if not db_book:
         raise HTTPException(status_code=404, detail="Book not added.")
