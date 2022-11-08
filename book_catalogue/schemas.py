@@ -37,16 +37,16 @@ class Book(BaseModel):
             raise NotImplementedError()
 
         self_author = sorted(self.authors)
-        self_author = self_author[0] if self_author else None
+        self_author = self_author[0] if self_author else ""
         other_author = sorted(other.authors)
-        other_author = other_author[0] if other_author else None
+        other_author = other_author[0] if other_author else ""
         if self_author != other_author:
             return self_author < other_author
 
         self_series = sorted(self.series)
-        self_series = self_series[0] if self_series else None
+        self_series = self_series[0] if self_series else ""
         other_series = sorted(other.series)
-        other_series = other_series[0] if other_series else None
+        other_series = other_series[0] if other_series else ""
         if self_series != other_series:
             return self_series < other_series
 
