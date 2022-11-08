@@ -4,12 +4,13 @@ import logging
 import platform
 from typing import Any
 
+from fastapi.exceptions import HTTPException
 from requests import get
 from requests.exceptions import ConnectionError, HTTPError, JSONDecodeError, ReadTimeout
 from sqlalchemy.orm import Session
 
 from book_manager import __version__, controller
-from book_manager.isbn import to_isbn
+from book_manager.isbn import convert_to_isbn
 from book_manager.models import Book
 
 LOGGER = logging.getLogger(__name__)
@@ -53,6 +54,9 @@ def retrieve_book(db: Session, isbn: str) -> Book:
         isbn = edition["isbn_13"][0]
     elif "isbn_10" in edition:
         isbn = edition["isbn_10"][0]
+    isbn = convert_to_isbn(isbn)
+    if not isbn:
+        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
     authors = [
         controller.get_author(db, x["name"]) or controller.create_author(db, x["name"])
         for x in book["authors"]
@@ -64,7 +68,7 @@ def retrieve_book(db: Session, isbn: str) -> Book:
     )
 
     return Book(
-        isbn=to_isbn(isbn) if isbn else None,
+        isbn=isbn,
         title=edition["title"],
         authors=authors,
         format=edition["physical_format"] if "physical_format" in edition else None,
