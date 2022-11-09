@@ -45,6 +45,7 @@ class Book(Base):
 
     isbn = Column(String, primary_key=True)
     title = Column(String, nullable=False)
+    subtitle = Column(String)
     authors = relationship("Author", secondary=book_authors_table, back_populates="books_written")
     format = Column(String)
     series = relationship("Series", secondary=book_series_table, back_populates="books")
@@ -61,6 +62,7 @@ class Book(Base):
         return schemas.Book(
             isbn=self.isbn,
             title=self.title,
+            subtitle=self.subtitle,
             authors=sorted(x.name for x in self.authors),
             format=self.format,
             series=sorted(x.name for x in self.series),

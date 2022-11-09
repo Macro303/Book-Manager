@@ -78,6 +78,7 @@ def retrieve_book(db: Session, isbn: str) -> Book:
     return Book(
         isbn=isbn,
         title=edition["title"],
+        subtitle=edition["subtitle"] if "subtitle" in edition else None,
         authors=authors,
         format=edition["physical_format"] if "physical_format" in edition else None,
         series=series,

@@ -63,7 +63,7 @@
             </figure>
           </div>
           <header class="card-header">
-            <p class="card-header-title is-capitalized">{{ book.title }}</p>
+            <p class="card-header-title is-capitalized">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
           </header>
           <div class="card-content">
             <div class="content">

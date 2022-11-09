@@ -23,6 +23,7 @@ class Images(BaseModel):
 class Book(BaseModel):
     isbn: str
     title: str
+    subtitle: str | None = None
     authors: list[str] = Field(default_factory=list)
     format: str | None = None
     series: list[str] = Field(default_factory=list)
