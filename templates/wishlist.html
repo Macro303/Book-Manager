@@ -63,16 +63,14 @@
             </figure>
           </div>
           <header class="card-header">
-            <p class="card-header-title is-capitalized">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
+            <p class="card-header-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
           </header>
           <div class="card-content">
             <div class="content">
               <p class="wrap-text"><strong><u>Authors:</u></strong> {{ "; ".join(book.authors) }}</p>
-              <p class="wrap-text is-capitalized"><strong><u>Format:</u></strong> {{ book.format }}</p>
-              <p class="wrap-text is-capitalized">
-                <strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
-              <p class="wrap-text is-capitalized">
-                <strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
+              <p class="wrap-text"><strong><u>Format:</u></strong> {{ book.format }}</p>
+              <p class="wrap-text"><strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
+              <p class="wrap-text"><strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
               <p class="wrap-text"><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
               <p class="wrap-text"><strong><u>Wisher:</u></strong> {{ book.wisher }}</p>
             </div>
