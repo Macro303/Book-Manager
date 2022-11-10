@@ -37,13 +37,6 @@ class Book(BaseModel):
         if not isinstance(other, Book):
             raise NotImplementedError()
 
-        self_author = sorted(self.authors)
-        self_author = self_author[0] if self_author else ""
-        other_author = sorted(other.authors)
-        other_author = other_author[0] if other_author else ""
-        if self_author != other_author:
-            return self_author < other_author
-
         self_series = sorted(self.series)
         self_series = self_series[0] if self_series else ""
         other_series = sorted(other.series)
@@ -51,4 +44,13 @@ class Book(BaseModel):
         if self_series != other_series:
             return self_series < other_series
 
-        return self.title < other.title
+        if self.title != other.title:
+            return self.title < other.title
+        if (self.subtitle or "") != (other.subtitle or ""):
+            return self.subtitle < other.subtitle
+
+        self_author = sorted(self.authors)
+        self_author = self_author[0] if self_author else ""
+        other_author = sorted(other.authors)
+        other_author = other_author[0] if other_author else ""
+        return self_author < other_author
