@@ -14,12 +14,7 @@
 <body class="has-navbar-fixed-top">
 <nav class="navbar is-fixed-top is-dark">
   <div class="navbar-brand">
-    <a class="navbar-item icon-text" href="/book-catalogue">
-      <span class="icon is-large">
-        <ion-icon name="home-outline"></ion-icon>
-      </span>
-      <span>Home</span>
-    </a>
+    <img alt="Book Catalogue logo" loading="lazy" src="/static/logo.png" width="64" height="64">
     <a class="navbar-item icon-text" href="/book-catalogue/collection?username={{ username }}">
       <span class="icon is-large">
         <ion-icon name="file-tray-full-outline"></ion-icon>
@@ -31,6 +26,12 @@
         <ion-icon name="list-outline"></ion-icon>
       </span>
       <span>Wishlist</span>
+    </a>
+    <a class="navbar-item icon-text" href="/book-catalogue">
+      <span class="icon is-large">
+        <ion-icon name="home-outline"></ion-icon>
+      </span>
+      <span>Logout</span>
     </a>
   </div>
 </nav>
@@ -56,7 +57,7 @@
     <div class="columns is-multiline is-centered">
       {% for book in books %}
       <div class="column is-narrow">
-        <div class="card has-text-light has-background-dark" style="width:350px">
+        <div class="card has-text-light has-background-dark" style="width:250px">
           <div class="card-image">
             <figure class="image is-2by3">
               <img alt="{{ book.title }} by {{ '; '.join(book.authors) }}" loading="lazy" onerror="this.src='/static/missing.png'" src="{{ book.images.large }}"/>
@@ -66,6 +67,19 @@
             <p class="card-header-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
           </header>
           <div class="card-content">
+            <button id="{{ book.isbn }}-button" class="modal-trigger button is-fullwidth" data-target="{{ book.isbn }}-modal">View Book</button>
+          </div>
+        </div>
+      </div>
+      <div id="{{ book.isbn }}-modal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <div class="content">
+              <p class="modal-card-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
+            </div>
+          </header>
+          <section class="modal-card-body">
             <div class="content">
               <p class="wrap-text"><strong><u>Authors:</u></strong> {{ "; ".join(book.authors) }}</p>
               <p class="wrap-text"><strong><u>Format:</u></strong> {{ book.format }}</p>
@@ -75,16 +89,16 @@
               <p class="wrap-text"><strong><u>Wisher:</u></strong> {{ book.wisher }}</p>
             </div>
             <div class="buttons is-centered has-addons">
-              <a class="card-footer-item button" id="{{ book.isbn }}-acquireBookButton" onclick="acquiredBook('{{ book.isbn }}-acquireBookButton', '{{ book.isbn }}')">Acquire Book</a>
-              <a class="card-footer-item button" id="{{ book.isbn }}-refreshBookButton" onclick="refreshBook('{{ book.isbn }}-refreshBookButton', '{{ book.isbn }}')">Refresh Book</a>
-              <a class="card-footer-item button" id="{{ book.isbn }}-removeBookButton" onclick="removeBook('{{ book.isbn }}-removeBookButton', '{{ book.isbn }}')">Remove Book</a>
+              <a class="button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+              <a class="button" href="https://openlibrary.org/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Open Library</a>
+              <a class="button" href="https://www.goodreads.com/book/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
             </div>
-            <div class="buttons is-centered has-addons">
-              <a class="card-footer-item button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
-              <a class="card-footer-item button" href="https://openlibrary.org/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Open Library</a>
-              <a class="card-footer-item button" href="https://www.goodreads.com/book/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
-            </div>
-          </div>
+          </section>
+          <footer class="modal-card-foot is-centered">
+            <button class="button is-fullwidth" onclick="acquiredBook('{{ book.isbn }}-button', '{{ book.isbn }}')">Acquire Book</button>
+            <button class="button is-fullwidth" onclick="refreshBook('{{ book.isbn }}-button', '{{ book.isbn }}')">Refresh Book</button>
+            <button class="button is-fullwidth" onclick="removeBook('{{ book.isbn }}-button', '{{ book.isbn }}')">Remove Book</button>
+          </footer>
         </div>
       </div>
       {% endfor %}
