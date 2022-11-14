@@ -49,7 +49,7 @@ class Book(Base):
     authors = relationship("Author", secondary=book_authors_table, back_populates="books_written")
     format = Column(String)
     series = relationship("Series", secondary=book_series_table, back_populates="books")
-    publisher = Column(String, nullable=False)
+    publisher = Column(String)
     wisher_id = Column(Integer, ForeignKey("Users.user_id"))
     wisher = relationship("User", back_populates="wished_books")
     readers = relationship("User", secondary=readers_table, back_populates="read_books")

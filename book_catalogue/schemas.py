@@ -27,7 +27,7 @@ class Book(BaseModel):
     authors: list[str] = Field(default_factory=list)
     format: str | None = None
     series: list[str] = Field(default_factory=list)
-    publisher: str
+    publisher: str | None = None
     wisher: str | None = None
     readers: list[str] = Field(default_factory=list)
     identifiers: Identifiers
