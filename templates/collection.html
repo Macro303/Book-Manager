@@ -14,7 +14,6 @@
 <body class="has-navbar-fixed-top">
 <nav class="navbar is-fixed-top is-dark">
   <div class="navbar-brand">
-    <img alt="Book Catalogue logo" loading="lazy" src="/static/logo.png" width="64" height="64">
     <a class="navbar-item icon-text" href="/book-catalogue/collection?username={{ username }}">
       <span class="icon is-large">
         <ion-icon name="file-tray-full-outline"></ion-icon>
@@ -81,13 +80,12 @@
           </header>
           <section class="modal-card-body">
             <div class="content">
-              <p class="wrap-text"><strong><u>Authors:</u></strong> {{ "; ".join(book.authors) }}</p>
-              <p class="wrap-text"><strong><u>Format:</u></strong> {{ book.format }}</p>
-              <p class="wrap-text"><strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
-              <p class="wrap-text"><strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
-              <p class="wrap-text"><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
-              <p class="wrap-text"><strong><u>Readers:</u></strong> {{ "; ".join(book.readers) }}
-              </p>
+              <p><strong><u>Authors:</u></strong> {{ "; ".join(book.authors) }}</p>
+              <p><strong><u>Format:</u></strong> {{ book.format }}</p>
+              <p><strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
+              <p><strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
+              <p><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
+              <p><strong><u>Readers:</u></strong> {{ "; ".join(book.readers) }}</p>
             </div>
             <div class="buttons is-centered has-addons">
               <a class="button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
