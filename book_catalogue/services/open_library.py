@@ -6,6 +6,8 @@ from typing import Any
 from urllib.parse import urlencode
 
 from fastapi.exceptions import HTTPException
+from natsort import humansorted as sorted
+from natsort import ns
 from requests import get
 from requests.exceptions import ConnectionError, HTTPError, JSONDecodeError, ReadTimeout
 from sqlalchemy.orm import Session
@@ -65,13 +67,22 @@ def retrieve_book(db: Session, isbn: str) -> Book:
     isbn = convert_to_isbn(isbn)
     if not isbn:
         raise HTTPException(status_code=400, detail="Invalid ISBN value.")
-    authors = [
-        controller.get_author(db, x["name"]) or controller.create_author(db, x["name"])
-        for x in book["authors"]
-    ]
+    authors = sorted(
+        {
+            controller.get_author(db, x["name"]) or controller.create_author(db, x["name"])
+            for x in book["authors"]
+        },
+        alg=ns.NA | ns.G,
+    )
     series = (
-        [controller.get_series(db, x) or controller.create_series(db, x) for x in edition["series"]]
-        if "series" in edition
+        sorted(
+            {
+                controller.get_series(db, x) or controller.create_series(db, x)
+                for x in edition["series"][0].split(";")
+            },
+            alg=ns.NA | ns.G,
+        )
+        if "series" in edition and edition["series"]
         else []
     )
 
@@ -82,7 +93,7 @@ def retrieve_book(db: Session, isbn: str) -> Book:
         authors=authors,
         format=edition["physical_format"] if "physical_format" in edition else None,
         series=series,
-        publisher="; ".join(edition["publishers"]),
+        publisher="; ".join(edition["publishers"]) if "publishers" in edition else None,
         open_library_id=edition_id,
         google_books_id=book["identifiers"]["google"][0]
         if "google" in book["identifiers"]

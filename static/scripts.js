@@ -126,6 +126,23 @@ function refreshBook(caller, isbn){
   });
 }
 
+function refreshAllBooks(caller){
+  addLoading(caller);
+  $.ajax({
+    url: "/api/v0/books",
+    type: "PUT",
+    dataType: "json",
+    contentType: "application/json; charset=UTF-8",
+    success: function(){
+      window.location.reload();
+    },
+    error: function(xhr){
+      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+      removeLoading(caller);
+    },
+  });
+}
+
 function removeBook(caller, isbn){
   addLoading(caller);
   $.ajax({

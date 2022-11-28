@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Body, Depends
 from fastapi.exceptions import HTTPException
+from natsort import humansorted as sorted
+from natsort import ns
 from sqlalchemy.orm import Session
 
 from book_catalogue import __version__, controller
@@ -72,9 +74,21 @@ def add_book(
     return controller.add_book(db, isbn, db_wisher).to_schema()
 
 
+@router.put(
+    path="/books",
+    response_model=list[Book],
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def refresh_books(db: Session = Depends(get_db)) -> list[Book]:
+    book_list = controller.list_books(db)
+    for db_book in book_list:
+        controller.refresh_book(db, db_book)
+    return sorted({x.to_schema() for x in controller.list_books(db)}, alg=ns.NA | ns.G)
+
+
 @router.get(path="/books", response_model=list[Book], responses={404: {"model": ErrorResponse}})
 def list_books(db: Session = Depends(get_db)) -> list[Book]:
-    return sorted(x.to_schema() for x in controller.list_books(db))
+    return sorted({x.to_schema() for x in controller.list_books(db)}, alg=ns.NA | ns.G)
 
 
 @router.get(
