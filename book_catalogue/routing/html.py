@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from natsort import humansorted as sorted
+from natsort import ns
 from sqlalchemy.orm import Session
 
 from book_catalogue import controller, get_project_root
@@ -30,7 +32,9 @@ def collection(username: str, request: Request, db: Session = Depends(get_db)):
         "collection.html",
         {
             "username": username,
-            "books": sorted(x.to_schema() for x in db_book_list if not x.wisher),
+            "books": sorted(
+                {x.to_schema() for x in db_book_list if not x.wisher}, alg=ns.NA | ns.G
+            ),
             "request": request,
         },
     )
@@ -43,7 +47,7 @@ def wishlist(username: str, request: Request, db: Session = Depends(get_db)):
         "wishlist.html",
         {
             "username": username,
-            "books": sorted(x.to_schema() for x in db_book_list if x.wisher),
+            "books": sorted({x.to_schema() for x in db_book_list if x.wisher}, alg=ns.NA | ns.G),
             "request": request,
         },
     )

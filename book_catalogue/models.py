@@ -1,5 +1,9 @@
 __all__ = ["User", "Book", "Author", "Series"]
 
+from typing import Optional
+
+from natsort import humansorted as sorted
+from natsort import ns
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
@@ -39,6 +43,19 @@ class User(Base):
     def to_schema(self) -> schemas.User:
         return schemas.User(username=self.username)
 
+    def __lt__(self, other):
+        if not isinstance(other, User):
+            raise NotImplementedError()
+        return self.username < other.username
+
+    def __eq__(self, other):
+        if not isinstance(other, User):
+            raise NotImplementedError()
+        return self.username == other.username
+
+    def __hash__(self):
+        return hash((type(self), self.username))
+
 
 class Book(Base):
     __tablename__ = "Books"
@@ -63,11 +80,11 @@ class Book(Base):
             isbn=self.isbn,
             title=self.title,
             subtitle=self.subtitle,
-            authors=sorted(x.name for x in self.authors),
+            authors=sorted({x.name for x in self.authors}, alg=ns.NA | ns.G),
             format=self.format,
-            series=sorted(x.name for x in self.series),
+            series=sorted({x.name for x in self.series}, alg=ns.NA | ns.G),
             publisher=self.publisher,
-            readers=sorted(x.username for x in self.readers),
+            readers=sorted({x.username for x in self.readers}, alg=ns.NA | ns.G),
             wisher=self.wisher.username if self.wisher else None,
             identifiers=schemas.Identifiers(
                 open_library_id=self.open_library_id,
@@ -97,6 +114,53 @@ class Book(Base):
             ),
         )
 
+    @property
+    def first_series(self) -> Optional["Series"]:
+        temp = sorted(self.series, alg=ns.NA | ns.G)
+        return temp[0] if temp else None
+
+    @property
+    def first_author(self) -> Optional["Author"]:
+        temp = sorted(self.authors, alg=ns.NA | ns.G)
+        return temp[0] if temp else None
+
+    def __lt__(self, other):
+        if not isinstance(other, Book):
+            raise NotImplementedError()
+        if (self.first_series or "") != (other.first_series or ""):
+            return (self.first_series or "") < (other.first_series or "")
+        if self.title != other.title:
+            return self.title < other.title
+        if (self.subtitle or "") != (other.subtitle or ""):
+            return self.subtitle < other.subtitle
+        return (self.first_author or "") < (other.first_author or "")
+
+    def __eq__(self, other):
+        if not isinstance(other, Book):
+            raise NotImplementedError()
+        return (
+            (self.first_series or ""),
+            self.title,
+            (self.subtitle or ""),
+            (self.first_author or ""),
+        ) == (
+            (other.first_series or ""),
+            other.title,
+            (other.subtitle or ""),
+            (other.first_author or ""),
+        )
+
+    def __hash__(self):
+        return hash(
+            (
+                type(self),
+                (self.first_series or ""),
+                self.title,
+                (self.subtitle or ""),
+                (self.first_author or ""),
+            )
+        )
+
 
 class Author(Base):
     __tablename__ = "Authors"
@@ -105,6 +169,19 @@ class Author(Base):
     name = Column(String, nullable=False)
     books_written = relationship("Book", secondary=book_authors_table, back_populates="authors")
 
+    def __lt__(self, other):
+        if not isinstance(other, Author):
+            raise NotImplementedError()
+        return self.name < other.name
+
+    def __eq__(self, other):
+        if not isinstance(other, Author):
+            raise NotImplementedError()
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash((type(self), self.name))
+
 
 class Series(Base):
     __tablename__ = "Series"
@@ -112,3 +189,16 @@ class Series(Base):
     series_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     books = relationship("Book", secondary=book_series_table, back_populates="series")
+
+    def __lt__(self, other):
+        if not isinstance(other, Series):
+            raise NotImplementedError()
+        return self.name < other.name
+
+    def __eq__(self, other):
+        if not isinstance(other, Series):
+            raise NotImplementedError()
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash((type(self), self.name))

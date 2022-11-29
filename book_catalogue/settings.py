@@ -19,7 +19,7 @@ class SettingsModel(BaseModel):
 
 class WebSettings(SettingsModel):
     host: str = "localhost"
-    port: int = 8001
+    port: int = 8003
 
 
 class Settings(SettingsModel):

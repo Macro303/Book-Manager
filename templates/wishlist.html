@@ -52,6 +52,18 @@
           </div>
         </div>
       </div>
+      <div class="column is-narrow">
+        <div class="card has-text-light has-background-dark">
+          <div class="card-content">
+            <div class="content">
+              <p>Warning this process may take a while</p>
+            </div>
+            <div class="buttons is-centered has-addons">
+              <a class="card-footer-item button" id="refreshAllBooksButton" onclick="refreshAllBooks('refreshAllBooksButton')">Refresh All Books</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="columns is-multiline is-centered">
       {% for book in books %}
