@@ -2,8 +2,6 @@ __all__ = ["User", "Book", "Author", "Series"]
 
 from typing import Optional
 
-from natsort import humansorted as sorted
-from natsort import ns
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
@@ -80,11 +78,11 @@ class Book(Base):
             isbn=self.isbn,
             title=self.title,
             subtitle=self.subtitle,
-            authors=sorted({x.name for x in self.authors}, alg=ns.NA | ns.G),
+            authors=sorted({x.name for x in self.authors}),
             format=self.format,
-            series=sorted({x.name for x in self.series}, alg=ns.NA | ns.G),
+            series=sorted({x.name for x in self.series}),
             publisher=self.publisher,
-            readers=sorted({x.username for x in self.readers}, alg=ns.NA | ns.G),
+            readers=sorted({x.username for x in self.readers}),
             wisher=self.wisher.username if self.wisher else None,
             identifiers=schemas.Identifiers(
                 open_library_id=self.open_library_id,
@@ -116,12 +114,12 @@ class Book(Base):
 
     @property
     def first_series(self) -> Optional["Series"]:
-        temp = sorted(self.series, alg=ns.NA | ns.G)
+        temp = sorted(self.series)
         return temp[0] if temp else None
 
     @property
     def first_author(self) -> Optional["Author"]:
-        temp = sorted(self.authors, alg=ns.NA | ns.G)
+        temp = sorted(self.authors)
         return temp[0] if temp else None
 
     def __lt__(self, other):

@@ -6,8 +6,6 @@ from typing import Any
 from urllib.parse import urlencode
 
 from fastapi.exceptions import HTTPException
-from natsort import humansorted as sorted
-from natsort import ns
 from requests import get
 from requests.exceptions import ConnectionError, HTTPError, JSONDecodeError, ReadTimeout
 from sqlalchemy.orm import Session
@@ -71,16 +69,14 @@ def retrieve_book(db: Session, isbn: str) -> Book:
         {
             controller.get_author(db, x["name"]) or controller.create_author(db, x["name"])
             for x in book["authors"]
-        },
-        alg=ns.NA | ns.G,
+        }
     )
     series = (
         sorted(
             {
-                controller.get_series(db, x) or controller.create_series(db, x)
+                controller.get_series(db, x.strip()) or controller.create_series(db, x.strip())
                 for x in edition["series"][0].split(";")
-            },
-            alg=ns.NA | ns.G,
+            }
         )
         if "series" in edition and edition["series"]
         else []

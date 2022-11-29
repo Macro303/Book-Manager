@@ -1,7 +1,5 @@
 __all__ = ["User", "Identifiers", "Images", "Book"]
 
-from natsort import humansorted as sorted
-from natsort import ns
 from pydantic import BaseModel, Field
 
 
@@ -66,12 +64,12 @@ class Book(BaseModel):
 
     @property
     def first_series(self) -> str | None:
-        temp = sorted(self.series, alg=ns.NA | ns.G)
+        temp = sorted(self.series)
         return temp[0] if temp else None
 
     @property
     def first_author(self) -> str | None:
-        temp = sorted(self.authors, alg=ns.NA | ns.G)
+        temp = sorted(self.authors)
         return temp[0] if temp else None
 
     def __lt__(self, other):
