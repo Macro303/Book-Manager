@@ -51,11 +51,9 @@ def _perform_get_request(endpoint: str, params: dict[str, str] = None) -> dict[s
 
 
 def retrieve_book(db: Session, isbn: str) -> Book:
-    book = search_book(isbn)
-    edition_id = book["identifiers"]["openlibrary"][0]
-    edition = get_edition(edition_id)
+    edition = get_edition(isbn)
     work_id = edition["works"][0]["key"].split("/")[-1]
-    _ = get_work(work_id)
+    work = get_work(work_id)
 
     isbn = None
     if "isbn_13" in edition:
@@ -65,11 +63,10 @@ def retrieve_book(db: Session, isbn: str) -> Book:
     isbn = convert_to_isbn(isbn)
     if not isbn:
         raise HTTPException(status_code=400, detail="Invalid ISBN value.")
+    author_ids = [x["author"]["key"].split("/")[-1] for x in work["authors"]]
+    authors = [get_author(x)["name"] for x in author_ids]
     authors = sorted(
-        {
-            controller.get_author(db, x["name"]) or controller.create_author(db, x["name"])
-            for x in book["authors"]
-        }
+        {controller.get_author(db, x) or controller.create_author(db, x) for x in authors}
     )
     series = (
         sorted(
@@ -90,34 +87,32 @@ def retrieve_book(db: Session, isbn: str) -> Book:
         format=edition["physical_format"] if "physical_format" in edition else None,
         series=series,
         publisher="; ".join(edition["publishers"]) if "publishers" in edition else None,
-        open_library_id=edition_id,
-        google_books_id=book["identifiers"]["google"][0]
-        if "google" in book["identifiers"]
+        open_library_id=edition["key"].split("/")[-1],
+        google_books_id=edition["identifiers"]["google"][0]
+        if "google" in edition["identifiers"]
         else None,
-        goodreads_id=book["identifiers"]["goodreads"][0]
-        if "goodreads" in book["identifiers"]
+        goodreads_id=edition["identifiers"]["goodreads"][0]
+        if "goodreads" in edition["identifiers"]
         else None,
-        library_thing_id=book["identifiers"]["librarything"][0]
-        if "librarything" in book["identifiers"]
+        library_thing_id=edition["identifiers"]["librarything"][0]
+        if "librarything" in edition["identifiers"]
         else None,
     )
 
 
-def search_book(isbn: str) -> dict[str, Any]:
-    LOGGER.info(f"Searching for book: {isbn}")
-    response = _perform_get_request(
-        endpoint="/api/books", params={"bibkeys": f"ISBN:{isbn}", "format": "json", "jscmd": "data"}
-    )
-    return list(response.values())[0]
-
-
-def get_edition(edition_id: str) -> dict[str, Any]:
-    LOGGER.info(f"Getting edition: {edition_id}")
-    response = _perform_get_request(endpoint=f"/books/{edition_id}.json")
+def get_edition(isbn: str) -> dict[str, Any]:
+    LOGGER.info(f"Getting edition using isbn: {isbn}")
+    response = _perform_get_request(endpoint=f"/isbn/{isbn}.json")
     return response
 
 
 def get_work(work_id: str) -> dict[str, Any]:
     LOGGER.info(f"Getting work: {work_id}")
-    response = _perform_get_request(endpoint=f"/works/{work_id}.json")
+    response = _perform_get_request(endpoint=f"/work/{work_id}.json")
+    return response
+
+
+def get_author(author_id: str) -> dict[str, Any]:
+    LOGGER.info(f"Getting author: {author_id}")
+    response = _perform_get_request(endpoint=f"/author/{author_id}.json")
     return response
