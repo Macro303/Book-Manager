@@ -104,7 +104,7 @@ def get_book(isbn: str, db: Session = Depends(get_db)) -> Book:
     return db_book.to_schema()
 
 
-@router.post(
+@router.put(
     path="/books/{isbn}",
     response_model=Book,
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
@@ -119,8 +119,23 @@ def refresh_book(isbn: str, db: Session = Depends(get_db)) -> Book:
     return controller.refresh_book(db, db_book).to_schema()
 
 
-@router.put(
+@router.delete(
     path="/books/{isbn}",
+    status_code=204,
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def remove_book(isbn: str, db: Session = Depends(get_db)):
+    isbn = convert_to_isbn(isbn)
+    if not isbn:
+        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
+    db_book = controller.get_book(db, isbn)
+    if not db_book:
+        raise HTTPException(status_code=404, detail="Book not added.")
+    controller.remove_book(db, db_book)
+
+
+@router.post(
+    path="/books/{isbn}/update",
     response_model=Book,
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
@@ -148,18 +163,3 @@ def update_book(
             raise HTTPException(status_code=404, detail="User doesn't exist.")
         db_readers.append(db_reader)
     return controller.update_book(db, db_book, db_wisher, db_readers).to_schema()
-
-
-@router.delete(
-    path="/books/{isbn}",
-    status_code=204,
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def remove_book(isbn: str, db: Session = Depends(get_db)):
-    isbn = convert_to_isbn(isbn)
-    if not isbn:
-        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
-    db_book = controller.get_book(db, isbn)
-    if not db_book:
-        raise HTTPException(status_code=404, detail="Book not added.")
-    controller.remove_book(db, db_book)

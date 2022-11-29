@@ -113,7 +113,7 @@ function refreshBook(caller, isbn){
   addLoading(caller);
   $.ajax({
     url: "/api/v0/books/" + isbn,
-    type: "POST",
+    type: "PUT",
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     success: function(){
@@ -166,8 +166,8 @@ function readBook(caller, isbn, readers){
   let username = params.get("username");
   readers.push(username);
   $.ajax({
-    url: "/api/v0/books/" + isbn,
-    type: "PUT",
+    url: "/api/v0/books/" + isbn + "/update",
+    type: "POST",
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     data: JSON.stringify({
@@ -190,8 +190,8 @@ function unreadBook(caller, isbn, readers){
   let username = params.get("username");
   readers = readers.filter(e => e !== username);
   $.ajax({
-    url: "/api/v0/books/" + isbn,
-    type: "PUT",
+    url: "/api/v0/books/" + isbn + "/update",
+    type: "POST",
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     data: JSON.stringify({
@@ -213,8 +213,8 @@ function acquiredBook(caller, isbn){
   let params = new URLSearchParams(window.location.search);
   let username = params.get("username");
   $.ajax({
-    url: "/api/v0/books/" + isbn,
-    type: "PUT",
+    url: "/api/v0/books/" + isbn + "/update",
+    type: "POST",
     dataType: "json",
     contentType: "application/json; charset=UTF-8",
     data: JSON.stringify({
