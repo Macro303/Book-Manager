@@ -4,119 +4,362 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <title>Book Catalogue</title>
-  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">-->
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
-  <link href="/static/styles.css" rel="stylesheet">
+  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">-->
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/superhero/bulmaswatch.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
+  <link href="/static/styles.css" id="favicon" rel="icon" type="image/x-icon">
   <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
-  <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js" type="module"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <link href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" rel="stylesheet">
 </head>
 <body class="has-navbar-fixed-top">
-<nav class="navbar is-fixed-top is-dark">
+<nav aria-label="main navigation" class="navbar is-fixed-top is-info" role="navigation">
   <div class="navbar-brand">
-    <a class="navbar-item icon-text" href="/book-catalogue/collection?username={{ username }}">
-      <span class="icon is-large">
-        <ion-icon name="file-tray-full-outline"></ion-icon>
-      </span>
-      <span>Collection</span>
+    <a class="navbar-item" href="/" id="navbar-banner">
+      <img alt="Logo" src="https://bulma.io/images/bulma-logo.png">
     </a>
-    <a class="navbar-item icon-text" href="/book-catalogue/wishlist?username={{ username }}">
-      <span class="icon is-large">
-        <ion-icon name="list-outline"></ion-icon>
-      </span>
-      <span>Wishlist</span>
-    </a>
-    <a class="navbar-item icon-text" href="/book-catalogue">
-      <span class="icon is-large">
-        <ion-icon name="home-outline"></ion-icon>
-      </span>
-      <span>Logout</span>
-    </a>
+    <span class="navbar-burger burger" data-target="navMenu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  </div>
+  <div class="navbar-menu" id="navMenu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="/{{ user.user_id }}">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-home"></i>
+        </span>
+        <span>Home</span>
+      </a>
+      <a class="navbar-item" href="/{{ user.user_id }}/collection">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-archive"></i>
+        </span>
+        <span>Collection</span>
+      </a>
+      <a class="navbar-item" href="/{{ user.user_id }}/wishlist">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-archive"></i>
+        </span>
+        <span>Wishlist</span>
+      </a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <a class="button is-primary" href="/signup">
+            <span class="icon is-medium">
+              <i class="fas fa-lg fa-user-plus"></i>
+            </span>
+            <span>Sign Up</span>
+          </a>
+          <a class="button is-success" href="/signin">
+            <span class="icon is-medium">
+              <i class="fas fa-lg fa-sign-in-alt"></i>
+            </span>
+            <span>Sign In</span>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </nav>
-<section class="section">
-  <div class="container is-fluid">
-    <h1 class="title has-text-centered">Wishlist</h1>
-    <div class="columns is-multiline is-centered">
-      <div class="column is-narrow">
-        <div class="card has-text-light has-background-dark">
-          <div class="card-content">
-            <div class="content">
-              <label class="label">
-                <input class="input" id="isbnEntry" placeholder="Isbn" type="text">
-              </label>
+    <section class="section">
+      <div class="container is-fluid">
+        <h1 class="title has-text-centered">Wishlist</h1>
+        <div class="columns is-multiline is-centered">
+          <div class="column is-two-fifths">
+            <div class="card has-text-light has-background-dark">
+              <header class="card-header">
+                <p class="card-header-title">Add Book</p>
+              </header>
+              <div class="card-content">
+                <div class="field">
+                  <input class="input" id="isbn-input" placeholder="Isbn" type="text">
+                </div>
+                <div class="field">
+                  <input class="input" id="open-library-input" placeholder="OpenLibrary Id" type="text">
+                </div>
+                <div class="buttons is-centered has-addons">
+                  <a class="card-footer-item button" id="add-book-button" onclick="addBook('add-book-button', {{ user.user_id }})">Add Book</a>
+                </div>
+              </div>
             </div>
-            <div class="buttons is-centered has-addons">
-              <a class="card-footer-item button" id="addBookButton" onclick="addBook('addBookButton')">Add Book</a>
+          </div>
+          <div class="column">
+            <div class="card has-text-light has-background-dark">
+              <header class="card-header">
+                <p class="card-header-title">Refresh All Books</p>
+              </header>
+              <div class="card-content">
+                <div class="content">
+                  <p>Warning this process may take a while</p>
+                </div>
+                <div class="buttons is-centered has-addons">
+                  <a class="card-footer-item button" id="refresh-all-button" onclick="refreshAllBooks('refresh-all-button')">Refresh</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column is-two-fifths">
+            <div class="card has-text-light has-background-dark">
+              <header class="card-header">
+                <p class="card-header-title">Filter Books</p>
+              </header>
+              <div class="card-content">
+                <div class="field">
+                  <input class="input" id="title-filter-input" placeholder="Title Filter" type="text">
+                </div>
+                <div class="field">
+                  <div class="select is-fullwidth">
+                    <select id="author-filter-select">
+                      <option value=-1 selected disabled>Author Filter</option>
+                      {% for author in author_list %}
+                        <option value={{ author.author_id }}>{{ author.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="select is-fullwidth">
+                    <select id="format-filter-select">
+                      <option value=-1 selected disabled>Format Filter</option>
+                      {% for format in format_list %}
+                        <option value="{{ format }}">{{ format }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="select is-fullwidth">
+                    <select id="series-filter-select" disabled>
+                      <option value=-1 selected disabled>Series Filter</option>
+                      {% for series in series_list %}
+                        <option value={{ series.series_id }}>{{ series.title }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="select is-fullwidth">
+                    <select id="publisher-filter-select">
+                      <option value=-1 selected disabled>Publisher Filter</option>
+                      {% for publisher in publisher_list %}
+                        <option value={{ publisher.publisher_id }}>{{ publisher.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="buttons is-centered has-addons">
+                  <a class="card-footer-item button" id="filter-button" onclick="filterBooks('filter-button', {{ user.user_id }})">Filter Books</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="column is-narrow">
-        <div class="card has-text-light has-background-dark">
-          <div class="card-content">
-            <div class="content">
-              <p>Warning this process may take a while</p>
+        <div class="columns is-multiline is-centered is-mobile">
+          {% for book in books %}
+            <div class="column is-narrow">
+              <div class="card has-text-light has-background-dark">
+                <div class="card-image">
+                  <figure class="image is-2by3" style="width:250px">
+                    <img alt="{{ book.title }} by {{ '; '.join(book.authors) }}" loading="lazy" onerror="this.src='https://via.placeholder.com/750x1125'" src="{{ book.image_url }}"/>
+                  </figure>
+                </div>
+                <div class="card-content" style="width:250px">
+                  <div class="media">
+                    <div class="media-content">
+                      <p class="title is-4">{{ book.title }}</p>
+                      {% if book.subtitle %}
+                        <p class="subtitle is-6">{{ book.subtitle }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="divider"></div>
+                  <div class="buttons is-centered has-addons">
+                    <button class="modal-trigger button is-fullwidth" data-target="{{ book.identifiers.book_id }}-view-modal" id="{{ book.identifiers.book_id }}-view-button">View</button>
+                    <button class="modal-trigger button is-fullwidth" data-target="{{ book.identifiers.book_id }}-edit-modal" id="{{ book.identifiers.book_id }}-edit-button">Edit</button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="buttons is-centered has-addons">
-              <a class="card-footer-item button" id="refreshAllBooksButton" onclick="refreshAllBooks('refreshAllBooksButton')">Refresh All Books</a>
+            <div id="{{ book.identifiers.book_id }}-view-modal" class="modal">
+              <div class="modal-background"></div>
+              <div class="modal-card">
+                <header class="modal-card-head">
+                  <div class="content">
+                    <p class="modal-card-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
+                  </div>
+                </header>
+                <section class="modal-card-body">
+                  <div class="content">
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Authors</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ book.author_names }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Format</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ book.format }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Series</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ book.series_names }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Publishers</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ book.publisher_names }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Isbn</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ book.identifiers.isbn_13 }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Wisher</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ book.wisher.username }}</p>
+                      </div>
+                    </nav>
+                  </div>
+                </section>
+                <footer class="modal-card-foot is-centered">
+                  <a class="button is-fullwidth" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+                  <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Open Library</a>
+                  <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+                </footer>
+              </div>
             </div>
-          </div>
+            <div id="{{ book.identifiers.book_id }}-edit-modal" class="modal">
+              <div class="modal-background"></div>
+              <div class="modal-card">
+                <header class="modal-card-head">
+                  <div class="content">
+                    <p class="modal-card-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
+                  </div>
+                </header>
+                <section class="modal-card-body">
+                  <div class="content">
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Authors</p>
+                      </div>
+                      <div class="level-right">
+                        <input class="level-item input" id="authors-input" placeholder="Authors" type="text" value="{{ book.author_names }}">
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Format</p>
+                      </div>
+                      <div class="level-right">
+                        <input class="level-item input" id="format-input" placeholder="Format" type="text" value="{{ book.format }}">
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Series</p>
+                      </div>
+                      <div class="level-right">
+                        <input class="level-item input" id="series-input" placeholder="Series" type="text" value="{{ book.series_names }}">
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Publishers</p>
+                      </div>
+                      <div class="level-right">
+                        <input class="level-item input" id="publisher-input" placeholder="Publishers" type="text" value="{{ book.publisher_names }}">
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Isbn</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ book.identifiers.isbn_13 }}</p>
+                      </div>
+                    </nav>
+                  </div>
+                </section>
+                <footer class="modal-card-foot is-centered">
+                  <button class="button is-fullwidth" onclick="collectBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }}, {{ user.user_id }})">Collect</button>
+                  <button class="button is-fullwidth" onclick="editBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Edit</button>
+                  <button class="button is-fullwidth" onclick="refreshBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Refresh</button>
+                  <button class="button is-fullwidth" onclick="removeBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Remove</button>
+                </footer>
+              </div>
+            </div>
+          {% endfor %}
         </div>
       </div>
+    </section>
+<footer class="footer has-background-dark has-text-light">
+  <div class="columns">
+    <div class="column is-one-third">
+      <h4>Contact Us</h4>
+      <p>
+        <a href="mailto:BuriedInCode@tuta.io" target="_blank">
+          <span class="icon is-medium">
+            <i class="fas fa-lg fa-inbox"></i>
+          </span>
+          <span>Email</span>
+        </a>
+      </p>
+      <p>
+        <a href="https://github.com/Buried-In-Code/Foiled-Again-Site" target="_blank">
+          <span class="icon is-medium">
+            <i class="fab fa-lg fa-github"></i>
+          </span>
+          <span>Github</span>
+        </a>
+      </p>
+      <p>
+        <a href="https://fosstodon.org/@BuriedInCode" target="_blank">
+          <span class="icon is-medium">
+            <i class="fab fa-lg fa-mastodon"></i>
+          </span>
+          <span>Mastodon</span>
+        </a>
+      </p>
+      <p>
+        <a href="https://matrix.to/#/#foiled-again:matrix.org" target="_blank">
+          <span class="icon is-medium">
+            <i class="far fa-lg fa-comments"></i>
+          </span>
+          <span>Matrix</span>
+        </a>
+      </p>
     </div>
-    <div class="columns is-multiline is-centered">
-      {% for book in books %}
-      <div class="column is-narrow">
-        <div class="card has-text-light has-background-dark" style="width:250px">
-          <div class="card-image">
-            <figure class="image is-2by3">
-              <img alt="{{ book.title }} by {{ '; '.join(book.authors) }}" loading="lazy" onerror="this.src='/static/missing.png'" src="{{ book.images.large }}"/>
-            </figure>
-          </div>
-          <header class="card-header">
-            <p class="card-header-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
-          </header>
-          <div class="card-content">
-            <button id="{{ book.isbn }}-button" class="modal-trigger button is-fullwidth" data-target="{{ book.isbn }}-modal">View Book</button>
-          </div>
-        </div>
-      </div>
-      <div id="{{ book.isbn }}-modal" class="modal">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-          <header class="modal-card-head">
-            <div class="content">
-              <p class="modal-card-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
-            </div>
-          </header>
-          <section class="modal-card-body">
-            <div class="content">
-              <p><strong><u>Authors:</u></strong> {{ "; ".join(book.authors) }}</p>
-              <p><strong><u>Format:</u></strong> {{ book.format }}</p>
-              <p><strong><u>Series:</u></strong> {{ "; ".join(book.series) }}</p>
-              <p><strong><u>Publisher:</u></strong> {{ book.publisher }}</p>
-              <p><strong><u>Isbn:</u></strong> {{ book.isbn }}</p>
-              <p><strong><u>Wisher:</u></strong> {{ book.wisher }}</p>
-            </div>
-            <div class="buttons is-centered has-addons">
-              <a class="button" href="https://www.bookdepository.com/search?searchIsbn={{ book.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
-              <a class="button" href="https://openlibrary.org/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Open Library</a>
-              <a class="button" href="https://www.goodreads.com/book/isbn/{{ book.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
-            </div>
-          </section>
-          <footer class="modal-card-foot is-centered">
-            <button class="button is-fullwidth" onclick="acquiredBook('{{ book.isbn }}-button', '{{ book.isbn }}')">Acquire Book</button>
-            <button class="button is-fullwidth" onclick="refreshBook('{{ book.isbn }}-button', '{{ book.isbn }}')">Refresh Book</button>
-            <button class="button is-fullwidth" onclick="removeBook('{{ book.isbn }}-button', '{{ book.isbn }}')">Remove Book</button>
-          </footer>
-        </div>
-      </div>
-      {% endfor %}
+    <div class="column is-two-third">
+      <a href="https://bulma.io">
+        <img alt="Made with Bulma" height="24" src="https://bulma.io/images/made-with-bulma.png" width="128">
+      </a>
     </div>
   </div>
-</section>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+</footer>
+<script src="/static/bulma-navbar-burger.js" type="text/javascript"></script>
 <script src="/static/scripts.js" type="text/javascript"></script>
 </body>
 </html>

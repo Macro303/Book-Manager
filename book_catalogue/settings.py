@@ -1,9 +1,9 @@
 __all__ = ["Settings"]
 
+import tomllib as tomlreader
 from typing import ClassVar
 
 import tomli_w as tomlwriter
-import tomllib as tomlreader
 from pydantic import BaseModel, Extra
 
 from book_catalogue import get_config_root

@@ -1,9 +1,19 @@
-__all__ = ["User", "Identifiers", "Images", "Book"]
+__all__ = [
+    "User",
+    "AuthorIdentifiers",
+    "Author",
+    "Publisher",
+    "Series",
+    "BookIdentifiers",
+    "Book",
+    "BookUpdate",
+]
 
 from pydantic import BaseModel, Field
 
 
 class User(BaseModel):
+    user_id: int
     username: str
 
     def __lt__(self, other):
@@ -20,82 +30,142 @@ class User(BaseModel):
         return hash((type(self), self.username))
 
 
-class Identifiers(BaseModel):
-    open_library_id: str
+class AuthorIdentifiers(BaseModel):
+    author_id: int
+    open_library_id: str | None
+
+
+class Author(BaseModel):
+    name: str
+    identifiers: AuthorIdentifiers
+
+    def __lt__(self, other) -> int:
+        if not isinstance(other, Author):
+            raise NotImplementedError()
+        return self.name < other.name
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Author):
+            raise NotImplementedError()
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash((type(self), self.name))
+
+
+class Publisher(BaseModel):
+    publisher_id: int
+    name: str
+
+    def __lt__(self, other) -> int:
+        if not isinstance(other, Publisher):
+            raise NotImplementedError()
+        return self.name < other.name
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Publisher):
+            raise NotImplementedError()
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash((type(self), self.name))
+
+
+class Series(BaseModel):
+    series_id: int
+    title: str
+
+    def __lt__(self, other) -> int:
+        if not isinstance(other, Series):
+            raise NotImplementedError()
+        return self.title < other.title
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Series):
+            raise NotImplementedError()
+        return self.title == other.title
+
+    def __hash__(self):
+        return hash((type(self), self.title))
+
+
+class BookIdentifiers(BaseModel):
+    book_id: int
+    isbn_10: str | None = None
+    isbn_13: str | None = None
+    open_library_id: str | None = None
     google_books_id: str | None = None
     goodreads_id: str | None = None
     library_thing_id: str | None = None
 
-    def __eq__(self, other):
-        if not isinstance(other, Identifiers):
-            raise NotImplementedError()
-        return self.open_library_id == other.open_library_id
-
-    def __hash__(self):
-        return hash((type(self), self.open_library_id))
-
-
-class Images(BaseModel):
-    small: str | None = None
-    medium: str | None = None
-    large: str | None = None
-
-    def __eq__(self, other):
-        if not isinstance(other, Images):
-            raise NotImplementedError()
-        return (self.small, self.medium, self.large) == (other.small, other.medium, other.large)
-
-    def __hash__(self):
-        return hash((type(self), self.small, self.medium, self.large))
-
 
 class Book(BaseModel):
-    isbn: str
     title: str
     subtitle: str | None = None
-    authors: list[str] = Field(default_factory=list)
+    authors: list[Author] = Field(default_factory=list)
     format: str | None = None
-    series: list[str] = Field(default_factory=list)
-    publisher: str | None = None
-    wisher: str | None = None
-    readers: list[str] = Field(default_factory=list)
-    identifiers: Identifiers
-    images: Images = Images()
+    series: list[Series] = Field(default_factory=list)
+    publishers: list[Publisher] = Field(default_factory=list)
+    wisher: User | None = None
+    readers: list[User] = Field(default_factory=list)
+    identifiers: BookIdentifiers
+    image_url: str | None = None
 
     @property
-    def first_series(self) -> str | None:
+    def first_author(self) -> Author | None:
+        temp = sorted(self.authors)
+        return temp[0] if temp else None
+
+    @property
+    def first_series(self) -> Series | None:
         temp = sorted(self.series)
         return temp[0] if temp else None
 
     @property
-    def first_author(self) -> str | None:
-        temp = sorted(self.authors)
-        return temp[0] if temp else None
+    def publisher_names(self) -> str:
+        return "; ".join(x.name for x in self.publishers)
+
+    @property
+    def author_names(self) -> str:
+        return "; ".join(x.name for x in self.authors)
+
+    @property
+    def series_names(self) -> str:
+        return "; ".join(x.title for x in self.series)
+
+    @property
+    def reader_names(self) -> str:
+        return "; ".join(x.username for x in self.readers)
 
     def __lt__(self, other):
         if not isinstance(other, Book):
             raise NotImplementedError()
-        if (self.first_series or "") != (other.first_series or ""):
-            return (self.first_series or "") < (other.first_series or "")
+        if self.first_series and other.first_series and self.first_series != other.first_series:
+            return self.first_series < other.first_series
+        elif self.first_series and not other.first_series:
+            return False
+        elif not self.first_series and other.first_series:
+            return True
         if self.title != other.title:
             return self.title < other.title
         if (self.subtitle or "") != (other.subtitle or ""):
             return self.subtitle < other.subtitle
-        return (self.first_author or "") < (other.first_author or "")
+        if self.first_author and other.first_author and self.first_author != other.first_author:
+            return self.first_author < other.first_author
+        elif self.first_author and not other.first_author:
+            return False
+        elif not self.first_author and other.first_author:
+            return True
+        return False
 
     def __eq__(self, other):
         if not isinstance(other, Book):
             raise NotImplementedError()
-        return (
-            (self.first_series or ""),
-            self.title,
-            (self.subtitle or ""),
-            (self.first_author or ""),
-        ) == (
-            (other.first_series or ""),
+        return (self.first_series, self.title, (self.subtitle or ""), self.first_author,) == (
+            other.first_series,
             other.title,
             (other.subtitle or ""),
-            (other.first_author or ""),
+            other.first_author,
         )
 
     def __hash__(self):
@@ -108,3 +178,8 @@ class Book(BaseModel):
                 (self.first_author or ""),
             )
         )
+
+
+class BookUpdate(BaseModel):
+    wisher_id: float
+    reader_id_list: list[float]

@@ -1,49 +1,123 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from pony.orm import db_session
 
 from book_catalogue import controller, get_project_root
-from book_catalogue.database import SessionLocal
 
-router = APIRouter(prefix="/book-catalogue", tags=["WebInterface"], include_in_schema=False)
+router = APIRouter(tags=["WebInterface"], include_in_schema=False)
 templates = Jinja2Templates(directory=get_project_root() / "templates")
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@router.get("", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@router.get("/collection", response_class=HTMLResponse)
-def collection(username: str, request: Request, db: Session = Depends(get_db)):
-    db_book_list = controller.list_books(db)
-    return templates.TemplateResponse(
-        "collection.html",
-        {
-            "username": username,
-            "books": sorted({x.to_schema() for x in db_book_list if not x.wisher}),
-            "request": request,
-        },
-    )
+@router.get("/{user_id}", response_class=HTMLResponse)
+def home(request: Request, user_id: int):
+    with db_session:
+        user = controller.get_user_by_id(user_id=user_id)
+        return templates.TemplateResponse("home.html", {"request": request, "user": user})
 
 
-@router.get("/wishlist", response_class=HTMLResponse)
-def wishlist(username: str, request: Request, db: Session = Depends(get_db)):
-    db_book_list = controller.list_books(db)
-    return templates.TemplateResponse(
-        "wishlist.html",
-        {
-            "username": username,
-            "books": sorted({x.to_schema() for x in db_book_list if x.wisher}),
-            "request": request,
-        },
-    )
+@router.get("/{user_id}/collection", response_class=HTMLResponse)
+def collection(
+    request: Request,
+    user_id: int,
+    title: str = "",
+    author: int = 0,
+    format: str = "",
+    series: int = 0,
+    publisher: int = 0,
+):
+    with db_session:
+        user = controller.get_user_by_id(user_id=user_id)
+        all_books = books = {x for x in controller.list_books() if not x.wisher}
+        if title:
+            books = {
+                x
+                for x in books
+                if (title in x.title)
+                or (x.title in title)
+                or (x.subtitle and ((title in x.subtitle) or (x.subtitle in title)))
+            }
+        if author:
+            _author = controller.get_author_by_id(author_id=author)
+            books = {x for x in books if _author in x.authors}
+        if format:
+            if format == "None":
+                books = {x for x in books if not x.format}
+            else:
+                books = {x for x in books if format == x.format}
+        if series:
+            _series = controller.get_series_by_id(series_id=series)
+            books = {x for x in books if _series in x.series}
+        if publisher:
+            _publisher = controller.get_publisher_by_id(publisher_id=publisher)
+            books = {x for x in books if _publisher in x.publishers}
+        return templates.TemplateResponse(
+            "collection.html",
+            {
+                "request": request,
+                "user": user.to_schema(),
+                "book_list": sorted(x.to_schema() for x in books),
+                "author_list": sorted({y.to_schema() for x in all_books for y in x.authors}),
+                "author_id": author,
+                "format_list": sorted({x.format or "None" for x in all_books}),
+                "format": format,
+                "series_list": sorted({y.to_schema() for x in all_books for y in x.series}),
+                "series_id": series,
+                "publisher_list": sorted({y.to_schema() for x in all_books for y in x.publishers}),
+                "publisher_id": publisher,
+            },
+        )
+
+
+@router.get("/{user_id}/wishlist", response_class=HTMLResponse)
+def wishlist(
+    request: Request,
+    user_id: int,
+    title: str = "",
+    author_id: int = 0,
+    format: str = "",
+    series_id: int = 0,
+    publisher_id: int = 0,
+):
+    with db_session:
+        user = controller.get_user_by_id(user_id=user_id)
+        all_books = books = {x for x in controller.list_books() if x.wisher}
+        if title:
+            books = {
+                x
+                for x in books
+                if (title in x.title)
+                or (x.title in title)
+                or (x.subtitle and ((title in x.subtitle) or (x.subtitle in title)))
+            }
+        if author_id:
+            author = controller.get_author_by_id(author_id=author_id)
+            books = {x for x in books if author in x.authors}
+        if format:
+            if format == "None":
+                books = {x for x in books if not x.format}
+            else:
+                books = {x for x in books if format == x.format}
+        if series_id:
+            series = controller.get_series_by_id(series_id=series_id)
+            books = {x for x in books if series in x.series}
+        if publisher_id:
+            publisher = controller.get_publisher_by_id(publisher_id=publisher_id)
+            books = {x for x in books if publisher in x.publishers}
+        return templates.TemplateResponse(
+            "wishlist.html",
+            {
+                "request": request,
+                "user": user.to_schema(),
+                "books": sorted(x.to_schema() for x in books),
+                "author_list": sorted({y.to_schema() for x in all_books for y in x.authors}),
+                "format_list": sorted({x.format or "None" for x in all_books}),
+                "series_list": sorted({y.to_schema() for x in all_books for y in x.series}),
+                "publisher_list": sorted({y.to_schema() for x in all_books for y in x.publishers}),
+            },
+        )

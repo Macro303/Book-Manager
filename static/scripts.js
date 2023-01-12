@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+const headers = {
+  "Accept": "application/json; charset=UTF-8",
+  "Content-Type": "application/json; charset=UTF-8",
+};
+
 function addLoading(caller){
   let element = document.getElementById(caller);
   element.classList.add("is-loading");
@@ -46,187 +51,205 @@ function removeLoading(caller){
   element.classList.remove("is-loading");
 }
 
-function addUser(caller){
+function createUser(caller){
   addLoading(caller);
-  let username = document.getElementById("usernameEntry").value;
-  $.ajax({
-    url: "/api/v0/users",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
+  let username = document.getElementById("username-entry").value;
+  fetch("/api/v0/users", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
       "username": username
     }),
-    success: function(){
-      window.location = "/book-catalogue/collection?username=" + username;
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+  })
+  .then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    return Promise.reject(response);
+  })
+  .then((data) => window.location = `/book-catalogue/${data.user_id}`)
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function selectUser(caller){
+function loginUser(caller){
   addLoading(caller);
-  let username = document.getElementById("usernameEntry").value;
-  $.ajax({
-    url: "/api/v0/users/" + username,
-    type: "GET",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
-      window.location = "/book-catalogue/collection?username=" + username;
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+  let username = document.getElementById("username-entry").value;
+  fetch(`/api/v0/users/${username}`, {
+    method: "GET",
+    headers,
+  })
+  .then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    return Promise.reject(response);
+  })
+  .then((data) => window.location = `/book-catalogue/${data.user_id}`)
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function addBook(caller){
+function addBook(caller, userId){
   addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  let isbn = document.getElementById("isbnEntry").value;
-  $.ajax({
-    url: "/api/v0/books",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
+  let isbn = document.getElementById("isbn-entry").value;
+  let openLibraryId = document.getElementById("open-library-entry").value;
+  fetch("/api/v0/books", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
       "isbn": isbn,
-      "wisher": username
+      "open_library_id": openLibraryId,
+      "wisher_id": userId
     }),
-    success: function(){
-      window.location = "/book-catalogue/wishlist?username=" + username;
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
-}
-
-function refreshBook(caller, isbn){
-  addLoading(caller);
-  $.ajax({
-    url: "/api/v0/books/" + isbn,
-    type: "PUT",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
-      window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+  })
+  .then((response) => {
+    if (response.ok) {
+      window.location = `/book-catalogue/${userId}/wishlist`;
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
 function refreshAllBooks(caller){
   addLoading(caller);
-  $.ajax({
-    url: "/api/v0/books",
-    type: "PUT",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
+  fetch("/api/v0/books/refresh", {
+    method: "PUT",
+    headers,
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function removeBook(caller, isbn){
+function refreshBook(caller, bookId){
   addLoading(caller);
-  $.ajax({
-    url: "/api/v0/books/" + isbn,
-    type: "DELETE",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
+  fetch(`/api/v0/books/${bookId}/refresh`, {
+    method: "PUT",
+    headers,
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function readBook(caller, isbn, readers){
+function updateBookReaders(caller, bookId, userId){
   addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  readers.push(username);
-  $.ajax({
-    url: "/api/v0/books/" + isbn + "/update",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
-      "wisher": "",
-      "readers": readers
+  fetch(`/api/v0/books/${bookId}/readers`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      "user_id": userId
     }),
-    success: function(){
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function unreadBook(caller, isbn, readers){
+function collectBook(caller, bookId, userId){
   addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  readers = readers.filter(e => e !== username);
-  $.ajax({
-    url: "/api/v0/books/" + isbn + "/update",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
-      "wisher": "",
-      "readers": readers
-    }),
-    success: function(){
+  fetch(`/api/v0/books/${bookId}`, {
+    method: "PUT",
+    headers,
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function acquiredBook(caller, isbn){
+function removeBook(caller, bookId){
   addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  $.ajax({
-    url: "/api/v0/books/" + isbn + "/update",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
-      "wisher": "",
-      "readers": []
-    }),
-    success: function(){
-      window.location = "/book-catalogue/collection?username=" + username;
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+  fetch(`/api/v0/books/${bookId}`, {
+    method: "DELETE",
+    headers,
+  })
+  .then((response) => {
+    if (response.ok) {
+      window.location.reload();
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
+}
+
+function filterBooks(caller, userId){
+  addLoading(caller);
+  let url = new URL(window.location);
+
+  let titleFilter = document.getElementById("title-filter-input").value;
+  if (titleFilter == "") {
+    url.searchParams.delete("title");
+  } else {
+    url.searchParams.set("title", titleFilter);
+  }
+
+  let authorFilter = document.getElementById("author-filter-select").value;
+  if (authorFilter == -1) {
+    url.searchParams.delete("author_id");
+  } else {
+    url.searchParams.set("author_id", authorFilter);
+  }
+
+  let formatFilter = document.getElementById("format-filter-select").value;
+  if (formatFilter == -1) {
+    url.searchParams.delete("format");
+  } else {
+    url.searchParams.set("format", formatFilter);
+  }
+
+  let seriesFilter = document.getElementById("series-filter-select").value;
+  if (seriesFilter == -1) {
+    url.searchParams.delete("series_id");
+  } else {
+    url.searchParams.set("series_id", seriesFilter);
+  }
+
+  let publisherFilter = document.getElementById("publisher-filter-select").value;
+  if (publisherFilter == -1) {
+    url.searchParams.delete("publisher_id");
+  } else {
+    url.searchParams.set("publisher_id", publisherFilter);
+  }
+
+  window.location = url;
 }
