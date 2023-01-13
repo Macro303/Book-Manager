@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body
 from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
+from pony.orm import db_session, flush
 
 from book_catalogue import __version__, controller
-from book_catalogue.database import SessionLocal
-from book_catalogue.isbn import convert_to_isbn
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas import Book, User
 
@@ -17,38 +15,21 @@ router = APIRouter(
 )
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@router.post(path="/users", status_code=201, responses={409: {"model": ErrorResponse}})
+def create_user(username: str = Body(embed=True)) -> User:  # noqa: B008
+    with db_session:
+        return controller.create_user(username=username).to_schema()
 
 
-@router.post(
-    path="/users", status_code=201, response_model=User, responses={409: {"model": ErrorResponse}}
-)
-def create_user(username: str = Body(embed=True), db: Session = Depends(get_db)) -> User:
-    db_user = controller.get_user(db, username)
-    if db_user:
-        raise HTTPException(status_code=409, detail="User already exists.")
-    return controller.create_user(db, username).to_schema()
-
-
-@router.get(
-    path="/users/{username}", response_model=User, responses={404: {"model": ErrorResponse}}
-)
-def get_user(username: str, db: Session = Depends(get_db)) -> User:
-    db_user = controller.get_user(db, username)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User doesn't exist.")
-    return db_user.to_schema()
+@router.get(path="/users/{username}", responses={404: {"model": ErrorResponse}})
+def get_user(username: str) -> User:
+    with db_session:
+        return controller.get_user_by_username(username=username).to_schema()
 
 
 @router.post(
     path="/books",
     status_code=201,
-    response_model=Book,
     responses={
         400: {"model": ErrorResponse},
         404: {"model": ErrorResponse},
@@ -56,110 +37,92 @@ def get_user(username: str, db: Session = Depends(get_db)) -> User:
     },
 )
 def add_book(
-    isbn: str = Body(embed=True),
-    wisher: str | None = Body(embed=True),
-    db: Session = Depends(get_db),
+    isbn: str | None = Body(embed=True, default=None),  # noqa: B008
+    open_library_id: str | None = Body(embed=True, default=None),  # noqa: B008
+    wisher_id: int = Body(embed=True),  # noqa: B008
 ) -> Book:
-    isbn = convert_to_isbn(isbn)
-    if not isbn:
-        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
-    db_wisher = controller.get_user(db, wisher)
-    if not db_wisher:
-        raise HTTPException(status_code=404, detail="User doesn't exist.")
-    db_book = controller.get_book(db, isbn)
-    if db_book:
-        raise HTTPException(status_code=409, detail="Book already added.")
-    return controller.add_book(db, isbn, db_wisher).to_schema()
+    if not isbn and not open_library_id:
+        raise HTTPException(
+            status_code=400, detail="Invalid request, isbn or open_library_id must be provided."
+        )
+    with db_session:
+        wisher = controller.get_user_by_id(user_id=wisher_id)
+        return controller.add_book_by_isbn(isbn=isbn, wisher=wisher).to_schema()
 
 
 @router.put(
-    path="/books",
-    response_model=list[Book],
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def refresh_books(db: Session = Depends(get_db)) -> list[Book]:
-    book_list = controller.list_books(db)
-    for db_book in book_list:
-        controller.refresh_book(db, db_book)
-    return sorted({x.to_schema() for x in controller.list_books(db)})
-
-
-@router.get(path="/books", response_model=list[Book], responses={404: {"model": ErrorResponse}})
-def list_books(db: Session = Depends(get_db)) -> list[Book]:
-    return sorted({x.to_schema() for x in controller.list_books(db)})
-
-
-@router.get(
-    path="/books/{isbn}",
-    response_model=Book,
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def get_book(isbn: str, db: Session = Depends(get_db)) -> Book:
-    isbn = convert_to_isbn(isbn)
-    if not isbn:
-        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
-    db_book = controller.get_book(db, isbn)
-    if not db_book:
-        raise HTTPException(status_code=404, detail="Book not added.")
-    return db_book.to_schema()
-
-
-@router.put(
-    path="/books/{isbn}",
-    response_model=Book,
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def refresh_book(isbn: str, db: Session = Depends(get_db)) -> Book:
-    isbn = convert_to_isbn(isbn)
-    if not isbn:
-        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
-    db_book = controller.get_book(db, isbn)
-    if not db_book:
-        raise HTTPException(status_code=404, detail="Book not added.")
-    return controller.refresh_book(db, db_book).to_schema()
-
-
-@router.delete(
-    path="/books/{isbn}",
+    path="/books/refresh",
     status_code=204,
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-def remove_book(isbn: str, db: Session = Depends(get_db)):
-    isbn = convert_to_isbn(isbn)
-    if not isbn:
-        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
-    db_book = controller.get_book(db, isbn)
-    if not db_book:
-        raise HTTPException(status_code=404, detail="Book not added.")
-    controller.remove_book(db, db_book)
+def refresh_all_books() -> None:
+    with db_session:
+        for book in controller.list_books():
+            controller.refresh_book(book_id=book.book_id)
+
+
+@router.get(path="/books", responses={404: {"model": ErrorResponse}})
+def list_books() -> list[Book]:
+    with db_session:
+        return sorted({x.to_schema() for x in controller.list_books()})
+
+
+@router.get(
+    path="/books/{book_id}",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def get_book(book_id: int) -> Book:
+    with db_session:
+        return controller.get_book_by_id(book_id=book_id).to_schema()
+
+
+@router.put(
+    path="/books/{book_id}",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def collect_book(book_id: int) -> Book:
+    with db_session:
+        book = controller.get_book_by_id(book_id=book_id)
+        if not book.wisher:
+            raise HTTPException(status_code=400, detail="Book has already been collected.")
+        book.wisher = None
+        flush()
+        return book.to_schema()
+
+
+@router.delete(
+    path="/books/{book_id}",
+    status_code=204,
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def remove_book(book_id: int) -> None:
+    with db_session:
+        controller.delete_book(book_id)
+
+
+@router.put(
+    path="/books/{book_id}/refresh",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def refresh_book(book_id: int) -> Book:
+    with db_session:
+        return controller.refresh_book(book_id=book_id).to_schema()
 
 
 @router.post(
-    path="/books/{isbn}/update",
-    response_model=Book,
+    path="/books/{book_id}/readers",
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-def update_book(
-    isbn: str,
-    wisher: str | None = Body(embed=True),
-    readers: list[str] = Body(embed=True),
-    db: Session = Depends(get_db),
+def update_book_readers(
+    book_id: int,
+    user_id: int = Body(embed=True),  # noqa: B008
 ) -> Book:
-    isbn = convert_to_isbn(isbn)
-    if not isbn:
-        raise HTTPException(status_code=400, detail="Invalid ISBN value.")
-    db_book = controller.get_book(db, isbn)
-    if not db_book:
-        raise HTTPException(status_code=404, detail="Book not added.")
-    db_wisher = None
-    if wisher:
-        db_wisher = controller.get_user(db, wisher)
-        if not db_wisher:
-            raise HTTPException(status_code=404, detail="User doesn't exist.")
-    db_readers = []
-    for reader in readers:
-        db_reader = controller.get_user(db, reader)
-        if not db_reader:
-            raise HTTPException(status_code=404, detail="User doesn't exist.")
-        db_readers.append(db_reader)
-    return controller.update_book(db, db_book, db_wisher, db_readers).to_schema()
+    with db_session:
+        book = controller.get_book_by_id(book_id=book_id)
+        user = controller.get_user_by_id(user_id=user_id)
+        if user in book.readers:
+            book.readers.remove(user)
+        else:
+            book.readers.add(user)
+        flush()
+        return book.to_schema()

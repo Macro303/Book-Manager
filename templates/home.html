@@ -25,6 +25,26 @@
     </span>
   </div>
   <div class="navbar-menu" id="navMenu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="/{{ user.user_id }}">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-home"></i>
+        </span>
+        <span>Home</span>
+      </a>
+      <a class="navbar-item" href="/{{ user.user_id }}/collection">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-archive"></i>
+        </span>
+        <span>Collection</span>
+      </a>
+      <a class="navbar-item" href="/{{ user.user_id }}/wishlist">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-star"></i>
+        </span>
+        <span>Wishlist</span>
+      </a>
+    </div>
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">

@@ -4,7 +4,7 @@ from book_catalogue import get_project_root
 from book_catalogue.settings import Settings
 
 
-def main():
+def main() -> None:
     settings = Settings.load().save()
     log_folder = get_project_root() / "logs"
     log_folder.mkdir(parents=True, exist_ok=True)

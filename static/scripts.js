@@ -2,17 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function openModal($el) {
     $el.classList.add('is-active');
   }
-
   function closeModal($el) {
     $el.classList.remove('is-active');
   }
-
   function closeAllModals() {
     (document.querySelectorAll('.modal') || []).forEach(($modal) => {
       closeModal($modal);
     });
   }
-
   (document.querySelectorAll('.modal-trigger') || []).forEach(($trigger) => {
     const modal = $trigger.dataset.target;
     const $target = document.getElementById(modal);
@@ -20,14 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
       openModal($target);
     });
   });
-
   (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
     const $target = $close.closest('.modal');
     $close.addEventListener('click', () => {
       closeModal($target);
     });
   });
-
   document.addEventListener('keydown', (event) => {
     const e = event || window.event;
     if (e.keyCode === 27) { // Escape key
@@ -35,6 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+const headers = {
+  "Accept": "application/json; charset=UTF-8",
+  "Content-Type": "application/json; charset=UTF-8",
+};
 
 function addLoading(caller){
   let element = document.getElementById(caller);
@@ -46,187 +46,185 @@ function removeLoading(caller){
   element.classList.remove("is-loading");
 }
 
-function addUser(caller){
+let addForm = document.getElementById("add-form");
+addForm.addEventListener('submit', e => {
+  addLoading("add-form-button");
+  let details = Object.fromEntries(new FormData(addForm));
+  console.log(details);
+
+  fetch("/api/v0/books", {
+    method: "POST",
+    headers: {
+      "Accept": "application/json; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({
+      "isbn": details["isbn"],
+      "open_library_id": "",
+      "wisher_id": details["wisher-id"]
+    }),
+  })
+  .then((response) => {
+    if(response.ok){
+      window.location = `/${details["wisher-id"]}/wishlist`;
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`)
+  }))
+  .finally(() => removeLoading("add-form-button"));
+
+  e.preventDefault();
+});
+
+function createUser(caller){
   addLoading(caller);
-  let username = document.getElementById("usernameEntry").value;
-  $.ajax({
-    url: "/api/v0/users",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
+  let username = document.getElementById("username-entry").value;
+  fetch("/api/v0/users", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
       "username": username
     }),
-    success: function(){
-      window.location = "/book-catalogue/collection?username=" + username;
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+  })
+  .then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    return Promise.reject(response);
+  })
+  .then((data) => window.location = `/book-catalogue/${data.user_id}`)
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function selectUser(caller){
+function loginUser(caller){
   addLoading(caller);
-  let username = document.getElementById("usernameEntry").value;
-  $.ajax({
-    url: "/api/v0/users/" + username,
-    type: "GET",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
-      window.location = "/book-catalogue/collection?username=" + username;
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
-}
-
-function addBook(caller){
-  addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  let isbn = document.getElementById("isbnEntry").value;
-  $.ajax({
-    url: "/api/v0/books",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
-      "isbn": isbn,
-      "wisher": username
-    }),
-    success: function(){
-      window.location = "/book-catalogue/wishlist?username=" + username;
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
-}
-
-function refreshBook(caller, isbn){
-  addLoading(caller);
-  $.ajax({
-    url: "/api/v0/books/" + isbn,
-    type: "PUT",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
-      window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+  let username = document.getElementById("username-entry").value;
+  fetch(`/api/v0/users/${username}`, {
+    method: "GET",
+    headers,
+  })
+  .then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    return Promise.reject(response);
+  })
+  .then((data) => window.location = `/book-catalogue/${data.user_id}`)
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
 function refreshAllBooks(caller){
   addLoading(caller);
-  $.ajax({
-    url: "/api/v0/books",
-    type: "PUT",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
+  fetch("/api/v0/books/refresh", {
+    method: "PUT",
+    headers: {
+      "Accept": "application/json; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function removeBook(caller, isbn){
+function refreshBook(caller, bookId){
   addLoading(caller);
-  $.ajax({
-    url: "/api/v0/books/" + isbn,
-    type: "DELETE",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    success: function(){
+  fetch(`/api/v0/books/${bookId}/refresh`, {
+    method: "PUT",
+    headers: {
+      "Accept": "application/json; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function readBook(caller, isbn, readers){
+function updateBookReaders(caller, bookId, userId){
   addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  readers.push(username);
-  $.ajax({
-    url: "/api/v0/books/" + isbn + "/update",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
-      "wisher": "",
-      "readers": readers
+  fetch(`/api/v0/books/${bookId}/readers`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({
+      "user_id": userId
     }),
-    success: function(){
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function unreadBook(caller, isbn, readers){
+function collectBook(caller, bookId, userId){
   addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  readers = readers.filter(e => e !== username);
-  $.ajax({
-    url: "/api/v0/books/" + isbn + "/update",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
-      "wisher": "",
-      "readers": readers
-    }),
-    success: function(){
+  fetch(`/api/v0/books/${bookId}`, {
+    method: "PUT",
+    headers: {
+      "Accept": "application/json; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+  })
+  .then((response) => {
+    if (response.ok) {
       window.location.reload();
-    },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
 
-function acquiredBook(caller, isbn){
+function removeBook(caller, bookId){
   addLoading(caller);
-  let params = new URLSearchParams(window.location.search);
-  let username = params.get("username");
-  $.ajax({
-    url: "/api/v0/books/" + isbn + "/update",
-    type: "POST",
-    dataType: "json",
-    contentType: "application/json; charset=UTF-8",
-    data: JSON.stringify({
-      "wisher": "",
-      "readers": []
-    }),
-    success: function(){
-      window.location = "/book-catalogue/collection?username=" + username;
+  fetch(`/api/v0/books/${bookId}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
     },
-    error: function(xhr){
-      alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
-      removeLoading(caller);
-    },
-  });
+  })
+  .then((response) => {
+    if (response.ok) {
+      window.location.reload();
+    }
+    return Promise.reject(response);
+  })
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  }))
+  .finally(() => removeLoading(caller));
 }
