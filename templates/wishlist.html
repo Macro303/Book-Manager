@@ -328,7 +328,7 @@
                 </section>
                 <footer class="modal-card-foot is-centered">
                   <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-collect-button" onclick="collectBook('{{ _book.identifiers.book_id }}-collect-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Collect</button>
-                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-save-button" onclick="editBook('{{ _book.identifiers.book_id }}-save-button', {{ _book.identifiers.book_id }})">Save</button>
+                  <button disabled class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-save-button" onclick="editBook('{{ _book.identifiers.book_id }}-save-button', {{ _book.identifiers.book_id }})">Save</button>
                   <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-refresh-button" onclick="refreshBook('{{ _book.identifiers.book_id }}-refresh-button', {{ _book.identifiers.book_id }})">Refresh</button>
                   <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-remove-button" onclick="removeBook('{{ _book.identifiers.book_id }}-remove-button', {{ _book.identifiers.book_id }})">Remove</button>
                 </footer>

@@ -1,0 +1,12 @@
+[Unit]
+Description=It's a book catalogue.... for cataloging books.
+After=network.target
+
+[Service]
+Type=idle
+Restart=on-failure
+User=buriedincode
+ExecStart=/bin/bash -c 'cd /data/projects/Buried-In-Code/Book-Catalogue && source .venv/bin/activate && python run.py'
+
+[Install]
+WantedBy=multi-user.target
