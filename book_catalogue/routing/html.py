@@ -79,10 +79,10 @@ def wishlist(
     request: Request,
     user_id: int,
     title: str = "",
-    author_id: int = 0,
+    author: int = 0,
     format: str = "",
-    series_id: int = 0,
-    publisher_id: int = 0,
+    series: int = 0,
+    publisher: int = 0,
 ):
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
@@ -95,29 +95,33 @@ def wishlist(
                 or (x.title in title)
                 or (x.subtitle and ((title in x.subtitle) or (x.subtitle in title)))
             }
-        if author_id:
-            author = controller.get_author_by_id(author_id=author_id)
-            books = {x for x in books if author in x.authors}
+        if author:
+            _author = controller.get_author_by_id(author_id=author)
+            books = {x for x in books if _author in x.authors}
         if format:
             if format == "None":
                 books = {x for x in books if not x.format}
             else:
                 books = {x for x in books if format == x.format}
-        if series_id:
-            series = controller.get_series_by_id(series_id=series_id)
-            books = {x for x in books if series in x.series}
-        if publisher_id:
-            publisher = controller.get_publisher_by_id(publisher_id=publisher_id)
-            books = {x for x in books if publisher in x.publishers}
+        if series:
+            _series = controller.get_series_by_id(series_id=series)
+            books = {x for x in books if _series in x.series}
+        if publisher:
+            _publisher = controller.get_publisher_by_id(publisher_id=publisher)
+            books = {x for x in books if _publisher in x.publishers}
         return templates.TemplateResponse(
             "wishlist.html",
             {
                 "request": request,
                 "user": user.to_schema(),
-                "books": sorted(x.to_schema() for x in books),
+                "book_list": sorted(x.to_schema() for x in books),
                 "author_list": sorted({y.to_schema() for x in all_books for y in x.authors}),
+                "author_id": author,
                 "format_list": sorted({x.format or "None" for x in all_books}),
+                "format": format,
                 "series_list": sorted({y.to_schema() for x in all_books for y in x.series}),
+                "series_id": series,
                 "publisher_list": sorted({y.to_schema() for x in all_books for y in x.publishers}),
+                "publisher_id": publisher,
             },
         )

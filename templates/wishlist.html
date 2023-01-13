@@ -8,7 +8,7 @@
   <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">-->
   <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/superhero/bulmaswatch.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
-  <link href="/static/styles.css" id="favicon" rel="icon" type="image/x-icon">
+  <link href="/static/styles.css" rel="stylesheet">
   <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
   <link href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" rel="stylesheet">
 </head>
@@ -16,7 +16,7 @@
 <nav aria-label="main navigation" class="navbar is-fixed-top is-info" role="navigation">
   <div class="navbar-brand">
     <a class="navbar-item" href="/" id="navbar-banner">
-      <img alt="Logo" src="https://bulma.io/images/bulma-logo.png">
+      <img alt="Logo" src="/static/logo.png">
     </a>
     <span class="navbar-burger burger" data-target="navMenu">
       <span></span>
@@ -40,7 +40,7 @@
       </a>
       <a class="navbar-item" href="/{{ user.user_id }}/wishlist">
         <span class="icon is-medium">
-          <i class="fas fa-lg fa-archive"></i>
+          <i class="fas fa-lg fa-star"></i>
         </span>
         <span>Wishlist</span>
       </a>
@@ -65,131 +65,146 @@
     </div>
   </div>
 </nav>
-    <section class="section">
-      <div class="container is-fluid">
-        <h1 class="title has-text-centered">Wishlist</h1>
-        <div class="columns is-multiline is-centered">
-          <div class="column is-two-fifths">
-            <div class="card has-text-light has-background-dark">
-              <header class="card-header">
-                <p class="card-header-title">Add Book</p>
-              </header>
-              <div class="card-content">
-                <div class="field">
-                  <input class="input" id="isbn-input" placeholder="Isbn" type="text">
-                </div>
-                <div class="field">
-                  <input class="input" id="open-library-input" placeholder="OpenLibrary Id" type="text">
-                </div>
-                <div class="buttons is-centered has-addons">
-                  <a class="card-footer-item button" id="add-book-button" onclick="addBook('add-book-button', {{ user.user_id }})">Add Book</a>
+<main class="section is-flex-grow-1">
+  <div class="container">
+    <header class="block has-text-centered">
+      <h1 class="title">Wishlist</h1>
+    </header>
+    <section>
+      <div class="columns">
+        <div class="column is-one-fifth">
+          <div class="box">
+            <h1 class="title is-5">Filter Books</h1>
+            <form accept-charset="UTF-8" action="/{{ user.user_id }}/collection" method="get">
+              <div class="field">
+                <label class="label">Title</label>
+                <div class="control">
+                  <input class="input" name="title" placeholder="Title" type="text">
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="column">
-            <div class="card has-text-light has-background-dark">
-              <header class="card-header">
-                <p class="card-header-title">Refresh All Books</p>
-              </header>
-              <div class="card-content">
-                <div class="content">
-                  <p>Warning this process may take a while</p>
-                </div>
-                <div class="buttons is-centered has-addons">
-                  <a class="card-footer-item button" id="refresh-all-button" onclick="refreshAllBooks('refresh-all-button')">Refresh</a>
+              <div class="field">
+                <label class="label">Author</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select name="author">
+                      <option value=0{% if not author_id %} selected{% endif %}>Select Author</option>
+                      {% for _author in author_list %}
+                      <option value={{ _author.author_id }}{% if _author.author_id == author_id %} selected{% endif %}>{{ _author.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
+              <div class="field">
+                <label class="label">Format</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select name="format">
+                      <option value=""{% if not format %} selected{% endif %}>Select Format</option>
+                      {% for _format in format_list %}
+                      <option value="{{ _format }}"{% if _format == format %} selected{% endif %}>{{ _format }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="label">Series</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select name="series">
+                      <option value=0{% if not series_id %} selected{% endif %}>Select Series</option>
+                      {% for _series in series_list %}
+                      <option value={{ _series.series_id }}{% if _series.series_id == series_id %} selected{% endif %}>{{ _series.title }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="label">Publisher</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select name="publisher">
+                      <option value=0{% if not publisher_id %} selected{% endif %}>Select Publisher</option>
+                      {% for _publisher in publisher_list %}
+                      <option value={{ _publisher.publisher_id }}{% if _publisher.publisher_id == publisher_id %} selected{% endif %}>{{ _publisher.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="field is-grouped is-grouped-centered">
+                <div class="control">
+                  <button class="button is-primary">Filter</button>
+                </div>
+              </div>
+            </form>
           </div>
-          <div class="column is-two-fifths">
-            <div class="card has-text-light has-background-dark">
-              <header class="card-header">
-                <p class="card-header-title">Filter Books</p>
-              </header>
-              <div class="card-content">
-                <div class="field">
-                  <input class="input" id="title-filter-input" placeholder="Title Filter" type="text">
+          <div class="box">
+            <h1 class="title is-5">Add Book</h1>
+            <form accept-charset="UTF-8" action="/api/v0/books" id="add-form" method="post">
+              <div class="field" hidden>
+                <label class="label">Wisher Id</label>
+                <div class="control">
+                  <input class="input" name="wisher-id" placeholder="Wisher Id" readonly type="text" value="{{ user.user_id }}" />
                 </div>
-                <div class="field">
-                  <div class="select is-fullwidth">
-                    <select id="author-filter-select">
-                      <option value=-1 selected disabled>Author Filter</option>
-                      {% for author in author_list %}
-                        <option value={{ author.author_id }}>{{ author.name }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
+              </div>
+              <div class="field">
+                <label class="label">ISBN</label>
+                <div class="control">
+                  <input class="input" name="isbn" placeholder="ISBN" type="text">
                 </div>
-                <div class="field">
-                  <div class="select is-fullwidth">
-                    <select id="format-filter-select">
-                      <option value=-1 selected disabled>Format Filter</option>
-                      {% for format in format_list %}
-                        <option value="{{ format }}">{{ format }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
+              </div>
+              <div class="field is-grouped is-grouped-centered">
+                <div class="control">
+                  <button class="button is-primary" id="add-form-button">Add</button>
                 </div>
-                <div class="field">
-                  <div class="select is-fullwidth">
-                    <select id="series-filter-select" disabled>
-                      <option value=-1 selected disabled>Series Filter</option>
-                      {% for series in series_list %}
-                        <option value={{ series.series_id }}>{{ series.title }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="field">
-                  <div class="select is-fullwidth">
-                    <select id="publisher-filter-select">
-                      <option value=-1 selected disabled>Publisher Filter</option>
-                      {% for publisher in publisher_list %}
-                        <option value={{ publisher.publisher_id }}>{{ publisher.name }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="buttons is-centered has-addons">
-                  <a class="card-footer-item button" id="filter-button" onclick="filterBooks('filter-button', {{ user.user_id }})">Filter Books</a>
-                </div>
+              </div>
+            </form>
+          </div>
+          <div class="box">
+            <h1 class="title is-5">Refresh All</h1>
+            <div class="content">
+              <p>Warning this process may take a while</p>
+            </div>
+            <div class="field is-grouped is-grouped-centered">
+              <div class="control">
+                <button class="button is-primary">Refresh</button>
               </div>
             </div>
           </div>
         </div>
-        <div class="columns is-multiline is-centered is-mobile">
-          {% for book in books %}
-            <div class="column is-narrow">
+        <div class="column">
+          <div class="columns is-multiline">
+            {% for _book in book_list %}
+            <div class="column is-one-quarter has-text-centered">
               <div class="card has-text-light has-background-dark">
                 <div class="card-image">
-                  <figure class="image is-2by3" style="width:250px">
-                    <img alt="{{ book.title }} by {{ '; '.join(book.authors) }}" loading="lazy" onerror="this.src='https://via.placeholder.com/750x1125'" src="{{ book.image_url }}"/>
+                  <figure class="image is-2by3">
+                    <img alt="{{ _book.title }} by {{ '; '.join(_book.authors) }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ _book.image_url }}" width="250"/>
                   </figure>
                 </div>
-                <div class="card-content" style="width:250px">
+                <div class="card-content">
                   <div class="media">
                     <div class="media-content">
-                      <p class="title is-4">{{ book.title }}</p>
-                      {% if book.subtitle %}
-                        <p class="subtitle is-6">{{ book.subtitle }}</p>
-                      {% endif %}
+                      <p class="title is-5">{{ _book.title }}</p>
+                      <p class="subtitle is-6">{{ _book.subtitle or "" }}</p>
                     </div>
                   </div>
-                  <div class="divider"></div>
-                  <div class="buttons is-centered has-addons">
-                    <button class="modal-trigger button is-fullwidth" data-target="{{ book.identifiers.book_id }}-view-modal" id="{{ book.identifiers.book_id }}-view-button">View</button>
-                    <button class="modal-trigger button is-fullwidth" data-target="{{ book.identifiers.book_id }}-edit-modal" id="{{ book.identifiers.book_id }}-edit-button">Edit</button>
-                  </div>
                 </div>
+                <footer class="card-footer">
+                  <a class="card-footer-item modal-trigger" data-target="{{ _book.identifiers.book_id }}-view-modal" id="{{ _book.identifiers.book_id }}-view-button">View</a>
+                  <a class="card-footer-item modal-trigger" data-target="{{ _book.identifiers.book_id }}-edit-modal" id="{{ _book.identifiers.book_id }}-edit-button">Edit</a>
+                </footer>
               </div>
             </div>
-            <div id="{{ book.identifiers.book_id }}-view-modal" class="modal">
+            <div class="modal" id="{{ _book.identifiers.book_id }}-view-modal">
               <div class="modal-background"></div>
               <div class="modal-card">
                 <header class="modal-card-head">
                   <div class="content">
-                    <p class="modal-card-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
+                    <p class="modal-card-title">{{ _book.title }}</p>
                   </div>
                 </header>
                 <section class="modal-card-body">
@@ -199,7 +214,7 @@
                         <p class="level-item subtitle is-5">Authors</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.author_names }}</p>
+                        <p class="level-item">{{ _book.author_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -207,7 +222,7 @@
                         <p class="level-item subtitle is-5">Format</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.format }}</p>
+                        <p class="level-item">{{ _book.format }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -215,7 +230,7 @@
                         <p class="level-item subtitle is-5">Series</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.series_names }}</p>
+                        <p class="level-item">{{ _book.series_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -223,7 +238,7 @@
                         <p class="level-item subtitle is-5">Publishers</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.publisher_names }}</p>
+                        <p class="level-item">{{ _book.publisher_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -231,7 +246,7 @@
                         <p class="level-item subtitle is-5">Isbn</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.identifiers.isbn_13 }}</p>
+                        <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -239,24 +254,24 @@
                         <p class="level-item subtitle is-5">Wisher</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.wisher.username }}</p>
+                        <p class="level-item">{{ _book.wisher.username }}</p>
                       </div>
                     </nav>
                   </div>
                 </section>
                 <footer class="modal-card-foot is-centered">
-                  <a class="button is-fullwidth" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
-                  <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Open Library</a>
-                  <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+                  <a class="button is-fullwidth" href="https://www.bookdepository.com/search?searchIsbn={{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+                  <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Open Library</a>
+                  <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
                 </footer>
               </div>
             </div>
-            <div id="{{ book.identifiers.book_id }}-edit-modal" class="modal">
+            <div class="modal" id="{{ _book.identifiers.book_id }}-edit-modal">
               <div class="modal-background"></div>
               <div class="modal-card">
                 <header class="modal-card-head">
                   <div class="content">
-                    <p class="modal-card-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
+                    <p class="modal-card-title">{{ _book.title }}</p>
                   </div>
                 </header>
                 <section class="modal-card-body">
@@ -266,7 +281,7 @@
                         <p class="level-item subtitle is-5">Authors</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="authors-input" placeholder="Authors" type="text" value="{{ book.author_names }}">
+                        <input class="level-item input" id="authors-input" placeholder="Authors" type="text" value="{{ _book.author_names }}" />
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -274,7 +289,7 @@
                         <p class="level-item subtitle is-5">Format</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="format-input" placeholder="Format" type="text" value="{{ book.format }}">
+                        <input class="level-item input" id="format-input" placeholder="Format" type="text" value="{{ _book.format }}" />
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -282,7 +297,7 @@
                         <p class="level-item subtitle is-5">Series</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="series-input" placeholder="Series" type="text" value="{{ book.series_names }}">
+                        <p class="level-item">{{ _book.series_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -290,7 +305,7 @@
                         <p class="level-item subtitle is-5">Publishers</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="publisher-input" placeholder="Publishers" type="text" value="{{ book.publisher_names }}">
+                        <p class="level-item">{{ _book.publisher_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -298,23 +313,34 @@
                         <p class="level-item subtitle is-5">Isbn</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.identifiers.isbn_13 }}</p>
+                        <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Wisher</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ _book.wisher.username }}</p>
                       </div>
                     </nav>
                   </div>
                 </section>
                 <footer class="modal-card-foot is-centered">
-                  <button class="button is-fullwidth" onclick="collectBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }}, {{ user.user_id }})">Collect</button>
-                  <button class="button is-fullwidth" onclick="editBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Edit</button>
-                  <button class="button is-fullwidth" onclick="refreshBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Refresh</button>
-                  <button class="button is-fullwidth" onclick="removeBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Remove</button>
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-collect-button" onclick="collectBook('{{ _book.identifiers.book_id }}-collect-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Collect</button>
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-save-button" onclick="editBook('{{ _book.identifiers.book_id }}-save-button', {{ _book.identifiers.book_id }})">Save</button>
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-refresh-button" onclick="refreshBook('{{ _book.identifiers.book_id }}-refresh-button', {{ _book.identifiers.book_id }})">Refresh</button>
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-remove-button" onclick="removeBook('{{ _book.identifiers.book_id }}-remove-button', {{ _book.identifiers.book_id }})">Remove</button>
                 </footer>
               </div>
             </div>
-          {% endfor %}
+            {% endfor %}
+          </div>
         </div>
       </div>
     </section>
+  </div>
+</main>
 <footer class="footer has-background-dark has-text-light">
   <div class="columns">
     <div class="column is-one-third">

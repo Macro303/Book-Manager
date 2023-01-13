@@ -8,6 +8,7 @@
   <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">-->
   <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/superhero/bulmaswatch.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
+  <link href="/static/styles.css" rel="stylesheet">
   <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
   <link href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" rel="stylesheet">
 </head>
@@ -15,7 +16,7 @@
 <nav aria-label="main navigation" class="navbar is-fixed-top is-info" role="navigation">
   <div class="navbar-brand">
     <a class="navbar-item" href="/" id="navbar-banner">
-      <img alt="Logo" src="https://bulma.io/images/bulma-logo.png">
+      <img alt="Logo" src="/static/logo.png">
     </a>
     <span class="navbar-burger burger" data-target="navMenu">
       <span></span>
@@ -39,7 +40,7 @@
       </a>
       <a class="navbar-item" href="/{{ user.user_id }}/wishlist">
         <span class="icon is-medium">
-          <i class="fas fa-lg fa-archive"></i>
+          <i class="fas fa-lg fa-star"></i>
         </span>
         <span>Wishlist</span>
       </a>

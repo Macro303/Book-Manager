@@ -8,7 +8,7 @@
   <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">-->
   <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/superhero/bulmaswatch.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
-  <link href="/static/styles.css" id="favicon" rel="icon" type="image/x-icon">
+  <link href="/static/styles.css" rel="stylesheet">
   <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
   <link href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" rel="stylesheet">
 </head>
@@ -143,7 +143,13 @@
           </div>
           <div class="box">
             <h1 class="title is-5">Add Book</h1>
-            <form accept-charset="UTF-8" action="/books" method="post">
+            <form accept-charset="UTF-8" action="/api/v0/books" id="add-form" method="post">
+              <div class="field" hidden>
+                <label class="label">Wisher Id</label>
+                <div class="control">
+                  <input class="input" name="wisher-id" placeholder="Wisher Id" readonly type="text" value="{{ user.user_id }}" />
+                </div>
+              </div>
               <div class="field">
                 <label class="label">ISBN</label>
                 <div class="control">
@@ -152,7 +158,7 @@
               </div>
               <div class="field is-grouped is-grouped-centered">
                 <div class="control">
-                  <button class="button is-primary">Add</button>
+                  <button class="button is-primary" id="add-form-button">Add</button>
                 </div>
               </div>
             </form>
@@ -164,7 +170,7 @@
             </div>
             <div class="field is-grouped is-grouped-centered">
               <div class="control">
-                <button class="button is-primary">Refresh</button>
+                <button class="button is-primary" disabled>Refresh</button>
               </div>
             </div>
           </div>
@@ -195,160 +201,10 @@
             </div>
             <div class="modal" id="{{ _book.identifiers.book_id }}-view-modal">
               <div class="modal-background"></div>
-                <div class="modal-card">
-                  <header class="modal-card-head">
-                    <div class="content">
-                      <p class="modal-card-title">{{ _book.title }}</p>
-                    </div>
-                  </header>
-                  <section class="modal-card-body">
-                    <div class="content">
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Authors</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.author_names }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Format</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.format }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Series</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.series_names }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Publishers</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.publisher_names }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Isbn</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Readers</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.reader_names }}</p>
-                        </div>
-                      </nav>
-                    </div>
-                  </section>
-                  <footer class="modal-card-foot is-centered">
-                    <a class="button is-fullwidth" href="https://www.bookdepository.com/search?searchIsbn={{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
-                    <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Open Library</a>
-                    <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
-                  </footer>
-                </div>
-              </div>
-            <div class="modal" id="{{ _book.identifiers.book_id }}-edit-modal">
-              <div class="modal-background"></div>
-                <div class="modal-card">
-                  <header class="modal-card-head">
-                    <div class="content">
-                      <p class="modal-card-title">{{ _book.title }}</p>
-                    </div>
-                  </header>
-                  <section class="modal-card-body">
-                    <div class="content">
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Authors</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.author_names }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Format</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.format }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Series</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.series_names }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Publishers</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.publisher_names }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Isbn</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
-                        </div>
-                      </nav>
-                      <nav class="level is-mobile">
-                        <div class="level-left">
-                          <p class="level-item subtitle is-5">Readers</p>
-                        </div>
-                        <div class="level-right">
-                          <p class="level-item">{{ _book.reader_names }}</p>
-                        </div>
-                      </nav>
-                    </div>
-                  </section>
-                  <footer class="modal-card-foot is-centered">
-                    {% if user in _book.readers %}
-                    <button class="button is-fullwidth" onclick="updateBookReaders('{{ _book.identifiers.book_id }}-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Unread</button>
-                    {% else %}
-                    <button class="button is-fullwidth" onclick="updateBookReaders('{{ _book.identifiers.book_id }}-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Read</button>
-                    {% endif %}
-                    <button class="button is-fullwidth" onclick="editBook('{{ _book.identifiers.book_id }}-button', {{ _book.identifiers.book_id }})">Edit</button>
-                    <button class="button is-fullwidth" onclick="refreshBook('{{ _book.identifiers.book_id }}-button', {{ _book.identifiers.book_id }})">Refresh</button>
-                    <button class="button is-fullwidth" onclick="removeBook('{{ _book.identifiers.book_id }}-button', {{ _book.identifiers.book_id }})">Remove</button>
-                  </footer>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-</main>
-<section class="section">
-      <div class="container is-fluid">
-        <div class="columns is-multiline is-centered is-mobile">
-          {% for book in books %}
-            <div id="{{ book.identifiers.book_id }}-edit-modal" class="modal">
-              <div class="modal-background"></div>
               <div class="modal-card">
                 <header class="modal-card-head">
                   <div class="content">
-                    <p class="modal-card-title">{{ book.title }}{% if book.subtitle %}: {{ book.subtitle }}{% endif %}</p>
+                    <p class="modal-card-title">{{ _book.title }}</p>
                   </div>
                 </header>
                 <section class="modal-card-body">
@@ -358,7 +214,7 @@
                         <p class="level-item subtitle is-5">Authors</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="authors-input" placeholder="Authors" type="text" value="{{ book.author_names }}">
+                        <p class="level-item">{{ _book.author_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -366,7 +222,7 @@
                         <p class="level-item subtitle is-5">Format</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="format-input" placeholder="Format" type="text" value="{{ book.format }}">
+                        <p class="level-item">{{ _book.format }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -374,7 +230,7 @@
                         <p class="level-item subtitle is-5">Series</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="series-input" placeholder="Series" type="text" value="{{ book.series_names }}">
+                        <p class="level-item">{{ _book.series_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -382,7 +238,7 @@
                         <p class="level-item subtitle is-5">Publishers</p>
                       </div>
                       <div class="level-right">
-                        <input class="level-item input" id="publisher-input" placeholder="Publishers" type="text" value="{{ book.publisher_names }}">
+                        <p class="level-item">{{ _book.publisher_names }}</p>
                       </div>
                     </nav>
                     <nav class="level is-mobile">
@@ -390,27 +246,105 @@
                         <p class="level-item subtitle is-5">Isbn</p>
                       </div>
                       <div class="level-right">
-                        <p class="level-item">{{ book.identifiers.isbn_13 }}</p>
+                        <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Readers</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ _book.reader_names }}</p>
                       </div>
                     </nav>
                   </div>
                 </section>
                 <footer class="modal-card-foot is-centered">
-                  {% if user in book.readers %}
-                    <button class="button is-fullwidth" onclick="updateBookReaders('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }}, {{ user.user_id }})">Unread</button>
-                  {% else %}
-                    <button class="button is-fullwidth" onclick="updateBookReaders('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }}, {{ user.user_id }})">Read</button>
-                  {% endif %}
-                  <button class="button is-fullwidth" onclick="editBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Edit</button>
-                  <button class="button is-fullwidth" onclick="refreshBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Refresh</button>
-                  <button class="button is-fullwidth" onclick="removeBook('{{ book.identifiers.book_id }}-button', {{ book.identifiers.book_id }})">Remove</button>
+                  <a class="button is-fullwidth" href="https://www.bookdepository.com/search?searchIsbn={{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+                  <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Open Library</a>
+                  <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
                 </footer>
               </div>
             </div>
-          {% endfor %}
+            <div class="modal" id="{{ _book.identifiers.book_id }}-edit-modal">
+              <div class="modal-background"></div>
+              <div class="modal-card">
+                <header class="modal-card-head">
+                  <div class="content">
+                    <p class="modal-card-title">{{ _book.title }}</p>
+                  </div>
+                </header>
+                <section class="modal-card-body">
+                  <div class="content">
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Authors</p>
+                      </div>
+                      <div class="level-right">
+                        <input class="level-item input" id="authors-input" placeholder="Authors" type="text" value="{{ _book.author_names }}" />
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Format</p>
+                      </div>
+                      <div class="level-right">
+                        <input class="level-item input" id="format-input" placeholder="Format" type="text" value="{{ _book.format }}" />
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Series</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ _book.series_names }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Publishers</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ _book.publisher_names }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Isbn</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
+                      </div>
+                    </nav>
+                    <nav class="level is-mobile">
+                      <div class="level-left">
+                        <p class="level-item subtitle is-5">Readers</p>
+                      </div>
+                      <div class="level-right">
+                        <p class="level-item">{{ _book.reader_names }}</p>
+                      </div>
+                    </nav>
+                  </div>
+                </section>
+                <footer class="modal-card-foot is-centered">
+                  {% if user in _book.readers %}
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-unread-button" onclick="updateBookReaders('{{ _book.identifiers.book_id }}-unread-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Unread</button>
+                  {% else %}
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-read-button" onclick="updateBookReaders('{{ _book.identifiers.book_id }}-read-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Read</button>
+                  {% endif %}
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-save-button" onclick="editBook('{{ _book.identifiers.book_id }}-save-button', {{ _book.identifiers.book_id }})">Save</button>
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-refresh-button" onclick="refreshBook('{{ _book.identifiers.book_id }}-refresh-button', {{ _book.identifiers.book_id }})">Refresh</button>
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-remove-button" onclick="removeBook('{{ _book.identifiers.book_id }}-remove-button', {{ _book.identifiers.book_id }})">Remove</button>
+                </footer>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </section>
+  </div>
+</main>
 <footer class="footer has-background-dark has-text-light">
   <div class="columns">
     <div class="column is-one-third">
