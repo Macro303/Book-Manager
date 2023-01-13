@@ -2,8 +2,7 @@ __all__ = ["BaseModel", "DatetimeResource", "TextResource", "Resource"]
 
 from datetime import datetime
 
-from pydantic import BaseModel as PyModel
-from pydantic import Extra
+from pydantic import BaseModel as PyModel, Extra
 
 
 class BaseModel(PyModel):

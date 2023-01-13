@@ -53,7 +53,7 @@ def list_books() -> list[Book]:
     return Book.select()
 
 
-def load_open_library():
+def load_open_library() -> OpenLibrary:
     return OpenLibrary(cache=None)
 
 
@@ -123,7 +123,7 @@ def refresh_book(book_id: int) -> Book:
     return book
 
 
-def delete_book(book_id: int):
+def delete_book(book_id: int) -> None:
     book = get_book_by_id(book_id=book_id)
     book.delete()
 

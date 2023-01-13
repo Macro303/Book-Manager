@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from pony.orm import db_session
 
@@ -10,12 +10,12 @@ templates = Jinja2Templates(directory=get_project_root() / "templates")
 
 
 @router.get("/", response_class=HTMLResponse)
-def index(request: Request):
+def index(request: Request) -> Response:
     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @router.get("/{user_id}", response_class=HTMLResponse)
-def home(request: Request, user_id: int):
+def home(request: Request, user_id: int) -> Response:
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
         return templates.TemplateResponse("home.html", {"request": request, "user": user})
@@ -27,10 +27,10 @@ def collection(
     user_id: int,
     title: str = "",
     author: int = 0,
-    format: str = "",
+    format: str = "",  # noqa: A002
     series: int = 0,
     publisher: int = 0,
-):
+) -> Response:
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
         all_books = books = {x for x in controller.list_books() if not x.wisher}
@@ -80,10 +80,10 @@ def wishlist(
     user_id: int,
     title: str = "",
     author: int = 0,
-    format: str = "",
+    format: str = "",  # noqa: A002
     series: int = 0,
     publisher: int = 0,
-):
+) -> Response:
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
         all_books = books = {x for x in controller.list_books() if x.wisher}

@@ -4,7 +4,7 @@ from http import HTTPStatus
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from rich.traceback import install
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -29,7 +29,7 @@ app.mount("/static", StaticFiles(directory=get_project_root() / "static"), name=
 
 
 @app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request, exc):
+async def http_exception_handler(request, exc) -> JSONResponse:  # noqa: ANN001, ARG001
     status = HTTPStatus(exc.status_code)
     return JSONResponse(
         status_code=status,
@@ -43,7 +43,7 @@ async def http_exception_handler(request, exc):
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
+async def validation_exception_handler(request, exc) -> JSONResponse:  # noqa: ANN001, ARG001
     status = HTTPStatus(422)
     details = []
     for error in exc.errors():

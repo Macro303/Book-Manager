@@ -16,7 +16,7 @@ router = APIRouter(
 
 
 @router.post(path="/users", status_code=201, responses={409: {"model": ErrorResponse}})
-def create_user(username: str = Body(embed=True)) -> User:
+def create_user(username: str = Body(embed=True)) -> User:  # noqa: B008
     with db_session:
         return controller.create_user(username=username).to_schema()
 
@@ -37,9 +37,9 @@ def get_user(username: str) -> User:
     },
 )
 def add_book(
-    isbn: str | None = Body(embed=True, default=None),
-    open_library_id: str | None = Body(embed=True, default=None),
-    wisher_id: int = Body(embed=True),
+    isbn: str | None = Body(embed=True, default=None),  # noqa: B008
+    open_library_id: str | None = Body(embed=True, default=None),  # noqa: B008
+    wisher_id: int = Body(embed=True),  # noqa: B008
 ) -> Book:
     if not isbn and not open_library_id:
         raise HTTPException(
@@ -55,7 +55,7 @@ def add_book(
     status_code=204,
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-def refresh_all_books():
+def refresh_all_books() -> None:
     with db_session:
         for book in controller.list_books():
             controller.refresh_book(book_id=book.book_id)
@@ -95,7 +95,7 @@ def collect_book(book_id: int) -> Book:
     status_code=204,
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-def remove_book(book_id: int):
+def remove_book(book_id: int) -> None:
     with db_session:
         controller.delete_book(book_id)
 
@@ -115,7 +115,7 @@ def refresh_book(book_id: int) -> Book:
 )
 def update_book_readers(
     book_id: int,
-    user_id: int = Body(embed=True),
+    user_id: int = Body(embed=True),  # noqa: B008
 ) -> Book:
     with db_session:
         book = controller.get_book_by_id(book_id=book_id)

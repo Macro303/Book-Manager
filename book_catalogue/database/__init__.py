@@ -17,6 +17,6 @@ db.generate_mapping(create_tables=True)
 
 
 @db.on_connect(provider="sqlite")
-def sqlite_case_sensitivity(database, connection):
+def sqlite_case_sensitivity(database, connection) -> None:  # noqa: ANN001, ARG001
     cursor = connection.cursor()
     cursor.execute("PRAGMA case_sensitive_like = OFF")

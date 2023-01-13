@@ -16,12 +16,12 @@ class User(BaseModel):
     user_id: int
     username: str
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, User):
             raise NotImplementedError()
         return self.username < other.username
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, User):
             raise NotImplementedError()
         return self.username == other.username
@@ -39,12 +39,12 @@ class Author(BaseModel):
     name: str
     identifiers: AuthorIdentifiers
 
-    def __lt__(self, other) -> int:
+    def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, Author):
             raise NotImplementedError()
         return self.name < other.name
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Author):
             raise NotImplementedError()
         return self.name == other.name
@@ -57,12 +57,12 @@ class Publisher(BaseModel):
     publisher_id: int
     name: str
 
-    def __lt__(self, other) -> int:
+    def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, Publisher):
             raise NotImplementedError()
         return self.name < other.name
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Publisher):
             raise NotImplementedError()
         return self.name == other.name
@@ -75,12 +75,12 @@ class Series(BaseModel):
     series_id: int
     title: str
 
-    def __lt__(self, other) -> int:
+    def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, Series):
             raise NotImplementedError()
         return self.title < other.title
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Series):
             raise NotImplementedError()
         return self.title == other.title
@@ -137,28 +137,31 @@ class Book(BaseModel):
     def reader_names(self) -> str:
         return "; ".join(x.username for x in self.readers)
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, Book):
             raise NotImplementedError()
         if self.first_series and other.first_series and self.first_series != other.first_series:
             return self.first_series < other.first_series
-        elif self.first_series and not other.first_series:
+        if self.first_series and not other.first_series:
             return False
-        elif not self.first_series and other.first_series:
+        if not self.first_series and other.first_series:
             return True
+
         if self.title != other.title:
             return self.title < other.title
+
         if (self.subtitle or "") != (other.subtitle or ""):
             return self.subtitle < other.subtitle
+
         if self.first_author and other.first_author and self.first_author != other.first_author:
             return self.first_author < other.first_author
-        elif self.first_author and not other.first_author:
+        if self.first_author and not other.first_author:
             return False
-        elif not self.first_author and other.first_author:
+        if not self.first_author and other.first_author:
             return True
         return False
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Book):
             raise NotImplementedError()
         return (self.first_series, self.title, (self.subtitle or ""), self.first_author,) == (

@@ -41,26 +41,26 @@ class OpenLibrary:
             response = get(url, params=params, headers=self.headers, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
-        except ConnectionError:
+        except ConnectionError as err:
             CONSOLE.print_exception(theme="ansi_dark")
-            raise HTTPException(status_code=500, detail=f"Unable to connect to '{url}'")
+            raise HTTPException(status_code=500, detail=f"Unable to connect to '{url}'") from err
         except HTTPError as err:
             CONSOLE.print_exception(theme="ansi_dark")
             try:
-                raise HTTPException(status_code=500, detail=err.response.json()["error"])
-            except JSONDecodeError:
+                raise HTTPException(status_code=500, detail=err.response.json()["error"]) from err
+            except JSONDecodeError as sub_err:
                 CONSOLE.print_exception(theme="ansi_dark")
                 raise HTTPException(
                     status_code=500, detail=f"Unable to parse error response from '{url}' as Json"
-                )
-        except JSONDecodeError:
+                ) from sub_err
+        except JSONDecodeError as err:
             CONSOLE.print_exception(theme="ansi_dark")
             raise HTTPException(
                 status_code=500, detail=f"Unable to parse response from '{url}' as Json"
-            )
-        except ReadTimeout:
+            ) from err
+        except ReadTimeout as err:
             CONSOLE.print_exception(theme="ansi_dark")
-            raise HTTPException(status_code=500, detail="Service took too long to respond")
+            raise HTTPException(status_code=500, detail="Service took too long to respond") from err
 
     def _get_request(
         self,
@@ -73,7 +73,7 @@ class OpenLibrary:
         url = self.API_URL + endpoint
         cache_key = f"{url}{cache_params}"
 
-        if self.cache and not skip_cache:
+        if self.cache and not skip_cache:  # noqa: SIM102
             if cached_response := self.cache.select(cache_key):
                 return cached_response
 
@@ -88,41 +88,41 @@ class OpenLibrary:
         try:
             result = self._get_request(endpoint=f"/isbn/{isbn}.json")
             return parse_obj_as(Edition, result)
-        except ValidationError:
+        except ValidationError as err:
             CONSOLE.print_exception(theme="ansi_dark")
             raise HTTPException(
                 status_code=500,
                 detail=f"Unable to validate OpenLibrary Edition with isbn: {isbn}",
-            )
+            ) from err
 
     def get_edition(self, edition_id: str) -> Edition:
         try:
             result = self._get_request(endpoint=f"/edition/{edition_id}.json")
             return parse_obj_as(Edition, result)
-        except ValidationError:
+        except ValidationError as err:
             CONSOLE.print_exception(theme="ansi_dark")
             raise HTTPException(
                 status_code=500,
                 detail=f"Unable to validate OpenLibrary Edition with id: {edition_id}",
-            )
+            ) from err
 
     def get_work(self, work_id: str) -> Work:
         try:
             result = self._get_request(endpoint=f"/work/{work_id}.json")
             return parse_obj_as(Work, result)
-        except ValidationError:
+        except ValidationError as err:
             CONSOLE.print_exception(theme="ansi_dark")
             raise HTTPException(
                 status_code=500, detail=f"Unable to validate OpenLibrary Work with id: {work_id}"
-            )
+            ) from err
 
     def get_author(self, author_id: str) -> Author:
         try:
             result = self._get_request(endpoint=f"/author/{author_id}.json")
             return parse_obj_as(Author, result)
-        except ValidationError:
+        except ValidationError as err:
             CONSOLE.print_exception(theme="ansi_dark")
             raise HTTPException(
                 status_code=500,
                 detail=f"Unable to validate OpenLibrary Author with id: {author_id}",
-            )
+            ) from err
