@@ -6,14 +6,14 @@ __all__ = [
     "add_book_by_isbn",
     "get_book_by_id",
     "get_book_by_isbn",
-    "refresh_book",
     "delete_book",
-    "get_author_by_id",
+    "refresh_book",
     "list_authors",
-    "get_series_by_id",
+    "get_author_by_id",
     "list_series",
-    "get_publisher_by_id",
+    "get_series_by_id",
     "list_publishers",
+    "get_publisher_by_id",
 ]
 import logging
 
@@ -53,18 +53,25 @@ def list_books() -> list[Book]:
     return Book.select()
 
 
-def load_open_library() -> OpenLibrary:
-    return OpenLibrary(cache=None)
-
-
 def add_book_by_isbn(isbn: str, wisher: User) -> Book:
     isbn_13 = to_isbn_13(value=isbn)
     if book := Book.get(isbn_13=isbn_13):  # noqa: F841
         raise HTTPException(status_code=409, detail="Book already exists.")
-    session = load_open_library()
+    session = OpenLibrary(cache=None)
     if result := lookup_book(session=session, isbn=isbn_13):
+        author_list = []
+        for _author in result["work"].authors:
+            author_id = _author.author_id
+            author = Author.get(open_library_id=author_id)
+            if not author and (author_result := session.get_author(author_id=author_id)):
+                author = Author(name=author_result.name, open_library_id=author_id)
+            if author:
+                author_list.append(author)
+                flush()
+            else:
+                LOGGER.warning(f"Unable to retrieve Author with id: {author_id}")
         temp = Book(
-            authors=[],
+            authors=sorted(set(author_list)),
             title=result["edition"].title,
             subtitle=result["edition"].subtitle,
             format=result["edition"].physical_format,
@@ -108,15 +115,41 @@ def get_book_by_id(book_id: int) -> Book:
 
 def refresh_book(book_id: int) -> Book:
     book = get_book_by_id(book_id=book_id)
-    session = load_open_library()
+    session = OpenLibrary(cache=None)
     if result := lookup_book(session=session, isbn=book.isbn_13):
+        author_list = []
+        for _author in result["work"].authors:
+            author_id = _author.author_id
+            author = Author.get(open_library_id=author_id)
+            if not author and (author_result := session.get_author(author_id=author_id)):
+                author = Author(name=author_result.name, open_library_id=author_id)
+            if author:
+                author_list.append(author)
+                flush()
+            else:
+                LOGGER.warning(f"Unable to retrieve Author with id: {author_id}")
+        book.authors = author_list
         book.title = result["edition"].title
         book.subtitle = result["edition"].subtitle
         book.format = result["edition"].physical_format
         book.publishers = sorted(
-            {Publisher.get(name=x) or Publisher(name=x) for x in result["edition"].publisher_list}
+            {
+                Publisher.get(name=y) or Publisher(name=y)
+                for x in result["edition"].publishers
+                for y in x.split(";")
+            }
+        )
+        book.series = sorted(
+            {
+                Series.get(title=y) or Series(title=y)
+                for x in result["edition"].series
+                for y in x.split(";")
+            }
         )
         book.open_library_id = result["edition"].edition_id
+        book.image_url = (
+            f"https://covers.openlibrary.org/b/OLID/{result['edition'].edition_id}-L.jpg"
+        )
         flush()
     else:
         pass

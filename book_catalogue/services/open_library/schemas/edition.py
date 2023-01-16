@@ -39,9 +39,8 @@ class Link(BaseModel):
 
 class Edition(BaseModel):
     authors: list[Resource] = Field(default_factory=list)
-    authors: list[Resource] = Field(default_factory=list)
     by_statement: str | None = None
-    classifications: dict[int, int]
+    classifications: dict[int, int] = Field(default_factory=dict)
     contributions: list[str] = Field(default_factory=list)
     contributors: list[Contributor] = Field(default_factory=list)
     copyright_date: str | None = None
@@ -50,12 +49,12 @@ class Edition(BaseModel):
     description: str | TextResource | None = None
     dewey_decimal_class: list[str] = Field(default_factory=list)
     edition_name: str | None = None
-    first_sentence: str | None = None
+    first_sentence: str | TextResource | None = None
     full_title: str | None = None
     genres: list[str] = Field(default_factory=list)
     ia_box_id: list[str] = Field(default_factory=list)
     ia_loaded_id: list[str] = Field(default_factory=list)
-    identifiers: Identifiers
+    identifiers: Identifiers = Identifiers()
     isbn_10: list[str] = Field(default_factory=list)
     isbn_13: list[str] = Field(default_factory=list)
     key: str

@@ -17,14 +17,14 @@ class SettingsModel(BaseModel):
         extra = Extra.ignore
 
 
-class WebSettings(SettingsModel):
+class WebsiteSettings(SettingsModel):
     host: str = "localhost"
     port: int = 8003
 
 
 class Settings(SettingsModel):
     FILENAME: ClassVar = get_config_root() / "settings.toml"
-    web: WebSettings = WebSettings()
+    website: WebsiteSettings = WebsiteSettings()
 
     @classmethod
     def load(cls) -> "Settings":

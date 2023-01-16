@@ -1,8 +1,22 @@
-__all__ = ["__version__", "get_cache_root", "get_config_root", "get_data_root", "get_project_root"]
+__all__ = [
+    "__version__",
+    "get_cache_root",
+    "get_config_root",
+    "get_data_root",
+    "get_project_root",
+    "setup_logging",
+]
 __version__ = "0.1.0"
 
+import logging
 import os
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
+
+from rich.logging import RichHandler
+from rich.traceback import install
+
+from book_catalogue.console import CONSOLE
 
 
 def get_cache_root() -> Path:
@@ -28,3 +42,33 @@ def get_data_root() -> Path:
 
 def get_project_root() -> Path:
     return Path(__file__).parent.parent
+
+
+def setup_logging(debug: bool = False) -> None:
+    install(show_locals=True, console=CONSOLE)
+    log_folder = get_project_root() / "logs"
+    log_folder.mkdir(parents=True, exist_ok=True)
+
+    logging.basicConfig(
+        format="[%(asctime)s] [%(levelname)-8s] {%(name)s} | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.DEBUG if debug else logging.INFO,
+        handlers=[
+            RichHandler(
+                rich_tracebacks=True,
+                tracebacks_show_locals=True,
+                omit_repeated_times=False,
+                show_level=False,
+                show_time=False,
+                show_path=False,
+                console=CONSOLE,
+            ),
+            RotatingFileHandler(
+                filename=log_folder / "book-catalogue.log", maxBytes=100000000, backupCount=3
+            ),
+        ],
+    )
+
+    logging.getLogger("uvicorn").disabled = True
+    logging.getLogger("uvicorn.access").disabled = True
+    logging.getLogger("uvicorn.error").disabled = True

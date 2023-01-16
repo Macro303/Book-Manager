@@ -46,185 +46,81 @@ function removeLoading(caller){
   element.classList.remove("is-loading");
 }
 
+function performRequest(caller, url, method, body = {}){
+  addLoading(caller);
+  fetch(url, {
+    method: method,
+    headers: headers,
+    body: JSON.stringify(body),
+  }).then((response) => {
+    if (response.ok){
+      window.location.reload();
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
 let addForm = document.getElementById("add-form");
 addForm.addEventListener('submit', e => {
-  addLoading("add-form-button");
   let details = Object.fromEntries(new FormData(addForm));
   console.log(details);
 
-  fetch("/api/v0/books", {
-    method: "POST",
-    headers: {
-      "Accept": "application/json; charset=UTF-8",
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-    body: JSON.stringify({
+  performRequest(
+    caller="add-form-button",
+    url="/api/v0/books",
+    method="POST",
+    body={
       "isbn": details["isbn"],
       "open_library_id": "",
-      "wisher_id": details["wisher-id"]
-    }),
-  })
-  .then((response) => {
-    if(response.ok){
-      window.location = `/${details["wisher-id"]}/wishlist`;
-    }
-    return Promise.reject(response);
-  })
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`)
-  }))
-  .finally(() => removeLoading("add-form-button"));
+      "wisher_id": details["wisher-id"],
+    },
+  );
 
   e.preventDefault();
 });
 
-function createUser(caller){
-  addLoading(caller);
-  let username = document.getElementById("username-entry").value;
-  fetch("/api/v0/users", {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      "username": username
-    }),
-  })
-  .then((response) => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(response);
-  })
-  .then((data) => window.location = `/book-catalogue/${data.user_id}`)
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  }))
-  .finally(() => removeLoading(caller));
-}
-
-function loginUser(caller){
-  addLoading(caller);
-  let username = document.getElementById("username-entry").value;
-  fetch(`/api/v0/users/${username}`, {
-    method: "GET",
-    headers,
-  })
-  .then((response) => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(response);
-  })
-  .then((data) => window.location = `/book-catalogue/${data.user_id}`)
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  }))
-  .finally(() => removeLoading(caller));
-}
-
 function refreshAllBooks(caller){
-  addLoading(caller);
-  fetch("/api/v0/books/refresh", {
-    method: "PUT",
-    headers: {
-      "Accept": "application/json; charset=UTF-8",
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-  })
-  .then((response) => {
-    if (response.ok) {
-      window.location.reload();
-    }
-    return Promise.reject(response);
-  })
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  }))
-  .finally(() => removeLoading(caller));
+  performRequest(
+    caller=caller,
+    url="/api/v0/books",
+    method="PUT",
+  );
+}
+
+function deleteBook(caller, bookId){
+  performRequest(
+    caller=caller,
+    url=`/api/v0/books/${bookId}`,
+    method="DELETE",
+  );
 }
 
 function refreshBook(caller, bookId){
-  addLoading(caller);
-  fetch(`/api/v0/books/${bookId}/refresh`, {
-    method: "PUT",
-    headers: {
-      "Accept": "application/json; charset=UTF-8",
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-  })
-  .then((response) => {
-    if (response.ok) {
-      window.location.reload();
-    }
-    return Promise.reject(response);
-  })
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  }))
-  .finally(() => removeLoading(caller));
-}
-
-function updateBookReaders(caller, bookId, userId){
-  addLoading(caller);
-  fetch(`/api/v0/books/${bookId}/readers`, {
-    method: "POST",
-    headers: {
-      "Accept": "application/json; charset=UTF-8",
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-    body: JSON.stringify({
-      "user_id": userId
-    }),
-  })
-  .then((response) => {
-    if (response.ok) {
-      window.location.reload();
-    }
-    return Promise.reject(response);
-  })
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  }))
-  .finally(() => removeLoading(caller));
+  performRequest(
+    caller=caller,
+    url=`/api/v0/books/${bookId}`,
+    method="PUT",
+  );
 }
 
 function collectBook(caller, bookId, userId){
-  addLoading(caller);
-  fetch(`/api/v0/books/${bookId}`, {
-    method: "PUT",
-    headers: {
-      "Accept": "application/json; charset=UTF-8",
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-  })
-  .then((response) => {
-    if (response.ok) {
-      window.location.reload();
-    }
-    return Promise.reject(response);
-  })
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  }))
-  .finally(() => removeLoading(caller));
+  performRequest(
+    caller=caller,
+    url=`/api/v0/books/${bookId}/collect`,
+    method="POST",
+  );
 }
 
-function removeBook(caller, bookId){
-  addLoading(caller);
-  fetch(`/api/v0/books/${bookId}`, {
-    method: "DELETE",
-    headers: {
-      "Accept": "application/json; charset=UTF-8",
-      "Content-Type": "application/json; charset=UTF-8",
+function readBook(caller, bookId, userId){
+  performRequest(
+    caller=caller,
+    url=`/api/v0/books/${bookId}/read`,
+    method="POST",
+    body={
+      "user_id": userId
     },
-  })
-  .then((response) => {
-    if (response.ok) {
-      window.location.reload();
-    }
-    return Promise.reject(response);
-  })
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  }))
-  .finally(() => removeLoading(caller));
+  );
 }

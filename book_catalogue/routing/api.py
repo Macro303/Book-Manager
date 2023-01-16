@@ -1,3 +1,5 @@
+__all__ = ["router"]
+
 from fastapi import APIRouter, Body
 from fastapi.exceptions import HTTPException
 from pony.orm import db_session, flush
@@ -22,7 +24,7 @@ def create_user(username: str = Body(embed=True)) -> User:  # noqa: B008
 
 
 @router.get(path="/users/{username}", responses={404: {"model": ErrorResponse}})
-def get_user(username: str) -> User:
+def get_user_by_username(username: str) -> User:
     with db_session:
         return controller.get_user_by_username(username=username).to_schema()
 
@@ -36,7 +38,7 @@ def get_user(username: str) -> User:
         409: {"model": ErrorResponse},
     },
 )
-def add_book(
+def add_book_by_isbn(
     isbn: str | None = Body(embed=True, default=None),  # noqa: B008
     open_library_id: str | None = Body(embed=True, default=None),  # noqa: B008
     wisher_id: int = Body(embed=True),  # noqa: B008
@@ -50,8 +52,14 @@ def add_book(
         return controller.add_book_by_isbn(isbn=isbn, wisher=wisher).to_schema()
 
 
+@router.get(path="/books", responses={404: {"model": ErrorResponse}})
+def list_books() -> list[Book]:
+    with db_session:
+        return sorted({x.to_schema() for x in controller.list_books()})
+
+
 @router.put(
-    path="/books/refresh",
+    path="/books",
     status_code=204,
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
@@ -61,23 +69,36 @@ def refresh_all_books() -> None:
             controller.refresh_book(book_id=book.book_id)
 
 
-@router.get(path="/books", responses={404: {"model": ErrorResponse}})
-def list_books() -> list[Book]:
-    with db_session:
-        return sorted({x.to_schema() for x in controller.list_books()})
-
-
 @router.get(
     path="/books/{book_id}",
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-def get_book(book_id: int) -> Book:
+def get_book_by_id(book_id: int) -> Book:
     with db_session:
         return controller.get_book_by_id(book_id=book_id).to_schema()
 
 
+@router.delete(
+    path="/books/{book_id}",
+    status_code=204,
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def delete_book(book_id: int) -> None:
+    with db_session:
+        controller.delete_book(book_id)
+
+
 @router.put(
     path="/books/{book_id}",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def refresh_book(book_id: int) -> Book:
+    with db_session:
+        return controller.refresh_book(book_id=book_id).to_schema()
+
+
+@router.post(
+    path="/books/{book_id}/collect",
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
 def collect_book(book_id: int) -> Book:
@@ -90,30 +111,11 @@ def collect_book(book_id: int) -> Book:
         return book.to_schema()
 
 
-@router.delete(
-    path="/books/{book_id}",
-    status_code=204,
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def remove_book(book_id: int) -> None:
-    with db_session:
-        controller.delete_book(book_id)
-
-
-@router.put(
-    path="/books/{book_id}/refresh",
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def refresh_book(book_id: int) -> Book:
-    with db_session:
-        return controller.refresh_book(book_id=book_id).to_schema()
-
-
 @router.post(
-    path="/books/{book_id}/readers",
+    path="/books/{book_id}/read",
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-def update_book_readers(
+def read_book(
     book_id: int,
     user_id: int = Body(embed=True),  # noqa: B008
 ) -> Book:

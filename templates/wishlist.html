@@ -72,7 +72,7 @@
     </header>
     <section>
       <div class="columns">
-        <div class="column is-one-fifth">
+        <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
           <div class="box">
             <h1 class="title is-5">Filter Books</h1>
             <form accept-charset="UTF-8" action="/{{ user.user_id }}/collection" method="get">
@@ -170,19 +170,19 @@
             </div>
             <div class="field is-grouped is-grouped-centered">
               <div class="control">
-                <button class="button is-primary">Refresh</button>
+                <button class="button is-primary" id="refresh-all-button" onclick="refreshAllBooks('refresh-all-button')">Refresh</button>
               </div>
             </div>
           </div>
         </div>
         <div class="column">
-          <div class="columns is-multiline">
+          <div class="columns is-multiline is-centered">
             {% for _book in book_list %}
-            <div class="column is-one-quarter has-text-centered">
+            <div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
               <div class="card has-text-light has-background-dark">
                 <div class="card-image">
                   <figure class="image is-2by3">
-                    <img alt="{{ _book.title }} by {{ '; '.join(_book.authors) }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ _book.image_url }}" width="250"/>
+                    <img alt="{{ _book.title }} by {{ _book.author_names }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ _book.image_url }}" width="250"/>
                   </figure>
                 </div>
                 <div class="card-content">
@@ -209,54 +209,14 @@
                 </header>
                 <section class="modal-card-body">
                   <div class="content">
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Authors</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.author_names }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Format</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.format }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Series</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.series_names }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Publishers</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.publisher_names }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Isbn</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Wisher</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.wisher.username }}</p>
-                      </div>
-                    </nav>
+                    <p><strong class="is-size-5">Subtitle:</strong> {{ _book.subtitle or '' }}</p>
+                    <p><strong class="is-size-5">Authors:</strong> {{ _book.author_names or '' }}</p>
+                    <p><strong class="is-size-5">Format:</strong> {{ _book.format or '' }}</p>
+                    <p><strong class="is-size-5">Series:</strong> {{ _book.series_names or '' }}</p>
+                    <p><strong class="is-size-5">Publishers:</strong> {{ _book.publisher_names or '' }}</p>
+                    <p><strong class="is-size-5">Wisher:</strong> {{ _book.wisher.username }}</p>
+                    <p><strong class="is-size-5">Isbn13:</strong> {{ _book.identifiers.isbn_13 or '' }}</p>
+                    <p><strong class="is-size-5">OpenLibrary Id:</strong> {{ _book.identifiers.open_library_id or '' }}</p>
                   </div>
                 </section>
                 <footer class="modal-card-foot is-centered">
@@ -275,62 +235,50 @@
                   </div>
                 </header>
                 <section class="modal-card-body">
-                  <div class="content">
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Authors</p>
+                  <form onsubmit="return false;">
+                    <div class="field">
+                      <label class="label">Title</label>
+                      <div class="control">
+                        <input class="input" name="title" placeholder="Title" type="text" value="{{ _book.title or '' }}" />
                       </div>
-                      <div class="level-right">
-                        <input class="level-item input" id="authors-input" placeholder="Authors" type="text" value="{{ _book.author_names }}" />
+                    </div>
+                    <div class="field">
+                      <label class="label">Subtitle</label>
+                      <div class="control">
+                        <input class="input" name="subtitle" placeholder="Subtitle" type="text" value="{{ _book.subtitle or '' }}" />
                       </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Format</p>
+                    </div>
+                    <div class="field">
+                      <label class="label">Authors</label>
+                      <div class="control">
+                        <input class="input" name="authors" placeholder="Authors" type="text" value="{{ _book.author_names or '' }}" />
                       </div>
-                      <div class="level-right">
-                        <input class="level-item input" id="format-input" placeholder="Format" type="text" value="{{ _book.format }}" />
+                    </div>
+                    <div class="field">
+                      <label class="label">Format</label>
+                      <div class="control">
+                        <input class="input" name="format" placeholder="Format" type="text" value="{{ _book.format or '' }}" />
                       </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Series</p>
+                    </div>
+                    <div class="field">
+                      <label class="label">Series</label>
+                      <div class="control">
+                        <input class="input" name="series" placeholder="Series" type="text" value="{{ _book.series_names or '' }}" />
                       </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.series_names }}</p>
+                    </div>
+                    <div class="field">
+                      <label class="label">Publishers</label>
+                      <div class="control">
+                        <input class="input" name="publishers" placeholder="Publishers" type="text" value="{{ _book.publisher_names or '' }}" />
                       </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Publishers</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.publisher_names }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Isbn</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Wisher</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.wisher.username }}</p>
-                      </div>
-                    </nav>
-                  </div>
+                    </div>
+                  </form>
                 </section>
                 <footer class="modal-card-foot is-centered">
                   <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-collect-button" onclick="collectBook('{{ _book.identifiers.book_id }}-collect-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Collect</button>
                   <button disabled class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-save-button" onclick="editBook('{{ _book.identifiers.book_id }}-save-button', {{ _book.identifiers.book_id }})">Save</button>
                   <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-refresh-button" onclick="refreshBook('{{ _book.identifiers.book_id }}-refresh-button', {{ _book.identifiers.book_id }})">Refresh</button>
-                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-remove-button" onclick="removeBook('{{ _book.identifiers.book_id }}-remove-button', {{ _book.identifiers.book_id }})">Remove</button>
+                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-delete-button" onclick="deleteBook('{{ _book.identifiers.book_id }}-delete-button', {{ _book.identifiers.book_id }})">Delete</button>
                 </footer>
               </div>
             </div>

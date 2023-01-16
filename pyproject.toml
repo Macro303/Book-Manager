@@ -25,7 +25,7 @@ dependencies = [
   "pyyaml >= 6.0",
   "ratelimit >= 2.2.1",
   "requests >= 2.28.2",
-  "rich >= 13.0.1",
+  "rich >= 13.1.0",
   "tomli-w >= 1.0.0",
   "uvicorn >= 0.20.0"
 ]
@@ -64,7 +64,8 @@ ignore = [
   "A003",
   "ANN101",
   "ANN102",
-  "ANN204"
+  "ANN204",
+  "PLR2004"
 ]
 line-length = 100
 select = [

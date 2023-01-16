@@ -1,5 +1,6 @@
 __all__ = ["OpenLibrary"]
 
+import logging
 import platform
 from typing import Any
 from urllib.parse import urlencode
@@ -18,6 +19,7 @@ from book_catalogue.services.open_library.schemas.work import Work
 from book_catalogue.services.sqlite_cache import SQLiteCache
 
 MINUTE = 60
+LOGGER = logging.getLogger("book_catalogue.services.open_library")
 
 
 class OpenLibrary:
@@ -39,6 +41,7 @@ class OpenLibrary:
 
         try:
             response = get(url, params=params, headers=self.headers, timeout=self.timeout)
+            LOGGER.info(f"{'GET':<7} {url.removeprefix(self.API_URL)} - {response.status_code}")
             response.raise_for_status()
             return response.json()
         except ConnectionError as err:

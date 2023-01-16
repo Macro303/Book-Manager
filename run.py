@@ -1,20 +1,26 @@
+import logging
+
 import uvicorn
 
-from book_catalogue import get_project_root
+from book_catalogue import setup_logging
 from book_catalogue.settings import Settings
+
+LOGGER = logging.getLogger("book_catalogue")
 
 
 def main() -> None:
     settings = Settings.load().save()
-    log_folder = get_project_root() / "logs"
-    log_folder.mkdir(parents=True, exist_ok=True)
+    setup_logging()
+
+    LOGGER.info(f"Listening on {settings.website.host}:{settings.website.port}")
+
     uvicorn.run(
         "book_catalogue.__main__:app",
-        host=settings.web.host,
-        port=settings.web.port,
+        host=settings.website.host,
+        port=settings.website.port,
         use_colors=True,
         server_header=False,
-        log_config="log_config.yaml",
+        log_level=logging.CRITICAL,
     )
 
 
