@@ -89,10 +89,12 @@ def add_book_by_isbn(isbn: str, wisher: User) -> Book:
                     for y in x.split(";")
                 }
             ),
+            description=result["edition"].get_description() or result["work"].get_description(),
             wisher=wisher,
             isbn_10=isbn if isbn != isbn_13 else None,
             isbn_13=isbn_13,
             open_library_id=result["edition"].edition_id,
+            goodreads_id=next(iter(result["edition"].identifiers.goodreads), None),
             image_url=f"https://covers.openlibrary.org/b/OLID/{result['edition'].edition_id}-L.jpg",
         )
         flush()
@@ -146,7 +148,9 @@ def refresh_book(book_id: int) -> Book:
                 for y in x.split(";")
             }
         )
+        book.description = result["edition"].get_description() or result["work"].get_description()
         book.open_library_id = result["edition"].edition_id
+        book.goodreads_id = next(iter(result["edition"].identifiers.goodreads), None)
         book.image_url = (
             f"https://covers.openlibrary.org/b/OLID/{result['edition'].edition_id}-L.jpg"
         )
@@ -177,6 +181,12 @@ def list_series() -> list[Series]:
 
 def get_series_by_id(series_id: int) -> Series:
     if series := Series.get(series_id=series_id):
+        return series
+    raise HTTPException(status_code=404, detail="Series not found.")
+
+
+def get_series_by_title(title: str) -> list[Series]:
+    if series := Series.select(title=title):
         return series
     raise HTTPException(status_code=404, detail="Series not found.")
 

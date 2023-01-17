@@ -20,7 +20,7 @@ def main() -> None:
         port=settings.website.port,
         use_colors=True,
         server_header=False,
-        log_level=logging.CRITICAL,
+        log_level=logging.WARNING,
     )
 
 

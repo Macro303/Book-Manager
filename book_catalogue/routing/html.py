@@ -30,7 +30,7 @@ def collection(
     title: str = "",
     author: int = 0,
     format: str = "",  # noqa: A002
-    series: int = 0,
+    series: str = "",
     publisher: int = 0,
 ) -> Response:
     with db_session:
@@ -52,9 +52,7 @@ def collection(
                 books = {x for x in books if not x.format}
             else:
                 books = {x for x in books if format == x.format}
-        if series:
-            _series = controller.get_series_by_id(series_id=series)
-            books = {x for x in books if _series in x.series}
+        # if series:
         if publisher:
             _publisher = controller.get_publisher_by_id(publisher_id=publisher)
             books = {x for x in books if _publisher in x.publishers}
@@ -68,7 +66,7 @@ def collection(
                 "author_id": author,
                 "format_list": sorted({x.format or "None" for x in all_books}),
                 "format": format,
-                "series_list": sorted({y.to_schema() for x in all_books for y in x.series}),
+                "series_list": sorted({y.title or "None" for x in all_books for y in x.series}),
                 "series_id": series,
                 "publisher_list": sorted({y.to_schema() for x in all_books for y in x.publishers}),
                 "publisher_id": publisher,
@@ -83,7 +81,7 @@ def wishlist(
     title: str = "",
     author: int = 0,
     format: str = "",  # noqa: A002
-    series: int = 0,
+    series: str = "",
     publisher: int = 0,
 ) -> Response:
     with db_session:
@@ -105,9 +103,7 @@ def wishlist(
                 books = {x for x in books if not x.format}
             else:
                 books = {x for x in books if format == x.format}
-        if series:
-            _series = controller.get_series_by_id(series_id=series)
-            books = {x for x in books if _series in x.series}
+        # if series:
         if publisher:
             _publisher = controller.get_publisher_by_id(publisher_id=publisher)
             books = {x for x in books if _publisher in x.publishers}
@@ -121,9 +117,33 @@ def wishlist(
                 "author_id": author,
                 "format_list": sorted({x.format or "None" for x in all_books}),
                 "format": format,
-                "series_list": sorted({y.to_schema() for x in all_books for y in x.series}),
+                "series_list": sorted({y.title or "None" for x in all_books for y in x.series}),
                 "series_id": series,
                 "publisher_list": sorted({y.to_schema() for x in all_books for y in x.publishers}),
                 "publisher_id": publisher,
             },
         )
+
+
+def view_book(request: Request, user_id: int, book_id: int) -> Response:
+    with db_session:
+        user = controller.get_user_by_id(user_id=user_id)
+        book = controller.get_book_by_id(book_id=book_id)
+        return templates.TemplateResponse(
+            "view_book.html",
+            {
+                "request": request,
+                "user": user.to_schema(),
+                "book": book.to_schema(),
+            },
+        )
+
+
+@router.get(path="/{user_id}/collection/{book_id}", response_class=HTMLResponse)
+def collection_book(request: Request, user_id: int, book_id: int) -> Response:
+    return view_book(request=request, user_id=user_id, book_id=book_id)
+
+
+@router.get(path="/{user_id}/wishlist/{book_id}", response_class=HTMLResponse)
+def wishlist_book(request: Request, user_id: int, book_id: int) -> Response:
+    return view_book(request=request, user_id=user_id, book_id=book_id)

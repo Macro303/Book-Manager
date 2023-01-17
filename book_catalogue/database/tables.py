@@ -12,12 +12,13 @@ class User(db.Entity):
 
     user_id: int = PrimaryKey(int, auto=True)
     username: str = Required(str)
+    role: int = Optional(int, default=0)
 
     wished_books: list["Book"] = Set("Book", reverse="wisher")
     read_books: list["Book"] = Set("Book", table="Readers", reverse="readers")
 
     def to_schema(self) -> schemas.User:
-        return schemas.User(user_id=self.user_id, username=self.username)
+        return schemas.User(user_id=self.user_id, username=self.username, role=self.role)
 
 
 class Book(db.Entity):
@@ -30,6 +31,7 @@ class Book(db.Entity):
     format: str | None = Optional(str, nullable=True)
     series: list["Series"] = Set("Series", table="BookSeries")
     publishers: list["Publisher"] = Set("Publisher", table="BookPublishers")
+    description: str | None = Optional(str, nullable=True)
     wisher: User = Optional(User, nullable=True, reverse="wished_books")
     readers: list[User] = Set(User, table="Readers", reverse="read_books")
 
@@ -47,8 +49,9 @@ class Book(db.Entity):
             subtitle=self.subtitle,
             authors=sorted(x.to_schema() for x in self.authors),
             format=self.format,
-            series=[x.to_schema() for x in self.series],
+            series=sorted(x.to_schema() for x in self.series),
             publishers=sorted(x.to_schema() for x in self.publishers),
+            description=self.description,
             wisher=self.wisher.to_schema() if self.wisher else None,
             readers=sorted(x.to_schema() for x in self.readers),
             identifiers=schemas.BookIdentifiers(
@@ -98,8 +101,9 @@ class Publisher(db.Entity):
 class Series(db.Entity):
     series_id: int = PrimaryKey(int, auto=True)
     title: str = Required(str)
+    number: int = Optional(int, nullable=True)
 
     books: list[Book] = Set(Book, table="BookSeries")
 
     def to_schema(self) -> schemas.Series:
-        return schemas.Series(series_id=self.series_id, title=self.title)
+        return schemas.Series(series_id=self.series_id, title=self.title, number=self.number)

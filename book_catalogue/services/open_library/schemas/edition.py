@@ -101,3 +101,10 @@ class Edition(BaseModel):
     @property
     def edition_id(self) -> str:
         return self.key.split("/")[-1]
+
+    def get_description(self) -> str | None:
+        if self.description:
+            if isinstance(self.description, TextResource):
+                return self.description.value
+            return self.description
+        return None

@@ -6,7 +6,6 @@ __all__ = [
     "Series",
     "BookIdentifiers",
     "Book",
-    "BookUpdate",
 ]
 
 from pydantic import BaseModel, Field
@@ -15,6 +14,7 @@ from pydantic import BaseModel, Field
 class User(BaseModel):
     user_id: int
     username: str
+    role: int
 
     def __lt__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, User):
@@ -74,19 +74,29 @@ class Publisher(BaseModel):
 class Series(BaseModel):
     series_id: int
     title: str
+    number: int | None = None
+
+    @property
+    def display_name(self) -> str:
+        output = self.title
+        if self.number:
+            return f"{output} (#{self.number})"
+        return output
 
     def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, Series):
             raise NotImplementedError()
-        return self.title < other.title
+        if self.title != other.title:
+            return self.title < other.title
+        return (self.number or -1) < (other.number or -1)
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Series):
             raise NotImplementedError()
-        return self.title == other.title
+        return (self.title, self.number) == (other.title, other.number)
 
     def __hash__(self):
-        return hash((type(self), self.title))
+        return hash((type(self), self.title, self.number))
 
 
 class BookIdentifiers(BaseModel):
@@ -106,6 +116,7 @@ class Book(BaseModel):
     format: str | None = None
     series: list[Series] = Field(default_factory=list)
     publishers: list[Publisher] = Field(default_factory=list)
+    description: str | None = None
     wisher: User | None = None
     readers: list[User] = Field(default_factory=list)
     identifiers: BookIdentifiers
@@ -113,13 +124,15 @@ class Book(BaseModel):
 
     @property
     def first_author(self) -> Author | None:
-        temp = sorted(self.authors)
-        return temp[0] if temp else None
+        if temp := sorted(self.authors):
+            return temp[0]
+        return None
 
     @property
     def first_series(self) -> Series | None:
-        temp = sorted(self.series)
-        return temp[0] if temp else None
+        if temp := sorted(self.series):
+            return temp[0]
+        return None
 
     @property
     def publisher_names(self) -> str:
@@ -150,39 +163,23 @@ class Book(BaseModel):
         if self.title != other.title:
             return self.title < other.title
 
-        if (self.subtitle or "") != (other.subtitle or ""):
-            return self.subtitle < other.subtitle
-
-        if self.first_author and other.first_author and self.first_author != other.first_author:
-            return self.first_author < other.first_author
-        if self.first_author and not other.first_author:
-            return False
-        if not self.first_author and other.first_author:
-            return True
-        return False
+        return (self.subtitle or "") < (other.subtitle or "")
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Book):
             raise NotImplementedError()
-        return (self.first_series, self.title, (self.subtitle or ""), self.first_author,) == (
+        return (self.first_series, self.title, (self.subtitle or ""),) == (
             other.first_series,
             other.title,
             (other.subtitle or ""),
-            other.first_author,
         )
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                (self.first_series or ""),
+                self.first_series,
                 self.title,
                 (self.subtitle or ""),
-                (self.first_author or ""),
             )
         )
-
-
-class BookUpdate(BaseModel):
-    wisher_id: float
-    reader_id_list: list[float]

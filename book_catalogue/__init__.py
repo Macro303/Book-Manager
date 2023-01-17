@@ -69,6 +69,6 @@ def setup_logging(debug: bool = False) -> None:
         ],
     )
 
-    logging.getLogger("uvicorn").disabled = True
-    logging.getLogger("uvicorn.access").disabled = True
-    logging.getLogger("uvicorn.error").disabled = True
+    logging.getLogger("uvicorn").disabled = False
+    logging.getLogger("uvicorn.access").disabled = False
+    logging.getLogger("uvicorn.error").disabled = False
