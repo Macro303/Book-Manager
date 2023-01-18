@@ -157,17 +157,6 @@
               </div>
             </form>
           </div>
-          <div class="box">
-            <h1 class="title is-5">Refresh All</h1>
-            <div class="content">
-              <p>Warning this process may take a while</p>
-            </div>
-            <div class="field is-grouped is-grouped-centered">
-              <div class="control">
-                <button class="button is-primary" id="refresh-all-button" onclick="refreshAllBooks('refresh-all-button')">Refresh</button>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="column">
           <div class="columns is-multiline">
@@ -176,7 +165,7 @@
               <div class="card has-text-light has-background-dark">
                 <div class="card-image">
                   <figure class="image is-2by3">
-                    <img alt="{{ _book.title }} by {{ _book.author_names }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ _book.image_url }}" width="250"/>
+                    <img alt="{{ _book.title }} by {{ _book.authors|join(', ', attribute='display_name') }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ _book.image_url }}" width="250"/>
                   </figure>
                 </div>
                 <div class="card-content">
@@ -189,107 +178,35 @@
                 </div>
                 <footer class="card-footer">
                   <a class="card-footer-item" href="/{{ user.user_id }}/collection/{{ _book.identifiers.book_id }}">View</a>
-                  <!--<a class="card-footer-item modal-trigger" data-target="{{ _book.identifiers.book_id }}-view-modal" id="{{ _book.identifiers.book_id }}-view-button">View</a>
-                  <a class="card-footer-item modal-trigger" data-target="{{ _book.identifiers.book_id }}-edit-modal" id="{{ _book.identifiers.book_id }}-edit-button">Edit</a>-->
+                  <a class="card-footer-item modal-trigger" data-target="{{ _book.identifiers.book_id }}-link-modal" id="{{ _book.identifiers.book_id }}-link-button">Links</a>
                 </footer>
               </div>
             </div>
-            <div class="modal" id="{{ _book.identifiers.book_id }}-view-modal">
+            <div class="modal" id="{{ _book.identifiers.book_id }}-link-modal">
               <div class="modal-background"></div>
               <div class="modal-card">
                 <header class="modal-card-head">
                   <div class="content">
-                    <p class="modal-card-title">{{ _book.title }}</p>
+                    <p class="modal-card-title">Links</p>
                   </div>
                 </header>
-                <section class="modal-card-body">
-                  <div class="content">
-                    <p><strong class="is-size-5">Subtitle:</strong> {{ _book.subtitle or '' }}</p>
-                    <p><strong class="is-size-5">Authors:</strong> {{ _book.author_names or '' }}</p>
-                    <p><strong class="is-size-5">Format:</strong> {{ _book.format or '' }}</p>
-                    <p><strong class="is-size-5">Series:</strong> {{ _book.series_names or '' }}</p>
-                    <p><strong class="is-size-5">Publishers:</strong> {{ _book.publisher_names or '' }}</p>
-                    <p><strong class="is-size-5">Readers:</strong> {{ _book.reader_names or '' }}</p>
-                    <p><strong class="is-size-5">Isbn13:</strong> {{ _book.identifiers.isbn_13 or '' }}</p>
-                    <p><strong class="is-size-5">OpenLibrary Id:</strong> {{ _book.identifiers.open_library_id or '' }}</p>
-                  </div>
-                </section>
                 <footer class="modal-card-foot is-centered">
                   <a class="button is-fullwidth" href="https://www.bookdepository.com/search?searchIsbn={{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
-                  <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Open Library</a>
-                  <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
-                </footer>
-              </div>
-            </div>
-            <div class="modal" id="{{ _book.identifiers.book_id }}-edit-modal">
-              <div class="modal-background"></div>
-              <div class="modal-card">
-                <header class="modal-card-head">
-                  <div class="content">
-                    <p class="modal-card-title">{{ _book.title }}</p>
-                  </div>
-                </header>
-                <section class="modal-card-body">
-                  <div class="content">
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Authors</p>
-                      </div>
-                      <div class="level-right">
-                        <input class="level-item input" id="authors-input" placeholder="Authors" type="text" value="{{ _book.author_names }}" />
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Format</p>
-                      </div>
-                      <div class="level-right">
-                        <input class="level-item input" id="format-input" placeholder="Format" type="text" value="{{ _book.format }}" />
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Series</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.series_names }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Publishers</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.publisher_names }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Isbn</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.identifiers.isbn_13 }}</p>
-                      </div>
-                    </nav>
-                    <nav class="level is-mobile">
-                      <div class="level-left">
-                        <p class="level-item subtitle is-5">Readers</p>
-                      </div>
-                      <div class="level-right">
-                        <p class="level-item">{{ _book.reader_names }}</p>
-                      </div>
-                    </nav>
-                  </div>
-                </section>
-                <footer class="modal-card-foot is-centered">
-                  {% if user in _book.readers %}
-                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-unread-button" onclick="readBook('{{ _book.identifiers.book_id }}-unread-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Unread</button>
+                  {% if _book.identifiers.goodreads_id %}
+                  <a class="button is-fullwidth" href="https://goodreads.com/book/show/{{ _book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
                   {% else %}
-                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-read-button" onclick="readBook('{{ _book.identifiers.book_id }}-read-button', {{ _book.identifiers.book_id }}, {{ user.user_id }})">Read</button>
+                  <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
                   {% endif %}
-                  <button disabled class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-save-button" onclick="editBook('{{ _book.identifiers.book_id }}-save-button', {{ _book.identifiers.book_id }})">Save</button>
-                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-refresh-button" onclick="refreshBook('{{ _book.identifiers.book_id }}-refresh-button', {{ _book.identifiers.book_id }})">Refresh</button>
-                  <button class="button is-fullwidth" id="{{ _book.identifiers.book_id }}-delete-button" onclick="deleteBook('{{ _book.identifiers.book_id }}-delete-button', {{ _book.identifiers.book_id }})">Delete</button>
+                  {% if _book.identifiers.library_thing_id %}
+                  <a class="button is-fullwidth" href="https://librarything.com/work/{{ _book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+                  {% else %}
+                  <a class="button is-fullwidth" href="https://librarything.com/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+                  {% endif %}
+                  {% if _book.identifiers.open_library_id %}
+                  <a class="button is-fullwidth" href="https://openlibrary.org/edition/{{ _book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+                  {% else %}
+                  <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+                  {% endif %}
                 </footer>
               </div>
             </div>

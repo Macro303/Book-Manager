@@ -75,75 +75,59 @@
       </div>
       <div class="column is-two-thirds-table is-three-quarters-fullhd">
         <div class="box">
-          <h3 class="title is-3">Details</h3>
-          <div class="content">
-            <div class="block">
-              <p><strong class="title is-size-4">Authors:</strong> {{ book.authors|join(", ", attribute="display_name") }}</p>
+          <form accept-charset="UTF-8" action="/api/v0/books" id="edit-form" method="PATCH">
+            <div class="field" hidden>
+              <label class="label">{{ book.identifiers.book_id }}</label>
+              <div class="control">
+                <input class="input" name="book-id" placeholder="Book Id" readonly type="text" value="{{ book.identifiers.book_id }}" />
+              </div>
             </div>
-            <div class="block">
-              <p><strong class="title is-size-4">Format:</strong> {{ book.format }}</p>
+            <div class="field">
+              <label class="label">Title</label>
+              <div class="control">
+                <input class="input" name="title" placeholder="Title" type="text" value="{{ book.title }}" />
+              </div>
             </div>
-            {% if book.wisher %}
-            <div class="block">
-              <p><strong class="title is-size-4">Wisher:</strong> {{ book.wisher.username }}</p>
+            <div class="field">
+              <label class="label">Subtitle</label>
+              <div class="control">
+                <input class="input" name="subtitle" placeholder="Subtitle" type="text" value="{{ book.subtitle or '' }}" />
+              </div>
             </div>
-            {% else %}
-            <div class="block">
-              <p><strong class="title is-size-4">Readers:</strong> {{ book.readers|join(", ", attribute="username") }}</p>
+            <label class="label">Authors</label>
+            {% for author in book.authors %}
+            <div class="field">
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <select name="author-{{ loop.index }}">
+                    {% for _author in author_list %}
+                    <option value="{{ _author.author_id }}"{% if _author.author_id == author.author_id %} selected{% endif %}>{{ _author.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
             </div>
-            {% endif %}
-          </div>
-      </div>
-        <div class="box">
-          <h3 class="title is-3">More Details</h3>
-          <div class="content">
-            <div class="block">
-              <p><strong class="title is-size-4">Description:</strong> {{ book.description or "" }}</p>
+            {% endfor %}
+            <div class="field has-addons">
+              <div class="control">
+                <input class="input" name="author" placeholder="Author" type="text" />
+              </div>
+              <div class="control">
+                <button class="button is-info">Create</button>
+              </div>
             </div>
-            <div class="block">
-              <p><strong class="title is-size-4">Publisher:</strong> {{ book.publisher.name or "" }}</p>
-            </div>
-            <div class="block">
-              <p><strong class="title is-size-4">Series:</strong> {{ book.series|join(", ", attribute="display_name") }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="box">
-          <h3 class="title is-3">Identifiers</h3>
-          <div class="content">
-            <div class="block">
-              <p><strong class="title is-size-4">Isbn:</strong> {{ book.identifiers.isbn }}</p>
-            </div>
-            {% if book.identifiers.goodreads_id %}
-            <div class="block">
-              <a href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">Goodreads:</strong> {{ book.identifiers.goodreads_id }}</a>
-            </div>
-            {% endif %}
-            {% if book.identifiers.library_thing_id %}
-            <div class="block">
-              <a href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">LibraryThing:</strong> {{ book.identifiers.library_thing_id }}</a>
-            </div>
-            {% endif %}
-            {% if book.identifiers.open_library_id %}
-            <div class="block">
-              <a href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">OpenLibrary:</strong> {{ book.identifiers.open_library_id }}</a>
-            </div>
-            {% endif %}
-          </div>
+          </form>
         </div>
       </div>
       <div class="column is-two-thirds is-centered">
         <div class="box">
           <div class="buttons has-addons is-centered">
-            {% if book.wisher %}
-            <button class="button is-success is-rounded is-outlined" id="{{ book.identifiers.book_id}}-collect-button" onclick="collectBook('{{ book.identifiers.book_id }}-collect-button', {{ book.identifiers.book_id }})">Collect</button>
-            {% elif user in book.readers %}
-            <button class="button is-info is-rounded is-outlined" id="{{ book.identifiers.book_id}}-unread-button" onclick="readBook('{{ book.identifiers.book_id }}-unread-button', {{ book.identifiers.book_id }}, '{{ user.user_id }}')">Unread</button>
-            {% else %}
-            <button class="button is-success is-rounded is-outlined" id="{{ book.identifiers.book_id}}-read-button" onclick="readBook('{{ book.identifiers.book_id }}-read-button', {{ book.identifiers.book_id }}, '{{ user.user_id }}')">Read</button>
-            {% endif %}
             {% if user.role >= 1 %}
-            <button class="button is-warning is-rounded is-outlined">Edit</button>
+            <button class="button is-warning is-rounded is-outlined">Save</button>
+            <button class="button is-warning is-rounded is-outlined">Reset</button>
+            {% endif %}
+            {% if user.role >= 2 %}
+            <button class="button is-danger is-rounded is-outlined">Delete</button>
             {% endif %}
           </div>
         </div>

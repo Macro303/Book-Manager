@@ -10,24 +10,32 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from book_catalogue import __version__, get_project_root
+from book_catalogue import __version__, get_project_root, setup_logging
 from book_catalogue.routing.api import router as api_router
 from book_catalogue.routing.html import router as html_router
+from book_catalogue.settings import Settings
 
 LOGGER = logging.getLogger("book_catalogue")
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Book Catalogue", version=__version__)
-    app.include_router(html_router)
-    app.include_router(api_router)
-
-    LOGGER.info(f"{app.title} v{app.version} started")
-    return app
+    _app = FastAPI(title="Book Catalogue", version=__version__)
+    _app.mount("/static", StaticFiles(directory=get_project_root() / "static"), name="static")
+    _app.include_router(html_router)
+    _app.include_router(api_router)
+    return _app
 
 
 app = create_app()
-app.mount("/static", StaticFiles(directory=get_project_root() / "static"), name="static")
+
+
+@app.on_event(event_type="startup")
+async def startup_event() -> None:
+    settings = Settings.load()
+    setup_logging()
+
+    LOGGER.info(f"Listening on {settings.website.host}:{settings.website.port}")
+    LOGGER.info(f"{app.title} v{app.version} started")
 
 
 @app.middleware(middleware_type="http")

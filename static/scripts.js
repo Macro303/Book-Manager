@@ -82,14 +82,6 @@ addForm.addEventListener('submit', e => {
   e.preventDefault();
 });
 
-function refreshAllBooks(caller){
-  performRequest(
-    caller=caller,
-    url="/api/v0/books",
-    method="PUT",
-  );
-}
-
 function deleteBook(caller, bookId){
   performRequest(
     caller=caller,
@@ -106,7 +98,7 @@ function refreshBook(caller, bookId){
   );
 }
 
-function collectBook(caller, bookId, userId){
+function collectBook(caller, bookId){
   performRequest(
     caller=caller,
     url=`/api/v0/books/${bookId}/collect`,

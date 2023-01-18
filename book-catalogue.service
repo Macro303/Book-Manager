@@ -6,7 +6,8 @@ After=network.target
 Type=idle
 Restart=on-failure
 User=buriedincode
-ExecStart=/bin/bash -c 'cd /data/projects/Buried-In-Code/Book-Catalogue && source .venv/bin/activate && python run.py'
+WorkingDirectory=/data/projects/Buried-In-Code/Book-Catalogue
+ExecStart=/bin/bash -c 'source .venv/bin/activate && python run.py'
 
 [Install]
 WantedBy=multi-user.target

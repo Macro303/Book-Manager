@@ -21,7 +21,7 @@ from fastapi.exceptions import HTTPException
 from pony.orm import flush
 
 from book_catalogue.console import CONSOLE  # noqa: F401
-from book_catalogue.database.tables import Author, Book, Publisher, Series, User
+from book_catalogue.database.tables import Author, Book, BookAuthor, Publisher, Role, Series, User
 from book_catalogue.isbn import to_isbn_13
 from book_catalogue.services.open_library import lookup_book
 from book_catalogue.services.open_library.service import OpenLibrary
@@ -59,44 +59,51 @@ def add_book_by_isbn(isbn: str, wisher: User) -> Book:
         raise HTTPException(status_code=409, detail="Book already exists.")
     session = OpenLibrary(cache=None)
     if result := lookup_book(session=session, isbn=isbn_13):
-        author_list = []
-        for _author in result["work"].authors:
-            author_id = _author.author_id
+        authors = {}
+        for entry in result["work"].authors:
+            author_id = entry.author_id
             author = Author.get(open_library_id=author_id)
             if not author and (author_result := session.get_author(author_id=author_id)):
-                author = Author(name=author_result.name, open_library_id=author_id)
+                if author := Author.get(name=author_result.name):
+                    author.open_library_id = author_id
+                else:
+                    author = Author(name=author_result.name, open_library_id=author_id)
             if author:
-                author_list.append(author)
+                if author not in authors:
+                    authors[author] = set()
+                authors[author].add(Role.get(name="Writer") or Role(name="Writer"))
                 flush()
             else:
                 LOGGER.warning(f"Unable to retrieve Author with id: {author_id}")
+        for entry in result["edition"].contributors:
+            author = Author.get(name=entry.name)
+            if not author:
+                author = Author(name=entry.name)
+            if author not in authors:
+                authors[author] = set()
+            authors[author].add(Role.get(name=entry.role) or Role(name=entry.role))
+            flush()
+        publisher_list = []
+        for x in result["edition"].publishers:
+            for y in x.split(";"):
+                publisher_list.append(Publisher.get(name=y.strip()) or Publisher(name=y.strip()))
         temp = Book(
-            authors=sorted(set(author_list)),
-            title=result["edition"].title,
-            subtitle=result["edition"].subtitle,
-            format=result["edition"].physical_format,
-            publishers=sorted(
-                {
-                    Publisher.get(name=y) or Publisher(name=y)
-                    for x in result["edition"].publishers
-                    for y in x.split(";")
-                }
-            ),
-            series=sorted(
-                {
-                    Series.get(title=y) or Series(title=y)
-                    for x in result["edition"].series
-                    for y in x.split(";")
-                }
-            ),
             description=result["edition"].get_description() or result["work"].get_description(),
+            format=result["edition"].physical_format,
+            image_url=f"https://covers.openlibrary.org/b/OLID/{result['edition'].edition_id}-L.jpg",
+            publisher=next(iter(sorted(publisher_list, key=lambda x: x.name)), None),
+            subtitle=result["edition"].subtitle,
+            title=result["edition"].title,
             wisher=wisher,
+            goodreads_id=next(iter(result["edition"].identifiers.goodreads), None),
             isbn_10=isbn if isbn != isbn_13 else None,
             isbn_13=isbn_13,
+            library_thing_id=next(iter(result["edition"].identifiers.librarything), None),
             open_library_id=result["edition"].edition_id,
-            goodreads_id=next(iter(result["edition"].identifiers.goodreads), None),
-            image_url=f"https://covers.openlibrary.org/b/OLID/{result['edition'].edition_id}-L.jpg",
         )
+        flush()
+        for author, roles in authors.items():
+            BookAuthor(book=temp, author=author, roles=roles)
         flush()
         return temp
     raise HTTPException(status_code=404, detail="Book not found.")
@@ -119,35 +126,42 @@ def refresh_book(book_id: int) -> Book:
     book = get_book_by_id(book_id=book_id)
     session = OpenLibrary(cache=None)
     if result := lookup_book(session=session, isbn=book.isbn_13):
-        author_list = []
-        for _author in result["work"].authors:
-            author_id = _author.author_id
+        authors = {}
+        for entry in result["work"].authors:
+            author_id = entry.author_id
             author = Author.get(open_library_id=author_id)
             if not author and (author_result := session.get_author(author_id=author_id)):
-                author = Author(name=author_result.name, open_library_id=author_id)
+                if author := Author.get(name=author_result.name):
+                    author.open_library_id = author_id
+                else:
+                    author = Author(name=author_result.name, open_library_id=author_id)
             if author:
-                author_list.append(author)
+                if author not in authors:
+                    authors[author] = set()
+                authors[author].add(Role.get(name="Writer") or Role(name="Writer"))
                 flush()
             else:
                 LOGGER.warning(f"Unable to retrieve Author with id: {author_id}")
-        book.authors = author_list
+        for entry in result["edition"].contributors:
+            author = Author.get(name=entry.name)
+            if not author:
+                author = Author(name=entry.name)
+            if author not in authors:
+                authors[author] = set()
+            authors[author].add(Role.get(name=entry.role) or Role(name=entry.role))
+            flush()
+        for author, roles in authors.items():
+            temp = BookAuthor.get(book=book, author=author) or BookAuthor(book=book, author=author)
+            temp.roles = roles
+        flush()
+        publisher_list = []
+        for x in result["edition"].publishers:
+            for y in x.split(";"):
+                publisher_list.append(Publisher.get(name=y.strip()) or Publisher(name=y.strip()))
         book.title = result["edition"].title
         book.subtitle = result["edition"].subtitle
         book.format = result["edition"].physical_format
-        book.publishers = sorted(
-            {
-                Publisher.get(name=y) or Publisher(name=y)
-                for x in result["edition"].publishers
-                for y in x.split(";")
-            }
-        )
-        book.series = sorted(
-            {
-                Series.get(title=y) or Series(title=y)
-                for x in result["edition"].series
-                for y in x.split(";")
-            }
-        )
+        book.publisher = (next(iter(sorted(publisher_list, key=lambda x: x.name)), None),)
         book.description = result["edition"].get_description() or result["work"].get_description()
         book.open_library_id = result["edition"].edition_id
         book.goodreads_id = next(iter(result["edition"].identifiers.goodreads), None)
