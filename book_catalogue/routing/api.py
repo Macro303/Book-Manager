@@ -6,7 +6,7 @@ from pony.orm import db_session, flush
 
 from book_catalogue import __version__, controller
 from book_catalogue.responses import ErrorResponse
-from book_catalogue.schemas import Book, User
+from book_catalogue.schemas import Book, Publisher, User
 
 router = APIRouter(
     prefix=f"/api/v{__version__.split('.')[0]}",
@@ -88,6 +88,35 @@ def delete_book(book_id: int) -> None:
         controller.delete_book(book_id)
 
 
+@router.patch(
+    path="/books/{book_id}",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def update_book(
+    book_id: int,
+    title: str = Body(embed=True),  # noqa: B008
+    subtitle: str | None = Body(embed=True, default=None),  # noqa: B008
+    format: str = Body(embed=True),  # noqa: A002, B008
+    description: str | None = Body(embed=True, default=None),  # noqa: B008
+    publisher_id: int = Body(embed=True),  # noqa: B008
+    goodreads_id: str | None = Body(embed=True, default=None),  # noqa: B008
+    library_thing_id: str | None = Body(embed=True, default=None),  # noqa: B008
+    open_library_id: str | None = Body(embed=True, default=None),  # noqa: B008
+) -> Book:
+    with db_session:
+        book = controller.get_book_by_id(book_id=book_id)
+        book.title = title
+        book.subtitle = subtitle or None
+        book.format = format
+        book.description = description or None
+        book.publisher = controller.get_publisher_by_id(publisher_id=publisher_id)
+        book.goodreads_id = goodreads_id or None
+        book.library_thing_id = library_thing_id or None
+        book.open_library_id = open_library_id or None
+        flush()
+        return book.to_schema()
+
+
 @router.put(
     path="/books/{book_id}",
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
@@ -128,3 +157,9 @@ def read_book(
             book.readers.add(user)
         flush()
         return book.to_schema()
+
+
+@router.post(path="/publishers", status_code=201, responses={409: {"model": ErrorResponse}})
+def create_publisher(name: str = Body(embed=True)) -> Publisher:
+    with db_session:
+        return controller.create_publisher(name=name).to_schema()

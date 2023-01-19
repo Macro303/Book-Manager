@@ -4,9 +4,8 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <title>Book Catalogue</title>
-  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">-->
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/superhero/bulmaswatch.min.css" rel="stylesheet">
+  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">-->
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
   <link href="/static/styles.css" rel="stylesheet">
   <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
@@ -69,17 +68,17 @@
         <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
           <div class="box">
             <h1 class="title is-5">Filter Books</h1>
-            <form accept-charset="UTF-8" action="/{{ user.user_id }}/collection" method="get">
+            <form accept-charset="UTF-8" action="/{{ user.user_id }}/wishlist" method="GET">
               <div class="field">
                 <label class="label">Title</label>
                 <div class="control">
-                  <input class="input" name="title" placeholder="Title" type="text">
+                  <input class="input is-rounded" name="title" placeholder="Title" type="text">
                 </div>
               </div>
               <div class="field">
                 <label class="label">Author</label>
-                <div class="control">
-                  <div class="select is-fullwidth">
+                <div class="control is-expanded">
+                  <div class="select is-fullwidth is-rounded">
                     <select name="author">
                       <option value=0{% if not author_id %} selected{% endif %}>Select Author</option>
                       {% for _author in author_list %}
@@ -91,8 +90,8 @@
               </div>
               <div class="field">
                 <label class="label">Format</label>
-                <div class="control">
-                  <div class="select is-fullwidth">
+                <div class="control is-expanded">
+                  <div class="select is-fullwidth is-rounded">
                     <select name="format">
                       <option value=""{% if not format %} selected{% endif %}>Select Format</option>
                       {% for _format in format_list %}
@@ -104,12 +103,12 @@
               </div>
               <div class="field">
                 <label class="label">Series</label>
-                <div class="control">
-                  <div class="select is-fullwidth">
+                <div class="control is-expanded">
+                  <div class="select is-fullwidth is-rounded">
                     <select name="series">
-                      <option value=0{% if not series_id %} selected{% endif %}>Select Series</option>
+                      <option value=0{% if not series %} selected{% endif %}>Select Series</option>
                       {% for _series in series_list %}
-                      <option value={{ _series.series_id }}{% if _series.series_id == series_id %} selected{% endif %}>{{ _series.title }}</option>
+                      <option value={{ _series }}{% if _series == series %} selected{% endif %}>{{ _series }}</option>
                       {% endfor %}
                     </select>
                   </div>
@@ -117,8 +116,8 @@
               </div>
               <div class="field">
                 <label class="label">Publisher</label>
-                <div class="control">
-                  <div class="select is-fullwidth">
+                <div class="control is-expanded">
+                  <div class="select is-fullwidth is-rounded">
                     <select name="publisher">
                       <option value=0{% if not publisher_id %} selected{% endif %}>Select Publisher</option>
                       {% for _publisher in publisher_list %}
@@ -128,10 +127,13 @@
                   </div>
                 </div>
               </div>
-              <div class="field is-grouped is-grouped-centered">
-                <div class="control">
-                  <button class="button is-primary">Filter</button>
-                </div>
+              <div class="buttons is-centered">
+                <button class="button is-primary is-rounded">
+                  <span class="icon is-medium">
+                    <i class="fas fa-lg fa-filter"></i>
+                  </span>
+                  <span>Filter</span>
+                </button>
               </div>
             </form>
           </div>
@@ -141,19 +143,22 @@
               <div class="field" hidden>
                 <label class="label">Wisher Id</label>
                 <div class="control">
-                  <input class="input" name="wisher-id" placeholder="Wisher Id" readonly type="text" value="{{ user.user_id }}" />
+                  <input class="input is-rounded" name="wisher-id" placeholder="Wisher Id" readonly type="text" value="{{ user.user_id }}" />
                 </div>
               </div>
               <div class="field">
                 <label class="label">ISBN</label>
                 <div class="control">
-                  <input class="input" name="isbn" placeholder="ISBN" type="text">
+                  <input class="input is-rounded" name="isbn" placeholder="ISBN" type="text">
                 </div>
               </div>
-              <div class="field is-grouped is-grouped-centered">
-                <div class="control">
-                  <button class="button is-primary" id="add-form-button">Add</button>
-                </div>
+              <div class="buttons is-centered">
+                <button class="button is-primary is-rounded" id="add-form-button">
+                  <span class="icon is-medium">
+                    <i class="fas fa-lg fa-plus"></i>
+                  </span>
+                  <span>Add</span>
+                </button>
               </div>
             </form>
           </div>
@@ -177,7 +182,7 @@
                   </div>
                 </div>
                 <footer class="card-footer">
-                  <a class="card-footer-item" href="/{{ user.user_id }}/wishlist/{{ _book.identifiers.book_id }}">View</a>
+                  <a class="card-footer-item" href="/{{ user.user_id }}/books/{{ _book.identifiers.book_id }}">View</a>
                   <a class="card-footer-item modal-trigger" data-target="{{ _book.identifiers.book_id }}-link-modal" id="{{ _book.identifiers.book_id }}-link-button">Links</a>
                 </footer>
               </div>
@@ -190,24 +195,26 @@
                     <p class="modal-card-title">Links</p>
                   </div>
                 </header>
-                <footer class="modal-card-foot is-centered">
-                  <a class="button is-fullwidth" href="https://www.bookdepository.com/search?searchIsbn={{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
-                  {% if _book.identifiers.goodreads_id %}
-                  <a class="button is-fullwidth" href="https://goodreads.com/book/show/{{ _book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
-                  {% else %}
-                  <a class="button is-fullwidth" href="https://www.goodreads.com/book/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
-                  {% endif %}
-                  {% if _book.identifiers.library_thing_id %}
-                  <a class="button is-fullwidth" href="https://librarything.com/work/{{ _book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
-                  {% else %}
-                  <a class="button is-fullwidth" href="https://librarything.com/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
-                  {% endif %}
-                  {% if _book.identifiers.open_library_id %}
-                  <a class="button is-fullwidth" href="https://openlibrary.org/edition/{{ _book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
-                  {% else %}
-                  <a class="button is-fullwidth" href="https://openlibrary.org/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
-                  {% endif %}
-                </footer>
+                <section class="modal-card-body">
+                  <div class="buttons is-centered">
+                    <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ _book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+                    {% if _book.identifiers.goodreads_id %}
+                    <a class="button is-link is-rounded" href="https://goodreads.com/book/show/{{ _book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+                    {% else %}
+                    <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+                    {% endif %}
+                    {% if _book.identifiers.library_thing_id %}
+                    <a class="button is-link is-rounded" href="https://librarything.com/work/{{ _book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+                    {% else %}
+                    <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+                    {% endif %}
+                    {% if _book.identifiers.open_library_id %}
+                    <a class="button is-link is-rounded" href="https://openlibrary.org/edition/{{ _book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+                    {% else %}
+                    <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ _book.identifiers.isbn_13 }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+                    {% endif %}
+                  </div>
+                </section>
               </div>
             </div>
             {% endfor %}
@@ -255,5 +262,25 @@
 </footer>
 <script src="/static/bulma-navbar-burger.js" type="text/javascript"></script>
 <script src="/static/scripts.js" type="text/javascript"></script>
+<script type="text/javascript">
+let addForm = document.getElementById("add-form");
+addForm.addEventListener('submit', e => {
+  let details = Object.fromEntries(new FormData(addForm));
+  console.log(details);
+
+  performRequest(
+    caller="add-form-button",
+    url="/api/v0/books",
+    method="POST",
+    body={
+      "isbn": details["isbn"],
+      "open_library_id": "",
+      "wisher_id": details["wisher-id"],
+    },
+  );
+
+  e.preventDefault();
+});
+</script>
 </body>
 </html>

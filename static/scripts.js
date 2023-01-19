@@ -54,53 +54,18 @@ function performRequest(caller, url, method, body = {}){
     body: JSON.stringify(body),
   }).then((response) => {
     if (response.ok){
-      window.location.reload();
       return response.json();
     }
     return Promise.reject(response);
-  }).catch((response) => response.json().then((msg) => {
+  }).then((data) => window.location.reload())
+  .catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));
 }
 
-let addForm = document.getElementById("add-form");
-addForm.addEventListener('submit', e => {
-  let details = Object.fromEntries(new FormData(addForm));
-  console.log(details);
-
+function collectBook(bookId){
   performRequest(
-    caller="add-form-button",
-    url="/api/v0/books",
-    method="POST",
-    body={
-      "isbn": details["isbn"],
-      "open_library_id": "",
-      "wisher_id": details["wisher-id"],
-    },
-  );
-
-  e.preventDefault();
-});
-
-function deleteBook(caller, bookId){
-  performRequest(
-    caller=caller,
-    url=`/api/v0/books/${bookId}`,
-    method="DELETE",
-  );
-}
-
-function refreshBook(caller, bookId){
-  performRequest(
-    caller=caller,
-    url=`/api/v0/books/${bookId}`,
-    method="PUT",
-  );
-}
-
-function collectBook(caller, bookId){
-  performRequest(
-    caller=caller,
+    caller="collect-book-button",
     url=`/api/v0/books/${bookId}/collect`,
     method="POST",
   );
@@ -115,4 +80,71 @@ function readBook(caller, bookId, userId){
       "user_id": userId
     },
   );
+}
+
+function saveBook(bookId, userId){
+  const caller = "save-book-button";
+  const editForm = document.getElementById("edit-form");
+  let details = Object.fromEntries(new FormData(editForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch(`/api/v0/books/${bookId}`, {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify({
+      "title": details["title"],
+      "subtitle": details["subtitle"],
+      "format": details["format"],
+      "description": details["description"],
+      "publisher_id": details["publisher"],
+      "goodreads_id": details["goodreads-id"],
+      "library_thing_id": details["library-thing-id"],
+      "open_library_id": details["open-library-id"],
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => window.location = `/${userId}/books/${bookId}`)
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
+function resetBook(bookId){
+  const caller = "reset-book-button"
+
+  addLoading(caller);
+  fetch(`/api/v0/books/${bookId}`, {
+    method: "PUT",
+    headers: headers,
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => window.location = `/${userId}/books/${bookId}`)
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
+function deleteBook(bookId){
+  const caller = "delete-book-button"
+
+  addLoading(caller);
+  fetch(`/api/v0/books/${bookId}`, {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => window.location = `/${userId}/collection`)
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
 }

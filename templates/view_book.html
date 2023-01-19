@@ -4,9 +4,8 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <title>Book Catalogue</title>
-  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">-->
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/superhero/bulmaswatch.min.css" rel="stylesheet">
+  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">-->
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
   <link href="/static/styles.css" rel="stylesheet">
   <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
@@ -73,10 +72,10 @@
           </figure>
         </div>
       </div>
-      <div class="column is-two-thirds-table is-three-quarters-fullhd">
+      <div class="column is-two-thirds-tablet is-three-quarters-fullhd">
         <div class="box">
-          <h3 class="title is-3">Details</h3>
           <div class="content">
+            <div class="divider is-info is-size-4">Details</div>
             <div class="block">
               <p><strong class="title is-size-4">Authors:</strong> {{ book.authors|join(", ", attribute="display_name") }}</p>
             </div>
@@ -92,11 +91,7 @@
               <p><strong class="title is-size-4">Readers:</strong> {{ book.readers|join(", ", attribute="username") }}</p>
             </div>
             {% endif %}
-          </div>
-      </div>
-        <div class="box">
-          <h3 class="title is-3">More Details</h3>
-          <div class="content">
+            <div class="divider is-info is-size-4">More Details</div>
             <div class="block">
               <p><strong class="title is-size-4">Description:</strong> {{ book.description or "" }}</p>
             </div>
@@ -106,11 +101,7 @@
             <div class="block">
               <p><strong class="title is-size-4">Series:</strong> {{ book.series|join(", ", attribute="display_name") }}</p>
             </div>
-          </div>
-        </div>
-        <div class="box">
-          <h3 class="title is-3">Identifiers</h3>
-          <div class="content">
+            <div class="divider is-info is-size-4">Identifiers</div>
             <div class="block">
               <p><strong class="title is-size-4">Isbn:</strong> {{ book.identifiers.isbn }}</p>
             </div>
@@ -132,18 +123,38 @@
           </div>
         </div>
       </div>
-      <div class="column is-two-thirds is-centered">
+      <div class="column is-four-fifths is-centered">
         <div class="box">
-          <div class="buttons has-addons is-centered">
+          <div class="buttons is-centered are-medium">
             {% if book.wisher %}
-            <button class="button is-success is-rounded is-outlined" id="{{ book.identifiers.book_id}}-collect-button" onclick="collectBook('{{ book.identifiers.book_id }}-collect-button', {{ book.identifiers.book_id }})">Collect</button>
+            <button class="button is-success is-rounded" id="collect-book-button" onclick="collectBook({{ book.identifiers.book_id }})">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-archive"></i>
+              </span>
+              <span>Collect</span>
+            </button>
             {% elif user in book.readers %}
-            <button class="button is-info is-rounded is-outlined" id="{{ book.identifiers.book_id}}-unread-button" onclick="readBook('{{ book.identifiers.book_id }}-unread-button', {{ book.identifiers.book_id }}, '{{ user.user_id }}')">Unread</button>
+            <button class="button is-info is-rounded" id="unread-book-button" onclick="readBook('unread-book-button', {{ book.identifiers.book_id }}, '{{ user.user_id }}')">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-book"></i>
+              </span>
+              <span>Unread</span>
+            </button>
             {% else %}
-            <button class="button is-success is-rounded is-outlined" id="{{ book.identifiers.book_id}}-read-button" onclick="readBook('{{ book.identifiers.book_id }}-read-button', {{ book.identifiers.book_id }}, '{{ user.user_id }}')">Read</button>
+            <button class="button is-success is-rounded" id="read-book-button" onclick="readBook('read-book-button', {{ book.identifiers.book_id }}, '{{ user.user_id }}')">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-book-open"></i>
+              </span>
+              <span>Read</span>
+            </button>
             {% endif %}
             {% if user.role >= 1 %}
-            <button class="button is-warning is-rounded is-outlined">Edit</button>
+            <a class="button is-warning is-rounded" href="/{{ user.user_id }}/books/{{ book.identifiers.book_id }}/edit">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-edit"></i>
+              </span>
+              <span>Edit</span>
+            </a>
             {% endif %}
           </div>
         </div>

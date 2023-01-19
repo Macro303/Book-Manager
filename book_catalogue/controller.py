@@ -13,6 +13,7 @@ __all__ = [
     "list_series",
     "get_series_by_id",
     "list_publishers",
+    "create_publisher",
     "get_publisher_by_id",
 ]
 import logging
@@ -161,7 +162,7 @@ def refresh_book(book_id: int) -> Book:
         book.title = result["edition"].title
         book.subtitle = result["edition"].subtitle
         book.format = result["edition"].physical_format
-        book.publisher = (next(iter(sorted(publisher_list, key=lambda x: x.name)), None),)
+        book.publisher = next(iter(sorted(publisher_list, key=lambda x: x.name)), None)
         book.description = result["edition"].get_description() or result["work"].get_description()
         book.open_library_id = result["edition"].edition_id
         book.goodreads_id = next(iter(result["edition"].identifiers.goodreads), None)
@@ -207,6 +208,14 @@ def get_series_by_title(title: str) -> list[Series]:
 
 def list_publishers() -> list[Publisher]:
     return Publisher.select()
+
+
+def create_publisher(name: str) -> Publisher:
+    if Publisher.get(name=name):
+        raise HTTPException(status_code=409, detail="Publisher already exists.")
+    temp = Publisher(name=name)
+    flush()
+    return temp
 
 
 def get_publisher_by_id(publisher_id: int) -> Publisher:

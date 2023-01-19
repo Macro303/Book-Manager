@@ -4,9 +4,8 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <title>Book Catalogue</title>
-  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">-->
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/superhero/bulmaswatch.min.css" rel="stylesheet">
+  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">-->
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
   <link href="/static/styles.css" rel="stylesheet">
   <link href="/static/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
@@ -61,10 +60,6 @@
 </nav>
 <main class="section is-flex-grow-1">
   <div class="container">
-    <header class="block has-text-centered">
-      <h1 class="title">{{ book.title }}</h1>
-      <h3 class="subtitle">{{ book.subtitle or "" }}</h3>
-    </header>
     <div class="columns is-multiline is-centered">
       <div class="column is-one-third-tablet is-one-quarter-fullhd">
         <div class="box">
@@ -73,63 +68,249 @@
           </figure>
         </div>
       </div>
-      <div class="column is-two-thirds-table is-three-quarters-fullhd">
+      <div class="column is-two-thirds-tablet is-three-quarters-fullhd">
         <div class="box">
           <form accept-charset="UTF-8" action="/api/v0/books" id="edit-form" method="PATCH">
-            <div class="field" hidden>
-              <label class="label">{{ book.identifiers.book_id }}</label>
-              <div class="control">
-                <input class="input" name="book-id" placeholder="Book Id" readonly type="text" value="{{ book.identifiers.book_id }}" />
-              </div>
-            </div>
             <div class="field">
               <label class="label">Title</label>
               <div class="control">
-                <input class="input" name="title" placeholder="Title" type="text" value="{{ book.title }}" />
+                <input class="input is-rounded" name="title" placeholder="Title" type="text" value="{{ book.title }}" />
               </div>
             </div>
             <div class="field">
               <label class="label">Subtitle</label>
               <div class="control">
-                <input class="input" name="subtitle" placeholder="Subtitle" type="text" value="{{ book.subtitle or '' }}" />
+                <input class="input is-rounded" name="subtitle" placeholder="Subtitle" type="text" value="{{ book.subtitle or '' }}" />
               </div>
             </div>
+            <div class="divider is-info is-size-4">Details</div>
             <label class="label">Authors</label>
             {% for author in book.authors %}
+            <div class="field is-grouped">
+              <div class="control is-expanded">
+                <div class="select is-fullwidth is-rounded">
+                  <select disabled name="author-{{ loop.index }}">
+                    {% for _author in author_list %}
+                    <option value={{ _author.author_id }}{% if _author.author_id == author.author_id %} selected{% endif %}>{{ _author.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="control">
+                <button class="button is-warning is-rounded is-outlined" type="button">
+                  <span>Remove</span>
+                  <span class="icon is-medium">
+                    <i class="fas fa-lg fa-times"></i>
+                  </span>
+                </button>
+              </div>
+            </div>
+            {% endfor %}
             <div class="field">
               <div class="control">
-                <div class="select is-fullwidth">
-                  <select name="author-{{ loop.index }}">
-                    {% for _author in author_list %}
-                    <option value="{{ _author.author_id }}"{% if _author.author_id == author.author_id %} selected{% endif %}>{{ _author.name }}</option>
+                <div class="buttons is-centered">
+                  <button class="button is-success is-rounded is-outlined" type="button" id="create-author-button">
+                    <span class="icon is-medium">
+                      <i class="fas fa-lg fa-plus"></i>
+                    </span>
+                    <span>Create Author</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Format</label>
+              <div class="control is-expanded">
+                <div class="select is-fullwidth is-rounded">
+                  <select name="format">
+                    <option disabled hidden value=""{% if not book.format %} selected{% endif %}>Select Format</option>
+                    {% for _format in format_list %}
+                    <option value="{{ _format }}"{% if _format == book.format %} selected{% endif %}>{{ _format }}</option>
                     {% endfor %}
                   </select>
                 </div>
               </div>
             </div>
-            {% endfor %}
-            <div class="field has-addons">
+            <div class="field">
               <div class="control">
-                <input class="input" name="author" placeholder="Author" type="text" />
+                <div class="buttons is-centered">
+                  <button class="button is-success is-rounded is-outlined modal-trigger" data-target="create-format-modal" type="button" id="create-format-button">
+                    <span class="icon is-medium">
+                      <i class="fas fa-lg fa-plus"></i>
+                    </span>
+                    <span>Create Format</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="divider is-info is-size-4">More Details</div>
+            <div class="field">
+              <label class="label">Description</label>
+              <div class="control">
+                <textarea class="textarea has-fixed-size" name="description" placeholder="Description">{{ book.description or "" }}</textarea>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Publisher</label>
+              <div class="control is-expanded">
+                <div class="select is-fullwidth is-rounded">
+                  <select name="publisher">
+                    <option disabled hidden value=""{% if not publisher %} selected{% endif %}>Select Publisher</option>
+                    {% for _publisher in publisher_list %}
+                    <option value={{ _publisher.publisher_id }}{% if _publisher == book.publisher %} selected{% endif %}>{{ _publisher.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <div class="control">
+                <div class="buttons is-centered">
+                  <button class="button is-success is-rounded is-outlined modal-trigger" data-target="create-publisher-modal" type="button" id="create-publisher-button">
+                    <span class="icon is-medium">
+                      <i class="fas fa-lg fa-plus"></i>
+                    </span>
+                    <span>Create Publisher</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <label class="label">Series</label>
+            {% for series in book.series %}
+            <div class="field is-grouped">
+              <div class="control is-expanded">
+                <div class="select is-fullwidth is-rounded">
+                  <select disabled name="series-{{ loop.index }}">
+                    {% for _series in series_list %}
+                    <option value={{ _series.series_id }}{% if _series == series.series %} selected{% endif %}>{{ _series.title }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="control">
-                <button class="button is-info">Create</button>
+                <button class="button is-warning is-rounded is-outlined" type="button">
+                  <span>Remove</span>
+                  <span class="icon is-medium">
+                    <i class="fas fa-lg fa-times"></i>
+                  </span>
+                </button>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="field">
+              <div class="control">
+                <div class="buttons is-centered">
+                  <button class="button is-success is-rounded is-outlined" type="button" id="create-series-button">
+                    <span class="icon is-medium">
+                      <i class="fas fa-lg fa-plus"></i>
+                    </span>
+                    <span>Create Series</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="divider is-info is-size-4">Identifiers</div>
+            <div class="field">
+              <label class="label">Isbn 13</label>
+              <div class="control">
+                <input class="input is-rounded" readonly name="isbn-13" placeholder="Isbn 13" type="text" value="{{ book.identifiers.isbn }}" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Goodreads</label>
+              <div class="control">
+                <input class="input is-rounded" name="goodreads-id" placeholder="Goodreads" type="text" value="{{ book.identifiers.goodreads_id or '' }}" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">LibraryThing</label>
+              <div class="control">
+                <input class="input is-rounded" name="library-thing-id" placeholder="LibraryThing" type="text" value="{{ book.identifiers.library_thing_id or '' }}" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">OpenLibrary</label>
+              <div class="control">
+                <input class="input is-rounded" name="open-library-id" placeholder="OpenLibrary" type="text" value="{{ book.identifiers.open_library_id or '' }}" />
               </div>
             </div>
           </form>
         </div>
       </div>
-      <div class="column is-two-thirds is-centered">
+      <div class="column is-four-fifths is-centered">
         <div class="box">
-          <div class="buttons has-addons is-centered">
+          <div class="buttons is-centered are-medium">
             {% if user.role >= 1 %}
-            <button class="button is-warning is-rounded is-outlined">Save</button>
-            <button class="button is-warning is-rounded is-outlined">Reset</button>
+            <button class="button is-success is-rounded" id="save-book-button" onclick="saveBook({{ book.identifiers.book_id }}, {{ user.user_id }})">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-save"></i>
+              </span>
+              <span>Save</span>
+            </button>
+            <button class="button is-warning is-rounded" type="button">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-undo"></i>
+              </span>
+              <span>Reset</span>
+            </button>
             {% endif %}
             {% if user.role >= 2 %}
-            <button class="button is-danger is-rounded is-outlined">Delete</button>
+            <button class="button is-danger is-rounded" type="button">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-trash"></i>
+              </span>
+              <span>Delete</span>
+            </button>
             {% endif %}
           </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="create-format-modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box">
+          <h5 class="title is-5">Create Format</h5>
+          <form id="create-format-form">
+            <div class="field">
+              <label class="label">Format</label>
+              <div class="control is-expanded">
+                <input class="input is-rounded" name="format" placeholder="Format" type="text">
+              </div>
+            </div>
+            <div class="buttons is-centered">
+              <button class="button is-primary is-rounded">
+                <span class="icon is-medium">
+                  <i class="fas fa-lg fa-plus"></i>
+                </span>
+                <span>Create</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="create-publisher-modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box">
+          <h5 class="title is-5">Create Publisher</h5>
+          <form id="create-publisher-form">
+            <div class="field">
+              <label class="label">Name</label>
+              <div class="control is-expanded">
+                <input class="input is-rounded" name="name" placeholder="Name" type="text">
+              </div>
+            </div>
+            <div class="buttons is-centered">
+              <button class="button is-primary is-rounded">
+                <span class="icon is-medium">
+                  <i class="fas fa-lg fa-plus"></i>
+                </span>
+                <span>Create</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -173,5 +354,65 @@
 </footer>
 <script src="/static/bulma-navbar-burger.js" type="text/javascript"></script>
 <script src="/static/scripts.js" type="text/javascript"></script>
+<script type="text/javascript">
+let createFormatForm = document.getElementById("create-format-form");
+createFormatForm.addEventListener('submit', e => {
+  const caller = "create-format-button";
+  let details = Object.fromEntries(new FormData(createFormatForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch("/api/v0/books/{{ book.identifiers.book_id }}", {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify({
+      "title": "{{ book.title }}",
+      "subtitle": "{{ book.subtitle or "" }}",
+      "format": details["format"],
+      "description": "{{ book.description or "" }}",
+      "publisher_id": {{ book.publisher.publisher_id }},
+      "goodreads_id": "{{ book.identifiers.goodreads_id or "" }}",
+      "library_thing_id": "{{ book.identifiers.library_thing_id or "" }}",
+      "open_library_id": "{{ book.identifiers.open_library_id or "" }}",
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => window.location.reload())
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+
+  e.preventDefault();
+});
+
+let createPublisherForm = document.getElementById("create-publisher-form");
+createPublisherForm.addEventListener('submit', e => {
+  const caller = "create-publisher-button";
+  let details = Object.fromEntries(new FormData(createPublisherForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch("/api/v0/publishers", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      "name": details["name"],
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => window.location.reload())
+  .catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+
+  e.preventDefault();
+});
+</script>
 </body>
 </html>

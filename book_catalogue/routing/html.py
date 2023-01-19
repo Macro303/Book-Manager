@@ -27,11 +27,12 @@ def home(request: Request, user_id: int) -> Response:
 def collection(
     request: Request,
     user_id: int,
-    title: str = "",
-    author: int = 0,
-    format: str = "",  # noqa: A002
-    series: int = 0,
-    publisher: int = 0,
+    title: str = None,
+    author: int = None,
+    format: str = None,  # noqa: A002
+    series: int = None,
+    publisher: int = None,
+    read: bool = False,
 ) -> Response:
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
@@ -58,6 +59,10 @@ def collection(
         if publisher:
             _publisher = controller.get_publisher_by_id(publisher_id=publisher)
             books = {x for x in books if _publisher == x.publisher}
+        if read:
+            books = {x for x in books if user in x.readers}
+        else:
+            books = {x for x in books if user not in x.readers}
         return templates.TemplateResponse(
             "collection.html",
             {
@@ -68,10 +73,11 @@ def collection(
                 "author_id": author,
                 "format_list": sorted({x.format or "None" for x in all_books}),
                 "format": format,
-                "series_list": sorted({y.series for x in all_books for y in x.series}),
+                "series_list": sorted({y.series.to_schema() for x in all_books for y in x.series}),
                 "series_id": series,
-                "publisher_list": sorted({x.publisher for x in all_books}),
+                "publisher_list": sorted({x.publisher.to_schema() for x in all_books}),
                 "publisher_id": publisher,
+                "read": read,
             },
         )
 
@@ -80,11 +86,11 @@ def collection(
 def wishlist(
     request: Request,
     user_id: int,
-    title: str = "",
-    author: int = 0,
-    format: str = "",  # noqa: A002
-    series: int = 0,
-    publisher: int = 0,
+    title: str = None,
+    author: int = None,
+    format: str = None,  # noqa: A002
+    series: int = None,
+    publisher: int = None,
 ) -> Response:
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
@@ -121,14 +127,15 @@ def wishlist(
                 "author_id": author,
                 "format_list": sorted({x.format or "None" for x in all_books}),
                 "format": format,
-                "series_list": sorted({y.series for x in all_books for y in x.series}),
+                "series_list": sorted({y.series.to_schema() for x in all_books for y in x.series}),
                 "series_id": series,
-                "publisher_list": sorted({x.publisher for x in all_books}),
+                "publisher_list": sorted({x.publisher.to_schema() for x in all_books}),
                 "publisher_id": publisher,
             },
         )
 
 
+@router.get(path="/{user_id}/books/{book_id}", response_class=HTMLResponse)
 def view_book(request: Request, user_id: int, book_id: int) -> Response:
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
@@ -143,25 +150,16 @@ def view_book(request: Request, user_id: int, book_id: int) -> Response:
         )
 
 
-@router.get(path="/{user_id}/collection/{book_id}", response_class=HTMLResponse)
-def view_collection_book(request: Request, user_id: int, book_id: int) -> Response:
-    return view_book(request=request, user_id=user_id, book_id=book_id)
-
-
-@router.get(path="/{user_id}/wishlist/{book_id}", response_class=HTMLResponse)
-def view_wishlist_book(request: Request, user_id: int, book_id: int) -> Response:
-    return view_book(request=request, user_id=user_id, book_id=book_id)
-
-
-def edit_book(request: Request, user_id: int, book_id: int, is_wishlist: bool = False) -> Response:
+@router.get(path="/{user_id}/books/{book_id}/edit", response_class=HTMLResponse)
+def edit_book(request: Request, user_id: int, book_id: int) -> Response:
     with db_session:
         user = controller.get_user_by_id(user_id=user_id)
         if user.role < 1:
-            if is_wishlist:
-                return RedirectResponse(url=f"/{user_id}/wishlist/{book_id}")
-            return RedirectResponse(url=f"/{user_id}/collection/{book_id}")
+            return RedirectResponse(url=f"/{user_id}/books/{book_id}")
         book = controller.get_book_by_id(book_id=book_id)
         author_list = controller.list_authors()
+        format_list = {x.format for x in controller.list_books() if x.format}
+        publisher_list = controller.list_publishers()
         return templates.TemplateResponse(
             "edit_book.html",
             {
@@ -169,15 +167,7 @@ def edit_book(request: Request, user_id: int, book_id: int, is_wishlist: bool = 
                 "user": user.to_schema(),
                 "book": book.to_schema(),
                 "author_list": sorted({x.to_schema() for x in author_list}),
+                "format_list": sorted(format_list),
+                "publisher_list": sorted({x.to_schema() for x in publisher_list}),
             },
         )
-
-
-@router.get(path="/{user_id}/collection/{book_id}/edit", response_class=HTMLResponse)
-def edit_collection_book(request: Request, user_id: int, book_id: int) -> Response:
-    return edit_book(request=request, user_id=user_id, book_id=book_id)
-
-
-@router.get(path="/{user_id}/wishlist/{book_id}/edit", response_class=HTMLResponse)
-def edit_wishlist_book(request: Request, user_id: int, book_id: int) -> Response:
-    return edit_book(request=request, user_id=user_id, book_id=book_id, is_wishlist=True)
