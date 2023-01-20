@@ -82,9 +82,9 @@ function readBook(caller, bookId, userId){
   );
 }
 
-function saveBook(bookId, userId){
-  const caller = "save-book-button";
-  const editForm = document.getElementById("edit-form");
+function updateBook(bookId, userId){
+  const caller = "update-book-button";
+  const editForm = document.getElementById("update-form");
   let details = Object.fromEntries(new FormData(editForm));
   console.log(details);
 

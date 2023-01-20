@@ -151,8 +151,8 @@ def view_book(request: Request, user_id: int, book_id: int) -> Response:
         )
 
 
-@router.get(path="/{user_id}/books/{book_id}/edit", response_class=HTMLResponse)
-def edit_book(request: Request, user_id: int, book_id: int) -> Response:
+@router.get(path="/{user_id}/books/{book_id}/update", response_class=HTMLResponse)
+def update_book(request: Request, user_id: int, book_id: int) -> Response:
     with db_session:
         user = UserController.get_user(user_id=user_id)
         if user.role < 1:
@@ -162,7 +162,7 @@ def edit_book(request: Request, user_id: int, book_id: int) -> Response:
         format_list = {x.format for x in BookController.list_books() if x.format}
         publisher_list = PublisherController.list_publishers()
         return templates.TemplateResponse(
-            "edit_book.html",
+            "update_book.html",
             {
                 "request": request,
                 "user": user.to_schema(),

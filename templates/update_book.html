@@ -70,7 +70,7 @@
       </div>
       <div class="column is-two-thirds-tablet is-three-quarters-fullhd">
         <div class="box">
-          <form accept-charset="UTF-8" action="/api/v0/books" id="edit-form" method="PATCH">
+          <form id="update-form">
             <div class="field">
               <label class="label">Title</label>
               <div class="control">
@@ -241,7 +241,7 @@
         <div class="box">
           <div class="buttons is-centered are-medium">
             {% if user.role >= 1 %}
-            <button class="button is-success is-rounded" id="save-book-button" onclick="saveBook({{ book.identifiers.book_id }}, {{ user.user_id }})">
+            <button class="button is-success is-rounded" id="update-book-button" onclick="updateBook({{ book.identifiers.book_id }}, {{ user.user_id }})">
               <span class="icon is-medium">
                 <i class="fas fa-lg fa-save"></i>
               </span>
@@ -362,7 +362,7 @@ createFormatForm.addEventListener('submit', e => {
   console.log(details);
 
   addLoading(caller);
-  fetch("/api/v0/books/{{ book.identifiers.book_id }}", {
+  /*fetch("/api/v0/books/{{ book.identifiers.book_id }}", {
     method: "PATCH",
     headers: headers,
     body: JSON.stringify({
@@ -383,7 +383,7 @@ createFormatForm.addEventListener('submit', e => {
   }).then((data) => window.location.reload())
   .catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
+  })).finally(() => removeLoading(caller));*/
 
   e.preventDefault();
 });

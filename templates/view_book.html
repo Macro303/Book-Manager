@@ -149,11 +149,11 @@
             </button>
             {% endif %}
             {% if user.role >= 1 %}
-            <a class="button is-warning is-rounded" href="/{{ user.user_id }}/books/{{ book.identifiers.book_id }}/edit">
+            <a class="button is-warning is-rounded" href="/{{ user.user_id }}/books/{{ book.identifiers.book_id }}/update">
               <span class="icon is-medium">
                 <i class="fas fa-lg fa-edit"></i>
               </span>
-              <span>Edit</span>
+              <span>Update</span>
             </a>
             {% endif %}
           </div>
