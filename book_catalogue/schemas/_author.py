@@ -1,4 +1,4 @@
-__all__ = ["Author", "Role"]
+__all__ = ["Author", "Role", "CreateAuthor"]
 
 from book_catalogue.schemas._base import BaseModel
 
@@ -42,3 +42,11 @@ class Author(BaseModel):
 
     def __hash__(self):
         return hash((type(self), self.name))
+
+
+class CreateRole(BaseModel):
+    name: str
+
+
+class CreateAuthor(BaseModel):
+    name: str

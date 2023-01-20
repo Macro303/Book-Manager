@@ -63,3 +63,34 @@ class Book(BaseModel):
 
     def __hash__(self):
         return hash((type(self), self.get_first_series(), self.title, (self.subtitle or "")))
+
+
+class BookUpdateSeries(BaseModel):
+    series_id: int
+    number: int | None = None
+
+
+class BookUpdateAuthor(BaseModel):
+    author_id: int
+    role_ids: list[int] = Field(default_factory=list)
+
+
+class BookUpdate(BaseModel):
+    authors: list[BookUpdateAuthor] = Field(default_factory=list)
+    description: str | None = None
+    format: str | None
+    image_url: str
+    publisher_id: int | None
+    reader_ids: list[int] = Field(default_factory=list)
+    series: list[BookUpdateSeries] = Field(default_factory=list)
+    subtitle: str | None = None
+    title: str
+    wisher_id: int | None = None
+    goodreads_id: str | None = None
+    google_books_id: str | None = None
+    isbn_13: str
+    library_thing_id: str | None = None
+    open_library_id: str | None = None
+
+class CreateBook(BaseModel):
+    isbn: str

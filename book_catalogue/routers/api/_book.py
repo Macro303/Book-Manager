@@ -1,32 +1,14 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Body
-from fastapi.exceptions import HTTPException
-from pony.orm import db_session, flush
+from fastapi import APIRouter, HTTPException
+from pony.orm import db_session
 
-from book_catalogue import __version__, controller
+from book_catalogue.controllers import BookController
 from book_catalogue.responses import ErrorResponse
-from book_catalogue.schemas import Book, Publisher, User
+from book_catalogue.schemas import Book
+from book_catalogue.schemas._book import CreateBook
 
-router = APIRouter(
-    prefix=f"/api/v{__version__.split('.')[0]}",
-    tags=["API"],
-    responses={
-        422: {"description": "Validation error", "model": ErrorResponse},
-    },
-)
-
-
-@router.post(path="/users", status_code=201, responses={409: {"model": ErrorResponse}})
-def create_user(username: str = Body(embed=True)) -> User:  # noqa: B008
-    with db_session:
-        return controller.create_user(username=username).to_schema()
-
-
-@router.get(path="/users/{username}", responses={404: {"model": ErrorResponse}})
-def get_user_by_username(username: str) -> User:
-    with db_session:
-        return controller.get_user_by_username(username=username).to_schema()
+router = APIRouter(prefix="/books", tags=["Books"])
 
 
 @router.post(
@@ -157,9 +139,3 @@ def read_book(
             book.readers.add(user)
         flush()
         return book.to_schema()
-
-
-@router.post(path="/publishers", status_code=201, responses={409: {"model": ErrorResponse}})
-def create_publisher(name: str = Body(embed=True)) -> Publisher:
-    with db_session:
-        return controller.create_publisher(name=name).to_schema()

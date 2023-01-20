@@ -11,8 +11,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from book_catalogue import __version__, get_project_root, setup_logging
-from book_catalogue.routing.api import router as api_router
-from book_catalogue.routing.html import router as html_router
+from book_catalogue.routers.api import api_router
+from book_catalogue.routers.html import router as html_router
 from book_catalogue.settings import Settings
 
 LOGGER = logging.getLogger("book_catalogue")

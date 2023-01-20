@@ -1,4 +1,4 @@
-__all__ = ["User"]
+__all__ = ["User", "CreateUser"]
 
 from book_catalogue.schemas._base import BaseModel
 
@@ -20,3 +20,7 @@ class User(BaseModel):
 
     def __hash__(self):
         return hash((type(self), self.username))
+
+
+class CreateUser(BaseModel):
+    username: str

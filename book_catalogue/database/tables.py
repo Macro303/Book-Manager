@@ -1,4 +1,12 @@
-__all__ = ["Series"]
+__all__ = [
+    "Author",
+    "Book",
+    "BookAuthor",
+    "Publisher",
+    "Role",
+    "Series",
+    "User",
+]
 
 from pony.orm import Database, Optional, PrimaryKey, Required, Set
 
@@ -50,8 +58,7 @@ class Book(db.Entity):
 
     goodreads_id: str | None = Optional(str, nullable=True)
     google_books_id: str | None = Optional(str, nullable=True)
-    isbn_10: str | None = Optional(str, nullable=True, unique=True)
-    isbn_13: str | None = Optional(str, nullable=True, unique=True)
+    isbn_13: str = Required(str, unique=True)
     library_thing_id: str | None = Optional(str, nullable=True)
     open_library_id: str | None = Optional(str, nullable=True, unique=True)
 
@@ -121,7 +128,7 @@ class Author(db.Entity):
     _table_ = "Authors"
 
     author_id: int = PrimaryKey(int, auto=True)
-    name: str = Required(str)
+    name: str = Required(str, unique=True)
     open_library_id: str | None = Optional(str, nullable=True, unique=True)
 
     books: list[BookAuthor] = Set(BookAuthor)
