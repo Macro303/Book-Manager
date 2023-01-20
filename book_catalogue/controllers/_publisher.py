@@ -6,37 +6,44 @@ from fastapi import HTTPException
 from pony.orm import flush
 
 from book_catalogue.database.tables import Publisher
+from book_catalogue.schemas._publisher import NewPublisher
 
 LOGGER = logging.getLogger(__name__)
 
 
 class PublisherController:
-    @staticmethod
-    def list_publishers() -> list[Publisher]:
+    @classmethod
+    def list_publishers(cls) -> list[Publisher]:
         return Publisher.select()
 
-    @staticmethod
-    def create_publisher(name: str) -> Publisher:
-        if Publisher.get(name=name):
+    @classmethod
+    def create_publisher(cls, new_publisher: NewPublisher) -> Publisher:
+        if Publisher.get(name=new_publisher.name):
             raise HTTPException(status_code=409, detail="Publisher already exists.")
-        publisher = Publisher(name=name)
+        publisher = Publisher(name=new_publisher.name)
         flush()
         return publisher
 
-    @staticmethod
-    def get_publisher(publisher_id: int) -> Publisher | None:
+    @classmethod
+    def get_publisher(cls, publisher_id: int) -> Publisher:
         if publisher := Publisher.get(publisher_id=publisher_id):
             return publisher
-        return None
-
-    @staticmethod
-    def delete_publisher(publisher_id: int):
-        if publisher := Publisher.get(publisher_id=publisher_id):
-            return publisher.delete()
         raise HTTPException(status_code=404, detail="Publisher not found.")
 
-    @staticmethod
-    def get_publisher_by_name(name: str) -> Publisher | None:
+    @classmethod
+    def update_publisher(cls, publisher_id: int, updates: NewPublisher):
+        publisher = cls.get_publisher(publisher_id=publisher_id)
+        publisher.name = updates.name
+        flush()
+        return publisher
+
+    @classmethod
+    def delete_publisher(cls, publisher_id: int):
+        publisher = cls.get_publisher(publisher_id=publisher_id)
+        publisher.delete()
+        
+    @classmethod
+    def get_publisher_by_name(cls, name: str) -> Publisher:
         if publisher := Publisher.get(name=name):
             return publisher
-        return None
+        raise HTTPException(status_code=404, detail="Publisher not found.")

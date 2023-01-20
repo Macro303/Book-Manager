@@ -6,7 +6,7 @@ from pony.orm import db_session
 from book_catalogue.controllers import PublisherController
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas import Publisher
-from book_catalogue.schemas._publisher import CreatePublisher
+from book_catalogue.schemas._publisher import NewPublisher
 
 router = APIRouter(prefix="/publishers", tags=["Publishers"])
 
@@ -18,17 +18,21 @@ def list_publishers() -> list[Publisher]:
 
 
 @router.post(path="", status_code=201, responses={409: {"model": ErrorResponse}})
-def create_publisher(new_publisher: CreatePublisher) -> Publisher:
+def create_publisher(new_publisher: NewPublisher) -> Publisher:
     with db_session:
-        return PublisherController.create_publisher(name=new_publisher.name).to_schema()
+        return PublisherController.create_publisher(new_publisher=new_publisher).to_schema()
 
 
 @router.get(path="/{publisher_id}", responses={404: {"model": ErrorResponse}})
 def get_publisher(publisher_id: int) -> Publisher:
     with db_session:
-        if publisher := PublisherController.get_publisher(publisher_id=publisher_id):
-            return publisher.to_schema()
-        raise HTTPException(status_code=404, detail="Publisher not found.")
+        return PublisherController.get_publisher(publisher_id=publisher_id).to_schema()
+            
+
+@router.patch(path="/{publisher_id}", responses={404: {"model": ErrorResponse}})
+def update_publisher(publisher_id: int, updates: NewPublisher) -> Publisher:
+    with db_session:
+        return PublisherController.update_publisher(publisher_id=publisher_id, updates=updates)
 
 
 @router.delete(path="/{publisher_id}", status_code=204, responses={404: {"model": ErrorResponse}})

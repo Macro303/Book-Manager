@@ -6,7 +6,7 @@ from pony.orm import db_session
 from book_catalogue.controllers import UserController
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas import User
-from book_catalogue.schemas._user import CreateUser
+from book_catalogue.schemas._user import NewUser
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -18,9 +18,15 @@ def list_users() -> list[User]:
 
 
 @router.post(path="", status_code=201, responses={409: {"model": ErrorResponse}})
-def create_user(new_user: CreateUser) -> User:
+def create_user(new_user: NewUser) -> User:
     with db_session:
-        return UserController.create_user(username=new_user.username).to_schema()
+        return UserController.create_user(new_user=new_user).to_schema()
+
+
+@router.patch(path="/{user_id}", responses={404: {"model": ErrorResponse}})
+def update_user(user_id: int, updates: NewUser) -> User:
+    with db_session:
+        return UserController.update_user(user_id=user_id, updates=updates)
 
 
 @router.delete(path="/{user_id}", status_code=204, responses={404: {"model": ErrorResponse}})

@@ -6,7 +6,7 @@ from pony.orm import db_session
 from book_catalogue.controllers import AuthorController
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas import Author, AuthorRole
-from book_catalogue.schemas._author import CreateAuthor, CreateRole
+from book_catalogue.schemas._author import NewAuthor, NewRole
 
 router = APIRouter(prefix="/authors", tags=["Authors"])
 
@@ -18,17 +18,21 @@ def list_authors() -> list[Author]:
 
 
 @router.post(path="", status_code=201, responses={409: {"model": ErrorResponse}})
-def create_author(new_author: CreateAuthor) -> Author:
+def create_author(new_author: NewAuthor) -> Author:
     with db_session:
-        return AuthorController.create_author(name=new_author.name).to_schema()
+        return AuthorController.create_author(new_author=new_author).to_schema()
 
 
 @router.get(path="/{author_id}", responses={404: {"model": ErrorResponse}})
 def get_author(author_id: int) -> Author:
     with db_session:
-        if author := AuthorController.get_author(author_id=author_id):
-            return author.to_schema()
-        raise HTTPException(status_code=404, detail="Author not found.")
+        return AuthorController.get_author(author_id=author_id).to_schema()
+            
+
+@router.patch(path="/{author_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}})
+def update_author(author_id: int, updates: NewAuthor) -> Author:
+    with db_session:
+        return AuthorController.update_author(author_id=author_id, updates=updates)
 
 
 @router.delete(path="/{author_id}", status_code=204, responses={404: {"model": ErrorResponse}})
@@ -44,7 +48,7 @@ def list_roles() -> list[AuthorRole]:
 
 
 @router.post(path="/roles", status_code=201, responses={409: {"model": ErrorResponse}})
-def create_role(new_role: CreateRole) -> AuthorRole:
+def create_role(new_role: NewRole) -> AuthorRole:
     with db_session:
         return AuthorController.create_role(name=new_role.name).to_schema()
 
@@ -52,9 +56,13 @@ def create_role(new_role: CreateRole) -> AuthorRole:
 @router.get(path="/roles/{role_id}", responses={404: {"model": ErrorResponse}})
 def get_role(role_id: int) -> AuthorRole:
     with db_session:
-        if role := AuthorController.get_role(role_id=role_id):
-            return role.to_schema()
-        raise HTTPException(status_code=404, detail="Role not found.")
+        return AuthorController.get_role(role_id=role_id).to_schema()
+            
+
+@router.patch(path="/roles/{role_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}})
+def update_role(role_id: int, updates: NewRole) -> AuthorRole:
+    with db_session:
+        return AuthorController.update_role(role_id=role_id, updates=updates).to_schema()
 
 
 @router.delete(path="/roles/{role_id}", status_code=204, responses={404: {"model": ErrorResponse}})

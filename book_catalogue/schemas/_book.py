@@ -1,4 +1,7 @@
-__all__ = ["Book", "Identifiers"]
+__all__ = [
+    "Book",
+    "NewBook"
+]
 
 from pydantic import Field
 
@@ -65,32 +68,38 @@ class Book(BaseModel):
         return hash((type(self), self.get_first_series(), self.title, (self.subtitle or "")))
 
 
-class BookUpdateSeries(BaseModel):
+class NewBookSeries(BaseModel):
     series_id: int
     number: int | None = None
 
 
-class BookUpdateAuthor(BaseModel):
+class NewBookIdentifiers(BaseModel):
+    goodreads_id: str | None = None
+    google_books_id: str | None = None
+    isbn: str
+    library_thing_id: str | None = None
+    open_library_id: str | None = None
+
+
+class NewBookAuthor(BaseModel):
     author_id: int
     role_ids: list[int] = Field(default_factory=list)
 
 
-class BookUpdate(BaseModel):
-    authors: list[BookUpdateAuthor] = Field(default_factory=list)
+class NewBook(BaseModel):
+    authors: list[NewBookAuthor] = Field(default_factory=list)
     description: str | None = None
-    format: str | None
+    format: str | None = None
+    identifiers: NewBookIdentifiers
     image_url: str
-    publisher_id: int | None
+    publisher_id: int | None = None
     reader_ids: list[int] = Field(default_factory=list)
-    series: list[BookUpdateSeries] = Field(default_factory=list)
+    series: list[NewBookSeries] = Field(default_factory=list)
     subtitle: str | None = None
     title: str
     wisher_id: int | None = None
-    goodreads_id: str | None = None
-    google_books_id: str | None = None
-    isbn_13: str
-    library_thing_id: str | None = None
-    open_library_id: str | None = None
 
-class CreateBook(BaseModel):
+
+class LookupBook(BaseModel):
     isbn: str
+    wisher_id: int

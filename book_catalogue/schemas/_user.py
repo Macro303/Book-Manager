@@ -22,5 +22,6 @@ class User(BaseModel):
         return hash((type(self), self.username))
 
 
-class CreateUser(BaseModel):
+class NewUser(BaseModel):
+    role: int = 0
     username: str

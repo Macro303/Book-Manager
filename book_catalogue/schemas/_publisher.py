@@ -1,4 +1,4 @@
-__all__ = ["Publisher", "CreatePublisher"]
+__all__ = ["Publisher", "NewPublisher"]
 
 from book_catalogue.schemas._base import BaseModel
 
@@ -21,5 +21,5 @@ class Publisher(BaseModel):
         return hash((type(self), self.name))
 
 
-class CreatePublisher(BaseModel):
+class NewPublisher(BaseModel):
     name: str

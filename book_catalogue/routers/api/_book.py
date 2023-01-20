@@ -1,120 +1,69 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from pony.orm import db_session
 
-from book_catalogue.controllers import BookController
+from book_catalogue.controllers import BookController, UserController
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas import Book
-from book_catalogue.schemas._book import CreateBook
+from book_catalogue.schemas._book import NewBook, LookupBook
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
 
-@router.post(
-    path="/books",
-    status_code=201,
-    responses={
-        400: {"model": ErrorResponse},
-        404: {"model": ErrorResponse},
-        409: {"model": ErrorResponse},
-    },
-)
-def add_book_by_isbn(
-    isbn: str | None = Body(embed=True, default=None),  # noqa: B008
-    open_library_id: str | None = Body(embed=True, default=None),  # noqa: B008
-    wisher_id: int = Body(embed=True),  # noqa: B008
-) -> Book:
-    if not isbn and not open_library_id:
-        raise HTTPException(
-            status_code=400, detail="Invalid request, isbn or open_library_id must be provided."
-        )
-    with db_session:
-        wisher = controller.get_user_by_id(user_id=wisher_id)
-        return controller.add_book_by_isbn(isbn=isbn, wisher=wisher).to_schema()
-
-
-@router.get(path="/books", responses={404: {"model": ErrorResponse}})
+@router.get(path="")
 def list_books() -> list[Book]:
     with db_session:
-        return sorted({x.to_schema() for x in controller.list_books()})
+        return sorted({x.to_schema() for x in BookController.list_books()})
 
 
-@router.put(
-    path="/books",
-    status_code=204,
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def refresh_all_books() -> None:
+@router.post(path="", status_code=201, responses={409: {"model": ErrorResponse}})
+def create_book(new_book: NewBook) -> Book:
     with db_session:
-        for book in controller.list_books():
-            controller.refresh_book(book_id=book.book_id)
+        return BookController.create_book(new_book=new_book)
 
 
-@router.get(
-    path="/books/{book_id}",
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def get_book_by_id(book_id: int) -> Book:
+@router.get(path="/{book_id}", responses={404: {"model": ErrorResponse}})
+def get_book(book_id: int) -> Book:
     with db_session:
-        return controller.get_book_by_id(book_id=book_id).to_schema()
+        return BookController.get_book(book_id=book_id).to_schema()
+            
 
-
-@router.delete(
-    path="/books/{book_id}",
-    status_code=204,
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def delete_book(book_id: int) -> None:
+@router.patch(path="/{book_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}})
+def update_book(book_id: int, updates: NewBook) -> Book:
     with db_session:
-        controller.delete_book(book_id)
+        return BookController.update_book(book_id=book_id, update_book=updates)
 
 
-@router.patch(
-    path="/books/{book_id}",
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def update_book(
-    book_id: int,
-    title: str = Body(embed=True),  # noqa: B008
-    subtitle: str | None = Body(embed=True, default=None),  # noqa: B008
-    format: str = Body(embed=True),  # noqa: A002, B008
-    description: str | None = Body(embed=True, default=None),  # noqa: B008
-    publisher_id: int = Body(embed=True),  # noqa: B008
-    goodreads_id: str | None = Body(embed=True, default=None),  # noqa: B008
-    library_thing_id: str | None = Body(embed=True, default=None),  # noqa: B008
-    open_library_id: str | None = Body(embed=True, default=None),  # noqa: B008
-) -> Book:
+@router.delete(path="/{book_id}", responses={404: {"model": ErrorResponse}})
+def delete_book(book_id: int):
     with db_session:
-        book = controller.get_book_by_id(book_id=book_id)
-        book.title = title
-        book.subtitle = subtitle or None
-        book.format = format
-        book.description = description or None
-        book.publisher = controller.get_publisher_by_id(publisher_id=publisher_id)
-        book.goodreads_id = goodreads_id or None
-        book.library_thing_id = library_thing_id or None
-        book.open_library_id = open_library_id or None
-        flush()
-        return book.to_schema()
+        BookController.delete_book(book_id=book_id)
 
 
-@router.put(
-    path="/books/{book_id}",
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
-def refresh_book(book_id: int) -> Book:
+@router.post(path="/lookup", status_code=201, responses={409: {"model": ErrorResponse}})
+def lookup_book(new_book: LookupBook) -> Book:
     with db_session:
-        return controller.refresh_book(book_id=book_id).to_schema()
+        return BookController.lookup_book(isbn=new_book.isbn, wisher_id=new_book.wisher_id).to_schema()
 
 
-@router.post(
-    path="/books/{book_id}/collect",
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
+@router.put(path="", status_code=204)
+def reset_all_books() -> None:
+    with db_session:
+        for book in BookController.list_books():
+            BookController.reset_book(book_id=book_id)
+
+
+@router.put(path="/{book_id}", responses={404: {"model": ErrorResponse}})
+def reset_book(book_id: int) -> Book:
+    with db_session:
+        return BookController.reset_book(book_id=book_id).to_schema()
+
+
+@router.post(path="/{book_id}/collect", responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
 def collect_book(book_id: int) -> Book:
     with db_session:
-        book = controller.get_book_by_id(book_id=book_id)
+        book = BookController.get_book(book_id=book_id)
         if not book.wisher:
             raise HTTPException(status_code=400, detail="Book has already been collected.")
         book.wisher = None
@@ -122,17 +71,14 @@ def collect_book(book_id: int) -> Book:
         return book.to_schema()
 
 
-@router.post(
-    path="/books/{book_id}/read",
-    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
-)
+@router.post(path="/{book_id}/read", responses={404: {"model": ErrorResponse}})
 def read_book(
     book_id: int,
     user_id: int = Body(embed=True),  # noqa: B008
 ) -> Book:
     with db_session:
-        book = controller.get_book_by_id(book_id=book_id)
-        user = controller.get_user_by_id(user_id=user_id)
+        book = BookController.get_book(book_id=book_id)
+        user = UserController.get_user(user_id=user_id)
         if user in book.readers:
             book.readers.remove(user)
         else:

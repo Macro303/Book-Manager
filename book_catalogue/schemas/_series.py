@@ -1,4 +1,4 @@
-__all__ = ["Series", "CreateSeries"]
+__all__ = ["Series", "NewSeries"]
 
 from book_catalogue.schemas._base import BaseModel
 
@@ -31,5 +31,5 @@ class Series(BaseModel):
         return hash((type(self), self.title, (self.number or -1)))
 
 
-class CreateSeries(BaseModel):
+class NewSeries(BaseModel):
     title: str
