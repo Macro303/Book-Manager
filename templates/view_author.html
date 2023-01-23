@@ -7,44 +7,40 @@
 {% block title %}{{ author.name }}{% endblock %}
 {% block content %}
 <section>
-  <div class="columns is-centered">
-    <div class="column is-one-quarter">
-      <div class="box">
-        <div class="divider is-info is-size-4">More Details</div>
-        <div class="block">
-          <p><strong class="title is-size-4">Bio:</strong> {{ author.bio or "" }}</p>
-        </div>
-        <div class="divider is-info is-size-4">Identifiers</div>
-        {% if author.identifiers.amazon_id %}
-        <div class="block">
-          <a href="#" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">Amazon:</strong> {{ author.identifiers.amazon_id }}
-          </a>
-        </div>
-        {% endif %}
-        {% if author.identifiers.goodreads_id %}
-        <div class="block">
-          <a href="#" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">Goodreads:</strong> {{ author.identifiers.goodreads_id }}
-          </a>
-        </div>
-        {% endif %}
-        {% if author.identifiers.library_thing_id %}
-        <div class="block">
-          <a href="#" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">ibraryThing:</strong> {{ author.identifiers.library_thing_id }}
-          </a>
-        </div>
-        {% endif %}
-        {% if author.identifiers.open_library_id %}
-        <div class="block">
-          <a href="https://openlibrary.org/author/{{ author.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">OpenLibrary:</strong> {{ author.identifiers.open_library_id }}
-          </a>
-        </div>
-        {% endif %}
-      </div>
+  <div class="box">
+    <div class="divider is-info is-size-4">More Details</div>
+    <div class="block">
+      <p><strong class="title is-size-4">Bio:</strong> {{ author.bio or "" }}</p>
     </div>
+    <div class="divider is-info is-size-4">Identifiers</div>
+    {% if author.identifiers.amazon_id %}
+    <div class="block">
+      <a href="#" rel="noopener noreferrer" target="_blank">
+        <strong class="title is-size-4">Amazon:</strong> {{ author.identifiers.amazon_id }}
+      </a>
+    </div>
+    {% endif %}
+    {% if author.identifiers.goodreads_id %}
+    <div class="block">
+      <a href="#" rel="noopener noreferrer" target="_blank">
+        <strong class="title is-size-4">Goodreads:</strong> {{ author.identifiers.goodreads_id }}
+      </a>
+    </div>
+    {% endif %}
+    {% if author.identifiers.library_thing_id %}
+    <div class="block">
+      <a href="#" rel="noopener noreferrer" target="_blank">
+        <strong class="title is-size-4">ibraryThing:</strong> {{ author.identifiers.library_thing_id }}
+      </a>
+    </div>
+    {% endif %}
+    {% if author.identifiers.open_library_id %}
+    <div class="block">
+      <a href="https://openlibrary.org/author/{{ author.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
+        <strong class="title is-size-4">OpenLibrary:</strong> {{ author.identifiers.open_library_id }}
+      </a>
+    </div>
+    {% endif %}
   </div>
   <div class="buttons is-centered">
     {% if token_user.role >= 2 %}
@@ -56,7 +52,7 @@
     </a>
     {% endif %}
   </div>
-  <div class="columns is-multiline is-centered">
+  <div class="columns is-multiline is-centered is-mobile">
     {% for _book in book_list %}
     {% include "components/book_column.jinja" %}
     {% endfor %}

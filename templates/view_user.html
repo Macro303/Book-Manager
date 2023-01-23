@@ -7,35 +7,27 @@
 {% block title %}{{ user.username }}{% endblock %}
 {% block content %}
 <section>
-  <div class="columns is-centered">
-    <div class="column is-one-quarter">
-      <div class="box"></div>
-    </div>
-  </div>
-  <div class="columns is-centered is-mobile">
+  <div class="box"></div>
+  <div class="buttons is-centered">
     {% if token_user == user or (token_user.role >= 8 and token_user.role > user.role) %}
-    <div class="column is-one-quarter">
-      <a class="button is-warning is-rounded" href="/users/{{ user.user_id }}/edit">
-        <span class="icon is-medium">
-          <i class="fas fa-lg fa-edit"></i>
-        </span>
-        <span>Edit</span>
-      </a>
-    </div>
+    <a class="button is-warning is-rounded" href="/users/{{ user.user_id }}/edit">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-edit"></i>
+      </span>
+      <span>Edit</span>
+    </a>
     {% endif %}
-    <div class="column is-one-quarter">
-      <a class="button is-success is-rounded" href="/users/{{ user.user_id }}/wishlist">
-        <span class="icon is-medium">
-          <i class="fas fa-lg fa-star"></i>
-        </span>
-        <span>Wishlist</span>
-      </a>
-    </div>
+    <a class="button is-success is-rounded" href="/users/{{ user.user_id }}/wishlist">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-star"></i>
+      </span>
+      <span>Wishlist</span>
+    </a>
   </div>
   <div class="block has-text-centered">
     <h3 class="subtitle is-3">Last Read</h3>
   </div>
-  <div class="columns is-centered is-multiline">
+  <div class="columns is-multiline is-centered is-mobile">
     {% for _book in last_read %}
     {% include "components/book_column.jinja" %}
     {% endfor %}
