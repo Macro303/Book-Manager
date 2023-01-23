@@ -1,0 +1,90 @@
+{% extends "base.jinja" %}
+{% from "macros/forms.jinja" import input, textarea %}
+{% block title %}{% endblock %}
+{% block content %}
+<section>
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      <div class="box has-text-centered">
+        <figure class="image is-64x64 is-inline-block is-rounded">
+          <img alt="{{ publisher.name }}'s Profile Image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ publisher.image_url }}"/>
+        </figure>
+      </div>
+    </div>
+    <div class="column">
+      <div class="box">
+        <form id="edit-publisher-form">
+          {{ input("Name", "name", value=publisher.name) }}
+          <div class="divider is-info is-size-4">More Details</div>
+          <div class="divider is-info is-size-4">Identifiers</div>
+          {{ input("Image Url", "image-url", value=publisher.image_url or "") }}
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="buttons is-centered">
+    <button class="button is-success is-rounded" id="save-publisher-button" onclick="savePublisher()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-save"></i>
+      </span>
+      <span>Save</span>
+    </button>
+    {% if token_user.role >= 3 %}
+    <button class="button is-danger is-rounded" id="delete-publisher-button" onclick="deletePublisher()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-trash"></i>
+      </span>
+      <span>Delete</span>
+    </button>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+function savePublisher(){
+  const caller = "save-publisher-button";
+  let editPublisherForm = document.getElementById("edit-publisher-form");
+  let details = Object.fromEntries(new FormData(editPublisherForm));
+  console.log(details);
+  
+  addLoading(caller);
+  fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify({
+      "name": details["name"],
+      "image_url": details["image_url"],
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location = "/publishers/{{ publisher.publisher_id }}";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% if token_user.role >= 3 %}
+function deletePublisher(){
+  const caller = "delete-publisher-button";
+  
+  addLoading(caller);
+  fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location = "/publishers";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
+{% endblock %}

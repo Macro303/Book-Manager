@@ -33,7 +33,7 @@ def get_publisher(publisher_id: int) -> Publisher:
 @router.patch(path="/{publisher_id}", responses={404: {"model": ErrorResponse}})
 def update_publisher(publisher_id: int, updates: NewPublisher) -> Publisher:
     with db_session:
-        return PublisherController.update_publisher(publisher_id=publisher_id, updates=updates)
+        return PublisherController.update_publisher(publisher_id=publisher_id, updates=updates).to_schema()
 
 
 @router.delete(path="/{publisher_id}", status_code=204, responses={404: {"model": ErrorResponse}})

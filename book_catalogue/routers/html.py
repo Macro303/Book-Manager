@@ -25,7 +25,9 @@ def get_token_user(token: int | None = Cookie(default=None)) -> User | None:
 
 
 @router.get("/", response_class=HTMLResponse)
-def index(request: Request):
+def index(request: Request, token_user: User | None = Depends(get_token_user)):
+    if token_user:
+        return RedirectResponse(f"/users/{token_user.user_id}")
     return templates.TemplateResponse("index.html", {"request": request})
 
 
@@ -40,7 +42,7 @@ def list_authors(
     with db_session:
         author_list = AuthorController.list_authors()
         if name:
-            author_list = [x for x in author_list if name in x.name or x.name in name]
+            author_list = [x for x in author_list if name.casefold() in x.name.casefold() or x.name.casefold() in name.casefold()]
         return templates.TemplateResponse(
             "list_authors.html",
             {
@@ -90,6 +92,67 @@ def edit_author(request: Request, author_id: int, token_user: User | None = Depe
         )
 
 
+@router.get("/publishers", response_class=HTMLResponse)
+def list_publishers(
+    request: Request,
+    token_user: User | None = Depends(get_token_user),
+    name: str = "",
+):
+    if not token_user:
+        return RedirectResponse("/")
+    with db_session:
+        publisher_list = PublisherController.list_publishers()
+        if name:
+            publisher_list = [x for x in publisher_list if name.casefold() in x.name.casefold() or x.name.casefold() in name.casefold()]
+        return templates.TemplateResponse(
+            "list_publishers.html",
+            {
+                "request": request,
+                "token_user": token_user.to_schema(),
+                "publisher_list": sorted({x.to_schema() for x in publisher_list}),
+                "filters": {
+                    "name": name
+                }
+            }
+        )
+
+
+@router.get("/publishers/{publisher_id}", response_class=HTMLResponse)
+def view_publisher(request: Request, publisher_id: int, token_user: User | None = Depends(get_token_user)):
+    if not token_user:
+        return RedirectResponse("/")
+    with db_session:
+        publisher = PublisherController.get_publisher(publisher_id=publisher_id)
+        book_list = sorted({x.to_schema() for x in publisher.books})
+        return templates.TemplateResponse(
+            "view_publisher.html",
+            {
+                "request": request,
+                "token_user": token_user.to_schema(),
+                "publisher": publisher.to_schema(),
+                "book_list": book_list,
+            }
+        )
+
+
+@router.get("/publishers/{publisher_id}/edit", response_class=HTMLResponse)
+def edit_publisher(request: Request, publisher_id: int, token_user: User | None = Depends(get_token_user)):
+    if not token_user:
+        return RedirectResponse("/")
+    if token_user.role < 2:
+        return RedirectResponse(f"/publishers/{publisher_id}")
+    with db_session:
+        publisher = PublisherController.get_publisher(publisher_id=publisher_id)
+        return templates.TemplateResponse(
+            "edit_publisher.html",
+            {
+                "request": request,
+                "token_user": token_user.to_schema(),
+                "publisher": publisher.to_schema(),
+            }
+        )
+
+
 @router.get("/users", response_class=HTMLResponse)
 def list_users(
     request: Request,
@@ -101,7 +164,7 @@ def list_users(
     with db_session:
         user_list = UserController.list_users()
         if username:
-            user_list = [x for x in user_list if username in x.username or x.username in username]
+            user_list = [x for x in user_list if username.casefold() in x.username.casefold() or x.username.casefold() in username.casefold()]
         return templates.TemplateResponse(
             "list_users.html",
             {
@@ -137,7 +200,7 @@ def edit_user(request: Request, user_id: int, token_user: User | None = Depends(
         return RedirectResponse("/")
     with db_session:
         user = UserController.get_user(user_id=user_id)
-        if token_user != user and (token_user < 8 or token_user.role <= user.role):
+        if token_user.user_id != user.user_id and (token_user.role < 8 or token_user.role <= user.role):
             return RedirectResponse(f"/users/{user_id}")
         return templates.TemplateResponse(
             "edit_user.html",
@@ -177,7 +240,7 @@ def user_wishlist(
             series = SeriesController.get_series(series_id=series_id)
             wishlist = [x for x in wishlist if series in [y.series for y in x.series]]
         if title:
-            wishlist = [x for x in wishlist if (title in x.title) or (x.title in title) or (x.subtitle and ((title in x.subtitle) or (x.subtitle in title)))]
+            wishlist = [x for x in wishlist if (title.casefold() in x.title.casefold()) or (x.title.casefold() in title.casefold()) or (x.subtitle and ((title.casefold() in x.subtitle.casefold()) or (x.subtitle.casefold() in title.casefold())))]
         if publisher_id:
             publisher = PublisherController.get_publisher(publisher_id=publisher_id)
             wishlist = [x for x in wishlist if publisher == x.publisher]

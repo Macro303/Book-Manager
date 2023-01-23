@@ -8,7 +8,7 @@ from pony.orm import flush
 
 from book_catalogue.database.tables import Author, Role
 from book_catalogue.services.open_library.service import OpenLibrary
-from book_catalogue.schemas._author import NewAuthor, NewRole
+from book_catalogue.schemas._author import NewAuthor, NewRole, NewAuthorIdentifiers
 
 LOGGER = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class AuthorController:
         raise HTTPException(status_code=404, detail="Author not found.")
 
     @classmethod
-    def _parse_open_library(open_library_id: str) -> NewAuthor:
+    def _parse_open_library(cls, open_library_id: str) -> NewAuthor:
         session = OpenLibrary(cache=None)
         result = session.get_author(author_id=open_library_id)
         
@@ -75,7 +75,7 @@ class AuthorController:
             identifiers = NewAuthorIdentifiers(
                 amazon_id = result.remote_ids.amazon,
                 goodreads_id = result.remote_ids.goodreads,
-                library_thing_id = result.remote_ids.library_thing,
+                library_thing_id = result.remote_ids.librarything,
                 open_library_id = open_library_id,
             ),
             # TODO image_url

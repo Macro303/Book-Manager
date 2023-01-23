@@ -1,19 +1,19 @@
 {% extends "base.jinja" %}
-{% from "macros/filters.jinja" import author with context %}
+{% from "macros/filters.jinja" import publisher with context %}
 {% from "macros/forms.jinja" import input %}
-{% block title %}Authors{% endblock %}
+{% block title %}Publishers{% endblock %}
 {% block content %}
 <section>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ author("/authors") }}
+      {{ publisher("/publishers") }}
       {% if token_user.role >= 1 %}
       <div class="box">
-        <h5 class="title is-5">Add Author</h5>
-        <form id="add-author-form">
+        <h5 class="title is-5">Add Publisher</h5>
+        <form id="add-publisher-form">
           {{ input("Name", "name") }}
           <div class="buttons is-centered">
-            <button class="button is-primary is-rounded" id="add-author-button" type="button" onclick="addAuthor()">
+            <button class="button is-primary is-rounded" id="add-publisher-button" type="button" onclick="addPublisher()">
               <span class="icon is-medium">
                 <i class="fas fa-lg fa-plus"></i>
               </span>
@@ -26,8 +26,8 @@
     </div>
     <div class="column">
       <div class="columns is-multiline">
-        {% for _author in author_list %}
-        {% include "components/author_column.jinja" %}
+        {% for _publisher in publisher_list %}
+        {% include "components/publisher_column.jinja" %}
         {% endfor %}
       </div>
     </div>
@@ -38,14 +38,14 @@
 {{ super() }}
 <script type="text/javascript">
 {% if token_user.role >= 1 %}
-function addAuthor(){
-  const caller = "add-author-button";
-  let addAuthorForm = document.getElementById("add-author-form");
-  let details = Object.fromEntries(new FormData(addAuthorForm));
+function addPublisher(){
+  const caller = "add-publisher-button";
+  let addPublisherForm = document.getElementById("add-publisher-form");
+  let details = Object.fromEntries(new FormData(addPublisherForm));
   console.log(details);
   
   addLoading(caller);
-  fetch("/api/v0/authors", {
+  fetch("/api/v0/publishers", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
@@ -57,7 +57,7 @@ function addAuthor(){
     }
     return Promise.reject(response);
   }).then((data) => {
-    window.location = "/authors";
+    window.location = "/publishers";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));

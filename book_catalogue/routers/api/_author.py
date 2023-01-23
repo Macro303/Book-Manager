@@ -42,6 +42,12 @@ def delete_author(author_id: int):
         AuthorController.delete_author(author_id=author_id)
 
 
+@router.put(path="/{author_id}", responses={404: {"model": ErrorResponse}})
+def reset_author(author_id: int) -> Author:
+    with db_session:
+        return AuthorController.reset_author(author_id=author_id).to_schema()
+
+
 @router.get(path="/roles")
 def list_roles() -> list[AuthorRole]:
     with db_session:

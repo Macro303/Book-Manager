@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from rich import inspect
+from jinja2.exceptions import TemplateNotFound
 
 from book_catalogue import __version__, get_project_root, setup_logging
 from book_catalogue.console import CONSOLE
@@ -86,5 +87,19 @@ async def validation_exception_handler(
             "timestamp": datetime.now().replace(microsecond=0).isoformat(),
             "status": f"{status.value}: {status.phrase}",
             "details": details,
+        },
+    )
+
+@app.exception_handler(exc_class_or_status_code=TemplateNotFound)
+async def missing_template_exception_handler(
+    request: Request, exc  # noqa: ARG001, ANN001
+) -> JSONResponse:
+    status = HTTPStatus(404)
+    return JSONResponse(
+        status_code=status,
+        content={
+            "timestamp": datetime.now().replace(microsecond=0).isoformat(),
+            "status": f"{status.value}: {status.phrase}",
+            "details": [f"{exc.message} not found."],
         },
     )
