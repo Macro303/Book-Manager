@@ -1,0 +1,39 @@
+<div class="column is-two-fifths-mobile is-two-fifths-tablet is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
+  <div class="card has-text-light has-background-dark">
+    <div class="card-content">
+      <div class="media">
+        <div class="media-content">
+          <p class="title is-4">{{ _series.title }}</p>
+        </div>
+      </div>
+    </div>
+    <footer class="card-footer">
+      <a class="card-footer-item" href="/series/{{ _series.series_id }}">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-eye"></i>
+        </span>
+        <span>View</span>
+      </a>
+      <a class="card-footer-item modal-trigger" data-target="{{ _series.series_id }}-link-modal" id="{{ _series.series_id }}-link-button">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-link"></i>
+        </span>
+        <span>Links</span>
+      </a>
+    </footer>
+  </div>
+</div>
+<div class="modal" id="{{ _series.series_id }}-link-modal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <div class="content">
+        <p class="modal-card-title">Links</p>
+      </div>
+    </header>
+    <section class="modal-card-body">
+      <div class="buttons is-centered">
+      </div>
+    </section>
+  </div>
+</div>

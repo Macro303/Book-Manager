@@ -1,0 +1,67 @@
+{% extends "base.jinja" %}
+{% from "macros/filters.jinja" import series with context %}
+{% from "macros/forms.jinja" import input %}
+{% block title %}Series{% endblock %}
+{% block content %}
+<section>
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      {{ series("/series") }}
+      {% if token_user.role >= 1 %}
+      <div class="box">
+        <h5 class="title is-5">Add Series</h5>
+        <form id="add-series-form">
+          {{ input("Title", "title") }}
+          <div class="buttons is-centered">
+            <button class="button is-primary is-rounded" id="add-series-button" type="button" onclick="addSeries()">
+              <span class="icon is-medium">
+                <i class="fas fa-lg fa-plus"></i>
+              </span>
+              <span>Add</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    <div class="column">
+      <div class="columns is-multiline is-centered is-mobile">
+        {% for _series in series_list %}
+        {% include "components/series_column.jinja" %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+{% if token_user.role >= 1 %}
+function addSeries(){
+  const caller = "add-series-button";
+  let addSeriesForm = document.getElementById("add-series-form");
+  let details = Object.fromEntries(new FormData(addSeriesForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch("/api/v0/series", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+        "title": details["title"]
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location = "/series";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.jinja" %}
+{% from "macros/forms.jinja" import input, textarea %}
+{% block title %}{% endblock %}
+{% block content %}
+<section>
+  <div class="box">
+    <form id="edit-series-form">
+      {{ input("Title", "title", value=series.title) }}
+      <div class="divider is-info is-size-4">More Details</div>
+      <div class="divider is-info is-size-4">Identifiers</div>
+    </form>
+  </div>
+  <div class="buttons is-centered">
+    <button class="button is-success is-rounded" id="save-series-button" onclick="saveSeries()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-save"></i>
+      </span>
+      <span>Save</span>
+    </button>
+    {% if token_user.role >= 3 %}
+    <button class="button is-danger is-rounded" id="delete-series-button" onclick="deleteSeries()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-trash"></i>
+      </span>
+      <span>Delete</span>
+    </button>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+function saveSeries(){
+  const caller = "save-series-button";
+  let editSeriesForm = document.getElementById("edit-series-form");
+  let details = Object.fromEntries(new FormData(editSeriesForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch("/api/v0/series/{{ series.series_id }}", {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify({
+      "title": details["title"],
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location = "/series/{{ series.series_id }}";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% if token_user.role >= 3 %}
+function deleteSeries(){
+  const caller = "delete-series-button";
+
+  addLoading(caller);
+  fetch("/api/v0/series/{{ series.series_id }}", {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location = "/series";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
+{% endblock %}

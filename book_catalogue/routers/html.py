@@ -171,6 +171,73 @@ def edit_publisher(
         )
 
 
+@router.get("/series", response_class=HTMLResponse)
+def list_series(
+    request: Request,
+    token_user: User | None = Depends(get_token_user),
+    title: str = "",
+):
+    if not token_user:
+        return RedirectResponse("/")
+    with db_session:
+        series_list = SeriesController.list_series()
+        if title:
+            series_list = [
+                x
+                for x in series_list
+                if title.casefold() in x.title.casefold() or x.title.casefold() in title.casefold()
+            ]
+        return templates.TemplateResponse(
+            "list_series.html",
+            {
+                "request": request,
+                "token_user": token_user.to_schema(),
+                "series_list": sorted({x.to_schema() for x in series_list}),
+                "filters": {"title": title},
+            },
+        )
+
+
+@router.get("/series/{series_id}", response_class=HTMLResponse)
+def view_series(
+    request: Request, series_id: int, token_user: User | None = Depends(get_token_user)
+):
+    if not token_user:
+        return RedirectResponse("/")
+    with db_session:
+        series = SeriesController.get_series(series_id=series_id)
+        book_list = sorted({x.book.to_schema() for x in series.books})
+        return templates.TemplateResponse(
+            "view_series.html",
+            {
+                "request": request,
+                "token_user": token_user.to_schema(),
+                "series": series.to_schema(),
+                "book_list": book_list,
+            },
+        )
+
+
+@router.get("/series/{series_id}/edit", response_class=HTMLResponse)
+def edit_series(
+    request: Request, series_id: int, token_user: User | None = Depends(get_token_user)
+):
+    if not token_user:
+        return RedirectResponse("/")
+    if token_user.role < 2:
+        return RedirectResponse(f"/series/{series_id}")
+    with db_session:
+        series = SeriesController.get_series(series_id=series_id)
+        return templates.TemplateResponse(
+            "edit_series.html",
+            {
+                "request": request,
+                "token_user": token_user.to_schema(),
+                "series": series.to_schema(),
+            },
+        )
+
+
 @router.get("/users", response_class=HTMLResponse)
 def list_users(
     request: Request,

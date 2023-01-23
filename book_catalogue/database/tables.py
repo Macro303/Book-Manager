@@ -71,7 +71,7 @@ class Book(db.Entity):
 
     def to_schema(self) -> schemas.Book:
         return schemas.Book(
-            authors=sorted(x.to_schema() for x in self.authors),
+            authors=sorted({x.to_schema() for x in self.authors}),
             description=self.description,
             format=self.format,
             identifiers=schemas.BookIdentifiers(
@@ -84,18 +84,11 @@ class Book(db.Entity):
             ),
             image_url=self.image_url,
             publisher=self.publisher.to_schema() if self.publisher else None,
-            readers=sorted(x.to_schema() for x in self.readers),
-            series=sorted(
-                schemas.Series(
-                    number=x.number,
-                    series_id=x.series.series_id,
-                    title=x.series.title,
-                )
-                for x in self.series
-            ),
+            readers=sorted({x.to_schema() for x in self.readers}),
+            series=sorted({x.to_schema() for x in self.series}),
             subtitle=self.subtitle,
             title=self.title,
-            wishers=sorted(x.to_schema() for x in self.wishers),
+            wishers=sorted({x.to_schema() for x in self.wishers}),
         )
 
 
@@ -110,13 +103,7 @@ class BookAuthor(db.Entity):
 
     def to_schema(self) -> schemas.Author:
         temp = self.author.to_schema()
-        temp.roles = sorted(
-            schemas.AuthorRole(
-                name=x.name,
-                role_id=x.role_id,
-            )
-            for x in self.roles
-        )
+        temp.roles = sorted({x.to_schema() for x in self.roles})
         return temp
 
 
@@ -128,6 +115,11 @@ class BookSeries(db.Entity):
     series: Series = Required("Series")
 
     PrimaryKey(book, series)
+
+    def to_schema(self) -> schemas.Series:
+        temp = self.series.to_schema()
+        temp.number = self.number
+        return temp
 
 
 class Publisher(db.Entity):
@@ -150,12 +142,18 @@ class Role(db.Entity):
 
     authors: list[BookAuthor] = Set(BookAuthor, table="Books_Authors_Roles")
 
+    def to_schema(self) -> schemas.AuthorRole:
+        return schemas.AuthorRole(name=self.name, role_id=self.role_id)
+
 
 class Series(db.Entity):
     series_id: int = PrimaryKey(int, auto=True)
     title: str = Required(str, unique=True)
 
     books: list[BookSeries] = Set(BookSeries)
+
+    def to_schema(self) -> schemas.Series:
+        return schemas.Series(series_id=self.series_id, title=self.title)
 
 
 class User(db.Entity):

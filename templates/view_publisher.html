@@ -1,15 +1,21 @@
 {% extends "base.jinja" %}
-{% block title_image %}
-<figure class="image is-64x64 is-inline-block is-rounded">
-  <img alt="{{ publisher.name }}'s Profile Image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ publisher.image_url }}"/>
-</figure>
-{% endblock %}
 {% block title %}{{ publisher.name }}{% endblock %}
 {% block content %}
 <section>
-  <div class="box">
-    <div class="divider is-info is-size-4">More Details</div>
-    <div class="divider is-info is-size-4">Identifiers</div>
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      <div class="box has-text-centered">
+        <figure class="image is-256x256 is-inline-block">
+          <img alt="{{ publisher.name }}'s Profile Image" class="is-rounded"  loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ publisher.image_url }}"/>
+        </figure>
+      </div>
+    </div>
+    <div class="column">
+      <div class="box">
+        <div class="divider is-info is-size-4">More Details</div>
+        <div class="divider is-info is-size-4">Identifiers</div>
+      </div>
+    </div>
   </div>
   <div class="buttons is-centered">
     {% if token_user.role >= 2 %}
