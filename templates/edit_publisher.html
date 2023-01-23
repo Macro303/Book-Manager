@@ -48,7 +48,7 @@ function savePublisher(){
   let editPublisherForm = document.getElementById("edit-publisher-form");
   let details = Object.fromEntries(new FormData(editPublisherForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
     method: "PATCH",
@@ -71,7 +71,7 @@ function savePublisher(){
 {% if token_user.role >= 3 %}
 function deletePublisher(){
   const caller = "delete-publisher-button";
-  
+
   addLoading(caller);
   fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
     method: "DELETE",

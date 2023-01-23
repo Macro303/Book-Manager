@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 __all__ = ["Work"]
 
 from pydantic import Field

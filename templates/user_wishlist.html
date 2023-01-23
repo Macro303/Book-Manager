@@ -43,7 +43,7 @@ function addWishlistBook(){
   let addWishlistBookForm = document.getElementById("add-wishlist-book-form");
   let details = Object.fromEntries(new FormData(addWishlistBookForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch("/api/v0/books/lookup", {
     method: "POST",

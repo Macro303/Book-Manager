@@ -1,14 +1,15 @@
 from __future__ import annotations
-__all__ = ["Book", "NewBook"]
+
+__all__ = ["Book", "Identifiers", "LookupBook", "NewBook"]
 
 from pydantic import Field, validator
 
+from book_catalogue.isbn import to_isbn_13
 from book_catalogue.schemas._author import Author
 from book_catalogue.schemas._base import BaseModel
 from book_catalogue.schemas._publisher import Publisher
 from book_catalogue.schemas._series import Series
 from book_catalogue.schemas._user import User
-from book_catalogue.isbn import to_isbn_13
 
 
 class Identifiers(BaseModel):
@@ -78,7 +79,7 @@ class NewBookIdentifiers(BaseModel):
     isbn: str
     library_thing_id: str | None = None
     open_library_id: str | None = None
-    
+
     @validator("isbn", pre=True)
     def validate_isbn(cls, v: str) -> str:
         return to_isbn_13(value=v)
@@ -106,7 +107,7 @@ class NewBook(BaseModel):
 class LookupBook(BaseModel):
     isbn: str
     wisher_id: int | None = None
-    
+
     @validator("isbn", pre=True)
     def validate_isbn(cls, v: str) -> str:
         return to_isbn_13(value=v)

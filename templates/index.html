@@ -45,7 +45,7 @@ function signIn(){
   let signInForm = document.getElementById("sign-in-form");
   let details = Object.fromEntries(new FormData(signInForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch(`/api/v0/users/${details['username']}`, {
     method: "GET",

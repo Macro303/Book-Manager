@@ -16,10 +16,10 @@ function removeLoading(caller){
 function signOut(){
   const caller = "sign-out-button"
   addLoading(caller);
-  
+
   document.cookie = "token=0;path=/;max-age=0";
   window.location = "/";
-  
+
   removeLoading(caller);
 }
 

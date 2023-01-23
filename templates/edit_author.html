@@ -59,7 +59,7 @@ function saveAuthor(){
   let editAuthorForm = document.getElementById("edit-author-form");
   let details = Object.fromEntries(new FormData(editAuthorForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
     method: "PATCH",
@@ -92,7 +92,7 @@ function refreshAuthor(){
   let editAuthorForm = document.getElementById("edit-author-form");
   let details = Object.fromEntries(new FormData(editAuthorForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
     method: "PUT",
@@ -111,7 +111,7 @@ function refreshAuthor(){
 {% if token_user.role >= 3 %}
 function deleteAuthor(){
   const caller = "delete-author-button";
-  
+
   addLoading(caller);
   fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
     method: "DELETE",

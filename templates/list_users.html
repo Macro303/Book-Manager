@@ -43,7 +43,7 @@ function addUser(){
   let addUserForm = document.getElementById("add-user-form");
   let details = Object.fromEntries(new FormData(addUserForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch("/api/v0/users", {
     method: "POST",

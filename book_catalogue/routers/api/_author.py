@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 __all__ = ["router"]
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pony.orm import db_session
 
 from book_catalogue.controllers import AuthorController
@@ -28,9 +29,11 @@ def create_author(new_author: NewAuthor) -> Author:
 def get_author(author_id: int) -> Author:
     with db_session:
         return AuthorController.get_author(author_id=author_id).to_schema()
-            
 
-@router.patch(path="/{author_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}})
+
+@router.patch(
+    path="/{author_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}}
+)
 def update_author(author_id: int, updates: NewAuthor) -> Author:
     with db_session:
         return AuthorController.update_author(author_id=author_id, updates=updates).to_schema()
@@ -64,9 +67,12 @@ def create_role(new_role: NewRole) -> AuthorRole:
 def get_role(role_id: int) -> AuthorRole:
     with db_session:
         return AuthorController.get_role(role_id=role_id).to_schema()
-            
 
-@router.patch(path="/roles/{role_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}})
+
+@router.patch(
+    path="/roles/{role_id}",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
 def update_role(role_id: int, updates: NewRole) -> AuthorRole:
     with db_session:
         return AuthorController.update_role(role_id=role_id, updates=updates).to_schema()

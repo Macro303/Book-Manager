@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 __all__ = ["Settings"]
 
 from typing import ClassVar
@@ -28,14 +29,14 @@ class Settings(SettingsModel):
     website: WebsiteSettings = WebsiteSettings()
 
     @classmethod
-    def load(cls) -> "Settings":
+    def load(cls) -> Settings:
         if not cls.FILENAME.exists():
             Settings().save()
         with cls.FILENAME.open("rb") as stream:
             content = tomlreader.load(stream)
         return Settings(**content)
 
-    def save(self) -> "Settings":
+    def save(self) -> Settings:
         with self.FILENAME.open("wb") as stream:
             content = self.dict(by_alias=False)
             tomlwriter.dump(content, stream)

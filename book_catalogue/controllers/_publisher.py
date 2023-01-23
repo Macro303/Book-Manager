@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 __all__ = ["PublisherController"]
 
 import logging
@@ -42,7 +43,7 @@ class PublisherController:
     def delete_publisher(cls, publisher_id: int):
         publisher = cls.get_publisher(publisher_id=publisher_id)
         publisher.delete()
-        
+
     @classmethod
     def get_publisher_by_name(cls, name: str) -> Publisher:
         if publisher := Publisher.get(name=name):

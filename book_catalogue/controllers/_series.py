@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 __all__ = ["SeriesController"]
 
 import logging
@@ -42,4 +43,3 @@ class SeriesController:
     def delete_series(cls, series_id: int):
         series = cls.get_series(series_id=series_id)
         series.delete()
-        

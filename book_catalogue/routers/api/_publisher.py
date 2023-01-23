@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 __all__ = ["router"]
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pony.orm import db_session
 
 from book_catalogue.controllers import PublisherController
@@ -28,12 +29,14 @@ def create_publisher(new_publisher: NewPublisher) -> Publisher:
 def get_publisher(publisher_id: int) -> Publisher:
     with db_session:
         return PublisherController.get_publisher(publisher_id=publisher_id).to_schema()
-            
+
 
 @router.patch(path="/{publisher_id}", responses={404: {"model": ErrorResponse}})
 def update_publisher(publisher_id: int, updates: NewPublisher) -> Publisher:
     with db_session:
-        return PublisherController.update_publisher(publisher_id=publisher_id, updates=updates).to_schema()
+        return PublisherController.update_publisher(
+            publisher_id=publisher_id, updates=updates
+        ).to_schema()
 
 
 @router.delete(path="/{publisher_id}", status_code=204, responses={404: {"model": ErrorResponse}})

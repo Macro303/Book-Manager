@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 __all__ = ["UserController"]
 
 import logging
@@ -43,7 +44,7 @@ class UserController:
     def delete_user(cls, user_id: int):
         user = cls.get_user(user_id=user_id)
         user.delete()
-        
+
     @classmethod
     def get_user_by_username(cls, username: str):
         if user := User.get(username=username):

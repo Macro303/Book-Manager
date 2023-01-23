@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 __all__ = ["EnumConverter"]
 
 from enum import Enum

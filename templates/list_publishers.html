@@ -43,7 +43,7 @@ function addPublisher(){
   let addPublisherForm = document.getElementById("add-publisher-form");
   let details = Object.fromEntries(new FormData(addPublisherForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch("/api/v0/publishers", {
     method: "POST",

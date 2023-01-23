@@ -1,5 +1,6 @@
 from __future__ import annotations
-__all__ = ["Author", "NewAuthor", "Role", "NewRole"]
+
+__all__ = ["Author", "Identifiers", "NewAuthor", "NewRole", "Role"]
 
 from book_catalogue.schemas._base import BaseModel
 

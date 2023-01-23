@@ -64,6 +64,7 @@ ignore = [
   "ANN101",
   "ANN102",
   "ANN204",
+  "ANN206",
   "PLR2004"
 ]
 line-length = 100
@@ -115,4 +116,5 @@ max-complexity = 10
 classmethod-decorators = ["classmethod", "pydantic.validator"]
 
 [tool.ruff.per-file-ignores]
+"book_catalogue/routers/*" = ["ANN201", "ANN202", "B008"]
 "tests/test_*.py" = ["ANN201", "S101"]

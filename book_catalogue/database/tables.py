@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 __all__ = [
     "Author",
     "Book",
@@ -23,13 +24,13 @@ class Author(db.Entity):
     bio: str | None = Optional(str, nullable=True)
     image_url: str | None = Optional(str, nullable=True)
     name: str = Required(str, unique=True)
-    
+
     amazon_id: str | None = Optional(str, nullable=True)
     goodreads_id: str | None = Optional(str, nullable=True)
     library_thing_id: str | None = Optional(str, nullable=True)
     open_library_id: str | None = Optional(str, nullable=True, unique=True)
 
-    books: list["BookAuthor"] = Set("BookAuthor")
+    books: list[BookAuthor] = Set("BookAuthor")
 
     def to_schema(self) -> schemas.Author:
         return schemas.Author(
@@ -50,17 +51,17 @@ class Author(db.Entity):
 class Book(db.Entity):
     _table_ = "Books"
 
-    authors: list["BookAuthor"] = Set("BookAuthor")
+    authors: list[BookAuthor] = Set("BookAuthor")
     book_id: int = PrimaryKey(int, auto=True)
     description: str | None = Optional(str, nullable=True)
     format: str | None = Optional(str, nullable=True)
     image_url: str = Required(str)
-    publisher: "Publisher" | None = Optional("Publisher", nullable=True)
-    readers: list["User"] = Set("User", table="Books_Readers", reverse="read_books")
-    series: list["BookSeries"] = Set("BookSeries")
+    publisher: Publisher | None = Optional("Publisher", nullable=True)
+    readers: list[User] = Set("User", table="Books_Readers", reverse="read_books")
+    series: list[BookSeries] = Set("BookSeries")
     subtitle: str | None = Optional(str, nullable=True)
     title: str = Required(str)
-    wishers: list["User"] = Set("User", table="Books_Wishers", reverse="wished_books")
+    wishers: list[User] = Set("User", table="Books_Wishers", reverse="wished_books")
 
     goodreads_id: str | None = Optional(str, nullable=True)
     google_books_id: str | None = Optional(str, nullable=True)
@@ -103,17 +104,18 @@ class BookAuthor(db.Entity):
 
     author: Author = Required(Author)
     book: Book = Required(Book)
-    roles: list["Role"] = Set("Role", table="Books_Authors_Roles")
+    roles: list[Role] = Set("Role", table="Books_Authors_Roles")
 
     PrimaryKey(book, author)
 
     def to_schema(self) -> schemas.Author:
         temp = self.author.to_schema()
-        temp.roles=sorted(
+        temp.roles = sorted(
             schemas.AuthorRole(
                 name=x.name,
                 role_id=x.role_id,
-            ) for x in self.roles
+            )
+            for x in self.roles
         )
         return temp
 
@@ -123,7 +125,7 @@ class BookSeries(db.Entity):
 
     book: Book = Required(Book)
     number: int | None = Optional(int, nullable=True)
-    series: "Series" = Required("Series")
+    series: Series = Required("Series")
 
     PrimaryKey(book, series)
 

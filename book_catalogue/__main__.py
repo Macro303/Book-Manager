@@ -10,12 +10,10 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.exceptions import HTTPException as StarletteHTTPException
-from rich import inspect
 from jinja2.exceptions import TemplateNotFound
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from book_catalogue import __version__, get_project_root, setup_logging
-from book_catalogue.console import CONSOLE
 from book_catalogue.routers.api import api_router
 from book_catalogue.routers.html import router as html_router
 from book_catalogue.settings import Settings
@@ -52,9 +50,13 @@ async def logger_middleware(request: Request, call_next: Callable) -> Any:  # no
     if response.status_code < 400:
         LOGGER.info(f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}")
     elif response.status_code < 500:
-        LOGGER.warning(f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}")
+        LOGGER.warning(
+            f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}"
+        )
     else:
-        LOGGER.error(f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}")
+        LOGGER.error(
+            f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}"
+        )
     return response
 
 
@@ -89,6 +91,7 @@ async def validation_exception_handler(
             "details": details,
         },
     )
+
 
 @app.exception_handler(exc_class_or_status_code=TemplateNotFound)
 async def missing_template_exception_handler(

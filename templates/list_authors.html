@@ -43,7 +43,7 @@ function addAuthor(){
   let addAuthorForm = document.getElementById("add-author-form");
   let details = Object.fromEntries(new FormData(addAuthorForm));
   console.log(details);
-  
+
   addLoading(caller);
   fetch("/api/v0/authors", {
     method: "POST",

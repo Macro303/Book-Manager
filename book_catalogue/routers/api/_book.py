@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 __all__ = ["router"]
 
-from fastapi import APIRouter, HTTPException, Body
-from pony.orm import db_session
+from fastapi import APIRouter, Body, HTTPException
+from pony.orm import db_session, flush
 
 from book_catalogue.controllers import BookController, UserController
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas import Book
-from book_catalogue.schemas._book import NewBook, LookupBook
+from book_catalogue.schemas._book import LookupBook, NewBook
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
@@ -28,9 +29,11 @@ def create_book(new_book: NewBook) -> Book:
 def get_book(book_id: int) -> Book:
     with db_session:
         return BookController.get_book(book_id=book_id).to_schema()
-            
 
-@router.patch(path="/{book_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}})
+
+@router.patch(
+    path="/{book_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}}
+)
 def update_book(book_id: int, updates: NewBook) -> Book:
     with db_session:
         return BookController.update_book(book_id=book_id, update_book=updates)
@@ -45,14 +48,16 @@ def delete_book(book_id: int):
 @router.post(path="/lookup", status_code=201, responses={409: {"model": ErrorResponse}})
 def lookup_book(new_book: LookupBook) -> Book:
     with db_session:
-        return BookController.lookup_book(isbn=new_book.isbn, wisher_id=new_book.wisher_id).to_schema()
+        return BookController.lookup_book(
+            isbn=new_book.isbn, wisher_id=new_book.wisher_id
+        ).to_schema()
 
 
 @router.put(path="", status_code=204)
 def reset_all_books():
     with db_session:
-        for book in BookController.list_books():
-            BookController.reset_book(book_id=book_id)
+        for _book in BookController.list_books():
+            BookController.reset_book(book_id=_book.book_id)
 
 
 @router.put(path="/{book_id}", responses={404: {"model": ErrorResponse}})
@@ -61,7 +66,9 @@ def reset_book(book_id: int) -> Book:
         return BookController.reset_book(book_id=book_id).to_schema()
 
 
-@router.post(path="/{book_id}/wish", responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
+@router.post(
+    path="/{book_id}/wish", responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}}
+)
 def wish_book(book_id: int, wisher_id: int) -> Book:
     with db_session:
         book = BookController.get_book(book_id=book_id)
@@ -76,7 +83,10 @@ def wish_book(book_id: int, wisher_id: int) -> Book:
         return book.to_schema()
 
 
-@router.post(path="/{book_id}/collect", responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
+@router.post(
+    path="/{book_id}/collect",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
 def collect_book(book_id: int) -> Book:
     with db_session:
         book = BookController.get_book(book_id=book_id)
