@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["router"]
 
 from fastapi import APIRouter, HTTPException, Body
@@ -48,7 +49,7 @@ def lookup_book(new_book: LookupBook) -> Book:
 
 
 @router.put(path="", status_code=204)
-def reset_all_books() -> None:
+def reset_all_books():
     with db_session:
         for book in BookController.list_books():
             BookController.reset_book(book_id=book_id)
@@ -60,13 +61,28 @@ def reset_book(book_id: int) -> Book:
         return BookController.reset_book(book_id=book_id).to_schema()
 
 
+@router.post(path="/{book_id}/wish", responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
+def wish_book(book_id: int, wisher_id: int) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        if not book.wishers:
+            raise HTTPException(status_code=400, detail="Book has already been collected.")
+        user = UserController.get_user(user_id=wisher_id)
+        if user in book.wishers:
+            book.wishers.remove(user)
+        else:
+            book.wishers.add(user)
+        flush()
+        return book.to_schema()
+
+
 @router.post(path="/{book_id}/collect", responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
 def collect_book(book_id: int) -> Book:
     with db_session:
         book = BookController.get_book(book_id=book_id)
-        if not book.wisher:
+        if not book.wishers:
             raise HTTPException(status_code=400, detail="Book has already been collected.")
-        book.wisher = None
+        book.wishers = []
         flush()
         return book.to_schema()
 
@@ -78,6 +94,8 @@ def read_book(
 ) -> Book:
     with db_session:
         book = BookController.get_book(book_id=book_id)
+        if book.wishers:
+            raise HTTPException(status_code=400, detail="Book has not been collected.")
         user = UserController.get_user(user_id=user_id)
         if user in book.readers:
             book.readers.remove(user)

@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = [
     "__version__",
     "get_cache_root",
@@ -45,7 +46,7 @@ def get_project_root() -> Path:
 
 
 def setup_logging(debug: bool = False) -> None:
-    install(show_locals=True, console=CONSOLE)
+    install(show_locals=True, max_frames=5, console=CONSOLE)
     log_folder = get_project_root() / "logs"
     log_folder.mkdir(parents=True, exist_ok=True)
 

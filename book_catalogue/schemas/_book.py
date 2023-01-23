@@ -1,15 +1,14 @@
-__all__ = [
-    "Book",
-    "NewBook"
-]
+from __future__ import annotations
+__all__ = ["Book", "NewBook"]
 
-from pydantic import Field
+from pydantic import Field, validator
 
 from book_catalogue.schemas._author import Author
 from book_catalogue.schemas._base import BaseModel
 from book_catalogue.schemas._publisher import Publisher
 from book_catalogue.schemas._series import Series
 from book_catalogue.schemas._user import User
+from book_catalogue.isbn import to_isbn_13
 
 
 class Identifiers(BaseModel):
@@ -32,7 +31,7 @@ class Book(BaseModel):
     series: list[Series] = Field(default_factory=list)
     subtitle: str | None = None
     title: str
-    wisher: User | None = None
+    wishers: list[User] = Field(default_factory=list)
 
     def get_first_series(self) -> Series | None:
         if temp := sorted(self.series):
@@ -68,9 +67,9 @@ class Book(BaseModel):
         return hash((type(self), self.get_first_series(), self.title, (self.subtitle or "")))
 
 
-class NewBookSeries(BaseModel):
-    series_id: int
-    number: int | None = None
+class NewBookAuthor(BaseModel):
+    author_id: int
+    role_ids: list[int] = Field(default_factory=list)
 
 
 class NewBookIdentifiers(BaseModel):
@@ -79,11 +78,15 @@ class NewBookIdentifiers(BaseModel):
     isbn: str
     library_thing_id: str | None = None
     open_library_id: str | None = None
+    
+    @validator("isbn", pre=True)
+    def validate_isbn(cls, v: str) -> str:
+        return to_isbn_13(value=v)
 
 
-class NewBookAuthor(BaseModel):
-    author_id: int
-    role_ids: list[int] = Field(default_factory=list)
+class NewBookSeries(BaseModel):
+    series_id: int
+    number: int | None = None
 
 
 class NewBook(BaseModel):
@@ -97,9 +100,13 @@ class NewBook(BaseModel):
     series: list[NewBookSeries] = Field(default_factory=list)
     subtitle: str | None = None
     title: str
-    wisher_id: int | None = None
+    wisher_ids: list[int] = Field(default_factory=list)
 
 
 class LookupBook(BaseModel):
     isbn: str
-    wisher_id: int
+    wisher_id: int | None = None
+    
+    @validator("isbn", pre=True)
+    def validate_isbn(cls, v: str) -> str:
+        return to_isbn_13(value=v)

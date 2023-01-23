@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["router"]
 
 from fastapi import APIRouter, HTTPException
@@ -36,6 +37,6 @@ def update_publisher(publisher_id: int, updates: NewPublisher) -> Publisher:
 
 
 @router.delete(path="/{publisher_id}", status_code=204, responses={404: {"model": ErrorResponse}})
-def delete_publisher(publisher_id: int) -> None:
+def delete_publisher(publisher_id: int):
     with db_session:
         PublisherController.delete_publisher(publisher_id=publisher_id)

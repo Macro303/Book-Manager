@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>Book Catalogue</title>
+  <!--<link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">-->
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-divider@1.1.0/dist/bulma-divider.min.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" rel="stylesheet">
+  {% block css %}
+  <link href="/static/css/styles.css" rel="stylesheet">
+  {% endblock %}
+  <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+</head>
+<body class="has-navbar-fixed-top">
+{% block navbar %}
+{% include "components/navbar.jinja" %}
+{% endblock %}
+<main class="section">
+  <div class="container">
+    <header class="block has-text-centered">
+      {% block title_image %}{% endblock %}
+      <h1 class="title is-1">{% block title required %}{% endblock %}</h1>
+    </header>
+    {% block content required %}{% endblock %}
+  </div>
+</main>
+{% include "components/footer.jinja" %}
+{% block js %}
+<script src="/static/js/bulma-modal.js" type="text/javascript"></script>
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+<script src="/static/js/scripts.js" type="text/javascript"></script>
+<script src="//cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+{% endblock %}
+</body>
+</html>

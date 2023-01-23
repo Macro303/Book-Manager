@@ -1,6 +1,15 @@
+from __future__ import annotations
 __all__ = ["Author", "NewAuthor", "Role", "NewRole"]
 
 from book_catalogue.schemas._base import BaseModel
+
+
+class Identifiers(BaseModel):
+    amazon_id: str | None = None
+    author_id: int
+    goodreads_id: str | None = None
+    library_thing_id: str | None = None
+    open_library_id: str | None = None
 
 
 class Role(BaseModel):
@@ -21,12 +30,10 @@ class Role(BaseModel):
         return hash((type(self), self.name))
 
 
-class NewRole(BaseModel):
-    name: str
-
-
 class Author(BaseModel):
-    author_id: int
+    bio: str | None = None
+    identifiers: Identifiers
+    image_url: str | None = None
     name: str
     roles: list[Role]
 
@@ -48,6 +55,19 @@ class Author(BaseModel):
         return hash((type(self), self.name))
 
 
-class NewAuthor(BaseModel):
-    name: str
+class NewAuthorIdentifiers(BaseModel):
+    amazon_id: str | None = None
+    goodreads_id: str | None = None
+    library_thing_id: str | None = None
     open_library_id: str | None = None
+
+
+class NewRole(BaseModel):
+    name: str
+
+
+class NewAuthor(BaseModel):
+    bio: str | None = None
+    identifiers: NewAuthorIdentifiers = NewAuthorIdentifiers()
+    image_url: str | None = None
+    name: str

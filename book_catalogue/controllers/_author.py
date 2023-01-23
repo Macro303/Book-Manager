@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["AuthorController"]
 
 import logging
@@ -19,9 +20,17 @@ class AuthorController:
 
     @classmethod
     def create_author(cls, new_author: NewAuthor) -> Author:
-        if Author.get(name=new_author.name) or (new_author.open_library_id and Author.get(open_library_id=open_library_id)):
+        if Author.get(name=new_author.name) or (new_author.identifiers.open_library_id and Author.get(open_library_id=new_author.identifiers.open_library_id)):
             raise HTTPException(status_code=409, detail="Author already exists.")
-        author = Author(name=new_author.name, open_library_id=new_author.open_library_id)
+        author = Author(
+            bio=new_author.bio,
+            image_url=new_author.image_url,
+            name=new_author.name,
+            amazon_id=new_author.identifiers.amazon_id,
+            goodreads_id=new_author.identifiers.goodreads_id,
+            library_thing_id=new_author.identifiers.library_thing_id,
+            open_library_id=new_author.identifiers.open_library_id,
+        )
         flush()
         return author
 
@@ -34,8 +43,14 @@ class AuthorController:
     @classmethod
     def update_author(cls, author_id: int, updates: NewAuthor) -> Author:
         author = cls.get_author(author_id=author_id)
+        author.bio = updates.bio
+        author.image_url = updates.image_url
         author.name = updates.name
-        author.open_library_id = updates.open_library_id
+        
+        author.amazon_id = updates.identifiers.amazon_id
+        author.goodreads_id = updates.identifiers.goodreads_id
+        author.library_thing_id = updates.identifiers.library_thing_id
+        author.open_library_id = updates.identifiers.open_library_id
         flush()
         return author
 
@@ -51,18 +66,44 @@ class AuthorController:
         raise HTTPException(status_code=404, detail="Author not found.")
 
     @classmethod
+    def _parse_open_library(open_library_id: str) -> NewAuthor:
+        session = OpenLibrary(cache=None)
+        result = session.get_author(author_id=open_library_id)
+        
+        return NewAuthor(
+            bio = result.get_bio(),
+            identifiers = NewAuthorIdentifiers(
+                amazon_id = result.remote_ids.amazon,
+                goodreads_id = result.remote_ids.goodreads,
+                library_thing_id = result.remote_ids.library_thing,
+                open_library_id = open_library_id,
+            ),
+            # TODO image_url
+            name = result.name,
+        )
+
+    @classmethod
     def lookup_author(cls, open_library_id: str) -> Author:
         if author := Author.get(open_library_id=open_library_id):
             return author
-        session = OpenLibrary(cache=None)
-        result = session.get_author(author_id=open_library_id)
-        result = NewAuthor(
-            name = result.name,
-            open_library_id = open_library_id
-        )
-        if author := Author.get(name=result.name):
-            return cls.update_author(author_id=author_id, updates=updates)
+        
+        new_author = cls._parse_open_library(open_library_id=open_library_id)
+        if author := Author.get(name=new_author.name):
+            author.open_library_id = new_author.open_library_id
+            flush()
+            return author
         return cls.create_author(new_author=new_author)
+        
+    @classmethod
+    def reset_author(cls, author_id: int) -> Author:
+        if not (author := cls.get_author(author_id=author_id)):
+            raise HTTPException(status_code=404, detail="Author not found.")
+        if not author.open_library_id:
+            raise HTTPException(status_code=400, detail="Author doesn't have an OpenLibrary Id.")
+        
+        updates = cls._parse_open_library(open_library_id=author.open_library_id)
+        updates.image_url = author.image_url
+        return cls.update_author(author_id=author_id, updates=updates)
 
     @classmethod
     def list_roles(cls) -> list[Role]:

@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["BaseModel", "DatetimeResource", "TextResource", "Resource"]
 
 from datetime import datetime
@@ -12,13 +13,13 @@ class BaseModel(PyModel):
         extra = Extra.forbid
 
 
-class Resource(BaseModel):
-    key: str
-
-
 class DatetimeResource(BaseModel):
     type: str
     value: datetime
+
+
+class Resource(BaseModel):
+    key: str
 
 
 class TextResource(BaseModel):

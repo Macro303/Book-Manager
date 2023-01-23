@@ -1,0 +1,44 @@
+{% extends "base.jinja" %}
+{% block title_image %}
+<figure class="image is-64x64 is-inline-block is-rounded">
+  <img alt="{{ user.username }}'s Profile Image" loading="lazy" src="/static/img/logo.png"/>
+</figure>
+{% endblock %}
+{% block title %}{{ user.username }}{% endblock %}
+{% block content %}
+<section>
+  <div class="columns is-centered">
+    <div class="column is-one-quarter">
+      <div class="box"></div>
+    </div>
+  </div>
+  <div class="columns is-centered is-mobile">
+    {% if token_user == user or (token_user.role >= 8 and token_user.role > user.role) %}
+    <div class="column is-one-quarter">
+      <a class="button is-warning is-rounded" href="/users/{{ user.user_id }}/edit">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-edit"></i>
+        </span>
+        <span>Edit</span>
+      </a>
+    </div>
+    {% endif %}
+    <div class="column is-one-quarter">
+      <a class="button is-success is-rounded" href="/users/{{ user.user_id }}/wishlist">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-star"></i>
+        </span>
+        <span>Wishlist</span>
+      </a>
+    </div>
+  </div>
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Last Read</h3>
+  </div>
+  <div class="columns is-centered is-multiline">
+    {% for _book in last_read %}
+    {% include "components/book_column.jinja" %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

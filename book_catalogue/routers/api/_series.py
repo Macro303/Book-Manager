@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["router"]
 
 from fastapi import APIRouter
@@ -36,6 +37,6 @@ def update_series(series_id: int, updates: NewSeries) -> Series:
 
 
 @router.delete(path="/{series_id}", status_code=204, responses={404: {"model": ErrorResponse}})
-def delete_series(series_id: int) -> None:
+def delete_series(series_id: int):
     with db_session:
         SeriesController.delete_series(series_id=series_id)

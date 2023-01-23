@@ -1,0 +1,19 @@
+{% macro input(label, name, type="text", value="") %}
+<div class="field">
+  <label class="label">{{ label }}</label>
+  <div class="control is-expanded">
+    <input class="input is-rounded" name="{{ name }}" placeholder="{{ label }}" type="{{ type }}" value="{{ value or '' }}">
+  </div>
+</div>
+{% endmacro %}
+
+
+
+{% macro textarea(label, name, value="") %}
+<div class="field">
+  <label class="label">{{ label }}</label>
+  <div class="control">
+    <textarea class="textarea has-fixed-size" name="{{ name }}" placeholder="{{ label }}">{{ value or "" }}</textarea>
+  </div>
+</div>
+{% endmacro %}

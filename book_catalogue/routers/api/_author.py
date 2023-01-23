@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["router"]
 
 from fastapi import APIRouter, HTTPException
@@ -32,11 +33,11 @@ def get_author(author_id: int) -> Author:
 @router.patch(path="/{author_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}})
 def update_author(author_id: int, updates: NewAuthor) -> Author:
     with db_session:
-        return AuthorController.update_author(author_id=author_id, updates=updates)
+        return AuthorController.update_author(author_id=author_id, updates=updates).to_schema()
 
 
 @router.delete(path="/{author_id}", status_code=204, responses={404: {"model": ErrorResponse}})
-def delete_author(author_id: int) -> None:
+def delete_author(author_id: int):
     with db_session:
         AuthorController.delete_author(author_id=author_id)
 
@@ -66,6 +67,6 @@ def update_role(role_id: int, updates: NewRole) -> AuthorRole:
 
 
 @router.delete(path="/roles/{role_id}", status_code=204, responses={404: {"model": ErrorResponse}})
-def delete_role(role_id: int) -> None:
+def delete_role(role_id: int):
     with db_session:
         AuthorController.delete_role(role_id=role_id)

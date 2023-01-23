@@ -1,0 +1,47 @@
+<div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
+  <div class="card has-text-light has-background-dark">
+    <div class="card-content">
+      <div class="media">
+        <div class="media-left">
+          <figure class="image is-64x64 is-rounded">
+            <img alt="{{ _author.name }}' profile image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ _author.image_url }}"/>
+          </figure>
+        </div>
+        <div class="media-content">
+          <p class="title is-4">{{ _author.name }}</p>
+        </div>
+      </div>
+    </div>
+    <footer class="card-footer">
+      <a class="card-footer-item" href="/authors/{{ _author.identifiers.author_id }}">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-eye"></i>
+        </span>
+        <span>View</span>
+      </a>
+      <a class="card-footer-item modal-trigger" data-target="{{ _author.identifiers.author_id }}-link-modal" id="{{ _author.identifiers.author_id }}-link-button">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-link"></i>
+        </span>
+        <span>Links</span>
+      </a>
+    </footer>
+  </div>
+</div>
+<div class="modal" id="{{ _author.identifiers.author_id }}-link-modal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <div class="content">
+        <p class="modal-card-title">Links</p>
+      </div>
+    </header>
+    <section class="modal-card-body">
+      <div class="buttons is-centered">
+        {% if _author.identifiers.open_library_id %}
+        <a class="button is-link is-rounded" href="https://openlibrary.org/author/{{ _author.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</div>

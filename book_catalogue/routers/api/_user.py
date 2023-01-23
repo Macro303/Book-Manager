@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["router"]
 
 from fastapi import APIRouter
@@ -30,7 +31,7 @@ def update_user(user_id: int, updates: NewUser) -> User:
 
 
 @router.delete(path="/{user_id}", status_code=204, responses={404: {"model": ErrorResponse}})
-def delete_user(user_id: int) -> None:
+def delete_user(user_id: int):
     with db_session:
         UserController.delete_user(user_id=user_id)
 

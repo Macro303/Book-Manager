@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["to_isbn_13"]
 
 import logging

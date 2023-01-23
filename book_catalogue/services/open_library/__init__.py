@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["lookup_book"]
 
 from book_catalogue.services.open_library.schemas.edition import Edition

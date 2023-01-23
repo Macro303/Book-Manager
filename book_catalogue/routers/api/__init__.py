@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["api_router"]
 
 from fastapi import APIRouter

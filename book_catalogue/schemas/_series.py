@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["Series", "NewSeries"]
 
 from book_catalogue.schemas._base import BaseModel

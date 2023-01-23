@@ -1,36 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
-  function openModal($el) {
-    $el.classList.add('is-active');
-  }
-  function closeModal($el) {
-    $el.classList.remove('is-active');
-  }
-  function closeAllModals() {
-    (document.querySelectorAll('.modal') || []).forEach(($modal) => {
-      closeModal($modal);
-    });
-  }
-  (document.querySelectorAll('.modal-trigger') || []).forEach(($trigger) => {
-    const modal = $trigger.dataset.target;
-    const $target = document.getElementById(modal);
-    $trigger.addEventListener('click', () => {
-      openModal($target);
-    });
-  });
-  (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
-    const $target = $close.closest('.modal');
-    $close.addEventListener('click', () => {
-      closeModal($target);
-    });
-  });
-  document.addEventListener('keydown', (event) => {
-    const e = event || window.event;
-    if (e.keyCode === 27) { // Escape key
-      closeAllModals();
-    }
-  });
-});
-
 const headers = {
   "Accept": "application/json; charset=UTF-8",
   "Content-Type": "application/json; charset=UTF-8",
@@ -46,22 +13,17 @@ function removeLoading(caller){
   element.classList.remove("is-loading");
 }
 
-function performRequest(caller, url, method, body = {}){
+function signOut(){
+  const caller = "sign-out-button"
   addLoading(caller);
-  fetch(url, {
-    method: method,
-    headers: headers,
-    body: JSON.stringify(body),
-  }).then((response) => {
-    if (response.ok){
-      return response.json();
-    }
-    return Promise.reject(response);
-  }).then((data) => window.location.reload())
-  .catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
+  
+  document.cookie = "token=0;path=/;max-age=0";
+  window.location = "/";
+  
+  removeLoading(caller);
 }
+
+// #####
 
 function collectBook(bookId){
   performRequest(

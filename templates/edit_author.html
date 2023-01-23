@@ -1,0 +1,130 @@
+{% extends "base.jinja" %}
+{% from "macros/forms.jinja" import input, textarea %}
+{% block title %}{% endblock %}
+{% block content %}
+<section>
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      <div class="box has-text-centered">
+        <figure class="image is-64x64 is-inline-block is-rounded">
+          <img alt="{{ author.name }}'s Profile Image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ author.image_url }}"/>
+        </figure>
+      </div>
+    </div>
+    <div class="column">
+      <div class="box">
+        <form id="edit-author-form">
+          {{ input("Name", "name", value=author.name) }}
+          <div class="divider is-info is-size-4">More Details</div>
+          {{ textarea("Bio", "bio", value=author.bio or "") }}
+          <div class="divider is-info is-size-4">Identifiers</div>
+          {{ input("Image Url", "image-url", value=author.image_url or "") }}
+          {{ input("Amazon", "amazon", value=author.identifiers.amazon_id or "") }}
+          {{ input("Goodreads", "goodreads", value=author.identifiers.goodreads_id or "") }}
+          {{ input("LibraryThing", "library-thing", value=author.identifiers.library_thing_id or "") }}
+          {{ input("OpenLibrary", "open-library", value=author.identifiers.open_library_id or "") }}
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="buttons is-centered">
+    <button class="button is-success is-rounded" id="save-author-button" onclick="saveAuthor()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-save"></i>
+      </span>
+      <span>Save</span>
+    </button>
+    <button class="button is-warning is-rounded" id="refresh-author-button" onclick="refreshAuthor()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-undo"></i>
+      </span>
+      <span>Refresh</span>
+    </button>
+    {% if token_user.role >= 3 %}
+    <button class="button is-danger is-rounded" id="delete-author-button" onclick="deleteAuthor()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-trash"></i>
+      </span>
+      <span>Delete</span>
+    </button>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+function saveAuthor(){
+  const caller = "save-author-button";
+  let editAuthorForm = document.getElementById("edit-author-form");
+  let details = Object.fromEntries(new FormData(editAuthorForm));
+  console.log(details);
+  
+  addLoading(caller);
+  fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify({
+      "name": details["name"],
+      "bio": details["bio"],
+      "image_url": details["image_url"],
+      "identifiers": {
+        "amazon_id": details["amazon_id"],
+        "goodreads_id": details["goodreads"],
+        "library_thing_id": details["library-thing"],
+        "open_library_id": details["open-library"]
+      },
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location = "/authors/{{ author.identifiers.author_id }}";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
+function refreshAuthor(){
+  const caller = "refresh-author-button";
+  let editAuthorForm = document.getElementById("edit-author-form");
+  let details = Object.fromEntries(new FormData(editAuthorForm));
+  console.log(details);
+  
+  addLoading(caller);
+  fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
+    method: "PUT",
+    headers: headers,
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location = "/authors/{{ author.identifiers.author_id }}";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% if token_user.role >= 3 %}
+function deleteAuthor(){
+  const caller = "delete-author-button";
+  
+  addLoading(caller);
+  fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location = "/authors";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
+{% endblock %}

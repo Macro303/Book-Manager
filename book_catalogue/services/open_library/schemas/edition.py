@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["Edition"]
 
 from pydantic import Field
@@ -8,15 +9,6 @@ from book_catalogue.services.open_library.schemas import (
     Resource,
     TextResource,
 )
-
-
-class Identifiers(BaseModel):
-    amazon: list[str] = Field(default_factory=list)
-    better_world_books: list[str] = Field(default_factory=list)
-    goodreads: list[str] = Field(default_factory=list)
-    google: list[str] = Field(default_factory=list)
-    librarything: list[str] = Field(default_factory=list)
-    wikidata: list[str] = Field(default_factory=list)
 
 
 class Contributor(BaseModel):
@@ -30,6 +22,15 @@ class Content(BaseModel):
     pagenum: str | None
     title: str
     type: Resource | None = None
+
+
+class Identifiers(BaseModel):
+    amazon: list[str] = Field(default_factory=list)
+    better_world_books: list[str] = Field(default_factory=list)
+    goodreads: list[str] = Field(default_factory=list)
+    google: list[str] = Field(default_factory=list)
+    librarything: list[str] = Field(default_factory=list)
+    wikidata: list[str] = Field(default_factory=list)
 
 
 class Link(BaseModel):

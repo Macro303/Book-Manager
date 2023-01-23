@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["BookController"]
 
 import logging
@@ -39,7 +40,7 @@ class BookController:
             readers=[UserController.get_user(user_id=x) for x in new_book.reader_ids],
             subtitle=new_book.subtitle,
             title=new_book.title,
-            wisher=UserController.get_user(user_id=new_book.wisher_id) if new_book.wisher_id else None,
+            wishers=[UserController.get_user(user_id=x) for x in new_book.wisher_ids],
             goodreads_id=new_book.identifiers.goodreads_id,
             google_books_id=new_book.identifiers.google_books_id,
             isbn_13=new_book.identifiers.isbn,
@@ -86,7 +87,10 @@ class BookController:
             temp.number = x.number
         book.subtitle = updates.subtitle
         book.title = updates.title
-        book.wisher = UserController.get_user(user_id=updates.wisher_id)
+        book.wishers = [
+            UserController.get_user(user_id=x)
+            for x in updates.wisher_ids
+        ]
 
         book.goodreads_id = updates.identifiers.goodreads_id
         book.google_books_id = updates.identifiers.google_books_id
@@ -163,19 +167,24 @@ class BookController:
         )
     
     @classmethod
-    def lookup_book(cls, isbn: str, wisher_id: int) -> Book:
-        isbn_13 = to_isbn_13(value=isbn)
-        if book := Book.get(isbn_13=isbn_13):
+    def lookup_book(cls, isbn: str, wisher_id: int | None) -> Book:
+        if book := Book.get(isbn_13=isbn):
+            if wisher_id and (wisher := UserController.get_user(user_id=wisher_id)):
+                if wisher in book.wishers:
+                    raise HTTPException(status_code=409, detail="Book already wished for.")
+                book.wishers.add(wisher)
+                return book
             raise HTTPException(status_code=409, detail="Book already exists.")
         
         new_book = cls._parse_open_library(isbn=isbn)
-        new_book.wisher_id = wisher_id
+        if wisher_id:
+            new_book.wisher_ids = [wisher_id]
         return cls.create_book(new_book=new_book)
 
     @classmethod
     def reset_book(cls, book_id: int) -> Book:
         if not (book := cls.get_book(book_id=book_id)):
-            raise HTTPException(status_code=409, detail="Book not found.")
+            raise HTTPException(status_code=404, detail="Book not found.")
         
         updates = cls._parse_open_library(isbn=book.isbn_13)
         updates.reader_ids = [x.user_id for x in book.readers]
@@ -183,6 +192,6 @@ class BookController:
             UpdateBookSeries(series_id=x.series.series_id, number=x.number)
             for x in book.series
         ],
-        updates.wisher_id = book.wisher.user_id if book.wisher else None
+        updates.wisher_ids = [x.user_id for x in book.wishers]
         return cls.update_book(book_id=book_id, updates=updates)
         

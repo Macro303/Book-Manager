@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from collections.abc import Callable
 from datetime import datetime
@@ -9,8 +11,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from rich import inspect
 
 from book_catalogue import __version__, get_project_root, setup_logging
+from book_catalogue.console import CONSOLE
 from book_catalogue.routers.api import api_router
 from book_catalogue.routers.html import router as html_router
 from book_catalogue.settings import Settings
@@ -44,7 +48,12 @@ async def logger_middleware(request: Request, call_next: Callable) -> Any:  # no
         f"{request.method.upper():<7} {request.scope['path']} - {request.headers['user-agent']}"
     )
     response = await call_next(request)
-    LOGGER.info(f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}")
+    if response.status_code < 400:
+        LOGGER.info(f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}")
+    elif response.status_code < 500:
+        LOGGER.warning(f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}")
+    else:
+        LOGGER.error(f"{request.method.upper():<7} {request.scope['path']} - {response.status_code}")
     return response
 
 

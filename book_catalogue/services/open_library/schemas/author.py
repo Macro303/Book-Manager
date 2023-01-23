@@ -1,3 +1,4 @@
+from __future__ import annotations
 __all__ = ["Author"]
 
 from pydantic import Field
@@ -50,3 +51,10 @@ class Author(BaseModel):
     @property
     def author_id(self) -> str:
         return self.key.split("/")[-1]
+    
+    def get_bio(self) -> str | None:
+        if self.bio:
+            if isinstance(self.bio, TextResource):
+                return self.bio.value
+            return self.bio
+        return None
