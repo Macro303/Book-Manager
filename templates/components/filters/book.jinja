@@ -1,24 +1,5 @@
-{% from "macros/forms.jinja" import input %}
-{% macro author(action) %}
-<div class="box">
-  <h1 class="title is-5">Filter Authors</h1>
-  <form accept-charset="UTF-8" action="{{ action }}" method="GET">
-    {{ input("Name", "name", value=filters['name'] or '') }}
-    <div class="buttons is-centered">
-      <button class="button is-primary is-rounded">
-        <span class="icon is-medium">
-          <i class="fas fa-lg fa-filter"></i>
-        </span>
-        <span>Filter</span>
-      </button>
-    </div>
-  </form>
-</div>
-{% endmacro %}
-
-
-
-{% macro book(action) %}
+{% from "components/forms.jinja" import input %}
+{% macro book_filter(action, show_read=False) %}
 <div class="box">
   <h5 class="title is-5">Filter Books</h5>
   <form accept-charset="UTF-8" action="{{ action }}" method="GET">
@@ -75,63 +56,15 @@
         </div>
       </div>
     </div>
-    <div class="buttons is-centered">
-      <button class="button is-primary is-rounded">
-        <span class="icon is-medium">
-          <i class="fas fa-lg fa-filter"></i>
-        </span>
-        <span>Filter</span>
-      </button>
+    {% if show_read %}
+    <div class="field">
+      <label class="label">Only Read</label>
+      <div class="control is-expanded">
+        <input id="read-switch" type="checkbox" name="read" class="switch is-info is-rounded"{% if filters['read'] %} checked{% endif %}>
+        <label for="read-switch"></label>
+      </div>
     </div>
-  </form>
-</div>
-{% endmacro %}
-
-
-
-{% macro publisher(action) %}
-<div class="box">
-  <h1 class="title is-5">Filter Publishers</h1>
-  <form accept-charset="UTF-8" action="{{ action }}" method="GET">
-    {{ input("Name", "name", value=filters['name'] or '') }}
-    <div class="buttons is-centered">
-      <button class="button is-primary is-rounded">
-        <span class="icon is-medium">
-          <i class="fas fa-lg fa-filter"></i>
-        </span>
-        <span>Filter</span>
-      </button>
-    </div>
-  </form>
-</div>
-{% endmacro %}
-
-
-
-{% macro series(action) %}
-<div class="box">
-  <h1 class="title is-5">Filter Series</h1>
-  <form accept-charset="UTF-8" action="{{ action }}" method="GET">
-    {{ input("Title", "title", value=filters['title'] or '') }}
-    <div class="buttons is-centered">
-      <button class="button is-primary is-rounded">
-        <span class="icon is-medium">
-          <i class="fas fa-lg fa-filter"></i>
-        </span>
-        <span>Filter</span>
-      </button>
-    </div>
-  </form>
-</div>
-{% endmacro %}
-
-
-
-{% macro user(action) %}
-<div class="box">
-  <h1 class="title is-5">Filter Users</h1>
-  <form accept-charset="UTF-8" action="{{ action }}" method="GET">
-    {{ input("Username", "username", value=filters['username'] or '') }}
+    {% endif %}
     <div class="buttons is-centered">
       <button class="button is-primary is-rounded">
         <span class="icon is-medium">

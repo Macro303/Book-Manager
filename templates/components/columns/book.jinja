@@ -1,0 +1,68 @@
+{% macro book_column(obj) %}
+<div class="column is-two-fifths-mobile is-two-fifths-tablet is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
+  <div class="card has-text-light has-background-dark">
+    <div class="card-image">
+      <figure class="image is-2by3">
+        <img alt="{{ obj.title }} by {{ obj.authors|join(', ', attribute='display_name') }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ obj.image_url }}" width="250"/>
+      </figure>
+    </div>
+    <div class="card-content">
+      <div class="media">
+        <div class="media-content">
+          <p class="title is-5">{{ obj.title }}</p>
+          <p class="subtitle is-6">{{ obj.subtitle or "" }}</p>
+        </div>
+      </div>
+    </div>
+    <footer class="card-footer">
+      <a class="card-footer-item" href="/books/{{ obj.identifiers.book_id }}">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-eye"></i>
+        </span>
+        <span>View</span>
+      </a>
+      <a class="card-footer-item modal-trigger" data-target="{{ obj.identifiers.book_id }}-link-modal" id="{{ obj.identifiers.book_id }}-link-button">
+        <span class="icon is-medium">
+          <i class="fas fa-lg fa-link"></i>
+        </span>
+        <span>Links</span>
+      </a>
+    </footer>
+  </div>
+</div>
+<div class="modal" id="{{ obj.identifiers.book_id }}-link-modal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <div class="content">
+        <p class="modal-card-title">Links</p>
+      </div>
+    </header>
+    <section class="modal-card-body">
+      <div class="buttons is-centered">
+        <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+        {% if obj.identifiers.goodreads_id %}
+        <a class="button is-link is-rounded" href="https://goodreads.com/book/show/{{ obj.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+        {% else %}
+        <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+        {% endif %}
+        {% if obj.identifiers.google_books_id %}
+        <a class="button is-link is-rounded" href="#" rel="noopener noreferrer" target="_blank">Google Books</a>
+        {% else %}
+        <a class="button is-link is-rounded" href="#" rel="noopener noreferrer" target="_blank">Google Books</a>
+        {% endif %}
+        {% if obj.identifiers.library_thing_id %}
+        <a class="button is-link is-rounded" href="https://librarything.com/work/{{ obj.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+        {% else %}
+        <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+        {% endif %}
+        {% if obj.identifiers.open_library_id %}
+        <a class="button is-link is-rounded" href="https://openlibrary.org/edition/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+        {% else %}
+        <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endmacro %}

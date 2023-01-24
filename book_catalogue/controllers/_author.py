@@ -93,7 +93,7 @@ class AuthorController:
 
         new_author = cls._parse_open_library(open_library_id=open_library_id)
         if author := Author.get(name=new_author.name):
-            author.open_library_id = new_author.open_library_id
+            author.open_library_id = new_author.identifiers.open_library_id
             flush()
             return author
         return cls.create_author(new_author=new_author)

@@ -1,25 +1,26 @@
+{% macro user_column(obj) %}
 <div class="column is-two-fifths-mobile is-two-fifths-tablet is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
   <div class="card has-text-light has-background-dark">
     <div class="card-content">
       <div class="media">
         <div class="media-left">
           <figure class="image is-64x64 is-rounded">
-            <img alt="{{ _user.username }}' profile image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="/static/logo.png"/>
+            <img alt="{{ obj.username }}' profile image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="/static/logo.png"/>
           </figure>
         </div>
         <div class="media-content">
-          <p class="title is-4">{{ _user.username }}</p>
+          <p class="title is-4">{{ obj.username }}</p>
         </div>
       </div>
     </div>
     <footer class="card-footer">
-      <a class="card-footer-item" href="/users/{{ _user.user_id }}">
+      <a class="card-footer-item" href="/users/{{ obj.user_id }}">
         <span class="icon is-medium">
           <i class="fas fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item" href="/users/{{ _user.user_id }}/wishlist">
+      <a class="card-footer-item" href="/users/{{ obj.user_id }}/wishlist">
         <span class="icon is-medium">
           <i class="fas fa-lg fa-star"></i>
         </span>
@@ -28,3 +29,4 @@
     </footer>
   </div>
 </div>
+{% endmacro %}

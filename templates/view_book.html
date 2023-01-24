@@ -1,0 +1,128 @@
+{% extends "base.jinja" %}
+{% from "components/columns/author.jinja" import author_column %}
+{% from "components/columns/publisher.jinja" import publisher_column %}
+{% from "components/columns/series.jinja" import series_column %}
+{% from "components/columns/user.jinja" import user_column %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block subtitle %}{% if book.subtitle %}{{ book.subtitle }}{% endif %}{% endblock %}
+{% block content %}
+<section>
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      <div class="box">
+        <figure class="image is-2by3">
+          <img alt="{{ book.title }} by {{ book.authors|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url }}" width="500"/>
+        </figure>
+      </div>
+    </div>
+    <div class="column">
+      <div class="box">
+        <div class="block">
+          <p><strong class="title is-size-4">Format:</strong> {{ book.format or "" }}</p>
+        </div>
+        <div class="divider is-info is-size-4">More Details</div>
+        <div class="block">
+          <p><strong class="title is-size-4">Description:</strong> {{ book.description or "" }}</p>
+        </div>
+        <div class="divider is-info is-size-4">Identifiers</div>
+        <div class="block">
+          <p><strong class="title is-size-4">Isbn:</strong> {{ book.identifiers.isbn }}</p>
+        </div>
+        {% if book.identifiers.goodreads_id %}
+        <div class="block">
+          <a href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">Goodreads:</strong> {{ book.identifiers.goodreads_id }}</a>
+        </div>
+        {% endif %}
+        {% if book.identifiers.google_books_id %}
+        <div class="block">
+          <a href="#" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">Google Books:</strong> {{ book.identifiers.google_books_id }}</a>
+        </div>
+        {% endif %}
+        {% if book.identifiers.library_thing_id %}
+        <div class="block">
+          <a href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">LibraryThing:</strong> {{ book.identifiers.library_thing_id }}</a>
+        </div>
+        {% endif %}
+        {% if book.identifiers.open_library_id %}
+        <div class="block">
+          <a href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">OpenLibrary:</strong> {{ book.identifiers.open_library_id }}</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="buttons is-centered">
+    {% if book.wishers %}
+    <button class="button is-success is-rounded" id="collect-book-button" type="button">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-archive"></i>
+      </span>
+      <span>Collect</span>
+    </button>
+    {% elif token_user in book.readers %}
+    <button class="button is-info is-rounded" id="unread-book-button" type="button">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-book"></i>
+      </span>
+      <span>Unread</span>
+    </button>
+    {% else %}
+    <button class="button is-success is-rounded" id="read-book-button" type="button">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-book-open"></i>
+      </span>
+      <span>Read</span>
+    </button>
+    {% endif %}
+    {% if token_user.role >= 2 %}
+    <a class="button is-warning is-rounded" href="/books/{{ book.identifiers.book_id }}/edit">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-edit"></i>
+      </span>
+      <span>Edit</span>
+    </a>
+    {% endif %}
+  </div>
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Authors</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _author in book.authors %}
+      {{ author_column(_author) }}
+    {% endfor %}
+  </div>
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Series</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _series in book.series %}
+      {{ series_column(_series) }}
+    {% endfor %}
+  </div>
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Publisher</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {{ publisher_column(book.publisher) }}
+  </div>
+  {% if book.wishers %}
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Wishers</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _wisher in book.wishers %}
+      {{ user_column(_wisher) }}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Readers</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _reader in book.readers %}
+      {{ user_column(_reader) }}
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

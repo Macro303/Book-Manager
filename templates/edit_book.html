@@ -1,0 +1,322 @@
+{% extends "base.jinja" %}
+{% from "components/forms.jinja" import input, textarea %}
+{% block title %}{% endblock %}
+{% block content %}
+<section>
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      <div class="box">
+        <figure class="image is-2by3">
+          <img alt="{{ book.title }} by {{ book.authors|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url }}" width="500"/>
+        </figure>
+      </div>
+    </div>
+    <div class="column">
+      <div class="box">
+        <form id="edit-book-form">
+          {{ input("Title", "title", value=book.title) }}
+          {{ input("Subtitle", "subtitle", value=book.subtitle or "") }}
+          <!-- region Authors -->
+          <label class="label">Authors</label>
+          {% for author in book.authors %}
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select disabled>
+                  {% for _author in author_list %}
+                  <option {% if _author == author %}selected {% endif %}value={{ _author.identifiers.author_id }}>{{ _author.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            {% for role in author.roles %}
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select disabled>
+                  {% for _role in role_list %}
+                  <option {% if _role == role %}selected {% endif %}value={{ _role.role_id }}>{{ _role.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="control">
+              <button class="button is-warning is-rounded is-outlined" type="button">
+                <span>Remove</span>
+                <span class="icon is-medium">
+                  <i class="fas fa-lg fa-times"></i>
+                </span>
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select name="new-author">
+                  <option disabled hidden selected value=0>Select Author</option>
+                  {% for _author in author_list %}
+                  <option value={{ _author.author_id }}>{{ _author.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select name="new-role">
+                  <option disabled hidden selected value=0>Add Role</option>
+                  {% for _role in role_list %}
+                  <option value={{ _role.role_id }}>{{ _role.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="control">
+              <div class="buttons is-centered">
+                <button class="button is-success is-rounded is-outlined" type="button" id="add-author-button">
+                  <span class="icon is-medium">
+                    <i class="fas fa-lg fa-plus"></i>
+                  </span>
+                  <span>Add Author</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- endregion -->
+          <!-- region Format -->
+          <div class="field">
+            <label class="label">Format</label>
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select name="format">
+                  <option disabled hidden {% if not book.format %}selected {% endif %}value="">Select Format</option>
+                  {% for _format in format_list %}
+                  <option {% if _format == book.format %}selected {% endif %}value={{ _format }}>{{ _format }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control is-expanded">
+              <input class="input is-rounded" name="new-format" placeholder="New Format" type="text">
+            </div>
+            <div class="control">
+              <div class="buttons is-centered">
+                <button class="button is-success is-rounded is-outlined" type="button" id="new-format-button" onclick="newFormat()">
+                  <span class="icon is-medium">
+                    <i class="fas fa-lg fa-plus"></i>
+                  </span>
+                  <span>New Format</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- endregion -->
+          <div class="divider is-info is-size-4">More Details</div>
+          {{ textarea("Description", "description", value=book.description or "") }}
+          <!-- region Publisher -->
+          <div class="field">
+            <label class="label">Publisher</label>
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select name="publisher">
+                  <option disabled hidden {% if not book.publisher %}selected {% endif %}value="">Select Publisher</option>
+                  {% for _publisher in publisher_list %}
+                  <option {% if _publisher == book.publisher %}selected {% endif %}value={{ _publisher.publisher_id }}>{{ _publisher.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- endregion -->
+          <!-- region Series -->
+          <label class="label">Series</label>
+          {% for series in book.series %}
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select disabled>
+                  {% for _series in series_list %}
+                  <option {% if _series == series %}selected {% endif %}value={{ _series.series_id }}>{{ _series.title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="control is-expanded">
+              <input class="input is-rounded" disabled placeholder="Number" type="number" value={{ series.number or 0 }}>
+            </div>
+            <div class="control">
+              <button class="button is-warning is-rounded is-outlined" type="button">
+                <span>Remove</span>
+                <span class="icon is-medium">
+                  <i class="fas fa-lg fa-times"></i>
+                </span>
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select name="new-author">
+                  <option disabled hidden selected value=0>Select Series</option>
+                  {% for _series in series_list %}
+                  <option value={{ _series.series_id }}>{{ _series.title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="control is-expanded">
+              <input class="input is-rounded" name="new-series-num" placeholder="Number" type="number">
+            </div>
+            <div class="control">
+              <div class="buttons is-centered">
+                <button class="button is-success is-rounded is-outlined" type="button" id="add-series-button">
+                  <span class="icon is-medium">
+                    <i class="fas fa-lg fa-plus"></i>
+                  </span>
+                  <span>Add Series</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- endregion -->
+          <div class="divider is-info is-size-4">Identifiers</div>
+          {{ input("Image Url", "image-url", value=book.image_url or "") }}
+          {{ input("Goodreads", "goodreads", value=book.identifiers.goodreads_id or "") }}
+          {{ input("Google Books", "google-books", value=book.identifiers.goodreads_id or "") }}
+          {{ input("Isbn", "isbn", value=book.identifiers.isbn) }}
+          {{ input("LibraryThing", "library-thing", value=book.identifiers.library_thing_id or "") }}
+          {{ input("OpenLibrary", "open-library", value=book.identifiers.open_library_id or "") }}
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="buttons is-centered">
+    <button class="button is-success is-rounded" id="save-book-button" onclick="saveBook()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-save"></i>
+      </span>
+      <span>Save</span>
+    </button>
+    <button class="button is-warning is-rounded" id="refresh-book-button" onclick="refreshBook()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-undo"></i>
+      </span>
+      <span>Refresh</span>
+    </button>
+    {% if token_user.role >= 3 %}
+    <button class="button is-danger is-rounded" id="delete-book-button" onclick="deleteBook()">
+      <span class="icon is-medium">
+        <i class="fas fa-lg fa-trash"></i>
+      </span>
+      <span>Delete</span>
+    </button>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+function newFormat(){
+  const caller = "new-format-button";
+  let editBookForm = document.getElementById("edit-book-form");
+  let details = Object.fromEntries(new FormData(editBookForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch("/api/v0/books/{{ book.identifiers.book_id }}/format", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      "name": details["new-format"],
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location.reload();
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
+function saveBook(){
+  const caller = "save-book-button";
+  let editBookForm = document.getElementById("edit-book-form");
+  let details = Object.fromEntries(new FormData(editBookForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch("/api/v0/books/{{ book.identifiers.book_id }}", {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify({
+      "authors": [],
+      "description": details["description"],
+      "format": details["format"],
+      "identifiers": {
+        "goodreads_id": details["goodreads"],
+        "google_books_id": details["google-books"],
+        "isbn": details["isbn"],
+        "library_thing_id": details["library-thing"],
+        "open_library_id": details["open-library"]
+      },
+      "image_url": details["image-url"],
+      "publisher_id": details["publisher"],
+      "series": [],
+      "subtitle": details["subtitle"],
+      "title": details["title"],
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location = "/books/{{ book.book_id }}";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
+function refreshBook(){
+  const caller = "refresh-book-button";
+
+  addLoading(caller);
+  fetch("/api/v0/books/{{ book.book_id }}", {
+    method: "PUT",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location = "/books/{{ book.identifiers.book_id }}";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% if token_user.role >= 3 %}
+function deleteBook(){
+  const caller = "delete-book-button";
+
+  addLoading(caller);
+  fetch("/api/v0/books/{{ book.identifiers.book_id }}", {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location = "/books";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
+{% endblock %}

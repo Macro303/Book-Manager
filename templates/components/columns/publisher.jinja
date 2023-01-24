@@ -1,25 +1,26 @@
+{% macro publisher_column(obj) %}
 <div class="column is-two-fifths-mobile is-two-fifths-tablet is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
   <div class="card has-text-light has-background-dark">
     <div class="card-content">
       <div class="media">
         <div class="media-left">
           <figure class="image is-64x64 is-rounded">
-            <img alt="{{ _publisher.name }}' profile image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ _publisher.image_url }}"/>
+            <img alt="{{ obj.name }}' profile image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ obj.image_url }}"/>
           </figure>
         </div>
         <div class="media-content">
-          <p class="title is-4">{{ _publisher.name }}</p>
+          <p class="title is-4">{{ obj.name }}</p>
         </div>
       </div>
     </div>
     <footer class="card-footer">
-      <a class="card-footer-item" href="/publishers/{{ _publisher.publisher_id }}">
+      <a class="card-footer-item" href="/publishers/{{ obj.publisher_id }}">
         <span class="icon is-medium">
           <i class="fas fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item modal-trigger" data-target="{{ _publisher.publisher_id }}-link-modal" id="{{ _publisher.publisher_id }}-link-button">
+      <a class="card-footer-item modal-trigger" data-target="{{ obj.publisher_id }}-link-modal" id="{{ obj.publisher_id }}-link-button">
         <span class="icon is-medium">
           <i class="fas fa-lg fa-link"></i>
         </span>
@@ -28,7 +29,7 @@
     </footer>
   </div>
 </div>
-<div class="modal" id="{{ _publisher.publisher_id }}-link-modal">
+<div class="modal" id="{{ obj.publisher_id }}-link-modal">
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">
@@ -42,3 +43,4 @@
     </section>
   </div>
 </div>
+{% endmacro %}

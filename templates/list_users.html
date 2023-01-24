@@ -1,12 +1,13 @@
 {% extends "base.jinja" %}
-{% from "macros/filters.jinja" import user with context %}
-{% from "macros/forms.jinja" import input %}
+{% from "components/columns/user.jinja" import user_column %}
+{% from "components/filters/user.jinja" import user_filter with context %}
+{% from "components/forms.jinja" import input %}
 {% block title %}Users{% endblock %}
 {% block content %}
 <section>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ user("/users") }}
+      {{ user_filter("/users") }}
       {% if token_user.role >= 1 %}
       <div class="box">
         <h1 class="title is-5">Add User</h1>
@@ -27,7 +28,7 @@
     <div class="column">
       <div class="columns is-multiline is-centered is-mobile">
         {% for _user in user_list %}
-        {% include "components/user_column.jinja" %}
+          {{ user_column(_user) }}
         {% endfor %}
       </div>
     </div>

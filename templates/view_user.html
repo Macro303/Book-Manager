@@ -1,4 +1,5 @@
 {% extends "base.jinja" %}
+{% from "components/columns/book.jinja" import book_column %}
 {% block title %}{{ user.username }}{% endblock %}
 {% block content %}
 <section>
@@ -35,7 +36,7 @@
   </div>
   <div class="columns is-multiline is-centered is-mobile">
     {% for _book in last_read %}
-    {% include "components/book_column.jinja" %}
+      {{ book_column(_book) }}
     {% endfor %}
   </div>
 </section>

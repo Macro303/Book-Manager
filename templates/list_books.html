@@ -1,20 +1,20 @@
 {% extends "base.jinja" %}
-{% from "components/columns/author.jinja" import author_column %}
-{% from "components/filters/author.jinja" import author_filter with context %}
+{% from "components/columns/book.jinja" import book_column %}
+{% from "components/filters/book.jinja" import book_filter with context %}
 {% from "components/forms.jinja" import input %}
-{% block title %}Authors{% endblock %}
+{% block title %}Books{% endblock %}
 {% block content %}
 <section>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ author_filter("/authors") }}
+      {{ book_filter("/books", show_read=True) }}
       {% if token_user.role >= 1 %}
       <div class="box">
-        <h5 class="title is-5">Add Author</h5>
-        <form id="add-author-form">
-          {{ input("Name", "name") }}
+        <h1 class="title is-5">Add Book</h1>
+        <form id="add-book-form">
+          {{ input("Isbn", "isbn") }}
           <div class="buttons is-centered">
-            <button class="button is-primary is-rounded" id="add-author-button" type="button" onclick="addAuthor()">
+            <button class="button is-primary is-rounded" id="add-book-button" type="button" onclick="addBook()">
               <span class="icon is-medium">
                 <i class="fas fa-lg fa-plus"></i>
               </span>
@@ -27,8 +27,8 @@
     </div>
     <div class="column">
       <div class="columns is-multiline is-centered is-mobile">
-        {% for _author in author_list %}
-          {{ author_column(_author) }}
+        {% for _book in book_list %}
+          {{ book_column(_book) }}
         {% endfor %}
       </div>
     </div>
@@ -39,18 +39,18 @@
 {{ super() }}
 <script type="text/javascript">
 {% if token_user.role >= 1 %}
-function addAuthor(){
-  const caller = "add-author-button";
-  let addAuthorForm = document.getElementById("add-author-form");
-  let details = Object.fromEntries(new FormData(addAuthorForm));
+function addBook(){
+  const caller = "add-book-button";
+  let addBookForm = document.getElementById("add-book-form");
+  let details = Object.fromEntries(new FormData(addBookForm));
   console.log(details);
 
   addLoading(caller);
-  fetch("/api/v0/authors", {
+  fetch("/api/v0/books/lookup", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
-        "name": details["name"]
+      "isbn": details["isbn"],
     }),
   }).then((response) => {
     if (response.ok){
@@ -58,7 +58,7 @@ function addAuthor(){
     }
     return Promise.reject(response);
   }).then((data) => {
-    window.location = "/authors";
+    window.location.reload();
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));

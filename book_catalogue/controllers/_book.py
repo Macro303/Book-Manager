@@ -71,7 +71,8 @@ class BookController:
         book.authors = []
         for x in updates.authors:
             author = AuthorController.get_author(author_id=x.author_id)
-            temp = BookAuthor.get(book=book, author=author) or Book(book=book, author=author)
+            flush()
+            temp = BookAuthor.get(book=book, author=author) or BookAuthor(book=book, author=author)
             temp.roles = [AuthorController.get_role(role_id=y) for y in x.role_ids]
         book.description = updates.description
         book.format = updates.format
@@ -133,7 +134,7 @@ class BookController:
                 role = AuthorController.create_role(new_role=NewRole(name=entry.role))
             authors[author].add(role)
         authors = [
-            NewBookAuthor(author_id=key.author_id, roles=[x.role_id for x in value])
+            NewBookAuthor(author_id=key.author_id, role_ids=[x.role_id for x in value])
             for key, value in authors.items()
         ]
 
@@ -189,8 +190,8 @@ class BookController:
 
         updates = cls._parse_open_library(isbn=book.isbn_13)
         updates.reader_ids = [x.user_id for x in book.readers]
-        updates.series = (
-            [NewBookSeries(series_id=x.series.series_id, number=x.number) for x in book.series],
-        )
+        updates.series = [
+            NewBookSeries(series_id=x.series.series_id, number=x.number) for x in book.series
+        ]
         updates.wisher_ids = [x.user_id for x in book.wishers]
         return cls.update_book(book_id=book_id, updates=updates)

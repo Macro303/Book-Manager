@@ -1,12 +1,13 @@
 {% extends "base.jinja" %}
-{% from "macros/filters.jinja" import series with context %}
-{% from "macros/forms.jinja" import input %}
+{% from "components/columns/series.jinja" import series_column %}
+{% from "components/filters/series.jinja" import series_filter with context %}
+{% from "components/forms.jinja" import input %}
 {% block title %}Series{% endblock %}
 {% block content %}
 <section>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ series("/series") }}
+      {{ series_filter("/series") }}
       {% if token_user.role >= 1 %}
       <div class="box">
         <h5 class="title is-5">Add Series</h5>
@@ -27,7 +28,7 @@
     <div class="column">
       <div class="columns is-multiline is-centered is-mobile">
         {% for _series in series_list %}
-        {% include "components/series_column.jinja" %}
+          {{ series_column(_series) }}
         {% endfor %}
       </div>
     </div>

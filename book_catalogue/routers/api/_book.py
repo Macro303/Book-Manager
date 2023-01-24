@@ -36,7 +36,7 @@ def get_book(book_id: int) -> Book:
 )
 def update_book(book_id: int, updates: NewBook) -> Book:
     with db_session:
-        return BookController.update_book(book_id=book_id, update_book=updates)
+        return BookController.update_book(book_id=book_id, updates=updates)
 
 
 @router.delete(path="/{book_id}", responses={404: {"model": ErrorResponse}})
@@ -111,5 +111,14 @@ def read_book(
             book.readers.remove(user)
         else:
             book.readers.add(user)
+        flush()
+        return book.to_schema()
+
+
+@router.post(path="/{book_id}/format", responses={409: {"model": ErrorResponse}})
+def create_format(book_id: int, name: str = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        book.format = name
         flush()
         return book.to_schema()

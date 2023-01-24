@@ -1,12 +1,13 @@
 {% extends "base.jinja" %}
-{% from "macros/filters.jinja" import book with context %}
-{% from "macros/forms.jinja" import input %}
+{% from "components/columns/book.jinja" import book_column %}
+{% from "components/filters/book.jinja" import book_filter with context %}
+{% from "components/forms.jinja" import input %}
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
 {% block content %}
 <section>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ book("/users/" ~ user.user_id ~ "/wishlist") }}
+      {{ book_filter("/users/" ~ user.user_id ~ "/wishlist") }}
       {% if token_user == user %}
       <div class="box">
         <h1 class="title is-5">Add Book</h1>
@@ -27,7 +28,7 @@
     <div class="column">
       <div class="columns is-multiline is-centered is-mobile">
         {% for _book in wishlist %}
-        {% include "components/book_column.jinja" %}
+          {{ book_column(_book) }}
         {% endfor %}
       </div>
     </div>
