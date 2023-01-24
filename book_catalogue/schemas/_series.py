@@ -5,10 +5,31 @@ __all__ = ["NewSeries", "Series"]
 from book_catalogue.schemas._base import BaseModel
 
 
-class Series(BaseModel):
+class BaseSeries(BaseModel):
+    title: str
+
+    def __lt__(self, other) -> int:  # noqa: ANN001
+        if not isinstance(other, BaseSeries):
+            raise NotImplementedError()
+        return self.title < other.title
+
+    def __eq__(self, other) -> bool:  # noqa: ANN001
+        if not isinstance(other, BaseSeries):
+            raise NotImplementedError()
+        return self.title == other.title
+
+    def __hash__(self):
+        return hash(
+            (
+                type(self),
+                self.title,
+            )
+        )
+
+
+class Series(BaseSeries):
     number: int | None = None
     series_id: int
-    title: str
 
     @property
     def display_name(self) -> str:
@@ -33,5 +54,5 @@ class Series(BaseModel):
         return hash((type(self), self.title, (self.number or -1)))
 
 
-class NewSeries(BaseModel):
-    title: str
+class NewSeries(BaseSeries):
+    pass

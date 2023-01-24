@@ -13,7 +13,7 @@ from book_catalogue.controllers._series import SeriesController
 from book_catalogue.controllers._user import UserController
 from book_catalogue.database.tables import Book, BookAuthor, BookSeries
 from book_catalogue.schemas._author import NewAuthor, NewRole
-from book_catalogue.schemas._book import NewBook, NewBookAuthor, NewBookIdentifiers, NewBookSeries
+from book_catalogue.schemas._book import Identifiers, NewBook, NewBookAuthor, NewBookSeries
 from book_catalogue.schemas._publisher import NewPublisher
 from book_catalogue.services.open_library import lookup_book
 from book_catalogue.services.open_library.service import OpenLibrary
@@ -154,7 +154,7 @@ class BookController:
             authors=authors,
             description=result["edition"].get_description() or result["work"].get_description(),
             format=result["edition"].physical_format,
-            identifiers=NewBookIdentifiers(
+            identifiers=Identifiers(
                 goodreads_id=next(iter(result["edition"].identifiers.goodreads), None),
                 google_books_id=next(iter(result["edition"].identifiers.google), None),
                 isbn=isbn,

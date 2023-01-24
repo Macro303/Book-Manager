@@ -34,10 +34,10 @@ class Author(db.Entity):
 
     def to_schema(self) -> schemas.Author:
         return schemas.Author(
+            author_id=self.author_id,
             bio=self.bio,
             identifiers=schemas.AuthorIdentifiers(
                 amazon_id=self.amazon_id,
-                author_id=self.author_id,
                 goodreads_id=self.goodreads_id,
                 library_thing_id=self.library_thing_id,
                 open_library_id=self.open_library_id,
@@ -72,10 +72,10 @@ class Book(db.Entity):
     def to_schema(self) -> schemas.Book:
         return schemas.Book(
             authors=sorted({x.to_schema() for x in self.authors}),
+            book_id=self.book_id,
             description=self.description,
             format=self.format,
             identifiers=schemas.BookIdentifiers(
-                book_id=self.book_id,
                 goodreads_id=self.goodreads_id,
                 google_books_id=self.google_books_id,
                 isbn=self.isbn_13 or self.isbn_10,

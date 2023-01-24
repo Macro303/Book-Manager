@@ -5,18 +5,17 @@ __all__ = ["NewUser", "User"]
 from book_catalogue.schemas._base import BaseModel
 
 
-class User(BaseModel):
-    role: int
-    user_id: int
+class BaseUser(BaseModel):
+    role: int = 0
     username: str
 
     def __lt__(self, other) -> int:  # noqa: ANN001
-        if not isinstance(other, User):
+        if not isinstance(other, BaseUser):
             raise NotImplementedError()
         return self.username < other.username
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
-        if not isinstance(other, User):
+        if not isinstance(other, BaseUser):
             raise NotImplementedError()
         return self.username == other.username
 
@@ -24,6 +23,9 @@ class User(BaseModel):
         return hash((type(self), self.username))
 
 
-class NewUser(BaseModel):
-    role: int = 0
-    username: str
+class User(BaseUser):
+    user_id: int
+
+
+class NewUser(BaseUser):
+    pass

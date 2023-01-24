@@ -406,7 +406,7 @@ def edit_user(request: Request, user_id: int, token_user: User | None = Depends(
     with db_session:
         user = UserController.get_user(user_id=user_id)
         if token_user.user_id != user.user_id and (
-            token_user.role < 8 or token_user.role <= user.role
+            token_user.role < 4 or token_user.role <= user.role
         ):
             return RedirectResponse(f"/users/{user_id}")
         return templates.TemplateResponse(

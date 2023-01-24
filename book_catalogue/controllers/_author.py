@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from pony.orm import flush
 
 from book_catalogue.database.tables import Author, Role
-from book_catalogue.schemas._author import NewAuthor, NewAuthorIdentifiers, NewRole
+from book_catalogue.schemas._author import Identifiers, NewAuthor, NewRole
 from book_catalogue.services.open_library.service import OpenLibrary
 
 LOGGER = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class AuthorController:
 
         return NewAuthor(
             bio=result.get_bio(),
-            identifiers=NewAuthorIdentifiers(
+            identifiers=Identifiers(
                 amazon_id=result.remote_ids.amazon,
                 goodreads_id=result.remote_ids.goodreads,
                 library_thing_id=result.remote_ids.librarything,

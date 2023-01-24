@@ -16,7 +16,7 @@
     </div>
   </div>
   <div class="buttons is-centered">
-    {% if token_user == user or (token_user.role >= 8 and token_user.role > user.role) %}
+    {% if token_user == user or (token_user.role >= 4 and token_user.role > user.role) %}
     <a class="button is-warning is-rounded" href="/users/{{ user.user_id }}/edit">
       <span class="icon is-medium">
         <i class="fas fa-lg fa-edit"></i>

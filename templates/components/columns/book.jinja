@@ -1,5 +1,5 @@
 {% macro book_column(obj) %}
-<div class="column is-two-fifths-mobile is-two-fifths-tablet is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
+<div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
   <div class="card has-text-light has-background-dark">
     <div class="card-image">
       <figure class="image is-2by3">
@@ -15,13 +15,13 @@
       </div>
     </div>
     <footer class="card-footer">
-      <a class="card-footer-item" href="/books/{{ obj.identifiers.book_id }}">
+      <a class="card-footer-item" href="/books/{{ obj.book_id }}">
         <span class="icon is-medium">
           <i class="fas fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item modal-trigger" data-target="{{ obj.identifiers.book_id }}-link-modal" id="{{ obj.identifiers.book_id }}-link-button">
+      <a class="card-footer-item modal-trigger" data-target="{{ obj.book_id }}-link-modal" id="{{ obj.book_id }}-link-button">
         <span class="icon is-medium">
           <i class="fas fa-lg fa-link"></i>
         </span>
@@ -30,7 +30,7 @@
     </footer>
   </div>
 </div>
-<div class="modal" id="{{ obj.identifiers.book_id }}-link-modal">
+<div class="modal" id="{{ obj.book_id }}-link-modal">
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">
