@@ -3,7 +3,7 @@
   <div class="card has-text-light has-background-dark">
     <div class="card-image">
       <figure class="image is-2by3">
-        <img alt="{{ obj.title }} by {{ obj.authors|join(', ', attribute='display_name') }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ obj.image_url }}" width="250"/>
+        <img alt="{{ obj.title }} by {{ obj.authors|join(', ', attribute='display_name') }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ obj.image_url or '/static/img/logo.png' }}" width="250"/>
       </figure>
     </div>
     <div class="card-content">

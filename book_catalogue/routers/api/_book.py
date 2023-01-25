@@ -36,7 +36,7 @@ def get_book(book_id: int) -> Book:
 )
 def update_book(book_id: int, updates: NewBook) -> Book:
     with db_session:
-        return BookController.update_book(book_id=book_id, updates=updates)
+        return BookController.update_book(book_id=book_id, updates=updates).to_schema()
 
 
 @router.delete(path="/{book_id}", responses={404: {"model": ErrorResponse}})

@@ -11,7 +11,7 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box">
         <figure class="image is-2by3">
-          <img alt="{{ book.title }} by {{ book.authors|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url }}" width="500"/>
+          <img alt="{{ book.title }} by {{ book.authors|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url or '/static/img/logo.png' }}" width="500"/>
         </figure>
       </div>
     </div>
@@ -48,6 +48,22 @@
           <a href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">OpenLibrary:</strong> {{ book.identifiers.open_library_id }}</a>
         </div>
         {% endif %}
+        <div class="divider is-info is-size-4">Links</div>
+        <div class="buttons is-centered is-multiline">
+          <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+          {% if not book.identifiers.goodreads_id %}
+          <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+          {% endif %}
+          {% if not book.identifiers.google_books_id %}
+          <a class="button is-link is-rounded" href="#" rel="noopener noreferrer" target="_blank">Google Books</a>
+          {% endif %}
+          {% if not book.identifiers.library_thing_id %}
+          <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+          {% endif %}
+          {% if not book.identifiers.open_library_id %}
+          <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
@@ -75,7 +91,7 @@
     </button>
     {% endif %}
     {% if token_user.role >= 2 %}
-    <a class="button is-warning is-rounded" href="/books/{{ book.identifiers.book_id }}/edit">
+    <a class="button is-warning is-rounded" href="/books/{{ book.book_id }}/edit">
       <span class="icon is-medium">
         <i class="fas fa-lg fa-edit"></i>
       </span>
@@ -88,7 +104,7 @@
   </div>
   <div class="columns is-multiline is-centered is-mobile">
     {% for _author in book.authors %}
-      {{ author_column(_author) }}
+      {{ author_column(_author, roles=_author.roles) }}
     {% endfor %}
   </div>
   <div class="block has-text-centered">

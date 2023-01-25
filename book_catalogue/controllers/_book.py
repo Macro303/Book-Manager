@@ -15,7 +15,7 @@ from book_catalogue.database.tables import Book, BookAuthor, BookSeries
 from book_catalogue.schemas._author import NewAuthor, NewRole
 from book_catalogue.schemas._book import Identifiers, NewBook, NewBookAuthor, NewBookSeries
 from book_catalogue.schemas._publisher import NewPublisher
-from book_catalogue.services.open_library import lookup_book
+from book_catalogue.services.open_library import lookup_book_by_id, lookup_book_by_isbn
 from book_catalogue.services.open_library.service import OpenLibrary
 
 LOGGER = logging.getLogger(__name__)
@@ -107,9 +107,14 @@ class BookController:
         book.delete()
 
     @classmethod
-    def _parse_open_library(cls, isbn: str) -> NewBook:  # noqa: C901
+    def _parse_open_library(cls, isbn: str | None, open_library_id: str | None) -> NewBook:
+        if not isbn and not open_library_id:
+            raise NotImplementedError("Require Isbn or OpenLibrary Id")
         session = OpenLibrary(cache=None)
-        result = lookup_book(session=session, isbn=isbn)
+        if open_library_id:
+            result = lookup_book_by_id(session=session, edition_id=open_library_id)
+        else:
+            result = lookup_book_by_isbn(session=session, isbn=isbn)
 
         authors = {}
         for entry in result["work"].authors:
@@ -178,7 +183,7 @@ class BookController:
                 return book
             raise HTTPException(status_code=409, detail="Book already exists.")
 
-        new_book = cls._parse_open_library(isbn=isbn)
+        new_book = cls._parse_open_library(isbn=isbn, open_library_id=None)
         if wisher_id:
             new_book.wisher_ids = [wisher_id]
         return cls.create_book(new_book=new_book)
@@ -188,7 +193,7 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        updates = cls._parse_open_library(isbn=book.isbn_13)
+        updates = cls._parse_open_library(isbn=book.isbn_13, open_library_id=book.open_library_id)
         updates.reader_ids = [x.user_id for x in book.readers]
         updates.series = [
             NewBookSeries(series_id=x.series.series_id, number=x.number) for x in book.series

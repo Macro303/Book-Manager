@@ -7,7 +7,7 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box has-text-centered">
         <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ author.name }}'s Profile Image" class="is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ author.image_url }}"/>
+          <img alt="{{ author.name }}'s Profile Image" class="is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ author.image_url or '/static/img/logo.png' }}"/>
         </figure>
       </div>
     </div>
@@ -51,7 +51,7 @@
   </div>
   <div class="buttons is-centered">
     {% if token_user.role >= 2 %}
-    <a class="button is-warning is-rounded" href="/authors/{{ author.identifiers.author_id }}/edit">
+    <a class="button is-warning is-rounded" href="/authors/{{ author.author_id }}/edit">
       <span class="icon is-medium">
         <i class="fas fa-lg fa-edit"></i>
       </span>
