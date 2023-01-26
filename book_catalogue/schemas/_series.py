@@ -48,7 +48,7 @@ class Series(BaseSeries):
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Series):
             raise NotImplementedError()
-        return (self.title, (self.number or -1)) == (other.title, (other.title or -1))
+        return (self.title, (self.number or -1)) == (other.title, (other.number or -1))
 
     def __hash__(self):
         return hash((type(self), self.title, (self.number or -1)))

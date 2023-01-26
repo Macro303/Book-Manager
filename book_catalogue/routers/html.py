@@ -323,7 +323,7 @@ def view_series(
         return RedirectResponse("/")
     with db_session:
         series = SeriesController.get_series(series_id=series_id)
-        book_list = sorted({x.book.to_schema() for x in series.books})
+        book_list = sorted({(x.book.to_schema(), x.number) for x in series.books})
         return templates.TemplateResponse(
             "view_series.html",
             {

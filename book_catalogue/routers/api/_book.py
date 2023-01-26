@@ -5,10 +5,16 @@ __all__ = ["router"]
 from fastapi import APIRouter, Body, HTTPException
 from pony.orm import db_session, flush
 
-from book_catalogue.controllers import BookController, UserController
+from book_catalogue.controllers import (
+    AuthorController,
+    BookController,
+    SeriesController,
+    UserController,
+)
+from book_catalogue.database.tables import BookAuthor, BookSeries
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas import Book
-from book_catalogue.schemas._book import LookupBook, NewBook
+from book_catalogue.schemas._book import LookupBook, NewBook, NewBookAuthor, NewBookSeries
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
@@ -120,5 +126,45 @@ def create_format(book_id: int, name: str = Body(embed=True)) -> Book:
     with db_session:
         book = BookController.get_book(book_id=book_id)
         book.format = name
+        flush()
+        return book.to_schema()
+
+
+@router.patch(
+    path="/{book_id}/authors",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def set_authors(book_id: int, authors: list[NewBookAuthor] = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        for _author in book.authors:
+            _author.delete()
+        flush()
+        for _author in authors:
+            BookAuthor(
+                book=book,
+                author=AuthorController.get_author(author_id=_author.author_id),
+                roles=[AuthorController.get_role(role_id=x) for x in _author.role_ids],
+            )
+        flush()
+        return book.to_schema()
+
+
+@router.patch(
+    path="/{book_id}/series",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def set_series(book_id: int, series: list[NewBookSeries] = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        for _series in book.series:
+            _series.delete()
+        flush()
+        for _series in series:
+            BookSeries(
+                book=book,
+                series=SeriesController.get_series(series_id=_series.series_id),
+                number=_series.number,
+            )
         flush()
         return book.to_schema()

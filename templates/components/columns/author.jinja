@@ -19,13 +19,13 @@
     <footer class="card-footer">
       <a class="card-footer-item" href="/authors/{{ obj.author_id }}">
         <span class="icon is-medium">
-          <i class="fas fa-lg fa-eye"></i>
+          <i class="fa-solid fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
       <a class="card-footer-item modal-trigger" data-target="{{ obj.author_id }}-link-modal" id="{{ obj.author_id }}-link-button">
         <span class="icon is-medium">
-          <i class="fas fa-lg fa-link"></i>
+          <i class="fa-solid fa-lg fa-link"></i>
         </span>
         <span>Links</span>
       </a>
@@ -43,8 +43,13 @@
     <section class="modal-card-body">
       <div class="buttons is-centered">
         {% if obj.identifiers.open_library_id %}
-        <a class="button is-link is-rounded" href="https://openlibrary.org/author/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+        <a class="button is-link is-rounded" href="https://openlibrary.org/author/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
         {% endif %}
+          <span class="icon is-medium">
+            <i class="fa-solid fa-lg fa-link"></i>
+          </span>
+          <span>OpenLibrary</span>
+        </a>
       </div>
     </section>
   </div>

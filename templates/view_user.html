@@ -19,14 +19,14 @@
     {% if token_user == user or (token_user.role >= 4 and token_user.role > user.role) %}
     <a class="button is-warning is-rounded" href="/users/{{ user.user_id }}/edit">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-edit"></i>
+        <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
     {% endif %}
     <a class="button is-success is-rounded" href="/users/{{ user.user_id }}/wishlist">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-star"></i>
+        <i class="fa-solid fa-lg fa-star"></i>
       </span>
       <span>Wishlist</span>
     </a>

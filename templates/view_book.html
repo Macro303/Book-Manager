@@ -30,38 +30,71 @@
         </div>
         {% if book.identifiers.goodreads_id %}
         <div class="block">
-          <a href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">Goodreads:</strong> {{ book.identifiers.goodreads_id }}</a>
+          <a href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">
+            <strong class="title is-size-4">Goodreads:</strong> {{ book.identifiers.goodreads_id }}
+          </a>
         </div>
         {% endif %}
         {% if book.identifiers.google_books_id %}
         <div class="block">
-          <a href="#" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">Google Books:</strong> {{ book.identifiers.google_books_id }}</a>
+          <a href="https://books.google.com/books?id={{ obj.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">
+            <strong class="title is-size-4">Google Books:</strong> {{ book.identifiers.google_books_id }}
+          </a>
         </div>
         {% endif %}
         {% if book.identifiers.library_thing_id %}
         <div class="block">
-          <a href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">LibraryThing:</strong> {{ book.identifiers.library_thing_id }}</a>
+          <a href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">
+            <strong class="title is-size-4">LibraryThing:</strong> {{ book.identifiers.library_thing_id }}
+          </a>
         </div>
         {% endif %}
         {% if book.identifiers.open_library_id %}
         <div class="block">
-          <a href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank"><strong class="title is-size-4">OpenLibrary:</strong> {{ book.identifiers.open_library_id }}</a>
+          <a href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
+            <strong class="title is-size-4">OpenLibrary:</strong> {{ book.identifiers.open_library_id }}
+          </a>
         </div>
         {% endif %}
         <div class="divider is-info is-size-4">Links</div>
         <div class="buttons is-centered is-multiline">
-          <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">Book Depository</a>
+          <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-link"></i>
+            </span>
+            <span>Book Depository</span>
+          </a>
           {% if not book.identifiers.goodreads_id %}
-          <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">Goodreads</a>
+          <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+            <span class="icon is-medium">
+              <i class="fa-brands fa-lg fa-goodreads"></i>
+            </span>
+            <span>Goodreads</span>
+          </a>
           {% endif %}
           {% if not book.identifiers.google_books_id %}
-          <a class="button is-link is-rounded" href="#" rel="noopener noreferrer" target="_blank">Google Books</a>
+          <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+            <span class="icon is-medium">
+              <i class="fa-brands fa-lg fa-google"></i>
+            </span>
+            <span>Google Books</span>
+          </a>
           {% endif %}
           {% if not book.identifiers.library_thing_id %}
-          <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">LibraryThing</a>
+          <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-link"></i>
+            </span>
+            <span>LibraryThing</span>
+          </a>
           {% endif %}
           {% if not book.identifiers.open_library_id %}
-          <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">OpenLibrary</a>
+          <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-link"></i>
+            </span>
+            <span>OpenLibrary</span>
+          </a>
           {% endif %}
         </div>
       </div>
@@ -71,21 +104,21 @@
     {% if book.wishers %}
     <button class="button is-success is-rounded" id="collect-book-button" type="button">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-archive"></i>
+        <i class="fa-solid fa-lg fa-box-archive"></i>
       </span>
       <span>Collect</span>
     </button>
     {% elif token_user in book.readers %}
     <button class="button is-info is-rounded" id="unread-book-button" type="button">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-book"></i>
+        <i class="fa-solid fa-lg fa-book"></i>
       </span>
       <span>Unread</span>
     </button>
     {% else %}
     <button class="button is-success is-rounded" id="read-book-button" type="button">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-book-open"></i>
+        <i class="fa-solid fa-lg fa-book-open"></i>
       </span>
       <span>Read</span>
     </button>
@@ -93,7 +126,7 @@
     {% if token_user.role >= 2 %}
     <a class="button is-warning is-rounded" href="/books/{{ book.book_id }}/edit">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-edit"></i>
+        <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>

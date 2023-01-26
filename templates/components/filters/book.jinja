@@ -7,7 +7,7 @@
       <label class="label">Author</label>
       <div class="control is-expanded">
         <div class="select is-fullwidth is-rounded">
-          <select name="author">
+          <select name="author_id">
             <option value=0{% if not filters['author_id'] %} selected{% endif %}>Select Author</option>
             {% for _author in author_list %}
             <option value={{ _author.author_id }}{% if filters['author_id'] == _author.author_id %} selected{% endif %}>{{ _author.name }}</option>
@@ -33,7 +33,7 @@
       <label class="label">Series</label>
       <div class="control is-expanded">
         <div class="select is-fullwidth is-rounded">
-          <select name="series">
+          <select name="series_id">
             <option value=0{% if not filters['series_id'] %} selected{% endif %}>Select Series</option>
             {% for _series in series_list %}
             <option value={{ _series.series_id }}{% if filters['series_id'] == _series.series_id %} selected{% endif %}>{{ _series.title }}</option>
@@ -47,7 +47,7 @@
       <label class="label">Publisher</label>
       <div class="control is-expanded">
         <div class="select is-fullwidth is-rounded">
-          <select name="publisher">
+          <select name="publisher_id">
             <option value=0{% if not filters['publisher_id'] %} selected{% endif %}>Select Publisher</option>
             {% for _publisher in publisher_list %}
             <option value={{ _publisher.publisher_id }}{% if filters['publisher_id'] == _publisher.publisher_id %} selected{% endif %}>{{ _publisher.name }}</option>
@@ -68,7 +68,7 @@
     <div class="buttons is-centered">
       <button class="button is-primary is-rounded">
         <span class="icon is-medium">
-          <i class="fas fa-lg fa-filter"></i>
+          <i class="fa-solid fa-lg fa-filter"></i>
         </span>
         <span>Filter</span>
       </button>

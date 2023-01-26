@@ -11,7 +11,7 @@
     {% if token_user.role >= 2 %}
     <a class="button is-warning is-rounded" href="/series/{{ series.series_id }}/edit">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-edit"></i>
+        <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
@@ -21,8 +21,8 @@
     <h3 class="subtitle is-3">Books</h3>
   </div>
   <div class="columns is-multiline is-centered is-mobile">
-    {% for _book in book_list %}
-      {{ book_column(_book) }}
+    {% for _book, number in book_list %}
+      {{ book_column(_book, series=(series.title, number)) }}
     {% endfor %}
   </div>
 </section>

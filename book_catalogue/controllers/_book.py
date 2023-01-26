@@ -86,6 +86,7 @@ class BookController:
         book.series = []
         for x in updates.series:
             series = SeriesController.get_series(series_id=x.series_id)
+            flush()
             temp = BookSeries.get(book=book, series=series) or BookSeries(book=book, series=series)
             temp.number = x.number
         book.subtitle = updates.subtitle

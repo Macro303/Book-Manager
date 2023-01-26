@@ -30,20 +30,20 @@
   <div class="buttons is-centered">
     <button class="button is-success is-rounded" id="save-author-button" onclick="saveAuthor()">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-save"></i>
+        <i class="fa-solid fa-lg fa-floppy-disk"></i>
       </span>
       <span>Save</span>
     </button>
     <button class="button is-warning is-rounded" id="refresh-author-button" onclick="refreshAuthor()">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-undo"></i>
+        <i class="fa-solid fa-lg fa-rotate-left"></i>
       </span>
       <span>Refresh</span>
     </button>
     {% if token_user.role >= 3 %}
     <button class="button is-danger is-rounded" id="delete-author-button" onclick="deleteAuthor()">
       <span class="icon is-medium">
-        <i class="fas fa-lg fa-trash"></i>
+        <i class="fa-solid fa-lg fa-trash"></i>
       </span>
       <span>Delete</span>
     </button>
