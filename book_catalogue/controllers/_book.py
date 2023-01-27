@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from pony.orm import flush
 
 from book_catalogue.controllers._author import AuthorController
+from book_catalogue.controllers._format import FormatController
 from book_catalogue.controllers._publisher import PublisherController
 from book_catalogue.controllers._series import SeriesController
 from book_catalogue.controllers._user import UserController
@@ -33,7 +34,9 @@ class BookController:
 
         book = Book(
             description=new_book.description,
-            format=new_book.format,
+            format=FormatController.get_format(format_id=new_book.format_id)
+            if new_book.format_id
+            else None,
             image_url=new_book.image_url,
             publisher=PublisherController.get_publisher(publisher_id=new_book.publisher_id)
             if new_book.publisher_id
@@ -75,7 +78,9 @@ class BookController:
             temp = BookAuthor.get(book=book, author=author) or BookAuthor(book=book, author=author)
             temp.roles = [AuthorController.get_role(role_id=y) for y in x.role_ids]
         book.description = updates.description
-        book.format = updates.format
+        book.format = (
+            FormatController.get_format(format_id=updates.format_id) if updates.format_id else None
+        )
         book.image_url = updates.image_url
         book.publisher = (
             PublisherController.get_publisher(publisher_id=updates.publisher_id)
@@ -156,10 +161,15 @@ class BookController:
                 publisher_list.append(publisher)
         publisher = next(iter(sorted(publisher_list, key=lambda x: x.name)), None)
 
+        try:
+            format = FormatController.get_format_by_name(name=result["edition"].physical_format)
+        except HTTPException:
+            format = FormatController.create_format(new_format=result["edition"].physical_format)
+
         return NewBook(
             authors=authors,
             description=result["edition"].get_description() or result["work"].get_description(),
-            format=result["edition"].physical_format,
+            format=format.format_id if format else None,
             identifiers=Identifiers(
                 goodreads_id=next(iter(result["edition"].identifiers.goodreads), None),
                 google_books_id=next(iter(result["edition"].identifiers.google), None),

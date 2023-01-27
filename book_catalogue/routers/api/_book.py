@@ -121,15 +121,6 @@ def read_book(
         return book.to_schema()
 
 
-@router.post(path="/{book_id}/format", responses={409: {"model": ErrorResponse}})
-def create_format(book_id: int, name: str = Body(embed=True)) -> Book:
-    with db_session:
-        book = BookController.get_book(book_id=book_id)
-        book.format = name
-        flush()
-        return book.to_schema()
-
-
 @router.patch(
     path="/{book_id}/authors",
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},

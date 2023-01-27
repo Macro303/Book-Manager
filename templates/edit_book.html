@@ -91,24 +91,9 @@
                 <select name="format">
                   <option disabled hidden {% if not book.format %}selected {% endif %}value="">Select Format</option>
                   {% for _format in format_list %}
-                  <option {% if _format == book.format %}selected {% endif %}value="{{ _format }}">{{ _format }}</option>
+                  <option {% if book.format and _format == book.format %}selected {% endif %}value={{ _format.format_id }}>{{ _format.name }}</option>
                   {% endfor %}
                 </select>
-              </div>
-            </div>
-          </div>
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control is-expanded">
-              <input class="input is-rounded" name="new-format" placeholder="New Format" type="text">
-            </div>
-            <div class="control">
-              <div class="buttons is-centered">
-                <button class="button is-success is-rounded is-outlined" type="button" id="new-format-button" onclick="newFormat()">
-                  <span class="icon is-medium">
-                    <i class="fa-solid fa-lg fa-plus"></i>
-                  </span>
-                  <span>New Format</span>
-                </button>
               </div>
             </div>
           </div>
@@ -220,29 +205,6 @@
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
-function newFormat(){
-  const caller = "new-format-button";
-  let editBookForm = document.getElementById("edit-book-form");
-  let details = Object.fromEntries(new FormData(editBookForm));
-  console.log(details);
-
-  addLoading(caller);
-  fetch("/api/v0/books/{{ book.book_id }}/format", {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
-      "name": details["new-format"],
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-
 function saveBook(){
   const caller = "save-book-button";
   let editBookForm = document.getElementById("edit-book-form");
@@ -263,7 +225,7 @@ function saveBook(){
         {% endfor %}
       ],
       "description": details["description"],
-      "format": details["format"],
+      "format_id": details["format"],
       "identifiers": {
         "goodreads_id": details["goodreads"],
         "google_books_id": details["google-books"],

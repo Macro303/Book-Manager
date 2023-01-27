@@ -1,6 +1,5 @@
 {% extends "base.jinja" %}
 {% from "components/columns/author.jinja" import author_column %}
-{% from "components/columns/publisher.jinja" import publisher_column %}
 {% from "components/columns/series.jinja" import series_column %}
 {% from "components/columns/user.jinja" import user_column %}
 {% block title %}{{ book.title }}{% endblock %}
@@ -18,7 +17,7 @@
     <div class="column">
       <div class="box">
         <div class="block">
-          <p><strong class="title is-size-5 has-text-info">Format:</strong> {{ book.format or "" }}</p>
+          <p><strong class="title is-size-5 has-text-info">Format:</strong> {% if book.format %}{{ book.format.name }}{% endif %}</p>
         </div>
         <div class="divider is-info is-size-5">More Details</div>
         <div class="block">

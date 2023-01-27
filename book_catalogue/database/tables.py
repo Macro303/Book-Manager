@@ -54,7 +54,7 @@ class Book(db.Entity):
     authors: list[BookAuthor] = Set("BookAuthor")
     book_id: int = PrimaryKey(int, auto=True)
     description: str | None = Optional(str, nullable=True)
-    format: str | None = Optional(str, nullable=True)
+    format: Format | None = Optional("Format", nullable=True)
     image_url: str = Required(str)
     publisher: Publisher | None = Optional("Publisher", nullable=True)
     readers: list[User] = Set("User", table="Books_Readers", reverse="read_books")
@@ -74,7 +74,7 @@ class Book(db.Entity):
             authors=sorted({x.to_schema() for x in self.authors}),
             book_id=self.book_id,
             description=self.description,
-            format=self.format,
+            format=self.format.to_schema() if self.format else None,
             identifiers=schemas.BookIdentifiers(
                 goodreads_id=self.goodreads_id,
                 google_books_id=self.google_books_id,
@@ -120,6 +120,18 @@ class BookSeries(db.Entity):
         temp = self.series.to_schema()
         temp.number = self.number
         return temp
+
+
+class Format(db.Entity):
+    _table_ = "Formats"
+
+    format_id: int = PrimaryKey(int, auto=True)
+    name: str = Required(str, unique=True)
+
+    books: list[Book] = Set(Book)
+
+    def to_schema(self) -> schemas.Format:
+        return schemas.Format(format_id=self.format_id, name=self.name)
 
 
 class Publisher(db.Entity):

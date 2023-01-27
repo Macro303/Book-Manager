@@ -7,6 +7,7 @@ from pydantic import Field, validator
 from book_catalogue.isbn import to_isbn_13
 from book_catalogue.schemas._author import Author
 from book_catalogue.schemas._base import BaseModel
+from book_catalogue.schemas._format import Format
 from book_catalogue.schemas._publisher import Publisher
 from book_catalogue.schemas._series import Series
 from book_catalogue.schemas._user import User
@@ -26,7 +27,6 @@ class Identifiers(BaseModel):
 
 class BaseBook(BaseModel):
     description: str | None = None
-    format: str | None = None
     identifiers: Identifiers
     image_url: str
     subtitle: str | None = None
@@ -51,6 +51,7 @@ class BaseBook(BaseModel):
 class Book(BaseBook):
     authors: list[Author] = Field(default_factory=list)
     book_id: int
+    format: Format | None = None
     publisher: Publisher | None = None
     readers: list[User] = Field(default_factory=list)
     series: list[Series] = Field(default_factory=list)
@@ -102,6 +103,7 @@ class NewBookSeries(BaseModel):
 
 class NewBook(BaseBook):
     authors: list[NewBookAuthor] = Field(default_factory=list)
+    format_id: int | None = None
     publisher_id: int | None = None
     reader_ids: list[int] = Field(default_factory=list)
     series: list[NewBookSeries] = Field(default_factory=list)

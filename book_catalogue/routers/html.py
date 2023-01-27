@@ -11,6 +11,7 @@ from book_catalogue import get_project_root
 from book_catalogue.controllers import (
     AuthorController,
     BookController,
+    FormatController,
     PublisherController,
     SeriesController,
     UserController,
@@ -109,7 +110,7 @@ def list_books(
     request: Request,
     token_user: User | None = Depends(get_token_user),
     author_id: int = 0,
-    format: str = "",  # noqa: A002
+    format_id: int = 0,
     series_id: int = 0,
     title: str = "",
     publisher_id: int = 0,
@@ -122,10 +123,11 @@ def list_books(
         if author_id:
             author = AuthorController.get_author(author_id=author_id)
             book_list = [x for x in book_list if author in [y.author for y in x.authors]]
-        if format:
-            if format == "None":
+        if format_id:
+            if format_id == -1:
                 book_list = [x for x in book_list if not x.format]
             else:
+                format = FormatController.get_format(format_id=format_id)
                 book_list = [x for x in book_list if format == x.format]
         if series_id:
             series = SeriesController.get_series(series_id=series_id)
@@ -145,8 +147,11 @@ def list_books(
                 )
             ]
         if publisher_id:
-            publisher = PublisherController.get_publisher(publisher_id=publisher_id)
-            book_list = [x for x in book_list if publisher == x.publisher]
+            if publisher_id == -1:
+                book_list = [x for x in book_list if not x.publisher]
+            else:
+                publisher = PublisherController.get_publisher(publisher_id=publisher_id)
+                book_list = [x for x in book_list if publisher == x.publisher]
         if read:
             book_list = [
                 x for x in book_list if token_user.user_id in [y.user_id for y in x.readers]
@@ -162,12 +167,14 @@ def list_books(
                 "token_user": token_user.to_schema(),
                 "book_list": sorted({x.to_schema() for x in book_list}),
                 "author_list": sorted({y.author.to_schema() for x in all_books for y in x.authors}),
-                "format_list": sorted({x.format or "None" for x in all_books}),
+                "format_list": sorted({x.format.to_schema() for x in all_books if x.format}),
                 "series_list": sorted({y.series.to_schema() for x in all_books for y in x.series}),
-                "publisher_list": sorted({x.publisher.to_schema() for x in all_books}),
+                "publisher_list": sorted(
+                    {x.publisher.to_schema() for x in all_books if x.publisher}
+                ),
                 "filters": {
                     "author_id": author_id,
-                    "format": format,
+                    "format_id": format_id,
                     "series_id": series_id,
                     "title": title,
                     "publisher_id": publisher_id,
@@ -203,7 +210,7 @@ def edit_book(request: Request, book_id: int, token_user: User | None = Depends(
         book = BookController.get_book(book_id=book_id)
         author_list = AuthorController.list_authors()
         role_list = AuthorController.list_roles()
-        format_list = sorted({x.format for x in BookController.list_books() if x.format})
+        format_list = FormatController.list_formats()
         publisher_list = PublisherController.list_publishers()
         series_list = SeriesController.list_series()
         return templates.TemplateResponse(
@@ -214,76 +221,9 @@ def edit_book(request: Request, book_id: int, token_user: User | None = Depends(
                 "book": book.to_schema(),
                 "author_list": sorted({x.to_schema() for x in author_list}),
                 "role_list": sorted({x.to_schema() for x in role_list}),
-                "format_list": format_list,
+                "format_list": sorted({x.to_schema() for x in format_list}),
                 "publisher_list": sorted({x.to_schema() for x in publisher_list}),
                 "series_list": sorted({x.to_schema() for x in series_list}),
-            },
-        )
-
-
-@router.get("/publishers", response_class=HTMLResponse)
-def list_publishers(
-    request: Request,
-    token_user: User | None = Depends(get_token_user),
-    name: str = "",
-):
-    if not token_user:
-        return RedirectResponse("/")
-    with db_session:
-        publisher_list = PublisherController.list_publishers()
-        if name:
-            publisher_list = [
-                x
-                for x in publisher_list
-                if name.casefold() in x.name.casefold() or x.name.casefold() in name.casefold()
-            ]
-        return templates.TemplateResponse(
-            "list_publishers.html",
-            {
-                "request": request,
-                "token_user": token_user.to_schema(),
-                "publisher_list": sorted({x.to_schema() for x in publisher_list}),
-                "filters": {"name": name},
-            },
-        )
-
-
-@router.get("/publishers/{publisher_id}", response_class=HTMLResponse)
-def view_publisher(
-    request: Request, publisher_id: int, token_user: User | None = Depends(get_token_user)
-):
-    if not token_user:
-        return RedirectResponse("/")
-    with db_session:
-        publisher = PublisherController.get_publisher(publisher_id=publisher_id)
-        book_list = sorted({x.to_schema() for x in publisher.books})
-        return templates.TemplateResponse(
-            "view_publisher.html",
-            {
-                "request": request,
-                "token_user": token_user.to_schema(),
-                "publisher": publisher.to_schema(),
-                "book_list": book_list,
-            },
-        )
-
-
-@router.get("/publishers/{publisher_id}/edit", response_class=HTMLResponse)
-def edit_publisher(
-    request: Request, publisher_id: int, token_user: User | None = Depends(get_token_user)
-):
-    if not token_user:
-        return RedirectResponse("/")
-    if token_user.role < 2:
-        return RedirectResponse(f"/publishers/{publisher_id}")
-    with db_session:
-        publisher = PublisherController.get_publisher(publisher_id=publisher_id)
-        return templates.TemplateResponse(
-            "edit_publisher.html",
-            {
-                "request": request,
-                "token_user": token_user.to_schema(),
-                "publisher": publisher.to_schema(),
             },
         )
 

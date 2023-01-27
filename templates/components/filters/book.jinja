@@ -20,10 +20,10 @@
       <label class="label has-text-info-light">Format</label>
       <div class="control is-expanded">
         <div class="select is-fullwidth is-rounded">
-          <select name="format">
-            <option value=""{% if not filters['format'] %} selected{% endif %}>Select Format</option>
+          <select name="format_id">
+            <option value=""{% if not filters['format_id'] %} selected{% endif %}>Select Format</option>
             {% for _format in format_list %}
-            <option value="{{ _format }}"{% if filters['format'] == _format %} selected{% endif %}>{{ _format }}</option>
+            <option value="{{ _format.format_id }}"{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name }}</option>
             {% endfor %}
           </select>
         </div>
