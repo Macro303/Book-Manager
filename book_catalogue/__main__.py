@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
 from datetime import datetime
 from http import HTTPStatus
-from typing import Any
+from typing import Any, Callable
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -13,10 +12,11 @@ from fastapi.staticfiles import StaticFiles
 from jinja2.exceptions import TemplateNotFound
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from book_catalogue import __version__, get_project_root, setup_logging
+from book_catalogue import __version__, get_project_root, setup_logging, get_data_root
 from book_catalogue.routers.api import api_router
 from book_catalogue.routers.html import router as html_router
 from book_catalogue.settings import Settings
+from book_catalogue.database import DATABASE_PATH
 
 LOGGER = logging.getLogger("book_catalogue")
 
@@ -38,6 +38,7 @@ async def startup_event() -> None:
     setup_logging()
 
     LOGGER.info(f"Listening on {settings.website.host}:{settings.website.port}")
+    LOGGER.info(f"Database initialized at: {DATABASE_PATH}")
     LOGGER.info(f"{app.title} v{app.version} started")
 
 

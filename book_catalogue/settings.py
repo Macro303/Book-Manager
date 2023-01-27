@@ -19,6 +19,10 @@ class SettingsModel(BaseModel):
         extra = Extra.ignore
 
 
+class DatabaseSettings(SettingsModel):
+    name: str = "book-catalogue.sqlite"
+
+
 class WebsiteSettings(SettingsModel):
     host: str = "localhost"
     port: int = 8003
@@ -26,6 +30,7 @@ class WebsiteSettings(SettingsModel):
 
 class Settings(SettingsModel):
     FILENAME: ClassVar = get_config_root() / "settings.toml"
+    database: DatabaseSettings = DatabaseSettings()
     website: WebsiteSettings = WebsiteSettings()
 
     @classmethod

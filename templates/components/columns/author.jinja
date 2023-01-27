@@ -9,9 +9,9 @@
           </figure>
         </div>
         <div class="media-content">
-          <p class="title is-4 has-text-info-dark">{{ obj.name }}</p>
+          <p class="title is-4 has-text-info">{{ obj.name }}</p>
           {% if roles %}
-          <p class="subtitle is-6 has-text-info">{{ roles|join(", ", attribute="name") }}</p>
+          <p class="subtitle is-6 has-text-info-dark">{{ roles|join(", ", attribute="name") }}</p>
           {% endif %}
         </div>
       </div>
