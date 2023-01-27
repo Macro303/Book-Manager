@@ -24,6 +24,9 @@
         <div class="block">
           <p><strong class="title is-size-5 has-text-info">Description:</strong> {{ book.description or "" }}</p>
         </div>
+        <div class="block">
+          <p><strong class="title is-size-5 has-text-info">Publisher:</strong> {% if book.publisher %}{{ book.publisher.name }}{% endif %}</p>
+        </div>
         <div class="divider is-info is-size-5">Identifiers</div>
         <div class="block">
           <p><strong class="title is-size-5 has-text-info">Isbn:</strong> {{ book.identifiers.isbn }}</p>
@@ -147,12 +150,6 @@
     {% for _series in book.series %}
       {{ series_column(_series) }}
     {% endfor %}
-  </div>
-  <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Publisher</h3>
-  </div>
-  <div class="columns is-multiline is-centered is-mobile">
-    {{ publisher_column(book.publisher) }}
   </div>
   {% if book.wishers %}
   <div class="block has-text-centered">
