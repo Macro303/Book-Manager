@@ -1,6 +1,6 @@
 {% macro author_column(obj, roles=[]) %}
 <div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
-  <div class="card has-text-light has-background-dark">
+  <div class="card">
     <div class="card-content">
       <div class="media">
         <div class="media-left">
@@ -9,21 +9,21 @@
           </figure>
         </div>
         <div class="media-content">
-          <p class="title is-4">{{ obj.name }}</p>
+          <p class="title is-4 has-text-info-dark">{{ obj.name }}</p>
           {% if roles %}
-          <p class="subtitle is-6">{{ roles|join(", ", attribute="name") }}</p>
+          <p class="subtitle is-6 has-text-info">{{ roles|join(", ", attribute="name") }}</p>
           {% endif %}
         </div>
       </div>
     </div>
     <footer class="card-footer">
-      <a class="card-footer-item" href="/authors/{{ obj.author_id }}">
+      <a class="card-footer-item has-text-link" href="/authors/{{ obj.author_id }}">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item modal-trigger" data-target="{{ obj.author_id }}-link-modal" id="{{ obj.author_id }}-link-button">
+      <a class="card-footer-item has-text-link modal-trigger" data-target="{{ obj.author_id }}-link-modal" id="{{ obj.author_id }}-link-button">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-link"></i>
         </span>
@@ -37,10 +37,10 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <div class="content">
-        <p class="modal-card-title">Links</p>
+        <p class="modal-card-title has-text-primary-dark">Links</p>
       </div>
     </header>
-    <section class="modal-card-body">
+    <section class="modal-card-body has-background-grey-darker">
       <div class="buttons is-centered">
         {% if obj.identifiers.open_library_id %}
         <a class="button is-link is-rounded" href="https://openlibrary.org/author/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">

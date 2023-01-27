@@ -1,9 +1,9 @@
 {% macro book_column(obj, series=("", "")) %}
 <div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
-  <div class="card has-text-light has-background-dark">
+  <div class="card">
     {% if series[0] %}
     <header class="card-header">
-      <p class="card-header-title">{{ series[0] }}{% if series[1] %} #{{ series[1] }}{% endif %}</p>
+      <p class="card-header-title has-text-info-light">{{ series[0] }}{% if series[1] %} #{{ series[1] }}{% endif %}</p>
     </header>
     {% endif %}
     <div class="card-image">
@@ -14,19 +14,19 @@
     <div class="card-content">
       <div class="media">
         <div class="media-content">
-          <p class="title is-5">{{ obj.title }}</p>
-          <p class="subtitle is-6">{{ obj.subtitle or "" }}</p>
+          <p class="title is-5 has-text-info-dark">{{ obj.title }}</p>
+          <p class="subtitle is-6 has-text-info">{{ obj.subtitle or "" }}</p>
         </div>
       </div>
     </div>
     <footer class="card-footer">
-      <a class="card-footer-item" href="/books/{{ obj.book_id }}">
+      <a class="card-footer-item has-text-link" href="/books/{{ obj.book_id }}">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item modal-trigger" data-target="{{ obj.book_id }}-link-modal" id="{{ obj.book_id }}-link-button">
+      <a class="card-footer-item has-text-link modal-trigger" data-target="{{ obj.book_id }}-link-modal" id="{{ obj.book_id }}-link-button">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-link"></i>
         </span>
@@ -40,7 +40,7 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <div class="content">
-        <p class="modal-card-title">Links</p>
+        <p class="modal-card-title has-text-primary-dark">Links</p>
       </div>
     </header>
     <section class="modal-card-body">

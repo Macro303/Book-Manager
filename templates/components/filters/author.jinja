@@ -1,11 +1,11 @@
 {% from "components/forms.jinja" import input %}
 {% macro author_filter(action) %}
 <div class="box">
-  <h1 class="title is-5">Filter Authors</h1>
+  <h1 class="title is-5 has-text-link">Filter Authors</h1>
   <form accept-charset="UTF-8" action="{{ action }}" method="GET">
     {{ input("Name", "name", value=filters['name'] or '') }}
     <div class="buttons is-centered">
-      <button class="button is-primary is-rounded">
+      <button class="button is-link is-rounded">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-filter"></i>
         </span>

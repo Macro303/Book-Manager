@@ -17,7 +17,7 @@
           {{ input("Title", "title", value=book.title) }}
           {{ input("Subtitle", "subtitle", value=book.subtitle or "") }}
           <!-- region Authors -->
-          <label class="label">Authors</label>
+          <label class="label has-text-info-light">Authors</label>
           {% for author in book.authors %}
           <div class="field is-grouped is-grouped-multiline">
             <div class="control is-expanded">
@@ -85,7 +85,7 @@
           <!-- endregion -->
           <!-- region Format -->
           <div class="field">
-            <label class="label">Format</label>
+            <label class="label has-text-info-light">Format</label>
             <div class="control is-expanded">
               <div class="select is-fullwidth is-rounded">
                 <select name="format">
@@ -113,11 +113,11 @@
             </div>
           </div>
           <!-- endregion -->
-          <div class="divider is-info is-size-4">More Details</div>
+          <div class="divider is-info is-size-5">More Details</div>
           {{ textarea("Description", "description", value=book.description or "") }}
           <!-- region Publisher -->
           <div class="field">
-            <label class="label">Publisher</label>
+            <label class="label has-text-info-light">Publisher</label>
             <div class="control is-expanded">
               <div class="select is-fullwidth is-rounded">
                 <select name="publisher">
@@ -131,7 +131,7 @@
           </div>
           <!-- endregion -->
           <!-- region Series -->
-          <label class="label">Series</label>
+          <label class="label has-text-info-light">Series</label>
           {% for series in book.series %}
           <div class="field is-grouped is-grouped-multiline">
             <div class="control is-expanded">
@@ -182,7 +182,7 @@
             </div>
           </div>
           <!-- endregion -->
-          <div class="divider is-info is-size-4">Identifiers</div>
+          <div class="divider is-info is-size-5">Identifiers</div>
           {{ input("Image Url", "image-url", value=book.image_url or "") }}
           {{ input("Goodreads", "goodreads", value=book.identifiers.goodreads_id or "") }}
           {{ input("Google Books", "google-books", value=book.identifiers.google_books_id or "") }}

@@ -10,11 +10,11 @@
       {{ book_filter("/books", show_read=True) }}
       {% if token_user.role >= 1 %}
       <div class="box">
-        <h1 class="title is-5">Add Book</h1>
+        <h1 class="title is-5 has-text-link">Add Book</h1>
         <form id="add-book-form">
           {{ input("Isbn", "isbn") }}
           <div class="buttons is-centered">
-            <button class="button is-primary is-rounded" id="add-book-button" type="button" onclick="addBook()">
+            <button class="button is-link is-rounded" id="add-book-button" type="button" onclick="addBook()">
               <span class="icon is-medium">
                 <i class="fa-solid fa-lg fa-plus"></i>
               </span>

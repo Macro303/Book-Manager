@@ -1,6 +1,6 @@
 {% macro publisher_column(obj) %}
 <div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
-  <div class="card has-text-light has-background-dark">
+  <div class="card">
     <div class="card-content">
       <div class="media">
         <div class="media-left">
@@ -9,38 +9,18 @@
           </figure>
         </div>
         <div class="media-content">
-          <p class="title is-4">{{ obj.name }}</p>
+          <p class="title is-4 has-text-info-dark">{{ obj.name }}</p>
         </div>
       </div>
     </div>
     <footer class="card-footer">
-      <a class="card-footer-item" href="/publishers/{{ obj.publisher_id }}">
+      <a class="card-footer-item has-text-link" href="/publishers/{{ obj.publisher_id }}">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item modal-trigger" data-target="{{ obj.publisher_id }}-link-modal" id="{{ obj.publisher_id }}-link-button">
-        <span class="icon is-medium">
-          <i class="fa-solid fa-lg fa-link"></i>
-        </span>
-        <span>Links</span>
-      </a>
     </footer>
-  </div>
-</div>
-<div class="modal" id="{{ obj.publisher_id }}-link-modal">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <div class="content">
-        <p class="modal-card-title">Links</p>
-      </div>
-    </header>
-    <section class="modal-card-body">
-      <div class="buttons is-centered">
-      </div>
-    </section>
   </div>
 </div>
 {% endmacro %}

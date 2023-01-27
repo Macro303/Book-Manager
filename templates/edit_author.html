@@ -15,9 +15,9 @@
       <div class="box">
         <form id="edit-author-form">
           {{ input("Name", "name", value=author.name) }}
-          <div class="divider is-info is-size-4">More Details</div>
+          <div class="divider is-info is-size-5">More Details</div>
           {{ textarea("Bio", "bio", value=author.bio or "") }}
-          <div class="divider is-info is-size-4">Identifiers</div>
+          <div class="divider is-info is-size-5">Identifiers</div>
           {{ input("Image Url", "image-url", value=author.image_url or "") }}
           {{ input("Amazon", "amazon", value=author.identifiers.amazon_id or "") }}
           {{ input("Goodreads", "goodreads", value=author.identifiers.goodreads_id or "") }}

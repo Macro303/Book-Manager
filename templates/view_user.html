@@ -3,17 +3,10 @@
 {% block title %}{{ user.username }}{% endblock %}
 {% block content %}
 <section>
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      <div class="box has-text-centered">
-        <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ user.username }}'s Profile Image" class="is-rounded"  loading="lazy" src="/static/img/logo.png"/>
-        </figure>
-      </div>
-    </div>
-    <div class="column">
-      <div class="box"></div>
-    </div>
+  <div class="box has-text-centered">
+    <figure class="image is-256x256 is-inline-block">
+      <img alt="{{ user.username }}'s Profile Image" class="is-rounded"  loading="lazy" src="/static/img/logo.png"/>
+    </figure>
   </div>
   <div class="buttons is-centered">
     {% if token_user == user or (token_user.role >= 4 and token_user.role > user.role) %}

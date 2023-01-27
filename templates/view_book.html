@@ -18,45 +18,45 @@
     <div class="column">
       <div class="box">
         <div class="block">
-          <p><strong class="title is-size-4">Format:</strong> {{ book.format or "" }}</p>
+          <p><strong class="title is-size-5 has-text-info">Format:</strong> {{ book.format or "" }}</p>
         </div>
-        <div class="divider is-info is-size-4">More Details</div>
+        <div class="divider is-info is-size-5">More Details</div>
         <div class="block">
-          <p><strong class="title is-size-4">Description:</strong> {{ book.description or "" }}</p>
+          <p><strong class="title is-size-5 has-text-info">Description:</strong> {{ book.description or "" }}</p>
         </div>
-        <div class="divider is-info is-size-4">Identifiers</div>
+        <div class="divider is-info is-size-5">Identifiers</div>
         <div class="block">
-          <p><strong class="title is-size-4">Isbn:</strong> {{ book.identifiers.isbn }}</p>
+          <p><strong class="title is-size-5 has-text-info">Isbn:</strong> {{ book.identifiers.isbn }}</p>
         </div>
         {% if book.identifiers.goodreads_id %}
         <div class="block">
           <a href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">Goodreads:</strong> {{ book.identifiers.goodreads_id }}
+            <strong class="title is-size-5 has-text-info">Goodreads:</strong> {{ book.identifiers.goodreads_id }}
           </a>
         </div>
         {% endif %}
         {% if book.identifiers.google_books_id %}
         <div class="block">
           <a href="https://books.google.com/books?id={{ obj.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">Google Books:</strong> {{ book.identifiers.google_books_id }}
+            <strong class="title is-size-5 has-text-info">Google Books:</strong> {{ book.identifiers.google_books_id }}
           </a>
         </div>
         {% endif %}
         {% if book.identifiers.library_thing_id %}
         <div class="block">
           <a href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">LibraryThing:</strong> {{ book.identifiers.library_thing_id }}
+            <strong class="title is-size-5 has-text-info">LibraryThing:</strong> {{ book.identifiers.library_thing_id }}
           </a>
         </div>
         {% endif %}
         {% if book.identifiers.open_library_id %}
         <div class="block">
           <a href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">OpenLibrary:</strong> {{ book.identifiers.open_library_id }}
+            <strong class="title is-size-5 has-text-info">OpenLibrary:</strong> {{ book.identifiers.open_library_id }}
           </a>
         </div>
         {% endif %}
-        <div class="divider is-info is-size-4">Links</div>
+        <div class="divider is-info is-size-5">Links</div>
         <div class="buttons is-centered is-multiline">
           <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
             <span class="icon is-medium">

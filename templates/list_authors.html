@@ -10,11 +10,11 @@
       {{ author_filter("/authors") }}
       {% if token_user.role >= 1 %}
       <div class="box">
-        <h5 class="title is-5">Add Author</h5>
+        <h5 class="title is-5 has-text-link">Add Author</h5>
         <form id="add-author-form">
           {{ input("Name", "name") }}
           <div class="buttons is-centered">
-            <button class="button is-primary is-rounded" id="add-author-button" type="button" onclick="addAuthor()">
+            <button class="button is-link is-rounded" id="add-author-button" type="button" onclick="addAuthor()">
               <span class="icon is-medium">
                 <i class="fa-solid fa-lg fa-plus"></i>
               </span>

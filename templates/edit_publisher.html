@@ -3,24 +3,10 @@
 {% block title %}{% endblock %}
 {% block content %}
 <section>
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      <div class="box has-text-centered">
-        <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ publisher.name }}'s Profile Image" class="is-rounded"  loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ publisher.image_url or '/static/img/logo.png' }}"/>
-        </figure>
-      </div>
-    </div>
-    <div class="column">
-      <div class="box">
-        <form id="edit-publisher-form">
-          {{ input("Name", "name", value=publisher.name) }}
-          <div class="divider is-info is-size-4">More Details</div>
-          <div class="divider is-info is-size-4">Identifiers</div>
-          {{ input("Image Url", "image-url", value=publisher.image_url or "") }}
-        </form>
-      </div>
-    </div>
+  <div class="box">
+    <form id="edit-publisher-form">
+      {{ input("Name", "name", value=publisher.name) }}
+    </form>
   </div>
   <div class="buttons is-centered">
     <button class="button is-success is-rounded" id="save-publisher-button" onclick="savePublisher()">

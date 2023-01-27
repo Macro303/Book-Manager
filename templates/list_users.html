@@ -10,11 +10,11 @@
       {{ user_filter("/users") }}
       {% if token_user.role >= 1 %}
       <div class="box">
-        <h1 class="title is-5">Add User</h1>
+        <h1 class="title is-5 has-text-link">Add User</h1>
         <form id="add-user-form">
           {{ input("Username", "username") }}
           <div class="buttons is-centered">
-            <button class="button is-primary is-rounded" id="add-user-button" type="button" onclick="addUser()">
+            <button class="button is-link is-rounded" id="add-user-button" type="button" onclick="addUser()">
               <span class="icon is-medium">
                 <i class="fa-solid fa-lg fa-plus"></i>
               </span>

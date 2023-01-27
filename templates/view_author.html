@@ -13,29 +13,28 @@
     </div>
     <div class="column">
       <div class="box">
-        <div class="divider is-info is-size-4">More Details</div>
         <div class="block">
-          <p><strong class="title is-size-4">Bio:</strong> {{ author.bio or "" }}</p>
+          <p><strong class="title is-size-5 has-text-info">Bio:</strong> {{ author.bio or "" }}</p>
         </div>
-        <div class="divider is-info is-size-4">Identifiers</div>
+        <div class="divider is-info is-size-5">Identifiers</div>
         {% if author.identifiers.goodreads_id %}
         <div class="block">
           <a href="#" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">Goodreads:</strong> {{ author.identifiers.goodreads_id }}
+            <strong class="title is-size-5 has-text-info">Goodreads:</strong> {{ author.identifiers.goodreads_id }}
           </a>
         </div>
         {% endif %}
         {% if author.identifiers.library_thing_id %}
         <div class="block">
           <a href="#" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">ibraryThing:</strong> {{ author.identifiers.library_thing_id }}
+            <strong class="title is-size-5 has-text-info">ibraryThing:</strong> {{ author.identifiers.library_thing_id }}
           </a>
         </div>
         {% endif %}
         {% if author.identifiers.open_library_id %}
         <div class="block">
           <a href="https://openlibrary.org/author/{{ author.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-            <strong class="title is-size-4">OpenLibrary:</strong> {{ author.identifiers.open_library_id }}
+            <strong class="title is-size-5 has-text-info">OpenLibrary:</strong> {{ author.identifiers.open_library_id }}
           </a>
         </div>
         {% endif %}
