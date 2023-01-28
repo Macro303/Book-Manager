@@ -10,6 +10,8 @@ __all__ = [
     "User",
 ]
 
+from datetime import date
+
 from pony.orm import Database, Optional, PrimaryKey, Required, Set
 
 from book_catalogue import schemas
@@ -25,7 +27,6 @@ class Author(db.Entity):
     image_url: str | None = Optional(str, nullable=True)
     name: str = Required(str, unique=True)
 
-    amazon_id: str | None = Optional(str, nullable=True)
     goodreads_id: str | None = Optional(str, nullable=True)
     library_thing_id: str | None = Optional(str, nullable=True)
     open_library_id: str | None = Optional(str, nullable=True, unique=True)
@@ -37,7 +38,6 @@ class Author(db.Entity):
             author_id=self.author_id,
             bio=self.bio,
             identifiers=schemas.AuthorIdentifiers(
-                amazon_id=self.amazon_id,
                 goodreads_id=self.goodreads_id,
                 library_thing_id=self.library_thing_id,
                 open_library_id=self.open_library_id,
@@ -56,6 +56,7 @@ class Book(db.Entity):
     description: str | None = Optional(str, nullable=True)
     format: Format | None = Optional("Format", nullable=True)
     image_url: str = Required(str)
+    publish_date: date | None = Optional(date, nullable=True)
     publisher: Publisher | None = Optional("Publisher", nullable=True)
     readers: list[User] = Set("User", table="Books_Readers", reverse="read_books")
     series: list[BookSeries] = Set("BookSeries")
@@ -83,6 +84,7 @@ class Book(db.Entity):
                 open_library_id=self.open_library_id,
             ),
             image_url=self.image_url,
+            publish_date=self.publish_date,
             publisher=self.publisher.to_schema() if self.publisher else None,
             readers=sorted({x.to_schema() for x in self.readers}),
             series=sorted({x.to_schema() for x in self.series}),

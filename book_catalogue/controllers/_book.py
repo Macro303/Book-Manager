@@ -3,10 +3,12 @@ from __future__ import annotations
 __all__ = ["BookController"]
 
 import logging
+from datetime import date
 
 from fastapi import HTTPException
 from pony.orm import flush
 
+from book_catalogue.console import CONSOLE
 from book_catalogue.controllers._author import AuthorController
 from book_catalogue.controllers._format import FormatController
 from book_catalogue.controllers._publisher import PublisherController
@@ -15,6 +17,7 @@ from book_catalogue.controllers._user import UserController
 from book_catalogue.database.tables import Book, BookAuthor, BookSeries
 from book_catalogue.schemas._author import NewAuthor, NewRole
 from book_catalogue.schemas._book import Identifiers, NewBook, NewBookAuthor, NewBookSeries
+from book_catalogue.schemas._format import NewFormat
 from book_catalogue.schemas._publisher import NewPublisher
 from book_catalogue.services.open_library import lookup_book_by_id, lookup_book_by_isbn
 from book_catalogue.services.open_library.service import OpenLibrary
@@ -161,15 +164,17 @@ class BookController:
                 publisher_list.append(publisher)
         publisher = next(iter(sorted(publisher_list, key=lambda x: x.name)), None)
 
-        try:
-            format = FormatController.get_format_by_name(name=result["edition"].physical_format)
-        except HTTPException:
-            format = FormatController.create_format(new_format=result["edition"].physical_format)
+        format = None
+        if result["edition"].physical_format:
+            try:
+                format = FormatController.get_format_by_name(name=result["edition"].physical_format)
+            except HTTPException:
+                format = FormatController.create_format(new_format=NewFormat(name=result["edition"].physical_format))
 
         return NewBook(
             authors=authors,
             description=result["edition"].get_description() or result["work"].get_description(),
-            format=format.format_id if format else None,
+            format_id=format.format_id if format else None,
             identifiers=Identifiers(
                 goodreads_id=next(iter(result["edition"].identifiers.goodreads), None),
                 google_books_id=next(iter(result["edition"].identifiers.google), None),
@@ -178,6 +183,7 @@ class BookController:
                 open_library_id=result["edition"].edition_id,
             ),
             image_url=f"https://covers.openlibrary.org/b/OLID/{result['edition'].edition_id}-L.jpg",
+            publish_date=result["edition"].get_publish_date(),
             publisher_id=publisher.publisher_id if publisher else None,
             series=[],
             subtitle=result["edition"].subtitle,
@@ -211,3 +217,13 @@ class BookController:
         ]
         updates.wisher_ids = [x.user_id for x in book.wishers]
         return cls.update_book(book_id=book_id, updates=updates)
+
+    @classmethod
+    def load_new_field(cls, book_id: int) -> Book:
+        if not (book := cls.get_book(book_id=book_id)):
+            raise HTTPException(status_code=404, detail="Book not found.")
+
+        updates = cls._parse_open_library(isbn=book.isbn_13, open_library_id=book.open_library_id)
+        book.publish_date = updates.publish_date
+        flush()
+        return book

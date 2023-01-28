@@ -21,9 +21,9 @@
       <div class="control is-expanded">
         <div class="select is-fullwidth is-rounded">
           <select name="format_id">
-            <option value=""{% if not filters['format_id'] %} selected{% endif %}>Select Format</option>
+            <option value=0{% if not filters['format_id'] %} selected{% endif %}>Select Format</option>
             {% for _format in format_list %}
-            <option value="{{ _format.format_id }}"{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name }}</option>
+            <option value={{ _format.format_id }}{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name }}</option>
             {% endfor %}
           </select>
         </div>

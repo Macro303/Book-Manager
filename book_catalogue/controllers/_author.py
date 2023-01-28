@@ -30,7 +30,6 @@ class AuthorController:
             bio=new_author.bio,
             image_url=new_author.image_url,
             name=new_author.name,
-            amazon_id=new_author.identifiers.amazon_id,
             goodreads_id=new_author.identifiers.goodreads_id,
             library_thing_id=new_author.identifiers.library_thing_id,
             open_library_id=new_author.identifiers.open_library_id,
@@ -51,7 +50,6 @@ class AuthorController:
         author.image_url = updates.image_url
         author.name = updates.name
 
-        author.amazon_id = updates.identifiers.amazon_id
         author.goodreads_id = updates.identifiers.goodreads_id
         author.library_thing_id = updates.identifiers.library_thing_id
         author.open_library_id = updates.identifiers.open_library_id
@@ -77,7 +75,6 @@ class AuthorController:
         return NewAuthor(
             bio=result.get_bio(),
             identifiers=Identifiers(
-                amazon_id=result.remote_ids.amazon,
                 goodreads_id=result.remote_ids.goodreads,
                 library_thing_id=result.remote_ids.librarything,
                 open_library_id=open_library_id,

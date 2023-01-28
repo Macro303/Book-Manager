@@ -6,7 +6,6 @@ from book_catalogue.schemas._base import BaseModel
 
 
 class Identifiers(BaseModel):
-    amazon_id: str | None = None
     goodreads_id: str | None = None
     library_thing_id: str | None = None
     open_library_id: str | None = None

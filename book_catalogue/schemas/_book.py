@@ -2,6 +2,8 @@ from __future__ import annotations
 
 __all__ = ["Book", "Identifiers", "LookupBook", "NewBook"]
 
+from datetime import date
+
 from pydantic import Field, validator
 
 from book_catalogue.isbn import to_isbn_13
@@ -29,8 +31,19 @@ class BaseBook(BaseModel):
     description: str | None = None
     identifiers: Identifiers
     image_url: str
+    publish_date: date | None = None
     subtitle: str | None = None
     title: str
+    
+    @property
+    def publish_date_str(self) -> str:
+        def suffix(day: int) -> str:
+            date_suffix = ["th", "st", "nd", "rd"]
+            if day % 10 in [1, 2, 3] and day not in [11, 12, 13]:
+                return date_suffix[day % 10]
+            return date_suffix[0]
+        
+        return self.publish_date.strftime(f"%-d{suffix(self.publish_date.day)} %b %Y")
 
     def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, BaseBook):

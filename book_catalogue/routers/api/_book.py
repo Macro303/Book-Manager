@@ -63,13 +63,15 @@ def lookup_book(new_book: LookupBook) -> Book:
 def reset_all_books():
     with db_session:
         for _book in BookController.list_books():
-            BookController.reset_book(book_id=_book.book_id)
+            BookController.load_new_field(book_id=_book.book_id)
+            #BookController.reset_book(book_id=_book.book_id)
 
 
 @router.put(path="/{book_id}", responses={404: {"model": ErrorResponse}})
 def reset_book(book_id: int) -> Book:
     with db_session:
-        return BookController.reset_book(book_id=book_id).to_schema()
+        return BookController.load_new_field(book_id=book_id).to_schema()
+        #return BookController.reset_book(book_id=book_id).to_schema()
 
 
 @router.post(

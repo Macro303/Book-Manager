@@ -19,6 +19,9 @@
         <div class="block">
           <p><strong class="title is-size-5 has-text-info">Format:</strong> {% if book.format %}{{ book.format.name }}{% endif %}</p>
         </div>
+        <div class="block">
+          <p><strong class="title is-size-5 has-text-info">Publish Date:</strong> {% if book.publish_date %}{{ book.publish_date_str }}{% endif %}</p>
+        </div>
         <div class="divider is-info is-size-5">More Details</div>
         <div class="block">
           <p><strong class="title is-size-5 has-text-info">Description:</strong> {{ book.description or "" }}</p>

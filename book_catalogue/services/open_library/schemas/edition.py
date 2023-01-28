@@ -2,8 +2,11 @@ from __future__ import annotations
 
 __all__ = ["Edition"]
 
+from datetime import date, datetime
+
 from pydantic import Field
 
+from book_catalogue.console import CONSOLE
 from book_catalogue.services.open_library.schemas import (
     BaseModel,
     DatetimeResource,
@@ -110,3 +113,17 @@ class Edition(BaseModel):
                 return self.description.value
             return self.description
         return None
+    
+    def get_publish_date(self) -> date | None:
+        if not self.publish_date:
+            return None
+        try:
+            return date.fromisoformat(self.publish_date)
+        except ValueError as iso_err:
+            for _format in ["%Y", "%b, %Y", "%Y-%b-%d", "%b %d, %Y", "%B %d, %Y", "%B %Y", "%d %b %Y"]:
+                try:
+                    return datetime.strptime(self.publish_date, _format).date()
+                except ValueError as err:
+                    pass
+            CONSOLE.print_exception(theme="ansi_dark")
+            raise iso_err
