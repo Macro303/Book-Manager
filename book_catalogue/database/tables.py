@@ -66,7 +66,7 @@ class Book(db.Entity):
 
     goodreads_id: str | None = Optional(str, nullable=True)
     google_books_id: str | None = Optional(str, nullable=True)
-    isbn_13: str = Required(str, unique=True)
+    isbn: str = Required(str, unique=True)
     library_thing_id: str | None = Optional(str, nullable=True)
     open_library_id: str | None = Optional(str, nullable=True, unique=True)
 
@@ -79,7 +79,7 @@ class Book(db.Entity):
             identifiers=schemas.BookIdentifiers(
                 goodreads_id=self.goodreads_id,
                 google_books_id=self.google_books_id,
-                isbn=self.isbn_13 or self.isbn_10,
+                isbn=self.isbn,
                 library_thing_id=self.library_thing_id,
                 open_library_id=self.open_library_id,
             ),

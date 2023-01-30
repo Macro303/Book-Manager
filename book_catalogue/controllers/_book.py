@@ -3,12 +3,10 @@ from __future__ import annotations
 __all__ = ["BookController"]
 
 import logging
-from datetime import date
 
 from fastapi import HTTPException
 from pony.orm import flush
 
-from book_catalogue.console import CONSOLE
 from book_catalogue.controllers._author import AuthorController
 from book_catalogue.controllers._format import FormatController
 from book_catalogue.controllers._publisher import PublisherController
@@ -32,7 +30,7 @@ class BookController:
 
     @classmethod
     def create_book(cls, new_book: NewBook) -> Book:
-        if Book.get(isbn_13=new_book.identifiers.isbn):
+        if Book.get(isbn=new_book.identifiers.isbn):
             raise HTTPException(status_code=409, detail="Book already exists.")
 
         book = Book(
@@ -41,6 +39,7 @@ class BookController:
             if new_book.format_id
             else None,
             image_url=new_book.image_url,
+            publish_date=new_book.publish_date,
             publisher=PublisherController.get_publisher(publisher_id=new_book.publisher_id)
             if new_book.publisher_id
             else None,
@@ -50,7 +49,7 @@ class BookController:
             wishers=[UserController.get_user(user_id=x) for x in new_book.wisher_ids],
             goodreads_id=new_book.identifiers.goodreads_id,
             google_books_id=new_book.identifiers.google_books_id,
-            isbn_13=new_book.identifiers.isbn,
+            isbn=new_book.identifiers.isbn,
             library_thing_id=new_book.identifiers.library_thing_id,
             open_library_id=new_book.identifiers.open_library_id,
         )
@@ -85,6 +84,7 @@ class BookController:
             FormatController.get_format(format_id=updates.format_id) if updates.format_id else None
         )
         book.image_url = updates.image_url
+        book.publish_date = updates.publish_date
         book.publisher = (
             PublisherController.get_publisher(publisher_id=updates.publisher_id)
             if updates.publisher_id
@@ -103,7 +103,7 @@ class BookController:
 
         book.goodreads_id = updates.identifiers.goodreads_id
         book.google_books_id = updates.identifiers.google_books_id
-        book.isbn_13 = updates.identifiers.isbn
+        book.isbn = updates.identifiers.isbn
         book.library_thing_id = updates.identifiers.library_thing_id
         book.open_library_id = updates.identifiers.open_library_id
 
@@ -169,7 +169,9 @@ class BookController:
             try:
                 format = FormatController.get_format_by_name(name=result["edition"].physical_format)
             except HTTPException:
-                format = FormatController.create_format(new_format=NewFormat(name=result["edition"].physical_format))
+                format = FormatController.create_format(
+                    new_format=NewFormat(name=result["edition"].physical_format)
+                )
 
         return NewBook(
             authors=authors,
@@ -192,7 +194,7 @@ class BookController:
 
     @classmethod
     def lookup_book(cls, isbn: str, wisher_id: int | None) -> Book:
-        if book := Book.get(isbn_13=isbn):
+        if book := Book.get(isbn=isbn):
             if wisher_id and (wisher := UserController.get_user(user_id=wisher_id)):
                 if wisher in book.wishers:
                     raise HTTPException(status_code=409, detail="Book already wished for.")
@@ -210,7 +212,7 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        updates = cls._parse_open_library(isbn=book.isbn_13, open_library_id=book.open_library_id)
+        updates = cls._parse_open_library(isbn=book.isbn, open_library_id=book.open_library_id)
         updates.reader_ids = [x.user_id for x in book.readers]
         updates.series = [
             NewBookSeries(series_id=x.series.series_id, number=x.number) for x in book.series
@@ -223,7 +225,7 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        updates = cls._parse_open_library(isbn=book.isbn_13, open_library_id=book.open_library_id)
+        updates = cls._parse_open_library(isbn=book.isbn, open_library_id=book.open_library_id)
         book.publish_date = updates.publish_date
         flush()
         return book

@@ -1,6 +1,6 @@
 <nav aria-label="main navigation" class="navbar is-fixed-top is-primary" role="navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="/users/{{ token_user.user_id }}" id="navbar-banner">
+    <a class="navbar-item is-size-5 is-family-secondary" href="/users/{{ token_user.user_id }}" id="navbar-banner">
       <img alt="Logo" src="/static/img/logo.png">
       <span>Book Catalogue</span>
     </a>
@@ -12,7 +12,7 @@
   </div>
   <div class="navbar-menu" id="navMenu">
     <div class="navbar-start">
-      <div class="navbar-item has-dropdown is-hoverable">
+      <div class="navbar-item is-size-6 has-dropdown is-hoverable">
         <a class="navbar-link">
           <span class="icon is-medium">
             <i class="fa-solid fa-lg fa-file-signature"></i>
@@ -20,13 +20,13 @@
           <span>Authors</span>
         </a>
         <div class="navbar-dropdown">
-          <a class="navbar-item" href="/authors">
+          <a class="navbar-item is-size-6" href="/authors">
             <span class="icon is-medium">
               <i class="fa-solid fa-lg fa-list"></i>
             </span>
             <span>List</span>
           </a>
-          <a class="navbar-item has-text-danger" href="/authors/roles">
+          <a class="navbar-item is-size-6 has-text-danger" href="/authors/roles">
             <span class="icon is-medium">
               <i class="fa-solid fa-lg fa-tags"></i>
             </span>
@@ -34,25 +34,25 @@
           </a>
         </div>
       </div>
-      <a class="navbar-item" href="/books">
+      <a class="navbar-item is-size-6" href="/books">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-book"></i>
         </span>
         <span>Books</span>
       </a>
-      <a class="navbar-item" href="/publishers">
+      <a class="navbar-item is-size-6 has-text-danger" href="/publishers">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-shop"></i>
         </span>
         <span>Publishers</span>
       </a>
-      <a class="navbar-item" href="/series">
+      <a class="navbar-item is-size-6" href="/series">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-layer-group"></i>
         </span>
         <span>Series</span>
       </a>
-      <div class="navbar-item has-dropdown is-hoverable">
+      <div class="navbar-item is-size-6 has-dropdown is-hoverable">
         <a class="navbar-link">
           <span class="icon is-medium">
             <i class="fa-solid fa-lg fa-users"></i>
@@ -60,19 +60,19 @@
           <span>Users</span>
         </a>
         <div class="navbar-dropdown">
-          <a class="navbar-item" href="/users">
+          <a class="navbar-item is-size-6" href="/users">
             <span class="icon is-medium">
               <i class="fa-solid fa-lg fa-list"></i>
             </span>
             <span>List</span>
           </a>
-          <a class="navbar-item" href="/users/{{ token_user.user_id }}">
+          <a class="navbar-item is-size-6" href="/users/{{ token_user.user_id }}">
             <span class="icon is-medium">
               <i class="fa-solid fa-lg fa-user"></i>
             </span>
             <span>My Profile</span>
           </a>
-          <a class="navbar-item" href="/users/{{ token_user.user_id }}/wishlist">
+          <a class="navbar-item is-size-6" href="/users/{{ token_user.user_id }}/wishlist">
             <span class="icon is-medium">
               <i class="fa-solid fa-lg fa-star"></i>
             </span>
@@ -82,7 +82,7 @@
       </div>
     </div>
     <div class="navbar-end">
-      <div class="navbar-item">
+      <div class="navbar-item is-size-6">
         <div class="buttons">
           <button class="button is-primary" id="sign-out-button" type="button" onclick="signOut()">
             <span class="icon is-medium">

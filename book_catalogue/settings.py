@@ -26,6 +26,7 @@ class DatabaseSettings(SettingsModel):
 class WebsiteSettings(SettingsModel):
     host: str = "localhost"
     port: int = 8003
+    reload: bool = False
 
 
 class Settings(SettingsModel):
