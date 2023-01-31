@@ -15,6 +15,8 @@ from book_catalogue.schemas.format import FormatWrite
 from book_catalogue.schemas.publisher import PublisherWrite
 from book_catalogue.services.open_library import lookup_book_by_id, lookup_book_by_isbn
 from book_catalogue.services.open_library.service import OpenLibrary
+from book_catalogue.services.google_books import google_books_lookup
+from book_catalogue.settings import Settings
 
 
 class BookController:
@@ -196,7 +198,13 @@ class BookController:
                 return book
             raise HTTPException(status_code=409, detail="Book already exists.")
 
-        new_book = cls._parse_open_library(isbn=isbn, open_library_id=None)
+        settings = Settings.load()
+        if settings.source.open_library:
+            new_book = cls._parse_open_library(isbn=isbn, open_library_id=None)
+        elif settings.source.google_books:
+            new_book = google_books_lookup(isbn=isbn, google_books_id=None)
+        else:
+            raise HTTPException(status_code=500, detail="Incorrect config setup, review source settings.")
         if wisher_id:
             new_book.wisher_ids = [wisher_id]
         return cls.create_book(new_book=new_book)
@@ -206,7 +214,13 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        updates = cls._parse_open_library(isbn=book.isbn, open_library_id=book.open_library_id)
+        settings = Settings.load()
+        if settings.source.open_library:
+            updates = cls._parse_open_library(isbn=book.isbn, open_library_id=book.open_library_id)
+        elif settings.source.google_books:
+            updates = google_books_lookup(isbn=book.isbn, google_books_id=book.google_books_id)
+        else:
+            raise HTTPException(status_code=500, detail="Incorrect config setup, review source settings.")
         updates.reader_ids = [x.user_id for x in book.readers]
         updates.series = [
             BookSeriesWrite(series_id=x.series.series_id, number=x.number) for x in book.series
@@ -219,7 +233,13 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        updates = cls._parse_open_library(isbn=book.isbn, open_library_id=book.open_library_id)
+        settings = Settings.load()
+        if settings.source.open_library:
+            updates = cls._parse_open_library(isbn=book.isbn, open_library_id=book.open_library_id)
+        elif settings.source.google_books:
+            updates = google_books_lookup(isbn=book.isbn, google_books_id=book.google_books_id)
+        else:
+            raise HTTPException(status_code=500, detail="Incorrect config setup, review source settings.")
         book.publish_date = updates.publish_date
         flush()
         return book

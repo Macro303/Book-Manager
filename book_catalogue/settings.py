@@ -6,7 +6,7 @@ import tomllib as tomlreader
 from typing import ClassVar
 
 import tomli_w as tomlwriter
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Extra, validator
 
 from book_catalogue import get_config_root
 
@@ -23,6 +23,11 @@ class DatabaseSettings(SettingsModel):
     name: str = "book-catalogue.sqlite"
 
 
+class SourceSettings(SettingsModel):
+    google_books: bool = False
+    open_library: bool = True
+
+
 class WebsiteSettings(SettingsModel):
     host: str = "localhost"
     port: int = 8003
@@ -32,7 +37,16 @@ class WebsiteSettings(SettingsModel):
 class Settings(SettingsModel):
     FILENAME: ClassVar = get_config_root() / "settings.toml"
     database: DatabaseSettings = DatabaseSettings()
+    source: SourceSettings = SourceSettings()
     website: WebsiteSettings = WebsiteSettings()
+    
+    @validator("source")
+    def validate_one_source(cls, v: SourceSettings) -> SourceSettings:
+        if v.google_books and v.open_library:
+            raise ValueError("Both GoogleBooks and OpenLibrary can be used as a source at the same time.")
+        if not v.google_books and not v.open_library:
+            raise ValueError("Select one source, GoogleBooks or OpenLibrary.")
+        return v
 
     @classmethod
     def load(cls) -> Settings:
