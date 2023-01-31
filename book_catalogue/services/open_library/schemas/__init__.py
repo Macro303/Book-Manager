@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["BaseModel", "DatetimeResource", "TextResource", "Resource"]
+__all__ = ["BaseModel", "DatetimeResource", "TextResource", "Resource", "Link"]
 
 from datetime import datetime
 
@@ -26,3 +26,9 @@ class Resource(BaseModel):
 class TextResource(BaseModel):
     type: str
     value: str
+
+
+class Link(BaseModel):
+    title: str
+    type: Resource | None = None
+    url: str

@@ -1,16 +1,10 @@
-from __future__ import annotations
-
 __all__ = ["SeriesController"]
-
-import logging
 
 from fastapi import HTTPException
 from pony.orm import flush
 
 from book_catalogue.database.tables import Series
-from book_catalogue.schemas._series import NewSeries
-
-LOGGER = logging.getLogger(__name__)
+from book_catalogue.schemas.series import SeriesWrite
 
 
 class SeriesController:
@@ -19,7 +13,7 @@ class SeriesController:
         return Series.select()
 
     @classmethod
-    def create_series(cls, new_series: NewSeries) -> Series:
+    def create_series(cls, new_series: SeriesWrite) -> Series:
         if Series.get(title=new_series.title):
             raise HTTPException(status_code=409, detail="Series already exists.")
         series = Series(title=new_series.title)
@@ -33,7 +27,7 @@ class SeriesController:
         raise HTTPException(status_code=404, detail="Series not found.")
 
     @classmethod
-    def update_series(cls, series_id: int, updates: NewSeries) -> Series:
+    def update_series(cls, series_id: int, updates: SeriesWrite) -> Series:
         series = cls.get_series(series_id=series_id)
         series.title = updates.title
         flush()

@@ -10,6 +10,7 @@ from book_catalogue.console import CONSOLE
 from book_catalogue.services.open_library.schemas import (
     BaseModel,
     DatetimeResource,
+    Link,
     Resource,
     TextResource,
 )
@@ -35,11 +36,6 @@ class Identifiers(BaseModel):
     google: list[str] = Field(default_factory=list)
     librarything: list[str] = Field(default_factory=list)
     wikidata: list[str] = Field(default_factory=list)
-
-
-class Link(BaseModel):
-    title: str
-    url: str
 
 
 class Edition(BaseModel):
@@ -113,17 +109,25 @@ class Edition(BaseModel):
                 return self.description.value
             return self.description
         return None
-    
+
     def get_publish_date(self) -> date | None:
         if not self.publish_date:
             return None
         try:
             return date.fromisoformat(self.publish_date)
         except ValueError as iso_err:
-            for _format in ["%Y", "%b, %Y", "%Y-%b-%d", "%b %d, %Y", "%B %d, %Y", "%B %Y", "%d %b %Y"]:
+            for _format in [
+                "%Y",
+                "%b, %Y",
+                "%Y-%b-%d",
+                "%b %d, %Y",
+                "%B %d, %Y",
+                "%B %Y",
+                "%d %b %Y",
+            ]:
                 try:
                     return datetime.strptime(self.publish_date, _format).date()
-                except ValueError as err:
+                except ValueError:
                     pass
             CONSOLE.print_exception(theme="ansi_dark")
             raise iso_err

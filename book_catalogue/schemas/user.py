@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-__all__ = ["NewUser", "User"]
+__all__ = ["UserRead", "UserWrite"]
 
 from book_catalogue.schemas._base import BaseModel
 
@@ -23,9 +21,9 @@ class BaseUser(BaseModel):
         return hash((type(self), self.username))
 
 
-class User(BaseUser):
+class UserRead(BaseUser):
     user_id: int
 
 
-class NewUser(BaseUser):
+class UserWrite(BaseUser):
     pass

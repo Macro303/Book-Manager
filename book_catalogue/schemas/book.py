@@ -1,18 +1,23 @@
-from __future__ import annotations
-
-__all__ = ["Book", "Identifiers", "LookupBook", "NewBook"]
+__all__ = [
+    "Identifiers",
+    "BookRead",
+    "BookWrite",
+    "BookAuthorWrite",
+    "BookSeriesWrite",
+    "LookupBook",
+]
 
 from datetime import date
 
 from pydantic import Field, validator
 
 from book_catalogue.isbn import to_isbn_13
-from book_catalogue.schemas._author import Author
 from book_catalogue.schemas._base import BaseModel
-from book_catalogue.schemas._format import Format
-from book_catalogue.schemas._publisher import Publisher
-from book_catalogue.schemas._series import Series
-from book_catalogue.schemas._user import User
+from book_catalogue.schemas.author import AuthorRead
+from book_catalogue.schemas.format import FormatRead
+from book_catalogue.schemas.publisher import PublisherRead
+from book_catalogue.schemas.series import SeriesRead
+from book_catalogue.schemas.user import UserRead
 
 
 class Identifiers(BaseModel):
@@ -31,10 +36,11 @@ class BaseBook(BaseModel):
     description: str | None = None
     identifiers: Identifiers
     image_url: str
+    is_collected: bool = False
     publish_date: date | None = None
     subtitle: str | None = None
     title: str
-    
+
     @property
     def publish_date_str(self) -> str:
         def suffix(day: int) -> str:
@@ -42,7 +48,7 @@ class BaseBook(BaseModel):
             if day % 10 in [1, 2, 3] and day not in [11, 12, 13]:
                 return date_suffix[day % 10]
             return date_suffix[0]
-        
+
         return self.publish_date.strftime(f"%-d{suffix(self.publish_date.day)} %b %Y")
 
     def __lt__(self, other) -> int:  # noqa: ANN001
@@ -55,28 +61,32 @@ class BaseBook(BaseModel):
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, BaseBook):
             raise NotImplementedError()
-        return (self.title, (self.subtitle or "")) == (other.title, (other.subtitle or ""))
+        return (self.title, (self.subtitle or ""), self.identifiers.isbn) == (
+            other.title,
+            (other.subtitle or ""),
+            other.identifiers.isbn,
+        )
 
     def __hash__(self):
-        return hash((type(self), self.title, (self.subtitle or "")))
+        return hash((type(self), self.title, (self.subtitle or ""), self.identifiers.isbn))
 
 
-class Book(BaseBook):
-    authors: list[Author] = Field(default_factory=list)
+class BookRead(BaseBook):
+    authors: list[AuthorRead] = Field(default_factory=list)
     book_id: int
-    format: Format | None = None
-    publisher: Publisher | None = None
-    readers: list[User] = Field(default_factory=list)
-    series: list[Series] = Field(default_factory=list)
-    wishers: list[User] = Field(default_factory=list)
+    format: FormatRead | None = None
+    publisher: PublisherRead | None = None
+    readers: list[UserRead] = Field(default_factory=list)
+    series: list[SeriesRead] = Field(default_factory=list)
+    wishers: list[UserRead] = Field(default_factory=list)
 
-    def get_first_series(self) -> Series | None:
+    def get_first_series(self) -> SeriesRead | None:
         if temp := sorted(self.series):
             return temp[0]
         return None
 
     def __lt__(self, other) -> int:  # noqa: ANN001
-        if not isinstance(other, Book):
+        if not isinstance(other, BookRead):
             raise NotImplementedError()
         self_first_series = self.get_first_series()
         other_first_series = other.get_first_series()
@@ -92,34 +102,35 @@ class Book(BaseBook):
         return (self.subtitle or "") < (other.subtitle or "")
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
-        if not isinstance(other, Book):
+        if not isinstance(other, BookRead):
             raise NotImplementedError()
-        return (self.get_first_series(), self.title, (self.subtitle or "")) == (
-            other.get_first_series(),
-            other.title,
-            (other.subtitle or ""),
-        )
+        return (
+            self.get_first_series(),
+            self.title,
+            (self.subtitle or ""),
+            self.identifiers.isbn,
+        ) == (other.get_first_series(), other.title, (other.subtitle or ""), other.identifiers.isbn)
 
     def __hash__(self):
         return hash((type(self), self.get_first_series(), self.title, (self.subtitle or "")))
 
 
-class NewBookAuthor(BaseModel):
+class BookAuthorWrite(BaseModel):
     author_id: int
     role_ids: list[int] = Field(default_factory=list)
 
 
-class NewBookSeries(BaseModel):
+class BookSeriesWrite(BaseModel):
     series_id: int
     number: int | None = None
 
 
-class NewBook(BaseBook):
-    authors: list[NewBookAuthor] = Field(default_factory=list)
+class BookWrite(BaseBook):
+    authors: list[BookAuthorWrite] = Field(default_factory=list)
     format_id: int | None = None
     publisher_id: int | None = None
     reader_ids: list[int] = Field(default_factory=list)
-    series: list[NewBookSeries] = Field(default_factory=list)
+    series: list[BookSeriesWrite] = Field(default_factory=list)
     wisher_ids: list[int] = Field(default_factory=list)
 
 

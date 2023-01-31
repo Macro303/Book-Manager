@@ -5,17 +5,15 @@ __all__ = ["router"]
 from fastapi import APIRouter, Cookie, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from pony.orm import db_session
+from pony.orm import db_session, flush
 
 from book_catalogue import get_project_root
-from book_catalogue.controllers import (
-    AuthorController,
-    BookController,
-    FormatController,
-    PublisherController,
-    SeriesController,
-    UserController,
-)
+from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.book import BookController
+from book_catalogue.controllers.format import FormatController
+from book_catalogue.controllers.publisher import PublisherController
+from book_catalogue.controllers.series import SeriesController
+from book_catalogue.controllers.user import UserController
 from book_catalogue.database.tables import User
 
 router = APIRouter(include_in_schema=False)
@@ -26,9 +24,7 @@ def get_token_user(token: int | None = Cookie(default=None)) -> User | None:
     if not token:
         return None
     with db_session:
-        if temp := UserController.get_user(user_id=token):
-            return temp
-        return None
+        return UserController.get_user(user_id=token)
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -119,10 +115,13 @@ def list_books(
     if not token_user:
         return RedirectResponse("/")
     with db_session:
-        all_books = book_list = [x for x in BookController.list_books() if not x.wishers]
+        all_books = book_list = [x for x in BookController.list_books() if x.is_collected]
         if author_id:
-            author = AuthorController.get_author(author_id=author_id)
-            book_list = [x for x in book_list if author in [y.author for y in x.authors]]
+            if author_id == -1:
+                book_list = [x for x in book_list if not x.authors]
+            else:
+                author = AuthorController.get_author(author_id=author_id)
+                book_list = [x for x in book_list if author in [y.author for y in x.authors]]
         if format_id:
             if format_id == -1:
                 book_list = [x for x in book_list if not x.format]
@@ -130,8 +129,11 @@ def list_books(
                 format = FormatController.get_format(format_id=format_id)
                 book_list = [x for x in book_list if format == x.format]
         if series_id:
-            series = SeriesController.get_series(series_id=series_id)
-            book_list = [x for x in book_list if series in [y.series for y in x.series]]
+            if series_id == -1:
+                book_list = [x for x in book_list if not x.series]
+            else:
+                series = SeriesController.get_series(series_id=series_id)
+                book_list = [x for x in book_list if series in [y.series for y in x.series]]
         if title:
             book_list = [
                 x
@@ -190,6 +192,7 @@ def view_book(request: Request, book_id: int, token_user: User | None = Depends(
         return RedirectResponse("/")
     with db_session:
         book = BookController.get_book(book_id=book_id)
+        flush()
         return templates.TemplateResponse(
             "view_book.html",
             {
@@ -333,8 +336,8 @@ def view_user(request: Request, user_id: int, token_user: User | None = Depends(
             "view_user.html",
             {
                 "request": request,
-                "token_user": token_user.to_schema(),
-                "user": user.to_schema(),
+                "token_user": token_user,
+                "user": user,
             },
         )
 
@@ -365,7 +368,7 @@ def user_wishlist(
     user_id: int,
     token_user: User | None = Depends(get_token_user),
     author_id: int = 0,
-    format: str = "",  # noqa: A002
+    format_id: int = 0,
     series_id: int = 0,
     title: str = "",
     publisher_id: int = 0,
@@ -374,18 +377,28 @@ def user_wishlist(
         return RedirectResponse("/")
     with db_session:
         user = UserController.get_user(user_id=user_id)
-        all_wishlist = wishlist = user.wished_books
+        all_wishlist = wishlist = {
+            *user.wished_books,
+            *[x for x in BookController.list_books() if not x.is_collected and not x.wishers],
+        }
         if author_id:
-            author = AuthorController.get_author(author_id=author_id)
-            wishlist = [x for x in wishlist if author in [y.author for y in x.authors]]
-        if format:
-            if format == "None":
+            if author_id == -1:
+                wishlist = [x for x in wishlist if not x.authors]
+            else:
+                author = AuthorController.get_author(author_id=author_id)
+                wishlist = [x for x in wishlist if author in [y.author for y in x.authors]]
+        if format_id:
+            if format_id == -1:
                 wishlist = [x for x in wishlist if not x.format]
             else:
-                wishlist = [x for x in wishlist if format == x.format]
+                format = FormatController.get_format(format_id=format_id)
+                wishlist = [x for x in wishlist if x.format == format]
         if series_id:
-            series = SeriesController.get_series(series_id=series_id)
-            wishlist = [x for x in wishlist if series in [y.series for y in x.series]]
+            if series_id == -1:
+                wishlist = [x for x in wishlist if not x.series]
+            else:
+                series = SeriesController.get_series(series_id=series_id)
+                wishlist = [x for x in wishlist if series in [y.series for y in x.series]]
         if title:
             wishlist = [
                 x
@@ -401,8 +414,11 @@ def user_wishlist(
                 )
             ]
         if publisher_id:
-            publisher = PublisherController.get_publisher(publisher_id=publisher_id)
-            wishlist = [x for x in wishlist if publisher == x.publisher]
+            if publisher_id == -1:
+                wishlist = [x for x in wishlist if not x.publisher]
+            else:
+                publisher = PublisherController.get_publisher(publisher_id=publisher_id)
+                wishlist = [x for x in wishlist if publisher == x.publisher]
         return templates.TemplateResponse(
             "user_wishlist.html",
             {
@@ -420,7 +436,7 @@ def user_wishlist(
                 "publisher_list": sorted({x.publisher.to_schema() for x in all_wishlist}),
                 "filters": {
                     "author_id": author_id,
-                    "format": format,
+                    "format_id": format_id,
                     "series_id": series_id,
                     "title": title,
                     "publisher_id": publisher_id,

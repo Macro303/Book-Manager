@@ -65,6 +65,7 @@ ignore = [
   "ANN102",
   "ANN204",
   "ANN206",
+  "PLR0913",
   "PLR2004"
 ]
 line-length = 100

@@ -1,20 +1,18 @@
-from __future__ import annotations
-
-__all__ = ["NewPublisher", "Publisher"]
+__all__ = ["FormatRead", "FormatWrite"]
 
 from book_catalogue.schemas._base import BaseModel
 
 
-class BasePublisher(BaseModel):
+class BaseFormat(BaseModel):
     name: str
 
     def __lt__(self, other) -> int:  # noqa: ANN001
-        if not isinstance(other, BasePublisher):
+        if not isinstance(other, BaseFormat):
             raise NotImplementedError()
         return self.name < other.name
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
-        if not isinstance(other, BasePublisher):
+        if not isinstance(other, BaseFormat):
             raise NotImplementedError()
         return self.name == other.name
 
@@ -22,9 +20,9 @@ class BasePublisher(BaseModel):
         return hash((type(self), self.name))
 
 
-class Publisher(BasePublisher):
-    publisher_id: int
+class FormatRead(BaseFormat):
+    format_id: int
 
 
-class NewPublisher(BasePublisher):
+class FormatWrite(BaseFormat):
     pass

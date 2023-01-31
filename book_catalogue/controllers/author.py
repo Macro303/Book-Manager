@@ -2,16 +2,12 @@ from __future__ import annotations
 
 __all__ = ["AuthorController"]
 
-import logging
-
 from fastapi import HTTPException
 from pony.orm import flush
 
 from book_catalogue.database.tables import Author, Role
-from book_catalogue.schemas._author import Identifiers, NewAuthor, NewRole
+from book_catalogue.schemas.author import AuthorWrite, Identifiers, RoleWrite
 from book_catalogue.services.open_library.service import OpenLibrary
-
-LOGGER = logging.getLogger(__name__)
 
 
 class AuthorController:
@@ -20,7 +16,7 @@ class AuthorController:
         return Author.select()
 
     @classmethod
-    def create_author(cls, new_author: NewAuthor) -> Author:
+    def create_author(cls, new_author: AuthorWrite) -> Author:
         if Author.get(name=new_author.name) or (
             new_author.identifiers.open_library_id
             and Author.get(open_library_id=new_author.identifiers.open_library_id)
@@ -44,7 +40,7 @@ class AuthorController:
         raise HTTPException(status_code=404, detail="Author not found.")
 
     @classmethod
-    def update_author(cls, author_id: int, updates: NewAuthor) -> Author:
+    def update_author(cls, author_id: int, updates: AuthorWrite) -> Author:
         author = cls.get_author(author_id=author_id)
         author.bio = updates.bio
         author.image_url = updates.image_url
@@ -68,11 +64,11 @@ class AuthorController:
         raise HTTPException(status_code=404, detail="Author not found.")
 
     @classmethod
-    def _parse_open_library(cls, open_library_id: str) -> NewAuthor:
+    def _parse_open_library(cls, open_library_id: str) -> AuthorWrite:
         session = OpenLibrary(cache=None)
         result = session.get_author(author_id=open_library_id)
 
-        return NewAuthor(
+        return AuthorWrite(
             bio=result.get_bio(),
             identifiers=Identifiers(
                 goodreads_id=result.remote_ids.goodreads,
@@ -111,7 +107,7 @@ class AuthorController:
         return Role.select()
 
     @classmethod
-    def create_role(cls, new_role: NewRole) -> Role:
+    def create_role(cls, new_role: RoleWrite) -> Role:
         if Role.get(name=new_role.name):
             raise HTTPException(status_code=409, detail="Role already exists.")
         role = Role(name=new_role.name)
@@ -125,7 +121,7 @@ class AuthorController:
         raise HTTPException(status_code=404, detail="Role not found.")
 
     @classmethod
-    def update_role(cls, role_id: int, updates: NewRole) -> Role:
+    def update_role(cls, role_id: int, updates: RoleWrite) -> Role:
         role = cls.get_role(role_id=role_id)
         role.name = updates.name
         flush()

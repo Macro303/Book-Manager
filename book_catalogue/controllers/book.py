@@ -1,26 +1,20 @@
-from __future__ import annotations
-
 __all__ = ["BookController"]
-
-import logging
 
 from fastapi import HTTPException
 from pony.orm import flush
 
-from book_catalogue.controllers._author import AuthorController
-from book_catalogue.controllers._format import FormatController
-from book_catalogue.controllers._publisher import PublisherController
-from book_catalogue.controllers._series import SeriesController
-from book_catalogue.controllers._user import UserController
+from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.format import FormatController
+from book_catalogue.controllers.publisher import PublisherController
+from book_catalogue.controllers.series import SeriesController
+from book_catalogue.controllers.user import UserController
 from book_catalogue.database.tables import Book, BookAuthor, BookSeries
-from book_catalogue.schemas._author import NewAuthor, NewRole
-from book_catalogue.schemas._book import Identifiers, NewBook, NewBookAuthor, NewBookSeries
-from book_catalogue.schemas._format import NewFormat
-from book_catalogue.schemas._publisher import NewPublisher
+from book_catalogue.schemas.author import AuthorWrite, RoleWrite
+from book_catalogue.schemas.book import BookAuthorWrite, BookSeriesWrite, BookWrite, Identifiers
+from book_catalogue.schemas.format import FormatWrite
+from book_catalogue.schemas.publisher import PublisherWrite
 from book_catalogue.services.open_library import lookup_book_by_id, lookup_book_by_isbn
 from book_catalogue.services.open_library.service import OpenLibrary
-
-LOGGER = logging.getLogger(__name__)
 
 
 class BookController:
@@ -29,7 +23,7 @@ class BookController:
         return Book.select()
 
     @classmethod
-    def create_book(cls, new_book: NewBook) -> Book:
+    def create_book(cls, new_book: BookWrite) -> Book:
         if Book.get(isbn=new_book.identifiers.isbn):
             raise HTTPException(status_code=409, detail="Book already exists.")
 
@@ -71,7 +65,7 @@ class BookController:
         raise HTTPException(status_code=404, detail="Book not found.")
 
     @classmethod
-    def update_book(cls, book_id: int, updates: NewBook) -> Book:
+    def update_book(cls, book_id: int, updates: BookWrite) -> Book:
         book = cls.get_book(book_id=book_id)
         book.authors = []
         for x in updates.authors:
@@ -116,7 +110,7 @@ class BookController:
         book.delete()
 
     @classmethod
-    def _parse_open_library(cls, isbn: str | None, open_library_id: str | None) -> NewBook:
+    def _parse_open_library(cls, isbn: str | None, open_library_id: str | None) -> BookWrite:
         if not isbn and not open_library_id:
             raise NotImplementedError("Require Isbn or OpenLibrary Id")
         session = OpenLibrary(cache=None)
@@ -133,22 +127,22 @@ class BookController:
             try:
                 role = AuthorController.get_role_by_name(name="Writer")
             except HTTPException:
-                role = AuthorController.create_role(new_role=NewRole(name="Writer"))
+                role = AuthorController.create_role(new_role=RoleWrite(name="Writer"))
             authors[author].add(role)
         for entry in result["edition"].contributors:
             try:
                 author = AuthorController.get_author_by_name(name=entry.name)
             except HTTPException:
-                author = AuthorController.create_author(new_author=NewAuthor(name=entry.name))
+                author = AuthorController.create_author(new_author=AuthorWrite(name=entry.name))
             if author not in authors:
                 authors[author] = set()
             try:
                 role = AuthorController.get_role_by_name(name=entry.role)
             except HTTPException:
-                role = AuthorController.create_role(new_role=NewRole(name=entry.role))
+                role = AuthorController.create_role(new_role=RoleWrite(name=entry.role))
             authors[author].add(role)
         authors = [
-            NewBookAuthor(author_id=key.author_id, role_ids=[x.role_id for x in value])
+            BookAuthorWrite(author_id=key.author_id, role_ids=[x.role_id for x in value])
             for key, value in authors.items()
         ]
 
@@ -159,7 +153,7 @@ class BookController:
                     publisher = PublisherController.get_publisher_by_name(name=y.strip())
                 except HTTPException:
                     publisher = PublisherController.create_publisher(
-                        new_publisher=NewPublisher(name=y.strip())
+                        new_publisher=PublisherWrite(name=y.strip())
                     )
                 publisher_list.append(publisher)
         publisher = next(iter(sorted(publisher_list, key=lambda x: x.name)), None)
@@ -170,10 +164,10 @@ class BookController:
                 format = FormatController.get_format_by_name(name=result["edition"].physical_format)
             except HTTPException:
                 format = FormatController.create_format(
-                    new_format=NewFormat(name=result["edition"].physical_format)
+                    new_format=FormatWrite(name=result["edition"].physical_format)
                 )
 
-        return NewBook(
+        return BookWrite(
             authors=authors,
             description=result["edition"].get_description() or result["work"].get_description(),
             format_id=format.format_id if format else None,
@@ -215,7 +209,7 @@ class BookController:
         updates = cls._parse_open_library(isbn=book.isbn, open_library_id=book.open_library_id)
         updates.reader_ids = [x.user_id for x in book.readers]
         updates.series = [
-            NewBookSeries(series_id=x.series.series_id, number=x.number) for x in book.series
+            BookSeriesWrite(series_id=x.series.series_id, number=x.number) for x in book.series
         ]
         updates.wisher_ids = [x.user_id for x in book.wishers]
         return cls.update_book(book_id=book_id, updates=updates)

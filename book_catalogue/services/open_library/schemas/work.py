@@ -7,6 +7,7 @@ from pydantic import Field
 from book_catalogue.services.open_library.schemas import (
     BaseModel,
     DatetimeResource,
+    Link,
     Resource,
     TextResource,
 )
@@ -25,12 +26,6 @@ class Excerpt(BaseModel):
     excerpt: str
     comment: str | None = None
     author: Resource | None = None
-
-
-class Link(BaseModel):
-    title: str
-    type: Resource
-    url: str
 
 
 class Work(BaseModel):

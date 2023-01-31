@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-__all__ = ["Author", "Identifiers", "NewAuthor", "NewRole", "Role"]
+__all__ = ["Identifiers", "AuthorRead", "AuthorWrite", "RoleRead", "RoleWrite"]
 
 from book_catalogue.schemas._base import BaseModel
 
@@ -9,6 +7,31 @@ class Identifiers(BaseModel):
     goodreads_id: str | None = None
     library_thing_id: str | None = None
     open_library_id: str | None = None
+
+
+class BaseRole(BaseModel):
+    name: str
+
+    def __lt__(self, other) -> int:  # noqa: ANN001
+        if not isinstance(other, BaseRole):
+            raise NotImplementedError()
+        return self.name < other.name
+
+    def __eq__(self, other) -> bool:  # noqa: ANN001
+        if not isinstance(other, BaseRole):
+            raise NotImplementedError()
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash((type(self), self.name))
+
+
+class RoleRead(BaseRole):
+    role_id: int
+
+
+class RoleWrite(BaseRole):
+    pass
 
 
 class BaseAuthor(BaseModel):
@@ -31,36 +54,14 @@ class BaseAuthor(BaseModel):
         return hash((type(self), self.name))
 
 
-class Role(BaseModel):
-    name: str
-    role_id: int
-
-    def __lt__(self, other) -> int:  # noqa: ANN001
-        if not isinstance(other, Role):
-            raise NotImplementedError()
-        return self.name < other.name
-
-    def __eq__(self, other) -> bool:  # noqa: ANN001
-        if not isinstance(other, Role):
-            raise NotImplementedError()
-        return self.name == other.name
-
-    def __hash__(self):
-        return hash((type(self), self.name))
-
-
-class Author(BaseAuthor):
+class AuthorRead(BaseAuthor):
     author_id: int
-    roles: list[Role]
+    roles: list[RoleRead]
 
     @property
     def display_name(self) -> str:
         return f"{self.name} ({', '.join(x.name for x in self.roles)})"
 
 
-class NewRole(BaseModel):
-    name: str
-
-
-class NewAuthor(BaseAuthor):
+class AuthorWrite(BaseAuthor):
     pass

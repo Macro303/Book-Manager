@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-__all__ = ["DATABASE_PATH"]
+__all__ = ["sqlite_filepath"]
 
 from enum import Enum
 
 from book_catalogue import get_data_root
-from book_catalogue.settings import Settings
 from book_catalogue.database.enum_converter import EnumConverter
 from book_catalogue.database.tables import db
+from book_catalogue.settings import Settings
 
-DATABASE_PATH = get_data_root() / Settings.load().database.name
+sqlite_filepath = get_data_root() / Settings.load().database.name
 db.bind(
     provider="sqlite",
-    filename=str(DATABASE_PATH),
+    filename=str(sqlite_filepath),
     create_db=True,
 )
 db.provider.converter_classes.append((Enum, EnumConverter))

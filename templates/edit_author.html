@@ -61,7 +61,7 @@ function saveAuthor(){
   console.log(details);
 
   addLoading(caller);
-  fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
+  fetch("/api/v0/authors/{{ author.author_id }}", {
     method: "PATCH",
     headers: headers,
     body: JSON.stringify({
@@ -94,7 +94,7 @@ function refreshAuthor(){
   console.log(details);
 
   addLoading(caller);
-  fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
+  fetch("/api/v0/authors/{{ author.author_id }}", {
     method: "PUT",
     headers: headers,
   }).then((response) => {
@@ -113,7 +113,7 @@ function deleteAuthor(){
   const caller = "delete-author-button";
 
   addLoading(caller);
-  fetch("/api/v0/authors/{{ author.identifiers.author_id }}", {
+  fetch("/api/v0/authors/{{ author.author_id }}", {
     method: "DELETE",
     headers: headers,
   }).then((response) => {

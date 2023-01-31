@@ -1,16 +1,10 @@
-from __future__ import annotations
-
 __all__ = ["FormatController"]
-
-import logging
 
 from fastapi import HTTPException
 from pony.orm import flush
 
 from book_catalogue.database.tables import Format
-from book_catalogue.schemas._format import NewFormat
-
-LOGGER = logging.getLogger(__name__)
+from book_catalogue.schemas.format import FormatWrite
 
 
 class FormatController:
@@ -19,7 +13,7 @@ class FormatController:
         return Format.select()
 
     @classmethod
-    def create_format(cls, new_format: NewFormat) -> Format:
+    def create_format(cls, new_format: FormatWrite) -> Format:
         if Format.get(name=new_format.name):
             raise HTTPException(status_code=409, detail="Format already exists.")
         format = Format(name=new_format.name)
@@ -33,7 +27,7 @@ class FormatController:
         raise HTTPException(status_code=404, detail="Format not found.")
 
     @classmethod
-    def update_format(cls, format_id: int, updates: NewFormat):
+    def update_format(cls, format_id: int, updates: FormatWrite):
         format = cls.get_format(format_id=format_id)
         format.name = updates.name
         flush()

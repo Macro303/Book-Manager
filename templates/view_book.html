@@ -118,26 +118,47 @@
     </div>
   </div>
   <div class="buttons is-centered">
-    {% if book.wishers %}
-    <button class="button is-success is-rounded" id="collect-book-button" type="button">
+    {% if book.is_collected %}
+    <button class="button is-warning is-rounded" id="discard-book-button" type="button" onclick="discardBook()">
+      <span class="icon is-medium">
+        <i class="fa-solid fa-lg fa-rotate-left"></i>
+      </span>
+      <span>Discard</span>
+    </button>
+    <button class="button is-info is-rounded" id="read-book-button" type="button" onclick="readBook()">
+      <span class="icon is-medium">
+        {% if token_user in book.readers %}
+        <i class="fa-solid fa-lg fa-bookmark"></i>
+        {% else %}
+        <i class="fa-regular fa-lg fa-bookmark"></i>
+        {% endif %}
+      </span>
+      {% if token_user in book.readers %}
+      <span>Unread</span>
+      {% else %}
+      <span>Read</span>
+      {% endif %}
+    </button>
+    {% else %}
+    <button class="button is-success is-rounded" id="collect-book-button" type="button" onclick="collectBook()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-box-archive"></i>
       </span>
       <span>Collect</span>
     </button>
-    {% elif token_user in book.readers %}
-    <button class="button is-info is-rounded" id="unread-book-button" type="button">
+    <button class="button is-info is-rounded" id="wish-book-button" type="button" onclick="wishBook()">
       <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-book"></i>
+        {% if token_user in book.wishers %}
+        <i class="fa-solid fa-lg fa-star"></i>
+        {% else %}
+        <i class="fa-regular fa-lg fa-star"></i>
+        {% endif %}
       </span>
-      <span>Unread</span>
-    </button>
-    {% else %}
-    <button class="button is-success is-rounded" id="read-book-button" type="button">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-book-open"></i>
-      </span>
-      <span>Read</span>
+      {% if token_user in book.wishers %}
+      <span>Unwish</span>
+      {% else %}
+      <span>Wish</span>
+      {% endif %}
     </button>
     {% endif %}
     {% if token_user.role >= 2 %}
@@ -165,16 +186,7 @@
       {{ series_column(_series) }}
     {% endfor %}
   </div>
-  {% if book.wishers %}
-  <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Wishers</h3>
-  </div>
-  <div class="columns is-multiline is-centered is-mobile">
-    {% for _wisher in book.wishers %}
-      {{ user_column(_wisher) }}
-    {% endfor %}
-  </div>
-  {% else %}
+  {% if book.is_collected %}
   <div class="block has-text-centered">
     <h3 class="subtitle is-3">Readers</h3>
   </div>
@@ -183,6 +195,93 @@
       {{ user_column(_reader) }}
     {% endfor %}
   </div>
+  {% else %}
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Wishers</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _wisher in book.wishers %}
+      {{ user_column(_wisher) }}
+    {% endfor %}
+  </div>
   {% endif %}
 </section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+{% if book.is_collected %}
+function discardBook(){
+  const caller = "discard-book-button";
+
+  addLoading(caller);
+  fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location.reload();
+  }).catch((response) => response.json().then((msg) => {
+      alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+function readBook(){
+  const caller = "read-book-button";
+
+  addLoading(caller);
+  fetch(`/api/v0/books/{{ book.book_id }}/read`, {
+    method: "PUT",
+    headers: headers,
+    body: JSON.stringify({
+      "reader_id": {{ token_user.user_id }}
+    }),
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location.reload();
+  }).catch((response) => response.json().then((msg) => {
+      alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% else %}
+function collectBook(){
+  const caller = "collect-book-button";
+
+  addLoading(caller);
+  fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
+    method: "POST",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location.reload();
+  }).catch((response) => response.json().then((msg) => {
+      alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+function wishBook(){
+  const caller = "wish-book-button";
+
+  addLoading(caller);
+  fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
+    method: "PUT",
+    headers: headers,
+    body: JSON.stringify({
+      "wisher_id": {{ token_user.user_id }}
+    }),
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location.reload();
+  }).catch((response) => response.json().then((msg) => {
+      alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
 {% endblock %}
