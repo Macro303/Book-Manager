@@ -171,12 +171,12 @@ class Role(db.Entity):
 
 class Series(db.Entity):
     series_id: int = PrimaryKey(int, auto=True)
-    title: str = Required(str, unique=True)
+    name: str = Required(str, unique=True)
 
     books: list[BookSeries] = Set(BookSeries)
 
     def to_schema(self) -> SeriesRead:
-        return SeriesRead(series_id=self.series_id, title=self.title)
+        return SeriesRead(series_id=self.series_id, name=self.name)
 
 
 class User(db.Entity):

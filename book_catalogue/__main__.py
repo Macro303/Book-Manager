@@ -39,7 +39,15 @@ async def startup_event() -> None:
     setup_logging()
 
     LOGGER.info(f"Listening on {settings.website.host}:{settings.website.port}")
-    LOGGER.info(f"Database initialized at: {sqlite_filepath}")
+    LOGGER.info(f"Database setup at: {sqlite_filepath}")
+    source = (
+        "OpenLibrary"
+        if settings.source.open_library
+        else "GoogleBooks"
+        if settings.source.google_books
+        else "ERROR"
+    )
+    LOGGER.info(f"New info pulled from: {source}")
     LOGGER.info(f"{app.title} v{app.version} started")
 
 

@@ -235,17 +235,17 @@ def edit_book(request: Request, book_id: int, token_user: User | None = Depends(
 def list_series(
     request: Request,
     token_user: User | None = Depends(get_token_user),
-    title: str = "",
+    name: str = "",
 ):
     if not token_user:
         return RedirectResponse("/")
     with db_session:
         series_list = SeriesController.list_series()
-        if title:
+        if name:
             series_list = [
                 x
                 for x in series_list
-                if title.casefold() in x.title.casefold() or x.title.casefold() in title.casefold()
+                if name.casefold() in x.name.casefold() or x.name.casefold() in name.casefold()
             ]
         return templates.TemplateResponse(
             "list_series.html",
@@ -253,7 +253,7 @@ def list_series(
                 "request": request,
                 "token_user": token_user.to_schema(),
                 "series_list": sorted({x.to_schema() for x in series_list}),
-                "filters": {"title": title},
+                "filters": {"name": name},
             },
         )
 
@@ -433,7 +433,9 @@ def user_wishlist(
                 "series_list": sorted(
                     {y.series.to_schema() for x in all_wishlist for y in x.series}
                 ),
-                "publisher_list": sorted({x.publisher.to_schema() for x in all_wishlist}),
+                "publisher_list": sorted(
+                    {x.publisher.to_schema() for x in all_wishlist if x.publisher}
+                ),
                 "filters": {
                     "author_id": author_id,
                     "format_id": format_id,

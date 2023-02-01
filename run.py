@@ -12,7 +12,7 @@ def main() -> None:
         port=settings.website.port,
         use_colors=True,
         server_header=False,
-        reload=True,
+        reload=settings.website.reload,
         log_config=None,
     )
 
