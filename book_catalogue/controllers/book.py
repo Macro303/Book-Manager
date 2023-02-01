@@ -147,7 +147,11 @@ class BookController:
 
         settings = Settings.load()
         if settings.source.open_library:
-            updates = open_library.lookup_book(isbn=book.isbn, open_library_id=book.open_library_id)
+            updates = open_library.lookup_book(
+                isbn=book.isbn,
+                open_library_id=book.open_library_id,
+                google_books_id=book.google_books_id,
+            )
             updates.series = [
                 BookSeriesWrite(series_id=x.series.series_id, number=x.number) for x in book.series
             ]

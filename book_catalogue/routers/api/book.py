@@ -69,12 +69,7 @@ def reset_all_books(load_new_fields: bool = False):
             if load_new_fields:
                 BookController.load_new_field(book_id=_book.book_id)
             else:
-                try:
-                    BookController.reset_book(book_id=_book.book_id)
-                except HTTPException as err:
-                    if err.detail == "No GoogleBooks result found.":
-                        continue
-                    raise err
+                BookController.reset_book(book_id=_book.book_id)
 
 
 @router.put(path="/{book_id}", responses={404: {"model": ErrorResponse}})

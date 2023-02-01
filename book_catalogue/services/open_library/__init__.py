@@ -1,4 +1,4 @@
-__all__ = ["lookup_book"]
+__all__ = ["lookup_book", "lookup_author"]
 
 from fastapi import HTTPException
 
@@ -12,7 +12,9 @@ from book_catalogue.schemas.publisher import PublisherWrite
 from book_catalogue.services.open_library.service import OpenLibrary
 
 
-def lookup_book(isbn: str, open_library_id: str | None = None) -> BookWrite:
+def lookup_book(
+    isbn: str, open_library_id: str | None = None, google_books_id: str | None = None
+) -> BookWrite:
     session = OpenLibrary()
     if open_library_id:
         edition = session.get_edition(edition_id=open_library_id)
@@ -74,7 +76,7 @@ def lookup_book(isbn: str, open_library_id: str | None = None) -> BookWrite:
         format_id=format.format_id if format else None,
         identifiers=Identifiers(
             goodreads_id=next(iter(edition.identifiers.goodreads), None),
-            google_books_id=next(iter(edition.identifiers.google), None),
+            google_books_id=google_books_id or next(iter(edition.identifiers.google), None),
             isbn=isbn,
             library_thing_id=next(iter(edition.identifiers.librarything), None),
             open_library_id=edition.edition_id,
