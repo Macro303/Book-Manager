@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.publisher import PublisherController
-from book_catalogue.schemas.author import AuthorWrite, RoleWrite
+from book_catalogue.schemas.author import AuthorWrite, Identifiers as AuthorIdentifiers, RoleWrite
 from book_catalogue.schemas.book import BookAuthorWrite, BookWrite, Identifiers
 from book_catalogue.schemas.format import FormatWrite
 from book_catalogue.schemas.publisher import PublisherWrite
@@ -101,7 +101,7 @@ def lookup_author(open_library_id: str | None = None) -> AuthorWrite:
 
     return AuthorWrite(
         bio=author.get_bio(),
-        identifiers=Identifiers(
+        identifiers=AuthorIdentifiers(
             goodreads_id=author.remote_ids.goodreads,
             library_thing_id=author.remote_ids.librarything,
             open_library_id=open_library_id,

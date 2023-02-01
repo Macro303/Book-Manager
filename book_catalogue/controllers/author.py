@@ -65,8 +65,8 @@ class AuthorController:
 
     @classmethod
     def lookup_author(cls, open_library_id: str) -> Author:
-        if _ := Author.get(open_library_id=open_library_id):
-            raise HTTPException(status_code=409, detail="Author already exists.")
+        if author := Author.get(open_library_id=open_library_id):
+            return author
 
         from book_catalogue.services import open_library
 

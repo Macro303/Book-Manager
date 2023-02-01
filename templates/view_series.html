@@ -18,7 +18,7 @@
   </div>
   <div class="columns is-multiline is-centered is-mobile">
     {% for _book, number in book_list %}
-      {{ book_column(_book, series=(series.title, number)) }}
+      {{ book_column(_book, series=(series.name, number)) }}
     {% endfor %}
   </div>
 </section>
