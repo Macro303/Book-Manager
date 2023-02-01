@@ -6,8 +6,8 @@ from fastapi import HTTPException
 from pony.orm import flush
 
 from book_catalogue.database.tables import Author, Role
-from book_catalogue.schemas.author import AuthorWrite, Identifiers, RoleWrite
-from book_catalogue.services.open_library.service import OpenLibrary
+from book_catalogue.schemas.author import AuthorWrite, RoleWrite
+from book_catalogue.settings import Settings
 
 
 class AuthorController:
@@ -64,31 +64,25 @@ class AuthorController:
         raise HTTPException(status_code=404, detail="Author not found.")
 
     @classmethod
-    def _parse_open_library(cls, open_library_id: str) -> AuthorWrite:
-        session = OpenLibrary(cache=None)
-        result = session.get_author(author_id=open_library_id)
-
-        return AuthorWrite(
-            bio=result.get_bio(),
-            identifiers=Identifiers(
-                goodreads_id=result.remote_ids.goodreads,
-                library_thing_id=result.remote_ids.librarything,
-                open_library_id=open_library_id,
-            ),
-            # TODO image_url
-            name=result.name,
-        )
-
-    @classmethod
     def lookup_author(cls, open_library_id: str) -> Author:
-        if author := Author.get(open_library_id=open_library_id):
-            return author
+        if _ := Author.get(open_library_id=open_library_id):
+            raise HTTPException(status_code=409, detail="Author already exists.")
 
-        new_author = cls._parse_open_library(open_library_id=open_library_id)
-        if author := Author.get(name=new_author.name):
-            author.open_library_id = new_author.identifiers.open_library_id
-            flush()
-            return author
+        from book_catalogue.services import open_library
+
+        settings = Settings.load()
+        if settings.source.open_library:
+            new_author = open_library.lookup_author(open_library_id=open_library_id)
+            if author := Author.get(name=new_author.name):
+                return cls.update_author(author_id=author.author_id, updates=new_author)
+        elif settings.source.google_books:
+            raise HTTPException(
+                status_code=400, detail="No author lookup available for GoogleBooks."
+            )
+        else:  # noqa: RET506
+            raise HTTPException(
+                status_code=500, detail="Incorrect config setup, review source settings."
+            )
         return cls.create_author(new_author=new_author)
 
     @classmethod
@@ -98,8 +92,19 @@ class AuthorController:
         if not author.open_library_id:
             raise HTTPException(status_code=400, detail="Author doesn't have an OpenLibrary Id.")
 
-        updates = cls._parse_open_library(open_library_id=author.open_library_id)
-        updates.image_url = author.image_url
+        from book_catalogue.services import open_library
+
+        settings = Settings.load()
+        if settings.source.open_library:
+            updates = open_library.lookup_author(open_library_id=author.open_library_id)
+        elif settings.source.google_books:
+            raise HTTPException(
+                status_code=400, detail="No author lookup available for GoogleBooks."
+            )
+        else:  # noqa: RET506
+            raise HTTPException(
+                status_code=500, detail="Incorrect config setup, review source settings."
+            )
         return cls.update_author(author_id=author_id, updates=updates)
 
     @classmethod

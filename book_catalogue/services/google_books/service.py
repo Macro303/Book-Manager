@@ -87,10 +87,16 @@ class GoogleBooks:
 
     def get_book_by_isbn(self, isbn: str) -> Book:
         try:
-            result = self._get_request(endpoint="/volumes", params={"q", f"isbn:{isbn}"})
-            return parse_obj_as(Book, result)
+            results = self._get_request(endpoint="/volumes", params={"q": f"isbn:{isbn}"})
+            results = results.get("items", [])
+            results = parse_obj_as(list[Book], results)
+            if len(results) > 1:
+                results = [x for x in results if x.volume_info.get_isbn() == isbn]
+            if result := next(iter(results), None):
+                return result
+            raise HTTPException(status_code=400, detail="No GoogleBooks result found.")
         except ValidationError as err:
-            CONSOLE.print_exception(theme="ansi_dark")
+            CONSOLE.print(err)
             raise HTTPException(
                 status_code=500,
                 detail=f"Unable to validate GoogleBooks book with isbn: {isbn}",
@@ -101,7 +107,7 @@ class GoogleBooks:
             result = self._get_request(endpoint=f"/volumes/{book_id}")
             return parse_obj_as(Book, result)
         except ValidationError as err:
-            CONSOLE.print_exception(theme="ansi_dark")
+            CONSOLE.print(err)
             raise HTTPException(
                 status_code=500,
                 detail=f"Unable to validate GoogleBooks book with id: {book_id}",

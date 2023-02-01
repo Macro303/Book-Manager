@@ -14,9 +14,9 @@ class SeriesController:
 
     @classmethod
     def create_series(cls, new_series: SeriesWrite) -> Series:
-        if Series.get(title=new_series.title):
+        if Series.get(title=new_series.name):
             raise HTTPException(status_code=409, detail="Series already exists.")
-        series = Series(title=new_series.title)
+        series = Series(title=new_series.name)
         flush()
         return series
 
@@ -29,7 +29,7 @@ class SeriesController:
     @classmethod
     def update_series(cls, series_id: int, updates: SeriesWrite) -> Series:
         series = cls.get_series(series_id=series_id)
-        series.title = updates.title
+        series.name = updates.name
         flush()
         return series
 

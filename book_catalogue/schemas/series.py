@@ -4,23 +4,23 @@ from book_catalogue.schemas._base import BaseModel
 
 
 class BaseSeries(BaseModel):
-    title: str
+    name: str
 
     def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, BaseSeries):
             raise NotImplementedError()
-        return self.title < other.title
+        return self.name < other.name
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, BaseSeries):
             raise NotImplementedError()
-        return self.title == other.title
+        return self.name == other.name
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.title,
+                self.name,
             )
         )
 
@@ -31,7 +31,7 @@ class SeriesRead(BaseSeries):
 
     @property
     def display_name(self) -> str:
-        output = self.title
+        output = self.name
         if self.number:
             output += f" (#{self.number})"
         return output
@@ -39,17 +39,17 @@ class SeriesRead(BaseSeries):
     def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, SeriesRead):
             raise NotImplementedError()
-        if self.title != other.title:
-            return self.title < other.title
+        if self.name != other.name:
+            return self.name < other.name
         return (self.number or -1) < (other.number or -1)
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, SeriesRead):
             raise NotImplementedError()
-        return (self.title, (self.number or -1)) == (other.title, (other.number or -1))
+        return (self.name, (self.number or -1)) == (other.name, (other.number or -1))
 
     def __hash__(self):
-        return hash((type(self), self.title, (self.number or -1)))
+        return hash((type(self), self.name, (self.number or -1)))
 
 
 class SeriesWrite(BaseSeries):

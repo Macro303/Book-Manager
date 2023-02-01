@@ -5,7 +5,7 @@
 <section>
   <div class="box">
     <form id="edit-series-form">
-      {{ input("Title", "title", value=series.title) }}
+      {{ input("Nmae", "name", value=series.name) }}
     </form>
   </div>
   <div class="buttons is-centered">
@@ -40,7 +40,7 @@ function saveSeries(){
     method: "PATCH",
     headers: headers,
     body: JSON.stringify({
-      "title": details["title"],
+      "name": details["name"],
     }),
   }).then((response) => {
     if (response.ok){
