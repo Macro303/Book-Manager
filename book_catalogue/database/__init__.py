@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = ["sqlite_filepath"]
 
 from enum import Enum

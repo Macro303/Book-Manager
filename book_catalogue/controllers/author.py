@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = ["AuthorController"]
 
 from fastapi import HTTPException

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = ["CONSOLE"]
 
 from rich.console import Console

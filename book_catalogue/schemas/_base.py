@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = ["BaseModel"]
 
 from pydantic import BaseModel as PyModel, Extra

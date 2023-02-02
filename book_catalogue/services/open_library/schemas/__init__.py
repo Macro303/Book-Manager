@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = ["BaseModel", "DatetimeResource", "TextResource", "Resource", "Link"]
 
 from datetime import datetime

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = [
     "Author",
     "Book",
@@ -13,6 +11,7 @@ __all__ = [
 ]
 
 from datetime import date
+from typing import Optional as Opt
 
 from pony.orm import Database, Optional, PrimaryKey, Required, Set
 
@@ -38,7 +37,7 @@ class Author(db.Entity):
     library_thing_id: str | None = Optional(str, nullable=True)
     open_library_id: str | None = Optional(str, nullable=True, unique=True)
 
-    books: list[BookAuthor] = Set("BookAuthor")
+    books: list["BookAuthor"] = Set("BookAuthor")
 
     def to_schema(self) -> AuthorRead:
         return AuthorRead(
@@ -58,19 +57,19 @@ class Author(db.Entity):
 class Book(db.Entity):
     _table_ = "Books"
 
-    authors: list[BookAuthor] = Set("BookAuthor")
+    authors: list["BookAuthor"] = Set("BookAuthor")
     book_id: int = PrimaryKey(int, auto=True)
     description: str | None = Optional(str, nullable=True)
-    format: Format | None = Optional("Format", nullable=True)
+    format: Opt["Format"] = Optional("Format", nullable=True)
     image_url: str = Required(str)
     is_collected: bool = Optional(bool, default=False)
     publish_date: date | None = Optional(date, nullable=True)
-    publisher: Publisher | None = Optional("Publisher", nullable=True)
-    readers: list[User] = Set("User", table="Books_Readers", reverse="read_books")
-    series: list[BookSeries] = Set("BookSeries")
+    publisher: Opt["Publisher"] = Optional("Publisher", nullable=True)
+    readers: list["User"] = Set("User", table="Books_Readers", reverse="read_books")
+    series: list["BookSeries"] = Set("BookSeries")
     subtitle: str | None = Optional(str, nullable=True)
     title: str = Required(str)
-    wishers: list[User] = Set("User", table="Books_Wishers", reverse="wished_books")
+    wishers: list["User"] = Set("User", table="Books_Wishers", reverse="wished_books")
 
     goodreads_id: str | None = Optional(str, nullable=True)
     google_books_id: str | None = Optional(str, nullable=True)
@@ -108,7 +107,7 @@ class BookAuthor(db.Entity):
 
     author: Author = Required(Author)
     book: Book = Required(Book)
-    roles: list[Role] = Set("Role", table="Books_Authors_Roles")
+    roles: list["Role"] = Set("Role", table="Books_Authors_Roles")
 
     PrimaryKey(book, author)
 
@@ -123,7 +122,7 @@ class BookSeries(db.Entity):
 
     book: Book = Required(Book)
     number: int | None = Optional(int, nullable=True)
-    series: Series = Required("Series")
+    series: "Series" = Required("Series")
 
     PrimaryKey(book, series)
 
