@@ -6,3 +6,8 @@ img.profile {
   height: 64px !important;
   object-fit: cover;
 }
+
+img.profile-large {
+  height: 256px !important;
+  object-fit: cover;
+}

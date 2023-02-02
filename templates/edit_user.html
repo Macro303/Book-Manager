@@ -7,7 +7,7 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box has-text-centered">
         <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ user.username }}'s Profile Image" class="is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ user.image_url or '/static/img/logo.png' }}"/>
+          <img alt="{{ user.username }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ user.image_url or '/static/img/logo.png' }}"/>
         </figure>
       </div>
     </div>
@@ -25,14 +25,14 @@
     </div>
   </div>
   <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-user-button" onclick="saveUser()">
+    <button class="button is-success is-rounded" id="save-user-button" onclick="saveUser()" type="button">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-floppy-disk"></i>
       </span>
       <span>Save</span>
     </button>
     {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-user-button" onclick="deleteUser()">
+    <button class="button is-danger is-rounded" id="delete-user-button" onclick="deleteUser()" type="button">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-trash"></i>
       </span>
@@ -58,7 +58,7 @@ function saveUser(){
     body: JSON.stringify({
       "username": details["username"],
       "role": {% if token_user.role > user.role %}details["role"]{% else %}{{ user.role }}{% endif %},
-      "image_url": details["image_url"],
+      "image_url": details["image-url"],
     }),
   }).then((response) => {
     if (response.ok){
