@@ -5,9 +5,8 @@ from fastapi.templating import Jinja2Templates
 from pony.orm import db_session
 
 from book_catalogue import get_project_root
-from book_catalogue.database.tables import User
 from book_catalogue.controllers.user import UserController
-
+from book_catalogue.database.tables import User
 
 templates = Jinja2Templates(directory=get_project_root() / "templates")
 

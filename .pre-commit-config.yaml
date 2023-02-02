@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.239
+    rev: v0.0.240
     hooks:
       - id: ruff
   - repo: https://github.com/asottile/pyupgrade
@@ -51,7 +51,7 @@ repos:
 #          - --autofix
 #          - --indent=2
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 23.1.0
     hooks:
       - id: black
   - repo: https://github.com/pappasam/toml-sort

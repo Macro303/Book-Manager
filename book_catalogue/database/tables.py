@@ -191,4 +191,6 @@ class User(db.Entity):
     read_books: list[Book] = Set(Book, table="Books_Readers", reverse="readers")
 
     def to_schema(self) -> UserRead:
-        return UserRead(user_id=self.user_id, username=self.username, role=self.role, image_url=self.image_url)
+        return UserRead(
+            user_id=self.user_id, username=self.username, role=self.role, image_url=self.image_url
+        )

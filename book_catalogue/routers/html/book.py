@@ -1,18 +1,19 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
-from book_catalogue.routers.html._utils import templates, get_token_user
-from book_catalogue.controllers.book import BookController
 from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.book import BookController
 from book_catalogue.controllers.format import FormatController
-from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.publisher import PublisherController
+from book_catalogue.controllers.series import SeriesController
 from book_catalogue.database.tables import User
+from book_catalogue.routers.html._utils import get_token_user, templates
 
 router = APIRouter(prefix="/books", tags=["Books"])
+
 
 @router.get(path="", response_class=HTMLResponse)
 def list_books(
