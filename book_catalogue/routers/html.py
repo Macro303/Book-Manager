@@ -266,7 +266,9 @@ def view_series(
         return RedirectResponse("/")
     with db_session:
         series = SeriesController.get_series(series_id=series_id)
-        book_list = sorted({(x.book.to_schema(), x.number) for x in series.books})
+        book_list = sorted(
+            {(x.book.to_schema(), x.number) for x in series.books}, key=lambda x: x[1] or 0
+        )
         return templates.TemplateResponse(
             "view_series.html",
             {

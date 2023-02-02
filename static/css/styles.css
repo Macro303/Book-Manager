@@ -1,3 +1,8 @@
 a {
-  font-family: "Patrick Hand SC"
+  font-family: "Overlock SC"
+}
+
+img.profile {
+  height: 64px !important;
+  object-fit: cover;
 }

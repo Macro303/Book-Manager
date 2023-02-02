@@ -44,6 +44,14 @@ def delete_author(author_id: int):
         AuthorController.delete_author(author_id=author_id)
 
 
+@router.put(path="", status_code=204)
+def reset_all_authors():
+    with db_session:
+        for _author in AuthorController.list_authors():
+            if _author.open_library_id:
+                AuthorController.reset_author(author_id=_author.author_id)
+
+
 @router.put(path="/{author_id}", responses={404: {"model": ErrorResponse}})
 def reset_author(author_id: int) -> AuthorRead:
     with db_session:

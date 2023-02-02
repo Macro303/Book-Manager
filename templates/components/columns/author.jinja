@@ -4,8 +4,8 @@
     <div class="card-content">
       <div class="media">
         <div class="media-left">
-          <figure class="image is-64x64 is-rounded">
-            <img alt="{{ obj.name }}' profile image" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ obj.image_url or '/static/img/logo.png' }}"/>
+          <figure class="image is-64x64">
+            <img alt="{{ obj.name }}' profile image" class="profile is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ obj.image_url or '/static/img/logo.png' }}"/>
           </figure>
         </div>
         <div class="media-content">

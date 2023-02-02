@@ -118,20 +118,9 @@ class BookController:
 
         settings = Settings.load()
         if settings.source.open_library:
-            new_book = open_library.lookup_book(
-                isbn=book.isbn, open_library_id=book.open_library_id
-            )
-            new_book.series = []
+            new_book = open_library.lookup_book(isbn=isbn, open_library_id=None)
         elif settings.source.google_books:
-            new_book = google_books.lookup_book(
-                isbn=book.isbn, google_books_id=book.google_books_id
-            )
-            new_book.format_id = book.format.format_id if book.format else None
-            new_book.identifiers.goodreads_id = book.goodreads_id
-            new_book.identifiers.library_thing_id = book.library_thing_id
-            new_book.identifiers.open_library_id = book.open_library_id
-            new_book.series = []
-            new_book.subtitle = book.subtitle
+            new_book = google_books.lookup_book(isbn=isbn, google_books_id=None)
         else:
             raise HTTPException(
                 status_code=500, detail="Incorrect config setup, review source settings."
