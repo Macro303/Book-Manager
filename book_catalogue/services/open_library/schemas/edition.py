@@ -94,6 +94,9 @@ class Edition(BaseModel):
     translated_from: list[Resource] = Field(default_factory=list)
     translation_of: str | None = None
     type: Resource
+    uri_descriptions: list[str] = Field(default_factory=list)
+    uris: list[str] = Field(default_factory=list)
+    url: list[str] = Field(default_factory=list)
     weight: str | None = None
     work_title: list[str] = Field(default_factory=list)
     work_titles: list[str] = Field(default_factory=list)
