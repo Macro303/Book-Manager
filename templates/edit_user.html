@@ -1,0 +1,94 @@
+{% extends "base.jinja" %}
+{% from "components/forms.jinja" import input, number_input, textarea %}
+{% block title %}{% endblock %}
+{% block content %}
+<section>
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      <div class="box has-text-centered">
+        <figure class="image is-256x256 is-inline-block">
+          <img alt="{{ user.username }}'s Profile Image" class="is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ user.image_url or '/static/img/logo.png' }}"/>
+        </figure>
+      </div>
+    </div>
+    <div class="column">
+      <div class="box">
+        <form id="edit-user-form">
+          {{ input("Username", "username", value=user.username) }}
+          {% if token_user.role > user.role %}
+          {{ number_input("Role", "role", value=user.role, max=token_user.role - 1) }}
+          {% endif %}
+          <div class="divider is-info is-size-5">Identifiers</div>
+          {{ input("Image Url", "image-url", value=user.image_url or "") }}
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="buttons is-centered">
+    <button class="button is-success is-rounded" id="save-user-button" onclick="saveUser()">
+      <span class="icon is-medium">
+        <i class="fa-solid fa-lg fa-floppy-disk"></i>
+      </span>
+      <span>Save</span>
+    </button>
+    {% if token_user.role >= 3 %}
+    <button class="button is-danger is-rounded" id="delete-user-button" onclick="deleteUser()">
+      <span class="icon is-medium">
+        <i class="fa-solid fa-lg fa-trash"></i>
+      </span>
+      <span>Delete</span>
+    </button>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+function saveUser(){
+  const caller = "save-user-button";
+  let editUserForm = document.getElementById("edit-user-form");
+  let details = Object.fromEntries(new FormData(editUserForm));
+  console.log(details);
+
+  addLoading(caller);
+  fetch("/api/v0/users/{{ user.user_id }}", {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify({
+      "username": details["username"],
+      "role": {% if token_user.role > user.role %}details["role"]{% else %}{{ user.role }}{% endif %},
+      "image_url": details["image_url"],
+    }),
+  }).then((response) => {
+    if (response.ok){
+      return response.json();
+    }
+    return Promise.reject(response);
+  }).then((data) => {
+    window.location = "/users/{{ user.user_id }}";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
+{% if token_user.role >= 3 %}
+function deleteUser(){
+  const caller = "delete-user-button";
+
+  addLoading(caller);
+  fetch("/api/v0/users/{{ user.user_id }}", {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location = "/users";
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
+{% endblock %}

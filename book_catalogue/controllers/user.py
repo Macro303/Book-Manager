@@ -16,7 +16,7 @@ class UserController:
     def create_user(cls, new_user: UserWrite) -> User:
         if User.get(username=new_user.username):
             raise HTTPException(status_code=409, detail="User already exists.")
-        user = User(username=new_user.username, role=new_user.role)
+        user = User(username=new_user.username, role=new_user.role, image_url=new_user.image_url)
         flush()
         return user
 
@@ -29,6 +29,7 @@ class UserController:
     @classmethod
     def update_user(cls, user_id: int, updates: UserWrite) -> User:
         user = cls.get_user(user_id=user_id)
+        user.image_url = updates.image_url
         user.role = updates.role
         user.username = updates.username
         flush()

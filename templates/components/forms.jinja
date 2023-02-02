@@ -9,6 +9,17 @@
 
 
 
+{% macro number_input(label, name, value=0, min=0, max=1000) %}
+<div class="field">
+  <label class="label has-text-info-light">{{ label }}</label>
+  <div class="control is-expanded">
+    <input class="input is-rounded" name="{{ name }}" max={{ max }} min={{ min }} placeholder="{{ label }}" type="number" value={{ value }}>
+  </div>
+</div>
+{% endmacro %}
+
+
+
 {% macro textarea(label, name, value="") %}
 <div class="field">
   <label class="label has-text-info-light">{{ label }}</label>

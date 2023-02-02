@@ -182,12 +182,13 @@ class Series(db.Entity):
 class User(db.Entity):
     _table_ = "Users"
 
+    image_url: str | None = Optional(str, nullable=True)
+    role: int = Optional(int, default=0)
     user_id: int = PrimaryKey(int, auto=True)
     username: str = Required(str)
-    role: int = Optional(int, default=0)
 
     wished_books: list[Book] = Set(Book, table="Books_Wishers", reverse="wishers")
     read_books: list[Book] = Set(Book, table="Books_Readers", reverse="readers")
 
     def to_schema(self) -> UserRead:
-        return UserRead(user_id=self.user_id, username=self.username, role=self.role)
+        return UserRead(user_id=self.user_id, username=self.username, role=self.role, image_url=self.image_url)

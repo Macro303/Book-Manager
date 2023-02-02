@@ -81,7 +81,7 @@ function saveAuthor(){
     }
     return Promise.reject(response);
   }).then((data) => {
-    window.location = "/authors/{{ author.identifiers.author_id }}";
+    window.location = "/authors/{{ author.author_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));
@@ -103,7 +103,7 @@ function refreshAuthor(){
     }
     return Promise.reject(response);
   }).then((data) => {
-    window.location = "/authors/{{ author.identifiers.author_id }}";
+    window.location = "/authors/{{ author.author_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));

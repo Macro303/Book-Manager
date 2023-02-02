@@ -4,6 +4,7 @@ from book_catalogue.schemas._base import BaseModel
 
 
 class BaseUser(BaseModel):
+    image_url: str | None = None
     role: int = 0
     username: str
 

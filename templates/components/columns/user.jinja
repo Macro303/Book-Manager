@@ -5,7 +5,7 @@
       <div class="media">
         <div class="media-left">
           <figure class="image is-64x64">
-            <img alt="{{ obj.username }}' profile image" class="profile is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="/static/img/logo.png"/>
+            <img alt="{{ obj.username }}' profile image" class="profile is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/128x128'" src="{{ obj.image_url or '/static/img/logo.png' }}"/>
           </figure>
         </div>
         <div class="media-content">
