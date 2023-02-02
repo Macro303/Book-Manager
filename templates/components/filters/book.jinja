@@ -23,7 +23,7 @@
           <select name="format_id">
             <option value=0{% if not filters['format_id'] %} selected{% endif %}>Select Format</option>
             {% for _format in format_list %}
-            <option value={{ _format.format_id }}{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name }}</option>
+            <option value={{ _format.format_id or -1 }}{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name or "None" }}</option>
             {% endfor %}
           </select>
         </div>

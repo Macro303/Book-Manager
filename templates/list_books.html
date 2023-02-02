@@ -53,11 +53,10 @@ function addBook(){
       "isbn": details["isbn"],
     }),
   }).then((response) => {
-    if (response.ok){
-      return response.json();
+    if (!response.ok){
+      return Promise.reject(response);
     }
-    return Promise.reject(response);
-  }).then((data) => {
+    addBookForm.reset();
     window.location.reload();
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);

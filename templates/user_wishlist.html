@@ -54,11 +54,10 @@ function addWishlistBook(){
       "wisher_id": {{ token_user.user_id }},
     }),
   }).then((response) => {
-    if (response.ok){
-      return response.json();
+    if (!response.ok){
+      return Promise.reject(response);
     }
-    return Promise.reject(response);
-  }).then((data) => {
+    addWishlistBookForm.reset();
     window.location.reload();
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
