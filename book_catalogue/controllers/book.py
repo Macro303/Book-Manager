@@ -5,6 +5,7 @@ from pony.orm import flush
 
 from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.format import FormatController
+from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
@@ -29,6 +30,7 @@ class BookController:
             format=FormatController.get_format(format_id=new_book.format_id)
             if new_book.format_id
             else None,
+            genres=[GenreController.get_genre(genre_id=x) for x in new_book.genre_ids],
             image_url=new_book.image_url,
             publish_date=new_book.publish_date,
             publisher=PublisherController.get_publisher(publisher_id=new_book.publisher_id)
@@ -74,6 +76,7 @@ class BookController:
         book.format = (
             FormatController.get_format(format_id=updates.format_id) if updates.format_id else None
         )
+        book.genres = [GenreController.get_genre(genre_id=x) for x in updates.genre_ids]
         book.image_url = updates.image_url
         book.publish_date = updates.publish_date
         book.publisher = (
@@ -188,6 +191,6 @@ class BookController:
             raise HTTPException(
                 status_code=500, detail="Incorrect config setup, review source settings."
             )
-        book.publish_date = updates.publish_date
+        book.genres = [GenreController.get_genre(genre_id=x) for x in updates.genre_ids]
         flush()
         return book

@@ -39,6 +39,15 @@ class AccessInfo(CamelModel):
     web_reader_link: str
 
 
+class Layer(CamelModel):
+    layer_id: str
+    volume_annotations_version: str
+
+
+class LayerInfo(CamelModel):
+    layers: list[Layer]
+
+
 class SaleInfo(CamelModel):
     country: str
     is_ebook: bool
@@ -51,8 +60,8 @@ class SearchInfo(CamelModel):
 
 class Dimensions(CamelModel):
     height: str
-    width: str
-    thickness: str
+    width: str | None = None
+    thickness: str | None = None
 
 
 class Identifier(CamelModel):
@@ -61,6 +70,8 @@ class Identifier(CamelModel):
 
 
 class ImageLinks(CamelModel):
+    extra_large: str | None = None
+    large: str | None = None
     medium: str | None = None
     small: str | None = None
     small_thumbnail: str
@@ -141,6 +152,7 @@ class Book(CamelModel):
     book_id: str = Field(alias="id")
     etag: str
     kind: str
+    layer_info: LayerInfo | None = None
     sale_info: SaleInfo
     search_info: SearchInfo | None = None
     self_link: str

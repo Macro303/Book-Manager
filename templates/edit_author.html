@@ -13,13 +13,12 @@
     </div>
     <div class="column">
       <div class="box">
-        <form id="edit-author-form">
+        <form id="edit-form">
           {{ input("Name", "name", value=author.name) }}
           <div class="divider is-info is-size-5">More Details</div>
           {{ textarea("Bio", "bio", value=author.bio or "") }}
           <div class="divider is-info is-size-5">Identifiers</div>
           {{ input("Image Url", "image-url", value=author.image_url or "") }}
-          {{ input("Amazon", "amazon", value=author.identifiers.amazon_id or "") }}
           {{ input("Goodreads", "goodreads", value=author.identifiers.goodreads_id or "") }}
           {{ input("LibraryThing", "library-thing", value=author.identifiers.library_thing_id or "") }}
           {{ input("OpenLibrary", "open-library", value=author.identifiers.open_library_id or "") }}
@@ -28,20 +27,20 @@
     </div>
   </div>
   <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-author-button" onclick="saveAuthor()">
+    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveAuthor()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-floppy-disk"></i>
       </span>
       <span>Save</span>
     </button>
-    <button class="button is-warning is-rounded" id="refresh-author-button" onclick="refreshAuthor()">
+    <button class="button is-warning is-rounded" id="refresh-button" type="button" onclick="refreshAuthor()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-rotate-left"></i>
       </span>
       <span>Refresh</span>
     </button>
     {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-author-button" onclick="deleteAuthor()">
+    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteAuthor()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-trash"></i>
       </span>
@@ -55,10 +54,10 @@
 {{ super() }}
 <script type="text/javascript">
 function saveAuthor(){
-  const caller = "save-author-button";
-  let editAuthorForm = document.getElementById("edit-author-form");
-  let details = Object.fromEntries(new FormData(editAuthorForm));
-  console.log(details);
+  const caller = "save-button";
+  let editForm = document.getElementById("edit-form");
+  let formDetails = Object.fromEntries(new FormData(editForm));
+  console.log(formDetails);
 
   addLoading(caller);
   fetch("/api/v0/authors/{{ author.author_id }}", {
@@ -67,20 +66,17 @@ function saveAuthor(){
     body: JSON.stringify({
       "name": details["name"],
       "bio": details["bio"],
-      "image_url": details["image_url"],
+      "image_url": details["image-url"],
       "identifiers": {
-        "amazon_id": details["amazon_id"],
         "goodreads_id": details["goodreads"],
         "library_thing_id": details["library-thing"],
         "open_library_id": details["open-library"]
       },
     }),
   }).then((response) => {
-    if (response.ok){
-      return response.json();
+    if (!response.ok){
+      return Promise.reject(response);
     }
-    return Promise.reject(response);
-  }).then((data) => {
     window.location = "/authors/{{ author.author_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
@@ -88,21 +84,16 @@ function saveAuthor(){
 }
 
 function refreshAuthor(){
-  const caller = "refresh-author-button";
-  let editAuthorForm = document.getElementById("edit-author-form");
-  let details = Object.fromEntries(new FormData(editAuthorForm));
-  console.log(details);
+  const caller = "refresh-button";
 
   addLoading(caller);
   fetch("/api/v0/authors/{{ author.author_id }}", {
     method: "PUT",
     headers: headers,
   }).then((response) => {
-    if (response.ok){
-      return response.json();
+    if (!response.ok){
+      return Promise.reject(response);
     }
-    return Promise.reject(response);
-  }).then((data) => {
     window.location = "/authors/{{ author.author_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
@@ -110,7 +101,7 @@ function refreshAuthor(){
 }
 {% if token_user.role >= 3 %}
 function deleteAuthor(){
-  const caller = "delete-author-button";
+  const caller = "delete-button";
 
   addLoading(caller);
   fetch("/api/v0/authors/{{ author.author_id }}", {

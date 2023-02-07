@@ -12,6 +12,8 @@ from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
 from book_catalogue.database.tables import User
 from book_catalogue.routers.html._utils import get_token_user, templates
+from book_catalogue.schemas.format import FormatRead
+from book_catalogue.schemas.publisher import PublisherRead
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -149,9 +151,19 @@ def user_wishlist(
                 "author_list": sorted(
                     {y.author.to_schema() for x in all_wishlist for y in x.authors}
                 ),
-                "format_list": sorted({x.format or "None" for x in all_wishlist}),
+                "format_list": sorted(
+                    {
+                        x.format.to_schema() if x.format else FormatRead(format_id=-1, name="None")
+                        for x in all_wishlist
+                    }
+                ),
                 "publisher_list": sorted(
-                    {x.publisher.to_schema() for x in all_wishlist if x.publisher}
+                    {
+                        x.publisher.to_schema()
+                        if x.publisher
+                        else PublisherRead(publisher_id=-1, name="None")
+                        for x in all_wishlist
+                    }
                 ),
                 "series_list": sorted(
                     {y.series.to_schema() for x in all_wishlist for y in x.series}

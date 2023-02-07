@@ -15,6 +15,7 @@ from book_catalogue.isbn import to_isbn_13
 from book_catalogue.schemas._base import BaseModel
 from book_catalogue.schemas.author import AuthorRead
 from book_catalogue.schemas.format import FormatRead
+from book_catalogue.schemas.genre import GenreRead
 from book_catalogue.schemas.publisher import PublisherRead
 from book_catalogue.schemas.series import SeriesRead
 from book_catalogue.schemas.user import UserRead
@@ -75,6 +76,7 @@ class BookRead(BaseBook):
     authors: list[AuthorRead] = Field(default_factory=list)
     book_id: int
     format: FormatRead | None = None
+    genres: list[GenreRead] = Field(default_factory=list)
     publisher: PublisherRead | None = None
     readers: list[UserRead] = Field(default_factory=list)
     series: list[SeriesRead] = Field(default_factory=list)
@@ -128,6 +130,7 @@ class BookSeriesWrite(BaseModel):
 class BookWrite(BaseBook):
     authors: list[BookAuthorWrite] = Field(default_factory=list)
     format_id: int | None = None
+    genre_ids: list[int] = Field(default_factory=list)
     publisher_id: int | None = None
     reader_ids: list[int] = Field(default_factory=list)
     series: list[BookSeriesWrite] = Field(default_factory=list)

@@ -4,6 +4,7 @@ __all__ = [
     "BookAuthor",
     "BookSeries",
     "Format",
+    "Genre",
     "Publisher",
     "Role",
     "Series",
@@ -18,6 +19,7 @@ from pony.orm import Database, Optional, PrimaryKey, Required, Set
 from book_catalogue.schemas.author import AuthorRead, Identifiers as AuthorIdentifiers, RoleRead
 from book_catalogue.schemas.book import BookRead, Identifiers as BookIdentifiers
 from book_catalogue.schemas.format import FormatRead
+from book_catalogue.schemas.genre import GenreRead
 from book_catalogue.schemas.publisher import PublisherRead
 from book_catalogue.schemas.series import SeriesRead
 from book_catalogue.schemas.user import UserRead
@@ -61,6 +63,7 @@ class Book(db.Entity):
     book_id: int = PrimaryKey(int, auto=True)
     description: str | None = Optional(str, nullable=True)
     format: Opt["Format"] = Optional("Format", nullable=True)
+    genres: list["Genre"] = Set("Genre", table="Books_Genres")
     image_url: str = Required(str)
     is_collected: bool = Optional(bool, default=False)
     publish_date: date | None = Optional(date, nullable=True)
@@ -83,6 +86,7 @@ class Book(db.Entity):
             book_id=self.book_id,
             description=self.description,
             format=self.format.to_schema() if self.format else None,
+            genres=sorted({x.to_schema() for x in self.genres}),
             identifiers=BookIdentifiers(
                 goodreads_id=self.goodreads_id,
                 google_books_id=self.google_books_id,
@@ -142,6 +146,18 @@ class Format(db.Entity):
 
     def to_schema(self) -> FormatRead:
         return FormatRead(format_id=self.format_id, name=self.name)
+
+
+class Genre(db.Entity):
+    _table_ = "Genres"
+
+    genre_id: int = PrimaryKey(int, auto=True)
+    name: str = Required(str, unique=True)
+
+    books: list[Book] = Set(Book, table="Books_Genres")
+
+    def to_schema(self) -> GenreRead:
+        return GenreRead(genre_id=self.genre_id, name=self.name)
 
 
 class Publisher(db.Entity):

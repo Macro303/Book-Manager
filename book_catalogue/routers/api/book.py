@@ -5,6 +5,7 @@ from pony.orm import db_session, flush
 
 from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.book import BookController
+from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
 from book_catalogue.database.tables import BookAuthor, BookSeries
@@ -159,6 +160,18 @@ def set_authors(book_id: int, authors: list[BookAuthorWrite] = Body(embed=True))
                 author=AuthorController.get_author(author_id=_author.author_id),
                 roles=[AuthorController.get_role(role_id=x) for x in _author.role_ids],
             )
+        flush()
+        return book.to_schema()
+
+
+@router.patch(
+    path="/{book_id}/genres",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def set_genres(book_id: int, genre_ids: list[int] = Body(embed=True)) -> BookRead:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        book.genres = [GenreController.get_genre(genre_id=x) for x in genre_ids]
         flush()
         return book.to_schema()
 

@@ -65,6 +65,7 @@ ignore = [
   "ANN102",
   "ANN204",
   "ANN206",
+  "C901",
   "PLR0913",
   "PLR2004"
 ]
@@ -111,7 +112,7 @@ ban-relative-imports = "all"
 combine-as-imports = true
 
 [tool.ruff.mccabe]
-max-complexity = 10
+max-complexity = 18
 
 [tool.ruff.pep8-naming]
 classmethod-decorators = ["classmethod", "pydantic.validator"]

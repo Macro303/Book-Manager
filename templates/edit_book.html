@@ -13,7 +13,7 @@
     </div>
     <div class="column">
       <div class="box">
-        <form id="edit-book-form">
+        <form id="edit-form">
           {{ input("Title", "title", value=book.title) }}
           {{ input("Subtitle", "subtitle", value=book.subtitle or "") }}
           <!-- region Authors -->
@@ -41,7 +41,7 @@
             </div>
             {% endfor %}
             <div class="control">
-              <button class="button is-warning is-rounded is-outlined" type="button">
+              <button class="button is-warning is-rounded is-outlined" id="remove-author-button" type="button" onclick="removeAuthor()">
                 <span>Remove</span>
                 <span class="icon is-medium">
                   <i class="fa-solid fa-lg fa-xmark"></i>
@@ -73,7 +73,7 @@
             </div>
             <div class="control">
               <div class="buttons is-centered">
-                <button class="button is-success is-rounded is-outlined" type="button" id="add-author-button">
+                <button class="button is-success is-rounded is-outlined" id="add-author-button" type="button" onclick="addAuthor()">
                   <span class="icon is-medium">
                     <i class="fa-solid fa-lg fa-plus"></i>
                   </span>
@@ -132,7 +132,7 @@
               <input class="input is-rounded" disabled placeholder="Number" type="number" value={{ series.number or 0 }}>
             </div>
             <div class="control">
-              <button class="button is-warning is-rounded is-outlined" type="button">
+              <button class="button is-warning is-rounded is-outlined" id="remove-series-button" type="button" onclick="removeSeries()">
                 <span>Remove</span>
                 <span class="icon is-medium">
                   <i class="fa-solid fa-lg fa-xmark"></i>
@@ -157,7 +157,7 @@
             </div>
             <div class="control">
               <div class="buttons is-centered">
-                <button class="button is-success is-rounded is-outlined" type="button" id="add-series-button">
+                <button class="button is-success is-rounded is-outlined" id="add-series-button" type="button" onclick="addSeries()">
                   <span class="icon is-medium">
                     <i class="fa-solid fa-lg fa-plus"></i>
                   </span>
@@ -179,20 +179,20 @@
     </div>
   </div>
   <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-book-button" onclick="saveBook()">
+    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveBook()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-floppy-disk"></i>
       </span>
       <span>Save</span>
     </button>
-    <button class="button is-warning is-rounded" id="refresh-book-button" onclick="refreshBook()">
+    <button class="button is-warning is-rounded" id="refresh-button" type="button" onclick="refreshBook()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-rotate-left"></i>
       </span>
       <span>Refresh</span>
     </button>
     {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-book-button" onclick="deleteBook()">
+    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteBook()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-trash"></i>
       </span>
@@ -205,11 +205,47 @@
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
-function saveBook(){
-  const caller = "save-book-button";
-  let editBookForm = document.getElementById("edit-book-form");
-  let details = Object.fromEntries(new FormData(editBookForm));
+function addAuthor(){
+  const caller = "add-author-button";
+  let editForm = document.getElementById("edit-form");
+  let formDetails = Object.fromEntries(new FormData(editForm));
   console.log(details);
+
+  // TODO: Add author and roles to book
+}
+
+function removeAuthor(){
+  const caller = "remove-author-button";
+  let editForm = document.getElementById("edit-form");
+  let formDetails = Object.fromEntries(new FormData(editForm));
+  console.log(details);
+
+  // TODO: Remove author from book
+}
+
+function addSeries(){
+  const caller = "add-series-button";
+  let editForm = document.getElementById("edit-form");
+  let formDetails = Object.fromEntries(new FormData(editForm));
+  console.log(details);
+
+  // TODO: Add series to book
+}
+
+function removeSeries(){
+  const caller = "remove-series-button";
+  let editForm = document.getElementById("edit-form");
+  let formDetails = Object.fromEntries(new FormData(editForm));
+  console.log(details);
+
+  // TODO: Remove series from book
+}
+
+function saveBook(){
+  const caller = "save-button";
+  let editForm = document.getElementById("edit-form");
+  let formDetails = Object.fromEntries(new FormData(editForm));
+  console.log(formDetails);
 
   addLoading(caller);
   fetch("/api/v0/books/{{ book.book_id }}", {
@@ -224,17 +260,17 @@ function saveBook(){
         },
         {% endfor %}
       ],
-      "description": details["description"],
-      "format_id": details["format"],
+      "description": formDetails["description"],
+      "format_id": formDetails["format"],
       "identifiers": {
-        "goodreads_id": details["goodreads"],
-        "google_books_id": details["google-books"],
-        "isbn": details["isbn"],
-        "library_thing_id": details["library-thing"],
-        "open_library_id": details["open-library"]
+        "goodreads_id": formDetails["goodreads"],
+        "google_books_id": formDetails["google-books"],
+        "isbn": formDetails["isbn"],
+        "library_thing_id": formDetails["library-thing"],
+        "open_library_id": formDetails["open-library"]
       },
-      "image_url": details["image-url"],
-      "publisher_id": details["publisher"],
+      "image_url": formDetails["image-url"],
+      "publisher_id": formDetails["publisher"],
       "reader_ids": [{{ book.readers|join(", ", attribute="user_id") }}],
       "series": [
         {% for _series in book.series %}
@@ -244,8 +280,8 @@ function saveBook(){
         },
         {% endfor %}
       ],
-      "subtitle": details["subtitle"],
-      "title": details["title"],
+      "subtitle": formDetails["subtitle"],
+      "title": formDetails["title"],
       "wisher_ids": [{{ book.wishers|join(", ", attribute="user_id") }}],
     }),
   }).then((response) => {
@@ -259,7 +295,7 @@ function saveBook(){
 }
 
 function refreshBook(){
-  const caller = "refresh-book-button";
+  const caller = "refresh-button";
 
   addLoading(caller);
   fetch("/api/v0/books/{{ book.book_id }}", {
@@ -277,7 +313,7 @@ function refreshBook(){
 
 {% if token_user.role >= 3 %}
 function deleteBook(){
-  const caller = "delete-book-button";
+  const caller = "delete-button";
 
   addLoading(caller);
   fetch("/api/v0/books/{{ book.book_id }}", {
