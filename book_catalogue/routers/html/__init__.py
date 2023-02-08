@@ -5,8 +5,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from book_catalogue.database.tables import User
 from book_catalogue.routers.html._utils import get_token_user, templates
-from book_catalogue.routers.html.author import router as author_router
 from book_catalogue.routers.html.book import router as book_router
+from book_catalogue.routers.html.creator import router as creator_router
 from book_catalogue.routers.html.format import router as format_router
 from book_catalogue.routers.html.genre import router as genre_router
 from book_catalogue.routers.html.publisher import router as publisher_router
@@ -24,7 +24,7 @@ def index(request: Request, token_user: User | None = Depends(get_token_user)):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-html_router.include_router(author_router)
+html_router.include_router(creator_router)
 html_router.include_router(book_router)
 html_router.include_router(format_router)
 html_router.include_router(genre_router)

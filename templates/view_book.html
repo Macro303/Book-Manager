@@ -1,5 +1,5 @@
 {% extends "base.jinja" %}
-{% from "components/columns/author.jinja" import author_column %}
+{% from "components/columns/creator.jinja" import creator_column %}
 {% from "components/columns/series.jinja" import series_column %}
 {% from "components/columns/user.jinja" import user_column %}
 {% block title %}{{ book.title }}{% endblock %}
@@ -10,7 +10,7 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box">
         <figure class="image is-2by3">
-          <img alt="{{ book.title }} by {{ book.authors|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url or '/static/img/logo.png' }}" width="500"/>
+          <img alt="{{ book.title }} by {{ book.creators|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url or '/static/img/logo.png' }}" width="500"/>
         </figure>
       </div>
     </div>
@@ -171,11 +171,11 @@
     {% endif %}
   </div>
   <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Authors</h3>
+    <h3 class="subtitle is-3">Creators</h3>
   </div>
   <div class="columns is-multiline is-centered is-mobile">
-    {% for _author in book.authors %}
-      {{ author_column(_author, roles=_author.roles) }}
+    {% for _creator in book.creators %}
+      {{ creator_column(_creator, roles=_creator.roles) }}
     {% endfor %}
   </div>
   <div class="block has-text-centered">

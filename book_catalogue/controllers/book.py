@@ -3,14 +3,14 @@ __all__ = ["BookController"]
 from fastapi import HTTPException
 from pony.orm import flush
 
-from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
 from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
-from book_catalogue.database.tables import Book, BookAuthor, BookSeries
+from book_catalogue.database.tables import Book, BookCreator, BookSeries
 from book_catalogue.schemas.book import BookSeriesWrite, BookWrite
 from book_catalogue.services import google_books, open_library
 from book_catalogue.settings import Settings
@@ -48,10 +48,10 @@ class BookController:
             open_library_id=new_book.identifiers.open_library_id,
         )
         flush()
-        for x in new_book.authors:
-            author = AuthorController.get_author(author_id=x.author_id)
+        for x in new_book.creators:
+            creator = CreatorController.get_creator(creator_id=x.creator_id)
             roles = [RoleController.get_role(role_id=y) for y in x.role_ids]
-            BookAuthor(book=book, author=author, roles=roles)
+            BookCreator(book=book, creator=creator, roles=roles)
         for x in new_book.series:
             series = SeriesController.get_series(series_id=x.series_id)
             BookSeries(book=book, series=series, number=x.number)
@@ -67,11 +67,13 @@ class BookController:
     @classmethod
     def update_book(cls, book_id: int, updates: BookWrite) -> Book:
         book = cls.get_book(book_id=book_id)
-        book.authors = []
-        for x in updates.authors:
-            author = AuthorController.get_author(author_id=x.author_id)
+        book.creators = []
+        for x in updates.creators:
+            creator = CreatorController.get_creator(creator_id=x.creator_id)
             flush()
-            temp = BookAuthor.get(book=book, author=author) or BookAuthor(book=book, author=author)
+            temp = BookCreator.get(book=book, creator=creator) or BookCreator(
+                book=book, creator=creator
+            )
             temp.roles = [RoleController.get_role(role_id=y) for y in x.role_ids]
         book.description = updates.description
         book.format = (

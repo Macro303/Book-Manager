@@ -7,40 +7,40 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box has-text-centered">
         <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ author.name }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ author.image_url or '/static/img/logo.png' }}"/>
+          <img alt="{{ creator.name }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ creator.image_url or '/static/img/logo.png' }}"/>
         </figure>
       </div>
     </div>
     <div class="column">
       <div class="box">
         <form id="edit-form">
-          {{ input("Name", "name", value=author.name) }}
+          {{ input("Name", "name", value=creator.name) }}
           <div class="divider is-info is-size-5">More Details</div>
-          {{ textarea("Bio", "bio", value=author.bio or "") }}
+          {{ textarea("Bio", "bio", value=creator.bio or "") }}
           <div class="divider is-info is-size-5">Identifiers</div>
-          {{ input("Image Url", "image-url", value=author.image_url or "") }}
-          {{ input("Goodreads", "goodreads", value=author.identifiers.goodreads_id or "") }}
-          {{ input("LibraryThing", "library-thing", value=author.identifiers.library_thing_id or "") }}
-          {{ input("OpenLibrary", "open-library", value=author.identifiers.open_library_id or "") }}
+          {{ input("Image Url", "image-url", value=creator.image_url or "") }}
+          {{ input("Goodreads", "goodreads", value=creator.identifiers.goodreads_id or "") }}
+          {{ input("LibraryThing", "library-thing", value=creator.identifiers.library_thing_id or "") }}
+          {{ input("OpenLibrary", "open-library", value=creator.identifiers.open_library_id or "") }}
         </form>
       </div>
     </div>
   </div>
   <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveAuthor()">
+    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveCreator()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-floppy-disk"></i>
       </span>
       <span>Save</span>
     </button>
-    <button class="button is-warning is-rounded" id="refresh-button" type="button" onclick="refreshAuthor()">
+    <button class="button is-warning is-rounded" id="refresh-button" type="button" onclick="refreshCreator()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-rotate-left"></i>
       </span>
       <span>Refresh</span>
     </button>
     {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteAuthor()">
+    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteCreator()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-trash"></i>
       </span>
@@ -53,14 +53,14 @@
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
-function saveAuthor(){
+function saveCreator(){
   const caller = "save-button";
   let editForm = document.getElementById("edit-form");
   let formDetails = Object.fromEntries(new FormData(editForm));
   console.log(formDetails);
 
   addLoading(caller);
-  fetch("/api/v0/authors/{{ author.author_id }}", {
+  fetch("/api/v0/creators/{{ creator.creator_id }}", {
     method: "PATCH",
     headers: headers,
     body: JSON.stringify({
@@ -77,41 +77,41 @@ function saveAuthor(){
     if (!response.ok){
       return Promise.reject(response);
     }
-    window.location = "/authors/{{ author.author_id }}";
+    window.location = "/creators/{{ creator.creator_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));
 }
 
-function refreshAuthor(){
+function refreshCreator(){
   const caller = "refresh-button";
 
   addLoading(caller);
-  fetch("/api/v0/authors/{{ author.author_id }}", {
+  fetch("/api/v0/creators/{{ creator.creator_id }}", {
     method: "PUT",
     headers: headers,
   }).then((response) => {
     if (!response.ok){
       return Promise.reject(response);
     }
-    window.location = "/authors/{{ author.author_id }}";
+    window.location = "/creators/{{ creator.creator_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));
 }
 {% if token_user.role >= 3 %}
-function deleteAuthor(){
+function deleteCreator(){
   const caller = "delete-button";
 
   addLoading(caller);
-  fetch("/api/v0/authors/{{ author.author_id }}", {
+  fetch("/api/v0/creators/{{ creator.creator_id }}", {
     method: "DELETE",
     headers: headers,
   }).then((response) => {
     if (!response.ok){
       return Promise.reject(response);
     }
-    window.location = "/authors";
+    window.location = "/creators";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));

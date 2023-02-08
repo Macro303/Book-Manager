@@ -1,4 +1,4 @@
-{% macro author_column(obj, roles=[]) %}
+{% macro creator_column(obj, roles=[]) %}
 <div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
   <div class="card">
     <div class="card-content">
@@ -17,13 +17,13 @@
       </div>
     </div>
     <footer class="card-footer">
-      <a class="card-footer-item has-text-link" href="/authors/{{ obj.author_id }}">
+      <a class="card-footer-item has-text-link" href="/creators/{{ obj.creator_id }}">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-eye"></i>
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item has-text-link modal-trigger" data-target="{{ obj.author_id }}-link-modal" id="{{ obj.author_id }}-link-button">
+      <a class="card-footer-item has-text-link modal-trigger" data-target="{{ obj.creator_id }}-link-modal" id="{{ obj.creator_id }}-link-button">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-link"></i>
         </span>
@@ -32,7 +32,7 @@
     </footer>
   </div>
 </div>
-<div class="modal" id="{{ obj.author_id }}-link-modal">
+<div class="modal" id="{{ obj.creator_id }}-link-modal">
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">
@@ -43,7 +43,7 @@
     <section class="modal-card-body has-background-grey-darker">
       <div class="buttons is-centered">
         {% if obj.identifiers.open_library_id %}
-        <a class="button is-link is-rounded" href="https://openlibrary.org/author/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
+        <a class="button is-link is-rounded" href="https://openlibrary.org/creator/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
         {% endif %}
           <span class="icon is-medium">
             <i class="fa-solid fa-lg fa-link"></i>

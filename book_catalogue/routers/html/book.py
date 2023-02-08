@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
-from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.book import BookController
+from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.publisher import PublisherController
 from book_catalogue.controllers.role import RoleController
@@ -23,7 +23,7 @@ def list_books(
     *,
     request: Request,
     token_user: User | None = Depends(get_token_user),
-    author_id: int = 0,
+    creator_id: int = 0,
     format_id: int = 0,
     publisher_id: int = 0,
     read: bool = False,
@@ -34,12 +34,12 @@ def list_books(
         return RedirectResponse("/")
     with db_session:
         all_books = book_list = [x for x in BookController.list_books() if x.is_collected]
-        if author_id:
-            if author_id == -1:
-                book_list = [x for x in book_list if not x.authors]
+        if creator_id:
+            if creator_id == -1:
+                book_list = [x for x in book_list if not x.creators]
             else:
-                author = AuthorController.get_author(author_id=author_id)
-                book_list = [x for x in book_list if author in [y.author for y in x.authors]]
+                creator = CreatorController.get_creator(creator_id=creator_id)
+                book_list = [x for x in book_list if creator in [y.creator for y in x.creators]]
         if format_id:
             if format_id == -1:
                 book_list = [x for x in book_list if not x.format]
@@ -86,7 +86,9 @@ def list_books(
                 "request": request,
                 "token_user": token_user.to_schema(),
                 "book_list": sorted({x.to_schema() for x in book_list}),
-                "author_list": sorted({y.author.to_schema() for x in all_books for y in x.authors}),
+                "creator_list": sorted(
+                    {y.creator.to_schema() for x in all_books for y in x.creators}
+                ),
                 "format_list": sorted(
                     {
                         x.format.to_schema() if x.format else FormatRead(format_id=-1, name="None")
@@ -103,7 +105,7 @@ def list_books(
                 ),
                 "series_list": sorted({y.series.to_schema() for x in all_books for y in x.series}),
                 "filters": {
-                    "author_id": author_id,
+                    "creator_id": creator_id,
                     "format_id": format_id,
                     "publisher_id": publisher_id,
                     "read": read,
@@ -138,7 +140,7 @@ def edit_book(*, request: Request, book_id: int, token_user: User | None = Depen
         return RedirectResponse(f"/books/{book_id}")
     with db_session:
         book = BookController.get_book(book_id=book_id)
-        author_list = AuthorController.list_authors()
+        creator_list = CreatorController.list_creators()
         role_list = RoleController.list_roles()
         format_list = FormatController.list_formats()
         publisher_list = PublisherController.list_publishers()
@@ -149,7 +151,7 @@ def edit_book(*, request: Request, book_id: int, token_user: User | None = Depen
                 "request": request,
                 "token_user": token_user.to_schema(),
                 "book": book.to_schema(),
-                "author_list": sorted({x.to_schema() for x in author_list}),
+                "creator_list": sorted({x.to_schema() for x in creator_list}),
                 "role_list": sorted({x.to_schema() for x in role_list}),
                 "format_list": sorted({x.to_schema() for x in format_list}),
                 "publisher_list": sorted({x.to_schema() for x in publisher_list}),

@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
-from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.book import BookController
+from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.publisher import PublisherController
 from book_catalogue.controllers.series import SeriesController
@@ -89,7 +89,7 @@ def user_wishlist(
     request: Request,
     user_id: int,
     token_user: User | None = Depends(get_token_user),
-    author_id: int = 0,
+    creator_id: int = 0,
     format_id: int = 0,
     publisher_id: int = 0,
     series_id: int = 0,
@@ -103,12 +103,12 @@ def user_wishlist(
             *user.wished_books,
             *[x for x in BookController.list_books() if not x.is_collected and not x.wishers],
         }
-        if author_id:
-            if author_id == -1:
-                wishlist = [x for x in wishlist if not x.authors]
+        if creator_id:
+            if creator_id == -1:
+                wishlist = [x for x in wishlist if not x.creators]
             else:
-                author = AuthorController.get_author(author_id=author_id)
-                wishlist = [x for x in wishlist if author in [y.author for y in x.authors]]
+                creator = CreatorController.get_creator(creator_id=creator_id)
+                wishlist = [x for x in wishlist if creator in [y.creator for y in x.creators]]
         if format_id:
             if format_id == -1:
                 wishlist = [x for x in wishlist if not x.format]
@@ -148,8 +148,8 @@ def user_wishlist(
                 "token_user": token_user.to_schema(),
                 "user": user.to_schema(),
                 "wishlist": sorted({x.to_schema() for x in wishlist}),
-                "author_list": sorted(
-                    {y.author.to_schema() for x in all_wishlist for y in x.authors}
+                "creator_list": sorted(
+                    {y.creator.to_schema() for x in all_wishlist for y in x.creators}
                 ),
                 "format_list": sorted(
                     {
@@ -169,7 +169,7 @@ def user_wishlist(
                     {y.series.to_schema() for x in all_wishlist for y in x.series}
                 ),
                 "filters": {
-                    "author_id": author_id,
+                    "creator_id": creator_id,
                     "format_id": format_id,
                     "publisher_id": publisher_id,
                     "series_id": series_id,

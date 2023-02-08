@@ -2,7 +2,7 @@ __all__ = [
     "Identifiers",
     "BookRead",
     "BookWrite",
-    "BookAuthorWrite",
+    "BookCreatorWrite",
     "BookSeriesWrite",
     "LookupBook",
 ]
@@ -13,7 +13,7 @@ from pydantic import Field, validator
 
 from book_catalogue.isbn import to_isbn_13
 from book_catalogue.schemas._base import BaseModel
-from book_catalogue.schemas.author import AuthorRead
+from book_catalogue.schemas.creator import CreatorRead
 from book_catalogue.schemas.format import FormatRead
 from book_catalogue.schemas.genre import GenreRead
 from book_catalogue.schemas.publisher import PublisherRead
@@ -73,7 +73,7 @@ class BaseBook(BaseModel):
 
 
 class BookRead(BaseBook):
-    authors: list[AuthorRead] = Field(default_factory=list)
+    creators: list[CreatorRead] = Field(default_factory=list)
     book_id: int
     format: FormatRead | None = None
     genres: list[GenreRead] = Field(default_factory=list)
@@ -106,19 +106,32 @@ class BookRead(BaseBook):
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, BookRead):
             raise NotImplementedError()
-        return (
-            self.get_first_series(),
-            self.title,
-            (self.subtitle or ""),
-            self.identifiers.isbn,
-        ) == (other.get_first_series(), other.title, (other.subtitle or ""), other.identifiers.isbn)
+        if self.get_first_series() and other.get_first_series():
+            return (
+                self.get_first_series(),
+                self.title,
+                (self.subtitle or ""),
+                self.identifiers.isbn,
+            ) == (
+                other.get_first_series(),
+                other.title,
+                (other.subtitle or ""),
+                other.identifiers.isbn,
+            )
+        if not self.get_first_series() and not other.get_first_series():
+            return (self.title, (self.subtitle or ""), self.identifiers.isbn) == (
+                other.title,
+                (other.subtitle or ""),
+                other.identifiers.isbn,
+            )
+        return False
 
     def __hash__(self):
         return hash((type(self), self.get_first_series(), self.title, (self.subtitle or "")))
 
 
-class BookAuthorWrite(BaseModel):
-    author_id: int
+class BookCreatorWrite(BaseModel):
+    creator_id: int
     role_ids: list[int] = Field(default_factory=list)
 
 
@@ -128,7 +141,7 @@ class BookSeriesWrite(BaseModel):
 
 
 class BookWrite(BaseBook):
-    authors: list[BookAuthorWrite] = Field(default_factory=list)
+    creators: list[BookCreatorWrite] = Field(default_factory=list)
     format_id: int | None = None
     genre_ids: list[int] = Field(default_factory=list)
     publisher_id: int | None = None

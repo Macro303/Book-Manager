@@ -1,7 +1,7 @@
 __all__ = [
-    "Author",
+    "Creator",
     "Book",
-    "BookAuthor",
+    "BookCreator",
     "BookSeries",
     "Format",
     "Genre",
@@ -16,8 +16,8 @@ from typing import Optional as Opt
 
 from pony.orm import Database, Optional, PrimaryKey, Required, Set
 
-from book_catalogue.schemas.author import AuthorRead, Identifiers as AuthorIdentifiers
 from book_catalogue.schemas.book import BookRead, Identifiers as BookIdentifiers
+from book_catalogue.schemas.creator import CreatorRead, Identifiers as CreatorIdentifiers
 from book_catalogue.schemas.format import FormatRead
 from book_catalogue.schemas.genre import GenreRead
 from book_catalogue.schemas.publisher import PublisherRead
@@ -28,52 +28,23 @@ from book_catalogue.schemas.user import UserRead
 db = Database()
 
 
-class Author(db.Entity):
-    _table_ = "Authors"
-
-    author_id: int = PrimaryKey(int, auto=True)
-    bio: str | None = Optional(str, nullable=True)
-    image_url: str | None = Optional(str, nullable=True)
-    name: str = Required(str, unique=True)
-
-    goodreads_id: str | None = Optional(str, nullable=True)
-    library_thing_id: str | None = Optional(str, nullable=True)
-    open_library_id: str | None = Optional(str, nullable=True, unique=True)
-
-    books: list["BookAuthor"] = Set("BookAuthor")
-
-    def to_schema(self) -> AuthorRead:
-        return AuthorRead(
-            author_id=self.author_id,
-            bio=self.bio,
-            identifiers=AuthorIdentifiers(
-                goodreads_id=self.goodreads_id,
-                library_thing_id=self.library_thing_id,
-                open_library_id=self.open_library_id,
-            ),
-            image_url=self.image_url,
-            name=self.name,
-            roles=[],
-        )
-
-
 class Book(db.Entity):
-    _table_ = "Books"
+    _table_ = "books"
 
-    authors: list["BookAuthor"] = Set("BookAuthor")
     book_id: int = PrimaryKey(int, auto=True)
+    creators: list["BookCreator"] = Set("BookCreator")
     description: str | None = Optional(str, nullable=True)
     format: Opt["Format"] = Optional("Format", nullable=True)
-    genres: list["Genre"] = Set("Genre", table="Books_Genres")
+    genres: list["Genre"] = Set("Genre", table="books_genres")
     image_url: str = Required(str)
     is_collected: bool = Optional(bool, default=False)
     publish_date: date | None = Optional(date, nullable=True)
     publisher: Opt["Publisher"] = Optional("Publisher", nullable=True)
-    readers: list["User"] = Set("User", table="Books_Readers", reverse="read_books")
+    readers: list["User"] = Set("User", table="readers", reverse="read_books")
     series: list["BookSeries"] = Set("BookSeries")
     subtitle: str | None = Optional(str, nullable=True)
     title: str = Required(str)
-    wishers: list["User"] = Set("User", table="Books_Wishers", reverse="wished_books")
+    wishers: list["User"] = Set("User", table="wishers", reverse="wished_books")
 
     goodreads_id: str | None = Optional(str, nullable=True)
     google_books_id: str | None = Optional(str, nullable=True)
@@ -83,7 +54,7 @@ class Book(db.Entity):
 
     def to_schema(self) -> BookRead:
         return BookRead(
-            authors=sorted({x.to_schema() for x in self.authors}),
+            creators=sorted({x.to_schema() for x in self.creators}),
             book_id=self.book_id,
             description=self.description,
             format=self.format.to_schema() if self.format else None,
@@ -107,23 +78,23 @@ class Book(db.Entity):
         )
 
 
-class BookAuthor(db.Entity):
-    _table_ = "Books_Authors"
+class BookCreator(db.Entity):
+    _table_ = "books_creators"
 
-    author: Author = Required(Author)
     book: Book = Required(Book)
-    roles: list["Role"] = Set("Role", table="Books_Authors_Roles")
+    creator: "Creator" = Required("Creator")
+    roles: list["Role"] = Set("Role", table="books_creators_roles")
 
-    PrimaryKey(book, author)
+    PrimaryKey(book, creator)
 
-    def to_schema(self) -> AuthorRead:
-        temp = self.author.to_schema()
+    def to_schema(self) -> CreatorRead:
+        temp = self.creator.to_schema()
         temp.roles = sorted({x.to_schema() for x in self.roles})
         return temp
 
 
 class BookSeries(db.Entity):
-    _table_ = "Books_Series"
+    _table_ = "books_series"
 
     book: Book = Required(Book)
     number: int | None = Optional(int, nullable=True)
@@ -137,8 +108,37 @@ class BookSeries(db.Entity):
         return temp
 
 
+class Creator(db.Entity):
+    _table_ = "creators"
+
+    bio: str | None = Optional(str, nullable=True)
+    creator_id: int = PrimaryKey(int, auto=True)
+    image_url: str | None = Optional(str, nullable=True)
+    name: str = Required(str, unique=True)
+
+    goodreads_id: str | None = Optional(str, nullable=True)
+    library_thing_id: str | None = Optional(str, nullable=True)
+    open_library_id: str | None = Optional(str, nullable=True, unique=True)
+
+    books: list[BookCreator] = Set(BookCreator)
+
+    def to_schema(self) -> CreatorRead:
+        return CreatorRead(
+            creator_id=self.creator_id,
+            bio=self.bio,
+            identifiers=CreatorIdentifiers(
+                goodreads_id=self.goodreads_id,
+                library_thing_id=self.library_thing_id,
+                open_library_id=self.open_library_id,
+            ),
+            image_url=self.image_url,
+            name=self.name,
+            roles=[],
+        )
+
+
 class Format(db.Entity):
-    _table_ = "Formats"
+    _table_ = "formats"
 
     format_id: int = PrimaryKey(int, auto=True)
     name: str = Required(str, unique=True)
@@ -150,19 +150,19 @@ class Format(db.Entity):
 
 
 class Genre(db.Entity):
-    _table_ = "Genres"
+    _table_ = "genres"
 
     genre_id: int = PrimaryKey(int, auto=True)
     name: str = Required(str, unique=True)
 
-    books: list[Book] = Set(Book, table="Books_Genres")
+    books: list[Book] = Set(Book, table="books_genres")
 
     def to_schema(self) -> GenreRead:
         return GenreRead(genre_id=self.genre_id, name=self.name)
 
 
 class Publisher(db.Entity):
-    _table_ = "Publishers"
+    _table_ = "publishers"
 
     publisher_id: int = PrimaryKey(int, auto=True)
     name: str = Required(str, unique=True)
@@ -174,18 +174,20 @@ class Publisher(db.Entity):
 
 
 class Role(db.Entity):
-    _table_ = "Roles"
+    _table_ = "roles"
 
     name: str = Required(str, unique=True)
     role_id: int = PrimaryKey(int, auto=True)
 
-    authors: list[BookAuthor] = Set(BookAuthor, table="Books_Authors_Roles")
+    creators: list[BookCreator] = Set(BookCreator, table="books_creators_roles")
 
     def to_schema(self) -> RoleRead:
         return RoleRead(name=self.name, role_id=self.role_id)
 
 
 class Series(db.Entity):
+    _table_ = "series"
+
     series_id: int = PrimaryKey(int, auto=True)
     name: str = Required(str, unique=True)
 
@@ -196,15 +198,15 @@ class Series(db.Entity):
 
 
 class User(db.Entity):
-    _table_ = "Users"
+    _table_ = "users"
 
     image_url: str | None = Optional(str, nullable=True)
     role: int = Optional(int, default=0)
     user_id: int = PrimaryKey(int, auto=True)
     username: str = Required(str)
 
-    wished_books: list[Book] = Set(Book, table="Books_Wishers", reverse="wishers")
-    read_books: list[Book] = Set(Book, table="Books_Readers", reverse="readers")
+    read_books: list[Book] = Set(Book, table="readers", reverse="readers")
+    wished_books: list[Book] = Set(Book, table="wishers", reverse="wishers")
 
     def to_schema(self) -> UserRead:
         return UserRead(
