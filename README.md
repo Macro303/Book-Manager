@@ -24,7 +24,7 @@ It's a book catalogue.... for cataloging books.
 2. Clone the repo: `git clone https://github.com/Buried-In-Code/Book-Catalogue`
 3. Install the project: `pip install .`
 
-### Install as a service _(usings systemd)_
+### Install as a service _(using systemd)_
 
 1. Update `book-catalogue.service` with the location of project
 2. Copy `book-catalogue.service` to your systemd location: `sudo cp ./book-catalogue.service /lib/systemd/system/book-catalogue.service`
