@@ -7,7 +7,7 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box">
         <figure class="image is-2by3">
-          <img alt="{{ book.title }} by {{ book.authors|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url or '/static/img/logo.png' }}" width="500"/>
+          <img alt="{{ book.title }} by {{ book.creators|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url or '/static/img/logo.png' }}" width="500"/>
         </figure>
       </div>
     </div>
@@ -16,20 +16,20 @@
         <form id="edit-form">
           {{ input("Title", "title", value=book.title) }}
           {{ input("Subtitle", "subtitle", value=book.subtitle or "") }}
-          <!-- region Authors -->
-          <label class="label has-text-info-light">Authors</label>
-          {% for author in book.authors %}
+          <!-- region Creators -->
+          <label class="label has-text-info-light">Creators</label>
+          {% for creator in book.creators %}
           <div class="field is-grouped is-grouped-multiline">
             <div class="control is-expanded">
               <div class="select is-fullwidth is-rounded">
                 <select disabled>
-                  {% for _author in author_list %}
-                  <option {% if _author == author %}selected {% endif %}value={{ _author.author_id }}>{{ _author.name }}</option>
+                  {% for _creator in creator_list %}
+                  <option {% if _creator == creator %}selected {% endif %}value={{ _creator.creator_id }}>{{ _creator.name }}</option>
                   {% endfor %}
                 </select>
               </div>
             </div>
-            {% for role in author.roles %}
+            {% for role in creator.roles %}
             <div class="control is-expanded">
               <div class="select is-fullwidth is-rounded">
                 <select disabled>
@@ -41,7 +41,7 @@
             </div>
             {% endfor %}
             <div class="control">
-              <button class="button is-warning is-rounded is-outlined" id="remove-author-button" type="button" onclick="removeAuthor()">
+              <button class="button is-warning is-rounded is-outlined" id="remove-creator-button" type="button" onclick="removeCreator()">
                 <span>Remove</span>
                 <span class="icon is-medium">
                   <i class="fa-solid fa-lg fa-xmark"></i>
@@ -53,10 +53,10 @@
           <div class="field is-grouped is-grouped-multiline">
             <div class="control is-expanded">
               <div class="select is-fullwidth is-rounded">
-                <select name="new-author">
-                  <option disabled hidden selected value=0>Select Author</option>
-                  {% for _author in author_list %}
-                  <option value={{ _author.author_id }}>{{ _author.name }}</option>
+                <select name="new-creator">
+                  <option disabled hidden selected value=0>Select Creator</option>
+                  {% for _creator in creator_list %}
+                  <option value={{ _creator.creator_id }}>{{ _creator.name }}</option>
                   {% endfor %}
                 </select>
               </div>
@@ -73,11 +73,11 @@
             </div>
             <div class="control">
               <div class="buttons is-centered">
-                <button class="button is-success is-rounded is-outlined" id="add-author-button" type="button" onclick="addAuthor()">
+                <button class="button is-success is-rounded is-outlined" id="add-creator-button" type="button" onclick="addCreator()">
                   <span class="icon is-medium">
                     <i class="fa-solid fa-lg fa-plus"></i>
                   </span>
-                  <span>Add Author</span>
+                  <span>Add Creator</span>
                 </button>
               </div>
             </div>
@@ -144,7 +144,7 @@
           <div class="field is-grouped is-grouped-multiline">
             <div class="control is-expanded">
               <div class="select is-fullwidth is-rounded">
-                <select name="new-author">
+                <select name="new-creator">
                   <option disabled hidden selected value=0>Select Series</option>
                   {% for _series in series_list %}
                   <option value={{ _series.series_id }}>{{ _series.title }}</option>
@@ -205,22 +205,22 @@
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
-function addAuthor(){
-  const caller = "add-author-button";
+function addCreator(){
+  const caller = "add-creator-button";
   let editForm = document.getElementById("edit-form");
   let formDetails = Object.fromEntries(new FormData(editForm));
   console.log(details);
 
-  // TODO: Add author and roles to book
+  // TODO: Add creator and roles to book
 }
 
-function removeAuthor(){
-  const caller = "remove-author-button";
+function removeCreator(){
+  const caller = "remove-creator-button";
   let editForm = document.getElementById("edit-form");
   let formDetails = Object.fromEntries(new FormData(editForm));
   console.log(details);
 
-  // TODO: Remove author from book
+  // TODO: Remove creator from book
 }
 
 function addSeries(){
@@ -252,11 +252,11 @@ function saveBook(){
     method: "PATCH",
     headers: headers,
     body: JSON.stringify({
-      "authors": [
-        {% for _author in book.authors %}
+      "creators": [
+        {% for _creator in book.creators %}
         {
-          "author_id": {{ _author.author_id }},
-          "role_ids": [{{ _author.roles|join(", ", attribute="role_id") }}]
+          "creator_id": {{ _creator.creator_id }},
+          "role_ids": [{{ _creator.roles|join(", ", attribute="role_id") }}]
         },
         {% endfor %}
       ],

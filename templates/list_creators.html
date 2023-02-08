@@ -1,20 +1,20 @@
 {% extends "base.jinja" %}
-{% from "components/columns/author.jinja" import author_column %}
-{% from "components/filters/author.jinja" import author_filter with context %}
+{% from "components/columns/creator.jinja" import creator_column %}
+{% from "components/filters/creator.jinja" import creator_filter with context %}
 {% from "components/forms.jinja" import input %}
-{% block title %}Authors{% endblock %}
+{% block title %}Creators{% endblock %}
 {% block content %}
 <section>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ author_filter("/authors") }}
+      {{ creator_filter("/creators") }}
       {% if token_user.role >= 1 %}
       <div class="box">
-        <h5 class="title is-5 has-text-link">Add Author</h5>
-        <form id="add-author-form">
+        <h5 class="title is-5 has-text-link">Add Creator</h5>
+        <form id="add-creator-form">
           {{ input("Name", "name") }}
           <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-author-button" type="button" onclick="addAuthor()">
+            <button class="button is-link is-rounded" id="add-creator-button" type="button" onclick="addCreator()">
               <span class="icon is-medium">
                 <i class="fa-solid fa-lg fa-plus"></i>
               </span>
@@ -27,8 +27,8 @@
     </div>
     <div class="column">
       <div class="columns is-multiline is-centered is-mobile">
-        {% for _author in author_list %}
-          {{ author_column(_author) }}
+        {% for _creator in creator_list %}
+          {{ creator_column(_creator) }}
         {% endfor %}
       </div>
     </div>
@@ -39,14 +39,14 @@
 {{ super() }}
 <script type="text/javascript">
 {% if token_user.role >= 1 %}
-function addAuthor(){
-  const caller = "add-author-button";
-  let addAuthorForm = document.getElementById("add-author-form");
-  let details = Object.fromEntries(new FormData(addAuthorForm));
+function addCreator(){
+  const caller = "add-creator-button";
+  let addCreatorForm = document.getElementById("add-creator-form");
+  let details = Object.fromEntries(new FormData(addCreatorForm));
   console.log(details);
 
   addLoading(caller);
-  fetch("/api/v0/authors", {
+  fetch("/api/v0/creators", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
@@ -56,7 +56,7 @@ function addAuthor(){
     if (!response.ok){
       return Promise.reject(response);
     }
-    addAuthorForm.reset();
+    addCreatorForm.reset();
     window.location.reload();
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);

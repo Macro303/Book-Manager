@@ -2,12 +2,12 @@ __all__ = ["lookup_book"]
 
 from fastapi import HTTPException
 
-from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
 from book_catalogue.controllers.role import RoleController
-from book_catalogue.schemas.author import AuthorWrite
-from book_catalogue.schemas.book import BookAuthorWrite, BookWrite, Identifiers
+from book_catalogue.schemas.book import BookCreatorWrite, BookWrite, Identifiers
+from book_catalogue.schemas.creator import CreatorWrite
 from book_catalogue.schemas.genre import GenreWrite
 from book_catalogue.schemas.publisher import PublisherWrite
 from book_catalogue.schemas.role import RoleWrite
@@ -20,17 +20,17 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
         result = session.get_book(book_id=google_books_id)
     else:
         result = session.get_book_by_isbn(isbn=isbn)
-    authors = []
-    for _author in result.volume_info.authors:
+    creators = []
+    for _creator in result.volume_info.creators:
         try:
             role = RoleController.get_role_by_name(name="Writer")
         except HTTPException:
             role = RoleController.create_role(new_role=RoleWrite(name="Writer"))
         try:
-            author = AuthorController.get_author_by_name(name=_author)
+            creator = CreatorController.get_creator_by_name(name=_creator)
         except HTTPException:
-            author = AuthorController.create_author(new_author=AuthorWrite(name=_author))
-        authors.append(BookAuthorWrite(author_id=author.author_id, role_ids=[role.role_id]))
+            creator = CreatorController.create_creator(new_creator=CreatorWrite(name=_creator))
+        creators.append(BookCreatorWrite(creator_id=creator.creator_id, role_ids=[role.role_id]))
 
     publisher = None
     if result.volume_info.publisher:
@@ -51,7 +51,7 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
             genre_ids.add(genre.genre_id)
 
     return BookWrite(
-        authors=authors,
+        creators=creators,
         description=result.volume_info.description,
         # TODO: Format Id
         genre_ids=genre_ids,

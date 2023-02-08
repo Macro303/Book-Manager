@@ -3,16 +3,16 @@ __all__ = ["router"]
 from fastapi import APIRouter, Body, HTTPException
 from pony.orm import db_session, flush
 
-from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.book import BookController
+from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
-from book_catalogue.database.tables import BookAuthor, BookSeries
+from book_catalogue.database.tables import BookCreator, BookSeries
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas.book import (
-    BookAuthorWrite,
+    BookCreatorWrite,
     BookRead,
     BookSeriesWrite,
     BookWrite,
@@ -146,20 +146,20 @@ def read_book(
 
 
 @router.patch(
-    path="/{book_id}/authors",
+    path="/{book_id}/creators",
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
-def set_authors(book_id: int, authors: list[BookAuthorWrite] = Body(embed=True)) -> BookRead:
+def set_creators(book_id: int, creators: list[BookCreatorWrite] = Body(embed=True)) -> BookRead:
     with db_session:
         book = BookController.get_book(book_id=book_id)
-        for _author in book.authors:
-            _author.delete()
+        for _creator in book.creators:
+            _creator.delete()
         flush()
-        for _author in authors:
-            BookAuthor(
+        for _creator in creators:
+            BookCreator(
                 book=book,
-                author=AuthorController.get_author(author_id=_author.author_id),
-                roles=[RoleController.get_role(role_id=x) for x in _author.role_ids],
+                creator=CreatorController.get_creator(creator_id=_creator.creator_id),
+                roles=[RoleController.get_role(role_id=x) for x in _creator.role_ids],
             )
         flush()
         return book.to_schema()

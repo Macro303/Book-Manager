@@ -1,48 +1,48 @@
 {% extends "base.jinja" %}
 {% from "components/columns/book.jinja" import book_column %}
-{% block title %}{{ author.name }}{% endblock %}
+{% block title %}{{ creator.name }}{% endblock %}
 {% block content %}
 <section>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box has-text-centered">
         <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ author.name }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ author.image_url or '/static/img/logo.png' }}"/>
+          <img alt="{{ creator.name }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ creator.image_url or '/static/img/logo.png' }}"/>
         </figure>
       </div>
     </div>
     <div class="column">
       <div class="box">
         <div class="block">
-          <p><strong class="title is-size-5 has-text-info">Bio:</strong> {{ author.bio or "" }}</p>
+          <p><strong class="title is-size-5 has-text-info">Bio:</strong> {{ creator.bio or "" }}</p>
         </div>
         <div class="divider is-info is-size-5">Identifiers</div>
-        {% if author.identifiers.goodreads_id %}
+        {% if creator.identifiers.goodreads_id %}
         <div class="block">
           <p>
             <strong class="title is-size-5 has-text-info">Goodreads:</strong>
             <a href="#" rel="noopener noreferrer" target="_blank">
-              {{ author.identifiers.goodreads_id }}
+              {{ creator.identifiers.goodreads_id }}
             </a>
           </p>
         </div>
         {% endif %}
-        {% if author.identifiers.library_thing_id %}
+        {% if creator.identifiers.library_thing_id %}
         <div class="block">
           <p>
             <strong class="title is-size-5 has-text-info">LibraryThing:</strong>
             <a href="#" rel="noopener noreferrer" target="_blank">
-              {{ author.identifiers.library_thing_id }}
+              {{ creator.identifiers.library_thing_id }}
             </a>
           </p>
         </div>
         {% endif %}
-        {% if author.identifiers.open_library_id %}
+        {% if creator.identifiers.open_library_id %}
         <div class="block">
           <p>
             <strong class="title is-size-5 has-text-info">OpenLibrary:</strong>
-            <a href="https://openlibrary.org/author/{{ author.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-              {{ author.identifiers.open_library_id }}
+            <a href="https://openlibrary.org/creator/{{ creator.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
+              {{ creator.identifiers.open_library_id }}
             </a>
           </p>
         </div>
@@ -52,7 +52,7 @@
   </div>
   <div class="buttons is-centered">
     {% if token_user.role >= 2 %}
-    <a class="button is-warning is-rounded" href="/authors/{{ author.author_id }}/edit">
+    <a class="button is-warning is-rounded" href="/creators/{{ creator.creator_id }}/edit">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>

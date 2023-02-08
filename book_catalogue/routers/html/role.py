@@ -45,20 +45,20 @@ def view_role(*, request: Request, role_id: int, token_user: User | None = Depen
         return RedirectResponse("/")
     with db_session:
         role = RoleController.get_role(role_id=role_id)
-        author_dict = {}
-        for temp in role.authors:
-            temp_author = temp.author.to_schema()
-            if temp_author not in author_dict:
-                author_dict[temp_author] = set()
-            author_dict[temp_author].add(temp.book.to_schema())
-        author_dict = {key: sorted(author_dict[key]) for key in sorted(author_dict.keys())}
+        creator_dict = {}
+        for temp in role.creators:
+            temp_creator = temp.creator.to_schema()
+            if temp_creator not in creator_dict:
+                creator_dict[temp_creator] = set()
+            creator_dict[temp_creator].add(temp.book.to_schema())
+        creator_dict = {key: sorted(creator_dict[key]) for key in sorted(creator_dict.keys())}
         return templates.TemplateResponse(
             "view_role.html",
             {
                 "request": request,
                 "token_user": token_user.to_schema(),
                 "role": role.to_schema(),
-                "authors": author_dict,
+                "creators": creator_dict,
             },
         )
 

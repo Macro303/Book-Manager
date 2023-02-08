@@ -4,15 +4,15 @@ from fastapi import APIRouter
 from pony.orm import db_session
 
 from book_catalogue import __version__
-from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
 from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.responses import ErrorResponse
-from book_catalogue.routers.api.author import router as author_router
 from book_catalogue.routers.api.book import router as book_router
+from book_catalogue.routers.api.creator import router as creator_router
 from book_catalogue.routers.api.format import router as format_router
 from book_catalogue.routers.api.genre import router as genre_router
 from book_catalogue.routers.api.publisher import router as publisher_router
@@ -26,7 +26,7 @@ api_router = APIRouter(
         422: {"description": "Validation error", "model": ErrorResponse},
     },
 )
-api_router.include_router(author_router)
+api_router.include_router(creator_router)
 api_router.include_router(book_router)
 api_router.include_router(format_router)
 api_router.include_router(genre_router)
@@ -40,12 +40,9 @@ api_router.include_router(user_router)
 def list_empty_entries() -> list[tuple[str, int, str]]:
     results = []
     with db_session:
-        for _author in sorted(AuthorController.list_authors(), key=lambda x: x.name):
-            if not _author.books:
-                results.append(("Author", _author.author_id, _author.name))
-        for _role in sorted(RoleController.list_roles(), key=lambda x: x.name):
-            if not _role.authors:
-                results.append(("Role", _role.role_id, _role.name))
+        for _creator in sorted(CreatorController.list_creators(), key=lambda x: x.name):
+            if not _creator.books:
+                results.append(("Creator", _creator.creator_id, _creator.name))
         for _format in sorted(FormatController.list_formats(), key=lambda x: x.name):
             if not _format.books:
                 results.append(("Format", _format.format_id, _format.name))
@@ -55,6 +52,9 @@ def list_empty_entries() -> list[tuple[str, int, str]]:
         for _publisher in sorted(PublisherController.list_publishers(), key=lambda x: x.name):
             if not _publisher.books:
                 results.append(("Publisher", _publisher.publisher_id, _publisher.name))
+        for _role in sorted(RoleController.list_roles(), key=lambda x: x.name):
+            if not _role.creators:
+                results.append(("Role", _role.role_id, _role.name))
         for _series in sorted(SeriesController.list_series(), key=lambda x: x.name):
             if not _series.books:
                 results.append(("Series", _series.series_id, _series.name))
