@@ -11,3 +11,13 @@ img.profile-large {
   height: 256px !important;
   object-fit: cover;
 }
+
+html,
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+body > footer {
+  margin-top: auto;
+}

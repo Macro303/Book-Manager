@@ -5,18 +5,18 @@
 <section class="section">
   <div class="box">
     <form id="edit-form">
-      {{ input("Name", "name", value=publisher.name) }}
+      {{ input("Name", "name", value=role.name) }}
     </form>
   </div>
   <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-button" type="button" onclick="savePublisher()">
+    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveRole()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-floppy-disk"></i>
       </span>
       <span>Save</span>
     </button>
     {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deletePublisher()">
+    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteRole()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-trash"></i>
       </span>
@@ -29,14 +29,14 @@
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
-function savePublisher(){
+function saveRole(){
   const caller = "save-button";
   let editForm = document.getElementById("edit-form");
   let formDetails = Object.fromEntries(new FormData(editForm));
   console.log(formDetails);
 
   addLoading(caller);
-  fetch("/api/v0/publisher/{{ publisher.publisher_id }}", {
+  fetch("/api/v0/role/{{ role.role_id }}", {
     method: "PATCH",
     headers: headers,
     body: JSON.stringify({
@@ -46,24 +46,24 @@ function savePublisher(){
     if (!response.ok){
       return Promise.reject(response);
     }
-    window.location = "/publishers/{{ publisher.publisher_id }}";
+    window.location = "/roles/{{ role.role_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));
 }
 {% if token_user.role >= 3 %}
-function deletePublisher(){
+function deleteRole(){
   const caller = "delete-button";
 
   addLoading(caller);
-  fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
+  fetch("/api/v0/roles/{{ role.role_id }}", {
     method: "DELETE",
     headers: headers,
   }).then((response) => {
     if (!response.ok){
       return Promise.reject(response);
     }
-    window.location = "/publishers";
+    window.location = "/roles";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
   })).finally(() => removeLoading(caller));

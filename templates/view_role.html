@@ -2,7 +2,7 @@
 {% from "components/columns/book.jinja" import book_column %}
 {% block title %}{{ role.name }}{% endblock %}
 {% block content %}
-<section>
+<section class="section">
   <div class="buttons is-centered">
     {% if token_user.role >= 2 %}
     <a class="button is-warning is-rounded" href="/roles/{{ role.role_id }}/edit">

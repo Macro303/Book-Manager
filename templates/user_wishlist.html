@@ -4,7 +4,7 @@
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
 {% block content %}
-<section>
+<section class="section">
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       {{ book_filter("/users/" ~ user.user_id ~ "/wishlist") }}

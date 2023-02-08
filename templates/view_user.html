@@ -2,7 +2,7 @@
 {% from "components/columns/book.jinja" import book_column %}
 {% block title %}{{ user.username }}{% endblock %}
 {% block content %}
-<section>
+<section class="section">
   <div class="has-text-centered">
     <figure class="image is-256x256 is-inline-block">
       <img alt="{{ user.username }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ user.image_url or '/static/img/logo.png' }}"/>

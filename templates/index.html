@@ -1,23 +1,14 @@
 {% extends "base.jinja" %}
 {% from "components/forms.jinja" import input %}
-{% block navbar %}
-<nav aria-label="main navigation" class="navbar is-fixed-top is-primary" role="navigation">
-  <div class="navbar-brand">
-    <a class="navbar-item" href="/" id="navbar-banner">
-      <img alt="Logo" src="/static/img/logo.png">
-      <span>Book Catalogue</span>
-    </a>
-  </div>
-</nav>
-{% endblock %}
+{% block navbar %}{% endblock %}
 {% block title_image %}
-<figure class="image is-256x256 is-inline-block">
-  <img alt="Book Catalogue logo" class="profile-large" loading="lazy" src="/static/img/logo.png"/>
+<figure class="image is-128x128 is-inline-block">
+  <img alt="Book Catalogue logo" loading="lazy" src="/static/img/logo.png"/>
 </figure>
 {% endblock %}
 {% block title %}Book Catalogue{% endblock %}
 {% block content %}
-<section>
+<section class="section">
   <div class="columns is-centered">
     <div class="column is-one-quarter">
       <div class="box">
