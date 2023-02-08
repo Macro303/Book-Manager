@@ -1,9 +1,13 @@
-{% macro book_column(obj, series=("", "")) %}
+{% macro book_column(obj, roles="", series=("", "")) %}
 <div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
   <div class="card">
-    {% if series[0] %}
+    {% if roles or series[0] %}
     <header class="card-header">
+      {% if roles %}
+      <p class="card-header-title has-text-info-light">{{ roles }}</p>
+      {% elif series[0] %}
       <p class="card-header-title has-text-info-light">{{ series[0] }}{% if series[1] %} #{{ series[1] }}{% endif %}</p>
+      {% endif %}
     </header>
     {% endif %}
     <div class="card-image">

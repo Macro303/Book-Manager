@@ -4,15 +4,15 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
-from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.genre import GenreController
 from book_catalogue.database.tables import User
 from book_catalogue.routers.html._utils import get_token_user, templates
 
-router = APIRouter(prefix="/authors", tags=["Authors"])
+router = APIRouter(prefix="/genres", tags=["Genres"])
 
 
 @router.get(path="", response_class=HTMLResponse)
-def list_authors(
+def list_genres(
     *,
     request: Request,
     token_user: User | None = Depends(get_token_user),
@@ -21,66 +21,59 @@ def list_authors(
     if not token_user:
         return RedirectResponse("/")
     with db_session:
-        author_list = AuthorController.list_authors()
+        genre_list = GenreController.list_genres()
         if name:
-            author_list = [
+            genre_list = [
                 x
-                for x in author_list
+                for x in genre_list
                 if name.casefold() in x.name.casefold() or x.name.casefold() in name.casefold()
             ]
         return templates.TemplateResponse(
-            "list_authors.html",
+            "list_genres.html",
             {
                 "request": request,
                 "token_user": token_user.to_schema(),
-                "author_list": sorted({x.to_schema() for x in author_list}),
+                "genre_list": sorted({x.to_schema() for x in genre_list}),
                 "filters": {"name": name},
             },
         )
 
 
-@router.get(path="/{author_id}", response_class=HTMLResponse)
-def view_author(
-    *, request: Request, author_id: int, token_user: User | None = Depends(get_token_user)
+@router.get(path="/{genre_id}", response_class=HTMLResponse)
+def view_genre(
+    *, request: Request, genre_id: int, token_user: User | None = Depends(get_token_user)
 ):
     if not token_user:
         return RedirectResponse("/")
     with db_session:
-        author = AuthorController.get_author(author_id=author_id)
-        book_dict = {}
-        for temp in author.books:
-            temp_book = temp.book.to_schema()
-            roles = sorted({x.to_schema() for x in temp.roles})
-            book_dict[temp_book] = roles
-        book_list = sorted(
-            [(key, values) for key, values in book_dict.items()], key=lambda x: (x[1][0], x[0])
-        )
+        genre = GenreController.get_genre(genre_id=genre_id)
+        book_list = sorted({x.to_schema() for x in genre.books})
         return templates.TemplateResponse(
-            "view_author.html",
+            "view_genre.html",
             {
                 "request": request,
                 "token_user": token_user.to_schema(),
-                "author": author.to_schema(),
+                "genre": genre.to_schema(),
                 "book_list": book_list,
             },
         )
 
 
-@router.get(path="/{author_id}/edit", response_class=HTMLResponse)
-def edit_author(
-    *, request: Request, author_id: int, token_user: User | None = Depends(get_token_user)
+@router.get(path="/{genre_id}/edit", response_class=HTMLResponse)
+def edit_genre(
+    *, request: Request, genre_id: int, token_user: User | None = Depends(get_token_user)
 ):
     if not token_user:
         return RedirectResponse("/")
     if token_user.role < 2:
-        return RedirectResponse(f"/authors/{author_id}")
+        return RedirectResponse(f"/genres/{genre_id}")
     with db_session:
-        author = AuthorController.get_author(author_id=author_id)
+        genre = GenreController.get_genre(genre_id=genre_id)
         return templates.TemplateResponse(
-            "edit_author.html",
+            "edit_genre.html",
             {
                 "request": request,
                 "token_user": token_user.to_schema(),
-                "author": author.to_schema(),
+                "genre": genre.to_schema(),
             },
         )

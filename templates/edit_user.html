@@ -13,7 +13,7 @@
     </div>
     <div class="column">
       <div class="box">
-        <form id="edit-user-form">
+        <form id="edit-form">
           {{ input("Username", "username", value=user.username) }}
           {% if token_user.role > user.role %}
           {{ number_input("Role", "role", value=user.role, max=token_user.role - 1) }}
@@ -25,14 +25,14 @@
     </div>
   </div>
   <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-user-button" onclick="saveUser()" type="button">
+    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveUser()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-floppy-disk"></i>
       </span>
       <span>Save</span>
     </button>
     {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-user-button" onclick="deleteUser()" type="button">
+    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteUser()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-trash"></i>
       </span>
@@ -46,26 +46,24 @@
 {{ super() }}
 <script type="text/javascript">
 function saveUser(){
-  const caller = "save-user-button";
-  let editUserForm = document.getElementById("edit-user-form");
-  let details = Object.fromEntries(new FormData(editUserForm));
-  console.log(details);
+  const caller = "save-button";
+  let editForm = document.getElementById("edit-form");
+  let formDetails = Object.fromEntries(new FormData(editForm));
+  console.log(formDetails);
 
   addLoading(caller);
   fetch("/api/v0/users/{{ user.user_id }}", {
     method: "PATCH",
     headers: headers,
     body: JSON.stringify({
-      "username": details["username"],
-      "role": {% if token_user.role > user.role %}details["role"]{% else %}{{ user.role }}{% endif %},
-      "image_url": details["image-url"],
+      "username": formDetails["username"],
+      "role": {% if token_user.role > user.role %}formDetails["role"]{% else %}{{ user.role }}{% endif %},
+      "image_url": formDetails["image-url"],
     }),
   }).then((response) => {
-    if (response.ok){
-      return response.json();
+    if (!response.ok){
+      return Promise.reject(response);
     }
-    return Promise.reject(response);
-  }).then((data) => {
     window.location = "/users/{{ user.user_id }}";
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);
@@ -74,7 +72,7 @@ function saveUser(){
 
 {% if token_user.role >= 3 %}
 function deleteUser(){
-  const caller = "delete-user-button";
+  const caller = "delete-button";
 
   addLoading(caller);
   fetch("/api/v0/users/{{ user.user_id }}", {

@@ -1,0 +1,25 @@
+{% extends "base.jinja" %}
+{% from "components/columns/book.jinja" import book_column %}
+{% block title %}{{ publisher.name }}{% endblock %}
+{% block content %}
+<section>
+  <div class="buttons is-centered">
+    {% if token_user.role >= 2 %}
+    <a class="button is-warning is-rounded" href="/publishers/{{ publisher.publisher_id }}/edit">
+      <span class="icon is-medium">
+        <i class="fa-solid fa-lg fa-pen-to-square"></i>
+      </span>
+      <span>Edit</span>
+    </a>
+    {% endif %}
+  </div>
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Books</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _book in book_list %}
+      {{ book_column(_book) }}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

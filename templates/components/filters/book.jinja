@@ -23,7 +23,7 @@
           <select name="format_id">
             <option value=0{% if not filters['format_id'] %} selected{% endif %}>Select Format</option>
             {% for _format in format_list %}
-            <option value={{ _format.format_id or -1 }}{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name or "None" }}</option>
+            <option value={{ _format.format_id }}{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name }}</option>
             {% endfor %}
           </select>
         </div>
@@ -36,7 +36,7 @@
           <select name="series_id">
             <option value=0{% if not filters['series_id'] %} selected{% endif %}>Select Series</option>
             {% for _series in series_list %}
-            <option value={{ _series.series_id }}{% if filters['series_id'] == _series.series_id %} selected{% endif %}>{{ _series.title }}</option>
+            <option value={{ _series.series_id }}{% if filters['series_id'] == _series.series_id %} selected{% endif %}>{{ _series.name }}</option>
             {% endfor %}
           </select>
         </div>

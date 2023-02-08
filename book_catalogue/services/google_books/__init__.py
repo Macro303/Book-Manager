@@ -3,10 +3,14 @@ __all__ = ["lookup_book"]
 from fastapi import HTTPException
 
 from book_catalogue.controllers.author import AuthorController
+from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
-from book_catalogue.schemas.author import AuthorWrite, RoleWrite
+from book_catalogue.controllers.role import RoleController
+from book_catalogue.schemas.author import AuthorWrite
 from book_catalogue.schemas.book import BookAuthorWrite, BookWrite, Identifiers
+from book_catalogue.schemas.genre import GenreWrite
 from book_catalogue.schemas.publisher import PublisherWrite
+from book_catalogue.schemas.role import RoleWrite
 from book_catalogue.services.google_books.service import GoogleBooks
 
 
@@ -19,9 +23,9 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
     authors = []
     for _author in result.volume_info.authors:
         try:
-            role = AuthorController.get_role_by_name(name="Writer")
+            role = RoleController.get_role_by_name(name="Writer")
         except HTTPException:
-            role = AuthorController.create_role(new_role=RoleWrite(name="Writer"))
+            role = RoleController.create_role(new_role=RoleWrite(name="Writer"))
         try:
             author = AuthorController.get_author_by_name(name=_author)
         except HTTPException:
@@ -37,10 +41,20 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
                 new_publisher=PublisherWrite(name=result.volume_info.publisher)
             )
 
+    genre_ids = set()
+    for _genre in result.volume_info.categories:
+        for part in _genre.split("/"):
+            try:
+                genre = GenreController.get_genre_by_name(name=part.strip())
+            except HTTPException:
+                genre = GenreController.create_genre(new_genre=GenreWrite(name=part.strip()))
+            genre_ids.add(genre.genre_id)
+
     return BookWrite(
         authors=authors,
         description=result.volume_info.description,
-        # TODO: Format
+        # TODO: Format Id
+        genre_ids=genre_ids,
         identifiers=Identifiers(
             # TODO: Goodreads Id
             google_books_id=result.book_id,
