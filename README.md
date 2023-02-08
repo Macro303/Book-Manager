@@ -18,24 +18,18 @@ It's a book catalogue.... for cataloging books.
 
 ## Installation
 
-### PyPI
-
-1. Make sure you have [Python](https://www.python.org/) installed: `python --version`
-2. Install the project from PyPI: `pip install book-catalogue`
-
 ### Github
 
 1. Make sure you have [Python](https://www.python.org/) installed: `python --version`
 2. Clone the repo: `git clone https://github.com/Buried-In-Code/Book-Catalogue`
 3. Install the project: `pip install .`
 
-### Install as a service
+### Install as a service _(usings systemd)_
 
-1. Install from Github _(See above)_
-2. Update `book-catalogue.service` with your username and location of project
-3. Copy `book-catalogue.service` to your systemd location: `sudo cp ./book-catalogue.service /lib/systemd/system/book-catalogue.service`
-4. Enable service in systemd: `sudo systemctl daemon-reload` & `systemctl enable book-catalogue.service`
-5. Start service: `systemctl start book-catalogue`
+1. Update `book-catalogue.service` with the location of project
+2. Copy `book-catalogue.service` to your systemd location: `sudo cp ./book-catalogue.service /lib/systemd/system/book-catalogue.service`
+3. Enable service in systemd: `sudo systemctl daemon-reload` & `systemctl enable book-catalogue.service`
+4. Start service: `systemctl start book-catalogue`
 
 ## Execution
 
