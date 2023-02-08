@@ -37,3 +37,9 @@ class SeriesController:
     def delete_series(cls, series_id: int):
         series = cls.get_series(series_id=series_id)
         series.delete()
+
+    @classmethod
+    def get_series_by_name(cls, name: str) -> Series:
+        if series := Series.get(name=name):
+            return series
+        raise HTTPException(status_code=404, detail="Series not found.")

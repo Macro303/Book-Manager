@@ -47,7 +47,14 @@ def view_author(
         return RedirectResponse("/")
     with db_session:
         author = AuthorController.get_author(author_id=author_id)
-        book_list = sorted({x.book.to_schema() for x in author.books})
+        book_dict = {}
+        for temp in author.books:
+            temp_book = temp.book.to_schema()
+            roles = sorted({x.to_schema() for x in temp.roles})
+            book_dict[temp_book] = roles
+        book_list = sorted(
+            [(key, values) for key, values in book_dict.items()], key=lambda x: (x[1][0], x[0])
+        )
         return templates.TemplateResponse(
             "view_author.html",
             {

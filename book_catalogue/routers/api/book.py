@@ -6,6 +6,7 @@ from pony.orm import db_session, flush
 from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.book import BookController
 from book_catalogue.controllers.genre import GenreController
+from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
 from book_catalogue.database.tables import BookAuthor, BookSeries
@@ -158,7 +159,7 @@ def set_authors(book_id: int, authors: list[BookAuthorWrite] = Body(embed=True))
             BookAuthor(
                 book=book,
                 author=AuthorController.get_author(author_id=_author.author_id),
-                roles=[AuthorController.get_role(role_id=x) for x in _author.role_ids],
+                roles=[RoleController.get_role(role_id=x) for x in _author.role_ids],
             )
         flush()
         return book.to_schema()

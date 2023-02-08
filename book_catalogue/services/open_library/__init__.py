@@ -6,11 +6,13 @@ from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
-from book_catalogue.schemas.author import AuthorWrite, Identifiers as AuthorIdentifiers, RoleWrite
+from book_catalogue.controllers.role import RoleController
+from book_catalogue.schemas.author import AuthorWrite, Identifiers as AuthorIdentifiers
 from book_catalogue.schemas.book import BookAuthorWrite, BookWrite, Identifiers
 from book_catalogue.schemas.format import FormatWrite
 from book_catalogue.schemas.genre import GenreWrite
 from book_catalogue.schemas.publisher import PublisherWrite
+from book_catalogue.schemas.role import RoleWrite
 from book_catalogue.services.open_library.service import OpenLibrary
 
 
@@ -30,9 +32,9 @@ def lookup_book(
         if author not in authors:
             authors[author] = set()
         try:
-            role = AuthorController.get_role_by_name(name="Writer")
+            role = RoleController.get_role_by_name(name="Writer")
         except HTTPException:
-            role = AuthorController.create_role(new_role=RoleWrite(name="Writer"))
+            role = RoleController.create_role(new_role=RoleWrite(name="Writer"))
         authors[author].add(role)
     for entry in edition.contributors:
         try:
@@ -42,9 +44,9 @@ def lookup_book(
         if author not in authors:
             authors[author] = set()
         try:
-            role = AuthorController.get_role_by_name(name=entry.role)
+            role = RoleController.get_role_by_name(name=entry.role)
         except HTTPException:
-            role = AuthorController.create_role(new_role=RoleWrite(name=entry.role))
+            role = RoleController.create_role(new_role=RoleWrite(name=entry.role))
         authors[author].add(role)
     authors = [
         BookAuthorWrite(author_id=key.author_id, role_ids=[x.role_id for x in value])

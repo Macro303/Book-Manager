@@ -8,6 +8,7 @@ from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.book import BookController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.publisher import PublisherController
+from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.database.tables import User
 from book_catalogue.routers.html._utils import get_token_user, templates
@@ -138,7 +139,7 @@ def edit_book(*, request: Request, book_id: int, token_user: User | None = Depen
     with db_session:
         book = BookController.get_book(book_id=book_id)
         author_list = AuthorController.list_authors()
-        role_list = AuthorController.list_roles()
+        role_list = RoleController.list_roles()
         format_list = FormatController.list_formats()
         publisher_list = PublisherController.list_publishers()
         series_list = SeriesController.list_series()

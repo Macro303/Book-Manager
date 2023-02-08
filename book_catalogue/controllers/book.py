@@ -7,6 +7,7 @@ from book_catalogue.controllers.author import AuthorController
 from book_catalogue.controllers.format import FormatController
 from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
+from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
 from book_catalogue.database.tables import Book, BookAuthor, BookSeries
@@ -49,7 +50,7 @@ class BookController:
         flush()
         for x in new_book.authors:
             author = AuthorController.get_author(author_id=x.author_id)
-            roles = [AuthorController.get_role(role_id=y) for y in x.role_ids]
+            roles = [RoleController.get_role(role_id=y) for y in x.role_ids]
             BookAuthor(book=book, author=author, roles=roles)
         for x in new_book.series:
             series = SeriesController.get_series(series_id=x.series_id)
@@ -71,7 +72,7 @@ class BookController:
             author = AuthorController.get_author(author_id=x.author_id)
             flush()
             temp = BookAuthor.get(book=book, author=author) or BookAuthor(book=book, author=author)
-            temp.roles = [AuthorController.get_role(role_id=y) for y in x.role_ids]
+            temp.roles = [RoleController.get_role(role_id=y) for y in x.role_ids]
         book.description = updates.description
         book.format = (
             FormatController.get_format(format_id=updates.format_id) if updates.format_id else None

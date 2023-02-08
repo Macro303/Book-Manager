@@ -16,11 +16,12 @@ from typing import Optional as Opt
 
 from pony.orm import Database, Optional, PrimaryKey, Required, Set
 
-from book_catalogue.schemas.author import AuthorRead, Identifiers as AuthorIdentifiers, RoleRead
+from book_catalogue.schemas.author import AuthorRead, Identifiers as AuthorIdentifiers
 from book_catalogue.schemas.book import BookRead, Identifiers as BookIdentifiers
 from book_catalogue.schemas.format import FormatRead
 from book_catalogue.schemas.genre import GenreRead
 from book_catalogue.schemas.publisher import PublisherRead
+from book_catalogue.schemas.role import RoleRead
 from book_catalogue.schemas.series import SeriesRead
 from book_catalogue.schemas.user import UserRead
 

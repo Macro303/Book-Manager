@@ -10,6 +10,7 @@ from book_catalogue.routers.html.book import router as book_router
 from book_catalogue.routers.html.format import router as format_router
 from book_catalogue.routers.html.genre import router as genre_router
 from book_catalogue.routers.html.publisher import router as publisher_router
+from book_catalogue.routers.html.role import router as role_router
 from book_catalogue.routers.html.series import router as series_router
 from book_catalogue.routers.html.user import router as user_router
 
@@ -28,5 +29,6 @@ html_router.include_router(book_router)
 html_router.include_router(format_router)
 html_router.include_router(genre_router)
 html_router.include_router(publisher_router)
+html_router.include_router(role_router)
 html_router.include_router(series_router)
 html_router.include_router(user_router)
