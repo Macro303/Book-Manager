@@ -100,6 +100,52 @@
           <!-- endregion -->
           <div class="divider is-info is-size-5">More Details</div>
           {{ textarea("Description", "description", value=book.description or "") }}
+          <!-- region Genres -->
+          <label class="label has-text-info-light">Genres</label>
+          {% for genre in book.genres %}
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select disabled>
+                  {% for _genre in genre_list %}
+                  <option {% if _genre == genre %}selected {% endif %}value={{ _genre.genre_id }}>{{ _genre.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="control">
+              <button class="button is-warning is-rounded is-outlined" id="remove-genre-button" type="button" onclick="removeGenre()">
+                <span>Remove</span>
+                <span class="icon is-medium">
+                  <i class="fa-solid fa-lg fa-xmark"></i>
+                </span>
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control is-expanded">
+              <div class="select is-fullwidth is-rounded">
+                <select name="new-creator">
+                  <option disabled hidden selected value=0>Select Genre</option>
+                  {% for _genre in genre_list %}
+                  <option value={{ _genre.genre_id }}>{{ _genre.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="control">
+              <div class="buttons is-centered">
+                <button class="button is-success is-rounded is-outlined" id="add-genre-button" type="button" onclick="addGenre()">
+                  <span class="icon is-medium">
+                    <i class="fa-solid fa-lg fa-plus"></i>
+                  </span>
+                  <span>Add Genre</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- endregion -->
           <!-- region Publisher -->
           <div class="field">
             <label class="label has-text-info-light">Publisher</label>

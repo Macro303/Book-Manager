@@ -7,6 +7,7 @@ from pony.orm import db_session
 from book_catalogue.controllers.book import BookController
 from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.format import FormatController
+from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.publisher import PublisherController
 from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.series import SeriesController
@@ -25,6 +26,7 @@ def list_books(
     token_user: User | None = Depends(get_token_user),
     creator_id: int = 0,
     format_id: int = 0,
+    genre_id: int = 0,
     publisher_id: int = 0,
     read: bool = False,
     series_id: int = 0,
@@ -46,6 +48,12 @@ def list_books(
             else:
                 format = FormatController.get_format(format_id=format_id)
                 book_list = [x for x in book_list if format == x.format]
+        if genre_id:
+            if genre_id == -1:
+                book_list = [x for x in book_list if not x.genres]
+            else:
+                genre = GenreController.get_genre(genre_id=genre_id)
+                book_list = [x for x in book_list if genre == x.genre]
         if publisher_id:
             if publisher_id == -1:
                 book_list = [x for x in book_list if not x.publisher]
@@ -95,6 +103,7 @@ def list_books(
                         for x in all_books
                     }
                 ),
+                "genre_list": sorted({y.genre.to_schema() for x in all_books for y in x.genres}),
                 "publisher_list": sorted(
                     {
                         x.publisher.to_schema()
@@ -107,6 +116,7 @@ def list_books(
                 "filters": {
                     "creator_id": creator_id,
                     "format_id": format_id,
+                    "genre_id": genre_id,
                     "publisher_id": publisher_id,
                     "read": read,
                     "series_id": series_id,
@@ -141,9 +151,10 @@ def edit_book(*, request: Request, book_id: int, token_user: User | None = Depen
     with db_session:
         book = BookController.get_book(book_id=book_id)
         creator_list = CreatorController.list_creators()
-        role_list = RoleController.list_roles()
         format_list = FormatController.list_formats()
+        genre_list = GenreController.list_genres()
         publisher_list = PublisherController.list_publishers()
+        role_list = RoleController.list_roles()
         series_list = SeriesController.list_series()
         return templates.TemplateResponse(
             "edit_book.html",
@@ -152,9 +163,10 @@ def edit_book(*, request: Request, book_id: int, token_user: User | None = Depen
                 "token_user": token_user.to_schema(),
                 "book": book.to_schema(),
                 "creator_list": sorted({x.to_schema() for x in creator_list}),
-                "role_list": sorted({x.to_schema() for x in role_list}),
                 "format_list": sorted({x.to_schema() for x in format_list}),
+                "genre_list": sorted({x.to_schema() for x in genre_list}),
                 "publisher_list": sorted({x.to_schema() for x in publisher_list}),
+                "role_list": sorted({x.to_schema() for x in role_list}),
                 "series_list": sorted({x.to_schema() for x in series_list}),
             },
         )

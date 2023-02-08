@@ -27,6 +27,9 @@
           <p><strong class="title is-size-4 has-text-info">Description:</strong> {{ book.description or "" }}</p>
         </div>
         <div class="block">
+          <p><strong class="title is-size-4 has-text-info">Genres:</strong> {{ book.genres|join(", ", attribute="name") }}</p>
+        </div>
+        <div class="block">
           <p><strong class="title is-size-4 has-text-info">Publisher:</strong> {% if book.publisher %}{{ book.publisher.name }}{% endif %}</p>
         </div>
         <div class="divider is-info is-size-4">Identifiers</div>
@@ -125,7 +128,7 @@
       </span>
       <span>Discard</span>
     </button>
-    <button class="button is-info is-rounded" id="read-book-button" type="button" onclick="readBook()">
+    <button class="button {% if token_user in book.readers %}is-warning{% else %}is-success{% endif %} is-rounded" id="read-book-button" type="button" onclick="readBook()">
       <span class="icon is-medium">
         {% if token_user in book.readers %}
         <i class="fa-solid fa-lg fa-bookmark"></i>
@@ -146,7 +149,7 @@
       </span>
       <span>Collect</span>
     </button>
-    <button class="button is-info is-rounded" id="wish-book-button" type="button" onclick="wishBook()">
+    <button class="button {% if token_user in book.wishers %}is-warning{% else %}is-success{% endif %} is-rounded" id="wish-book-button" type="button" onclick="wishBook()">
       <span class="icon is-medium">
         {% if token_user in book.wishers %}
         <i class="fa-solid fa-lg fa-star"></i>
@@ -162,7 +165,7 @@
     </button>
     {% endif %}
     {% if token_user.role >= 2 %}
-    <a class="button is-warning is-rounded" href="/books/{{ book.book_id }}/edit">
+    <a class="button is-danger is-rounded" href="/books/{{ book.book_id }}/edit">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
