@@ -75,5 +75,7 @@ def remove_book_creator_from_role(role_id: int, creator_id: int, book_id: int):
         if not book_creator or role not in book_creator.roles:
             raise HTTPException(status_code=400, detail="Role hasn't been assigned to BookCreator")
         book_creator.roles.remove(role)
+        if not book_creator.roles:
+            book_creator.delete()
         flush()
         return role.to_schema()
