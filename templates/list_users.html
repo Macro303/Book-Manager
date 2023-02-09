@@ -1,6 +1,6 @@
 {% extends "base.jinja" %}
 {% from "components/columns/user.jinja" import user_column %}
-{% from "components/filters/user.jinja" import user_filter with context %}
+{% from "components/filter_box/user.jinja" import user_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}Users{% endblock %}
 {% block content %}
@@ -11,7 +11,7 @@
       {% if token_user.role >= 1 %}
       <div class="box">
         <h1 class="title is-5 has-text-link">Add User</h1>
-        <form id="add-user-form">
+        <form id="add-user-form" onsubmit="return false;">
           {{ input("Username", "username") }}
           <div class="buttons is-centered">
             <button class="button is-link is-rounded" id="add-user-button" type="button" onclick="addUser()">

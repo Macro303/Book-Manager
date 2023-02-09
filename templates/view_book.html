@@ -17,7 +17,9 @@
     <div class="column">
       <div class="box">
         <div class="block">
-          <p><strong class="title is-size-4 has-text-info">Format:</strong> {% if book.format %}{{ book.format.name }}{% endif %}</p>
+          <p>
+            <strong class="title is-size-4 has-text-info">Format:</strong> <a class="is-family-primary" href="/formats/{{ book.format.format_id }}">{{ book.format.name }}</a>
+          </p>
         </div>
         <div class="block">
           <p><strong class="title is-size-4 has-text-info">Publish Date:</strong> {% if book.publish_date %}{{ book.publish_date_str }}{% endif %}</p>
@@ -27,10 +29,17 @@
           <p><strong class="title is-size-4 has-text-info">Description:</strong> {{ book.description or "" }}</p>
         </div>
         <div class="block">
-          <p><strong class="title is-size-4 has-text-info">Genres:</strong> {{ book.genres|join(", ", attribute="name") }}</p>
+          <p>
+            <strong class="title is-size-4 has-text-info">Genres:</strong> {% for _genre in book.genres %}<a class="is-family-primary" href="/genres/{{ _genre.format_id }}">{{ _genre.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+          </p>
         </div>
         <div class="block">
           <p><strong class="title is-size-4 has-text-info">Publisher:</strong> {% if book.publisher %}{{ book.publisher.name }}{% endif %}</p>
+        </div>
+        <div class="block">
+          <p>
+            <strong class="title is-size-4 has-text-info">Series:</strong> {% for _series in book.series %}<a class="is-family-primary" href="/series/{{ _series.series_id }}">{{ _series.name }}{% if _series.number %} #{{ _series.number }}{% endif %}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+          </p>
         </div>
         <div class="divider is-info is-size-4">Identifiers</div>
         <div class="block">
@@ -39,40 +48,28 @@
         {% if book.identifiers.goodreads_id %}
         <div class="block">
           <p>
-            <strong class="title is-size-4 has-text-info">Goodreads:</strong>
-            <a href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">
-              {{ book.identifiers.goodreads_id }}
-            </a>
+            <strong class="title is-size-4 has-text-info">Goodreads:</strong> <a class="is-family-primary" href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.goodreads_id }}</a>
           </p>
         </div>
         {% endif %}
         {% if book.identifiers.google_books_id %}
         <div class="block">
           <p>
-            <strong class="title is-size-4 has-text-info">Google Books:</strong>
-            <a href="https://books.google.com/books?id={{ book.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">
-              {{ book.identifiers.google_books_id }}
-            </a>
+            <strong class="title is-size-4 has-text-info">Google Books:</strong> <a class="is-family-primary" href="https://books.google.com/books?id={{ book.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.google_books_id }}</a>
           </p>
         </div>
         {% endif %}
         {% if book.identifiers.library_thing_id %}
         <div class="block">
           <p>
-            <strong class="title is-size-4 has-text-info">LibraryThing:</strong>
-            <a href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">
-              {{ book.identifiers.library_thing_id }}
-            </a>
+            <strong class="title is-size-4 has-text-info">LibraryThing:</strong> <a class="is-family-primary" href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.library_thing_id }}</a>
           </p>
         </div>
         {% endif %}
         {% if book.identifiers.open_library_id %}
         <div class="block">
           <p>
-            <strong class="title is-size-4 has-text-info">OpenLibrary:</strong>
-            <a href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-              {{ book.identifiers.open_library_id }}
-            </a>
+            <strong class="title is-size-4 has-text-info">OpenLibrary:</strong> <a class="is-family-primary" href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.open_library_id }}</a>
           </p>
         </div>
         {% endif %}
@@ -181,14 +178,6 @@
       {{ creator_column(_creator, roles=_creator.roles) }}
     {% endfor %}
   </div>
-  <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Series</h3>
-  </div>
-  <div class="columns is-multiline is-centered is-mobile">
-    {% for _series in book.series %}
-      {{ series_column(_series) }}
-    {% endfor %}
-  </div>
   {% if book.is_collected %}
   <div class="block has-text-centered">
     <h3 class="subtitle is-3">Readers</h3>
@@ -202,7 +191,7 @@
   <div class="block has-text-centered">
     <h3 class="subtitle is-3">Wishers</h3>
   </div>
-  <div class="columns is-multiline is-centered is-mobile">
+  <div class="columns is-multiline is-mobile is-centered">
     {% for _wisher in book.wishers %}
       {{ user_column(_wisher) }}
     {% endfor %}

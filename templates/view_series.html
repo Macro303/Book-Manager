@@ -1,5 +1,6 @@
 {% extends "base.jinja" %}
 {% from "components/columns/book.jinja" import book_column %}
+{% from "components/forms.jinja" import input, number_input %}
 {% block title %}{{ series.name }}{% endblock %}
 {% block content %}
 <section class="section">
@@ -16,10 +17,79 @@
   <div class="block has-text-centered">
     <h3 class="subtitle is-3">Books</h3>
   </div>
-  <div class="columns is-multiline is-centered is-mobile">
-    {% for _book, number in book_list %}
-      {{ book_column(_book, series=(series.name, number)) }}
-    {% endfor %}
+  <div class="columns">
+    {% if token_user.role >= 2 %}
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      <div class="box">
+        <h5 class="title is-5 has-text-link">Add Book to Series</h5>
+        <form id="add-form" onsubmit="return false;">
+          {{ input("Book Id", "book-id") }}
+          {{ number_input("Series Number", "series-num") }}
+          <div class="buttons is-centered">
+            <button class="button is-link is-rounded" id="add-button" type="button" onclick="addBook()">
+              <span class="icon is-medium">
+                <i class="fa-solid fa-lg fa-plus"></i>
+              </span>
+              <span>Add</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+    <div class="column">
+      <div class="columns is-multiline is-mobile">
+        {% for _book, number in book_list %}
+          {{ book_column(_book, series=(series.name, number), remove_button=True) }}
+        {% endfor %}
+      </div>
+    </div>
   </div>
 </section>
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript">
+{% if token_user.role >= 2 %}
+function addBook(){
+  const caller = "add-button";
+  let addForm = document.getElementById("add-form");
+  let formDetails = Object.fromEntries(new FormData(addForm));
+  console.log(formDetails);
+
+  addLoading(caller);
+  fetch("/api/v0/series/{{ series.series_id }}/books", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      "book_id": formDetails["book-id"],
+      "series_num": formDetails["series-num"]
+    }),
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    addForm.reset();
+    window.location.reload();
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+
+function removeBook(caller, bookId){
+  addLoading(caller);
+  fetch(`/api/v0/series/{{ series.series_id }}/books/${bookId}`, {
+    method: "DELETE",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok){
+      return Promise.reject(response);
+    }
+    window.location.reload();
+  }).catch((response) => response.json().then((msg) => {
+    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+  })).finally(() => removeLoading(caller));
+}
+{% endif %}
+</script>
 {% endblock %}

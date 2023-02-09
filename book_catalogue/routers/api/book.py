@@ -5,16 +5,13 @@ from pony.orm import db_session, flush
 
 from book_catalogue.controllers.book import BookController
 from book_catalogue.controllers.creator import CreatorController
-from book_catalogue.controllers.genre import GenreController
 from book_catalogue.controllers.role import RoleController
-from book_catalogue.controllers.series import SeriesController
 from book_catalogue.controllers.user import UserController
-from book_catalogue.database.tables import BookCreator, BookSeries
+from book_catalogue.database.tables import BookCreator
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas.book import (
     BookCreatorWrite,
     BookRead,
-    BookSeriesWrite,
     BookWrite,
     LookupBook,
 )
@@ -160,38 +157,6 @@ def set_creators(book_id: int, creators: list[BookCreatorWrite] = Body(embed=Tru
                 book=book,
                 creator=CreatorController.get_creator(creator_id=_creator.creator_id),
                 roles=[RoleController.get_role(role_id=x) for x in _creator.role_ids],
-            )
-        flush()
-        return book.to_schema()
-
-
-@router.patch(
-    path="/{book_id}/genres",
-    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
-)
-def set_genres(book_id: int, genre_ids: list[int] = Body(embed=True)) -> BookRead:
-    with db_session:
-        book = BookController.get_book(book_id=book_id)
-        book.genres = [GenreController.get_genre(genre_id=x) for x in genre_ids]
-        flush()
-        return book.to_schema()
-
-
-@router.patch(
-    path="/{book_id}/series",
-    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
-)
-def set_series(book_id: int, series: list[BookSeriesWrite] = Body(embed=True)) -> BookRead:
-    with db_session:
-        book = BookController.get_book(book_id=book_id)
-        for _series in book.series:
-            _series.delete()
-        flush()
-        for _series in series:
-            BookSeries(
-                book=book,
-                series=SeriesController.get_series(series_id=_series.series_id),
-                number=_series.number,
             )
         flush()
         return book.to_schema()

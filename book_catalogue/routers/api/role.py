@@ -1,9 +1,12 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter
-from pony.orm import db_session
+from fastapi import APIRouter, Body, HTTPException
+from pony.orm import db_session, flush
 
+from book_catalogue.controllers.book import BookController
+from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.role import RoleController
+from book_catalogue.database.tables import BookCreator
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas.role import RoleRead, RoleWrite
 
@@ -38,3 +41,39 @@ def update_role(role_id: int, updates: RoleWrite) -> RoleRead:
 def delete_role(role_id: int):
     with db_session:
         RoleController.delete_role(role_id=role_id)
+
+
+@router.post(path="/{role_id}/books", responses={404: {"model": ErrorResponse}})
+def add_book_creator_to_role(
+    role_id: int, book_id: int = Body(embed=True), creator_id: int = Body(embed=True)
+) -> RoleRead:
+    with db_session:
+        role = RoleController.get_role(role_id=role_id)
+        book = BookController.get_book(book_id=book_id)
+        creator = CreatorController.get_creator(creator_id=creator_id)
+        book_creator = BookCreator.get(book=book, creator=creator) or BookCreator(
+            book=book, creator=creator
+        )
+        if book_creator and role in book_creator.roles:
+            raise HTTPException(
+                status_code=400, detail="Role has already been assigned to BookCreator"
+            )
+        book_creator.roles.add(role)
+        flush()
+        return role.to_schema()
+
+
+@router.delete(
+    path="/{role_id}/books/{creator_id}/{book_id}", responses={404: {"model": ErrorResponse}}
+)
+def remove_book_creator_from_role(role_id: int, creator_id: int, book_id: int):
+    with db_session:
+        role = RoleController.get_role(role_id=role_id)
+        book = BookController.get_book(book_id=book_id)
+        creator = CreatorController.get_creator(creator_id=creator_id)
+        book_creator = BookCreator.get(book=book, creator=creator)
+        if not book_creator or role not in book_creator.roles:
+            raise HTTPException(status_code=400, detail="Role hasn't been assigned to BookCreator")
+        book_creator.roles.remove(role)
+        flush()
+        return role.to_schema()

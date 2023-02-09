@@ -1,6 +1,6 @@
 {% extends "base.jinja" %}
 {% from "components/columns/series.jinja" import series_column %}
-{% from "components/filters/series.jinja" import series_filter with context %}
+{% from "components/filter_box/series.jinja" import series_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}Series{% endblock %}
 {% block content %}
@@ -11,7 +11,7 @@
       {% if token_user.role >= 1 %}
       <div class="box">
         <h5 class="title is-5 has-text-link">Add Series</h5>
-        <form id="add-series-form">
+        <form id="add-series-form" onsubmit="return false;">
           {{ input("Name", "name") }}
           <div class="buttons is-centered">
             <button class="button is-link is-rounded" id="add-series-button" type="button" onclick="addSeries()">

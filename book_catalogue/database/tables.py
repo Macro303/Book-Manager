@@ -97,7 +97,7 @@ class BookSeries(db.Entity):
     _table_ = "books_series"
 
     book: Book = Required(Book)
-    number: int | None = Optional(int, nullable=True)
+    number: int = Optional(int, default=0)
     series: "Series" = Required("Series")
 
     PrimaryKey(book, series)

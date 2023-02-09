@@ -12,7 +12,7 @@
   <div class="columns is-centered">
     <div class="column is-one-quarter">
       <div class="box">
-        <form id="sign-in-form">
+        <form id="sign-in-form" onsubmit="return false;">
           {{ input("Username", "username") }}
           <div class="buttons is-centered">
             <button class="button is-primary is-rounded" id="sign-in-button" type="button" onclick="signIn()">

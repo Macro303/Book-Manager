@@ -1,6 +1,7 @@
 {% extends "base.jinja" %}
+{% from "components/add_box/book.jinja" import add_book %}
 {% from "components/columns/book.jinja" import book_column %}
-{% from "components/filters/book.jinja" import book_filter with context %}
+{% from "components/filter_box/book.jinja" import book_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
 {% block content %}
@@ -9,22 +10,7 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       {{ book_filter("/users/" ~ user.user_id ~ "/wishlist") }}
       {% if token_user == user %}
-      <div class="box">
-        <h1 class="title is-5 has-text-link">Add Book</h1>
-        <form id="add-form">
-          {{ input("Isbn", "isbn") }}
-          <div class="divider is-info is-size-4">OR</div>
-          {{ input("Book Depository Url", "book-depository-url") }}
-          <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-button" type="button" onclick="addBook()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-plus"></i>
-              </span>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
-      </div>
+      {{ add_book() }}
       {% endif %}
     </div>
     <div class="column">

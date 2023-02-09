@@ -13,7 +13,7 @@
     </div>
     <div class="column">
       <div class="box">
-        <form id="edit-form">
+        <form id="edit-form" onsubmit="return false;">
           {{ input("Name", "name", value=creator.name) }}
           <div class="divider is-info is-size-5">More Details</div>
           {{ textarea("Bio", "bio", value=creator.bio or "") }}

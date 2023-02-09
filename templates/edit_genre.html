@@ -4,7 +4,7 @@
 {% block content %}
 <section class="section">
   <div class="box">
-    <form id="edit-form">
+    <form id="edit-form" onsubmit="return false;">
       {{ input("Name", "name", value=genre.name) }}
     </form>
   </div>

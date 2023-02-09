@@ -1,4 +1,4 @@
-{% macro book_column(obj, roles="", series=("", "")) %}
+{% macro book_column(obj, roles="", series=("", ""), remove_button=False, creator_id="") %}
 <div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
   <div class="card">
     {% if roles or series[0] %}
@@ -12,7 +12,7 @@
     {% endif %}
     <div class="card-image">
       <figure class="image is-2by3">
-        <img alt="{{ obj.title }}: {{ obj.subtitle }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ obj.image_url or '/static/img/logo.png' }}" width="250"/>
+        <img alt="{{ obj.title }}: {{ obj.subtitle or '' }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ obj.image_url or '/static/img/logo.png' }}" width="250"/>
       </figure>
     </div>
     <div class="card-content">
@@ -22,6 +22,16 @@
           <p class="subtitle is-6 has-text-info-dark">{{ obj.subtitle or "" }}</p>
         </div>
       </div>
+      {% if remove_button %}
+      <div class="buttons is-centered">
+        <button class="button is-danger is-rounded is-outlined" type="button" id="{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-remove-button" onclick="removeBook('{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-remove-button', {{ obj.book_id }}{% if creator_id %}, {{ creator_id }}{% endif %})">
+          <span class="icon is-medium">
+            <i class="fa-solid fa-lg fa-minus"></i>
+          </span>
+          <span>Remove</span>
+        </button>
+      </div>
+      {% endif %}
     </div>
     <footer class="card-footer">
       <a class="card-footer-item has-text-link" href="/books/{{ obj.book_id }}">
@@ -30,7 +40,7 @@
         </span>
         <span>View</span>
       </a>
-      <a class="card-footer-item has-text-link modal-trigger" data-target="{{ obj.book_id }}-link-modal" id="{{ obj.book_id }}-link-button">
+      <a class="card-footer-item has-text-link modal-trigger" data-target="{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-link-modal" id="{{ obj.book_id }}-link-button">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-link"></i>
         </span>
@@ -39,7 +49,7 @@
     </footer>
   </div>
 </div>
-<div class="modal" id="{{ obj.book_id }}-link-modal">
+<div class="modal" id="{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-link-modal">
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">

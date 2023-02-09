@@ -13,76 +13,9 @@
     </div>
     <div class="column">
       <div class="box">
-        <form id="edit-form">
+        <form id="edit-form" onsubmit="return false;">
           {{ input("Title", "title", value=book.title) }}
           {{ input("Subtitle", "subtitle", value=book.subtitle or "") }}
-          <!-- region Creators -->
-          <label class="label has-text-info-light">Creators</label>
-          {% for creator in book.creators %}
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select disabled>
-                  {% for _creator in creator_list %}
-                  <option {% if _creator == creator %}selected {% endif %}value={{ _creator.creator_id }}>{{ _creator.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            {% for role in creator.roles %}
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select disabled>
-                  {% for _role in role_list %}
-                  <option {% if _role == role %}selected {% endif %}value={{ _role.role_id }}>{{ _role.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            {% endfor %}
-            <div class="control">
-              <button class="button is-warning is-rounded is-outlined" id="remove-creator-button" type="button" onclick="removeCreator()">
-                <span>Remove</span>
-                <span class="icon is-medium">
-                  <i class="fa-solid fa-lg fa-xmark"></i>
-                </span>
-              </button>
-            </div>
-          </div>
-          {% endfor %}
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select name="new-creator">
-                  <option disabled hidden selected value=0>Select Creator</option>
-                  {% for _creator in creator_list %}
-                  <option value={{ _creator.creator_id }}>{{ _creator.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select name="new-role">
-                  <option disabled hidden selected value=0>Add Role</option>
-                  {% for _role in role_list %}
-                  <option value={{ _role.role_id }}>{{ _role.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="control">
-              <div class="buttons is-centered">
-                <button class="button is-success is-rounded is-outlined" id="add-creator-button" type="button" onclick="addCreator()">
-                  <span class="icon is-medium">
-                    <i class="fa-solid fa-lg fa-plus"></i>
-                  </span>
-                  <span>Add Creator</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <!-- endregion -->
           <!-- region Format -->
           <div class="field">
             <label class="label has-text-info-light">Format</label>
@@ -98,54 +31,9 @@
             </div>
           </div>
           <!-- endregion -->
+          {{ input("Publish Date", "publish-date", value=book.publish_date) }}
           <div class="divider is-info is-size-5">More Details</div>
           {{ textarea("Description", "description", value=book.description or "") }}
-          <!-- region Genres -->
-          <label class="label has-text-info-light">Genres</label>
-          {% for genre in book.genres %}
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select disabled>
-                  {% for _genre in genre_list %}
-                  <option {% if _genre == genre %}selected {% endif %}value={{ _genre.genre_id }}>{{ _genre.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="control">
-              <button class="button is-warning is-rounded is-outlined" id="remove-genre-button" type="button" onclick="removeGenre()">
-                <span>Remove</span>
-                <span class="icon is-medium">
-                  <i class="fa-solid fa-lg fa-xmark"></i>
-                </span>
-              </button>
-            </div>
-          </div>
-          {% endfor %}
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select name="new-creator">
-                  <option disabled hidden selected value=0>Select Genre</option>
-                  {% for _genre in genre_list %}
-                  <option value={{ _genre.genre_id }}>{{ _genre.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="control">
-              <div class="buttons is-centered">
-                <button class="button is-success is-rounded is-outlined" id="add-genre-button" type="button" onclick="addGenre()">
-                  <span class="icon is-medium">
-                    <i class="fa-solid fa-lg fa-plus"></i>
-                  </span>
-                  <span>Add Genre</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <!-- endregion -->
           <!-- region Publisher -->
           <div class="field">
             <label class="label has-text-info-light">Publisher</label>
@@ -157,58 +45,6 @@
                   <option {% if book.publisher and _publisher == book.publisher %}selected {% endif %}value={{ _publisher.publisher_id }}>{{ _publisher.name }}</option>
                   {% endfor %}
                 </select>
-              </div>
-            </div>
-          </div>
-          <!-- endregion -->
-          <!-- region Series -->
-          <label class="label has-text-info-light">Series</label>
-          {% for series in book.series %}
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select disabled>
-                  {% for _series in series_list %}
-                  <option {% if _series == series %}selected {% endif %}value={{ _series.series_id }}>{{ _series.title }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="control is-expanded">
-              <input class="input is-rounded" disabled placeholder="Number" type="number" value={{ series.number or 0 }}>
-            </div>
-            <div class="control">
-              <button class="button is-warning is-rounded is-outlined" id="remove-series-button" type="button" onclick="removeSeries()">
-                <span>Remove</span>
-                <span class="icon is-medium">
-                  <i class="fa-solid fa-lg fa-xmark"></i>
-                </span>
-              </button>
-            </div>
-          </div>
-          {% endfor %}
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select name="new-creator">
-                  <option disabled hidden selected value=0>Select Series</option>
-                  {% for _series in series_list %}
-                  <option value={{ _series.series_id }}>{{ _series.title }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="control is-expanded">
-              <input class="input is-rounded" name="new-series-num" placeholder="Number" type="number">
-            </div>
-            <div class="control">
-              <div class="buttons is-centered">
-                <button class="button is-success is-rounded is-outlined" id="add-series-button" type="button" onclick="addSeries()">
-                  <span class="icon is-medium">
-                    <i class="fa-solid fa-lg fa-plus"></i>
-                  </span>
-                  <span>Add Series</span>
-                </button>
               </div>
             </div>
           </div>
@@ -251,42 +87,6 @@
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
-function addCreator(){
-  const caller = "add-creator-button";
-  let editForm = document.getElementById("edit-form");
-  let formDetails = Object.fromEntries(new FormData(editForm));
-  console.log(details);
-
-  // TODO: Add creator and roles to book
-}
-
-function removeCreator(){
-  const caller = "remove-creator-button";
-  let editForm = document.getElementById("edit-form");
-  let formDetails = Object.fromEntries(new FormData(editForm));
-  console.log(details);
-
-  // TODO: Remove creator from book
-}
-
-function addSeries(){
-  const caller = "add-series-button";
-  let editForm = document.getElementById("edit-form");
-  let formDetails = Object.fromEntries(new FormData(editForm));
-  console.log(details);
-
-  // TODO: Add series to book
-}
-
-function removeSeries(){
-  const caller = "remove-series-button";
-  let editForm = document.getElementById("edit-form");
-  let formDetails = Object.fromEntries(new FormData(editForm));
-  console.log(details);
-
-  // TODO: Remove series from book
-}
-
 function saveBook(){
   const caller = "save-button";
   let editForm = document.getElementById("edit-form");
@@ -316,6 +116,7 @@ function saveBook(){
         "open_library_id": formDetails["open-library"]
       },
       "image_url": formDetails["image-url"],
+      "publish_date": "{{ book.publish_date }}",
       "publisher_id": formDetails["publisher"],
       "reader_ids": [{{ book.readers|join(", ", attribute="user_id") }}],
       "series": [
