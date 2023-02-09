@@ -27,8 +27,8 @@ def lookup_book(
     work = session.get_work(work_id=edition.works[0].key.split("/")[-1])
 
     creators = {}
-    for entry in work.creators:
-        creator = CreatorController.lookup_creator(open_library_id=entry.creator_id)
+    for entry in work.authors:
+        creator = CreatorController.lookup_creator(open_library_id=entry.author_id)
         if creator not in creators:
             creators[creator] = set()
         try:

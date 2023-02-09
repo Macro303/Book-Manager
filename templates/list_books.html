@@ -11,10 +11,12 @@
       {% if token_user.role >= 1 %}
       <div class="box">
         <h1 class="title is-5 has-text-link">Add Book</h1>
-        <form id="add-book-form">
+        <form id="add-form">
           {{ input("Isbn", "isbn") }}
+          <div class="divider is-info is-size-4">OR</div>
+          {{ input("Book Depository Url", "book-depository-url") }}
           <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-book-button" type="button" onclick="addBook()">
+            <button class="button is-link is-rounded" id="add-button" type="button" onclick="addBook()">
               <span class="icon is-medium">
                 <i class="fa-solid fa-lg fa-plus"></i>
               </span>
@@ -40,23 +42,31 @@
 <script type="text/javascript">
 {% if token_user.role >= 1 %}
 function addBook(){
-  const caller = "add-book-button";
-  let addBookForm = document.getElementById("add-book-form");
-  let details = Object.fromEntries(new FormData(addBookForm));
-  console.log(details);
+  const caller = "add-button";
+  let addForm = document.getElementById("add-form");
+  let formDetails = Object.fromEntries(new FormData(addForm));
+  console.log(formDetails);
+
+  let book_depository_url = formDetails["book-depository-url"];
+  if (book_depository_url){
+    let segments = new URL(book_depository_url).pathname.split('/');
+    book_depository_url = segments.pop() || segments.pop();
+  }
+
+  let isbn = formDetails["isbn"] || book_depository_url;
 
   addLoading(caller);
   fetch("/api/v0/books/lookup", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
-      "isbn": details["isbn"],
+      "isbn": isbn,
     }),
   }).then((response) => {
     if (!response.ok){
       return Promise.reject(response);
     }
-    addBookForm.reset();
+    addForm.reset();
     window.location.reload();
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);

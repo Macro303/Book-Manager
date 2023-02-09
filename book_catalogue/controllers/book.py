@@ -52,6 +52,7 @@ class BookController:
             creator = CreatorController.get_creator(creator_id=x.creator_id)
             roles = [RoleController.get_role(role_id=y) for y in x.role_ids]
             BookCreator(book=book, creator=creator, roles=roles)
+        flush()
         for x in new_book.series:
             series = SeriesController.get_series(series_id=x.series_id)
             BookSeries(book=book, series=series, number=x.number)
