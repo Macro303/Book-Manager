@@ -108,7 +108,7 @@ def lookup_book(
 
 def lookup_creator(open_library_id: str | None = None) -> CreatorWrite:
     session = OpenLibrary()
-    creator = session.get_creator(creator_id=open_library_id)
+    creator = session.get_author(author_id=open_library_id)
 
     photo_id = next(iter(creator.photos), None)
 
