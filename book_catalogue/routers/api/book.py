@@ -1,5 +1,7 @@
 __all__ = ["router"]
 
+from datetime import date
+
 from fastapi import APIRouter, Body, HTTPException
 from pony.orm import db_session, flush
 
@@ -7,7 +9,7 @@ from book_catalogue.controllers.book import BookController
 from book_catalogue.controllers.creator import CreatorController
 from book_catalogue.controllers.role import RoleController
 from book_catalogue.controllers.user import UserController
-from book_catalogue.database.tables import BookCreator
+from book_catalogue.database.tables import BookCreator, Reader
 from book_catalogue.responses import ErrorResponse
 from book_catalogue.schemas.book import (
     BookCreatorWrite,
@@ -124,20 +126,37 @@ def wish_book(book_id: int, wisher_id: int = Body(embed=True)) -> BookRead:
         return book.to_schema()
 
 
-@router.put(path="/{book_id}/read", responses={404: {"model": ErrorResponse}})
+@router.post(path="/{book_id}/read", responses={404: {"model": ErrorResponse}})
 def read_book(
     book_id: int,
     reader_id: int = Body(embed=True),
+    read_date: date | None = Body(default=None, embed=True),
 ) -> BookRead:
     with db_session:
         book = BookController.get_book(book_id=book_id)
         if not book.is_collected:
             raise HTTPException(status_code=400, detail="Book has not been collected.")
         user = UserController.get_user(user_id=reader_id)
-        if user in book.readers:
-            book.readers.remove(user)
-        else:
-            book.readers.add(user)
+        if _ := Reader.get(book=book, user=user):
+            raise HTTPException(status_code=400, detail="Book has already been read by user.")
+        print(locals())
+        Reader(book=book, user=user, read_date=read_date)
+        flush()
+        print(locals())
+        return book.to_schema()
+
+
+@router.delete(path="/{book_id}/read", responses={404: {"model": ErrorResponse}})
+def unread_book(book_id: int, reader_id: int = Body(embed=True)) -> BookRead:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        if not book.is_collected:
+            raise HTTPException(status_code=400, detail="Book has not been collected.")
+        user = UserController.get_user(user_id=reader_id)
+        reader = Reader.get(book=book, user=user)
+        if not reader:
+            raise HTTPException(status_code=400, detail="Book has not been read by user yet.")
+        reader.delete()
         flush()
         return book.to_schema()
 

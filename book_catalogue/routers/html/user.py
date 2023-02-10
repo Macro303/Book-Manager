@@ -1,5 +1,7 @@
 __all__ = ["router"]
 
+from datetime import date
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
@@ -53,12 +55,14 @@ def view_user(*, request: Request, user_id: int, token_user: User | None = Depen
         return RedirectResponse("/")
     with db_session:
         user = UserController.get_user(user_id=user_id)
+        read_books = [x.book.to_schema() for x in sorted(user.read_books, reverse=True, key=lambda x: (x.read_date or x.book.publish_date or date(2000,1,1)))[:5]]
         return templates.TemplateResponse(
             "view_user.html",
             {
                 "request": request,
                 "token_user": token_user,
                 "user": user,
+                "read_books": read_books
             },
         )
 

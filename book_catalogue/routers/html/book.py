@@ -1,5 +1,7 @@
 __all__ = ["router"]
 
+from datetime import date
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
@@ -62,11 +64,11 @@ def list_books(
                 book_list = [x for x in book_list if publisher == x.publisher]
         if read:
             book_list = [
-                x for x in book_list if token_user.user_id in [y.user_id for y in x.readers]
+                x for x in book_list if token_user.user_id in [y.user.user_id for y in x.readers]
             ]
         else:
             book_list = [
-                x for x in book_list if token_user.user_id not in [y.user_id for y in x.readers]
+                x for x in book_list if token_user.user_id not in [y.user.user_id for y in x.readers]
             ]
         if series_id:
             if series_id == -1:
@@ -138,6 +140,7 @@ def view_book(*, request: Request, book_id: int, token_user: User | None = Depen
                 "request": request,
                 "token_user": token_user.to_schema(),
                 "book": book.to_schema(),
+                "today": date.today(),
             },
         )
 

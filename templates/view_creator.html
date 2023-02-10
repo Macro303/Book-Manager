@@ -14,36 +14,27 @@
     <div class="column">
       <div class="box">
         <div class="block">
-          <p><strong class="title is-size-5 has-text-info">Bio:</strong> {{ creator.bio or "" }}</p>
+          <p><strong class="subtitle is-size-5 has-text-info">Bio:</strong> {{ creator.bio or "" }}</p>
         </div>
-        <div class="divider is-info is-size-5">Identifiers</div>
+        <div class="divider subtitle is-capitalized has-text-info is-size-4">Identifiers</div>
         {% if creator.identifiers.goodreads_id %}
         <div class="block">
           <p>
-            <strong class="title is-size-5 has-text-info">Goodreads:</strong>
-            <a href="#" rel="noopener noreferrer" target="_blank">
-              {{ creator.identifiers.goodreads_id }}
-            </a>
+            <strong class="subtitle is-size-5 has-text-info">Goodreads:</strong> <a href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.goodreads_id }}</a>
           </p>
         </div>
         {% endif %}
         {% if creator.identifiers.library_thing_id %}
         <div class="block">
           <p>
-            <strong class="title is-size-5 has-text-info">LibraryThing:</strong>
-            <a href="#" rel="noopener noreferrer" target="_blank">
-              {{ creator.identifiers.library_thing_id }}
-            </a>
+            <strong class="subtitle is-size-5 has-text-info">LibraryThing:</strong> <a href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.library_thing_id }}</a>
           </p>
         </div>
         {% endif %}
         {% if creator.identifiers.open_library_id %}
         <div class="block">
           <p>
-            <strong class="title is-size-5 has-text-info">OpenLibrary:</strong>
-            <a href="https://openlibrary.org/creator/{{ creator.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-              {{ creator.identifiers.open_library_id }}
-            </a>
+            <strong class="subtitle is-size-5 has-text-info">OpenLibrary:</strong> <a href="https://openlibrary.org/creator/{{ creator.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.open_library_id }}</a>
           </p>
         </div>
         {% endif %}

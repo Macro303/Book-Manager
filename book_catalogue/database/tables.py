@@ -40,7 +40,7 @@ class Book(db.Entity):
     is_collected: bool = Optional(bool, default=False)
     publish_date: date | None = Optional(date, nullable=True)
     publisher: Opt["Publisher"] = Optional("Publisher", nullable=True)
-    readers: list["User"] = Set("User", table="readers", reverse="read_books")
+    readers: list["Reader"] = Set("Reader")
     series: list["BookSeries"] = Set("BookSeries")
     subtitle: str | None = Optional(str, nullable=True)
     title: str = Required(str)
@@ -70,7 +70,7 @@ class Book(db.Entity):
             is_collected=self.is_collected,
             publish_date=self.publish_date,
             publisher=self.publisher.to_schema() if self.publisher else None,
-            readers=sorted({x.to_schema() for x in self.readers}),
+            readers=sorted({x.user.to_schema() for x in self.readers}),
             series=sorted({x.to_schema() for x in self.series}),
             subtitle=self.subtitle,
             title=self.title,
@@ -173,6 +173,16 @@ class Publisher(db.Entity):
         return PublisherRead(publisher_id=self.publisher_id, name=self.name)
 
 
+class Reader(db.Entity):
+    _table_ = "readers"
+    
+    book: Book = Required(Book)
+    user: "User" = Required("User")
+    read_date: date | None = Optional(date, nullable=True)
+    
+    PrimaryKey(book, user)
+
+
 class Role(db.Entity):
     _table_ = "roles"
 
@@ -205,7 +215,7 @@ class User(db.Entity):
     user_id: int = PrimaryKey(int, auto=True)
     username: str = Required(str)
 
-    read_books: list[Book] = Set(Book, table="readers", reverse="readers")
+    read_books: list[Reader] = Set(Reader)
     wished_books: list[Book] = Set(Book, table="wishers", reverse="wishers")
 
     def to_schema(self) -> UserRead:
