@@ -116,7 +116,7 @@ function saveBook(){
         "open_library_id": formDetails["open-library"]
       },
       "image_url": formDetails["image-url"],
-      "publish_date": "{{ book.publish_date }}",
+      "publish_date": formDetails["publish-date"],
       "publisher_id": formDetails["publisher"],
       "reader_ids": [{{ book.readers|join(", ", attribute="user_id") }}],
       "series": [

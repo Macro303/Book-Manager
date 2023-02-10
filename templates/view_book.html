@@ -30,7 +30,7 @@
         </div>
         <div class="block">
           <p>
-            <strong class="title is-size-4 has-text-info">Genres:</strong> {% for _genre in book.genres %}<a class="is-family-primary" href="/genres/{{ _genre.format_id }}">{{ _genre.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+            <strong class="title is-size-4 has-text-info">Genres:</strong> {% for _genre in book.genres %}<a class="is-family-primary" href="/genres/{{ _genre.genre_id }}">{{ _genre.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
           </p>
         </div>
         <div class="block">

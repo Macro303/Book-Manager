@@ -195,6 +195,7 @@ class BookController:
             raise HTTPException(
                 status_code=500, detail="Incorrect config setup, review source settings."
             )
+        book.publish_date = updates.publish_date
         book.genres = [GenreController.get_genre(genre_id=x) for x in updates.genre_ids]
         flush()
         return book
