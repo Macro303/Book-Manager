@@ -21,9 +21,10 @@ class Author(BaseModel):
 
 
 class Excerpt(BaseModel):
-    excerpt: str
+    excerpt: str | TextResource
     comment: str | None = None
     author: Resource | None = None
+    page: str | None = None
 
 
 class Work(BaseModel):

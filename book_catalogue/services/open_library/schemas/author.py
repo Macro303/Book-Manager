@@ -15,6 +15,7 @@ class Identifiers(BaseModel):
     goodreads: str | None = None
     isni: str | None = None
     librarything: str | None = None
+    project_gutenberg: str | None = None
     viaf: str | None = None
     wikidata: str | None = None
 
