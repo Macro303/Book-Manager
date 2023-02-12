@@ -139,10 +139,8 @@ def read_book(
         user = UserController.get_user(user_id=reader_id)
         if _ := Reader.get(book=book, user=user):
             raise HTTPException(status_code=400, detail="Book has already been read by user.")
-        print(locals())
         Reader(book=book, user=user, read_date=read_date)
         flush()
-        print(locals())
         return book.to_schema()
 
 
