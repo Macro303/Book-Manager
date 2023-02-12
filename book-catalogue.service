@@ -7,7 +7,7 @@ Type=idle
 Restart=on-failure
 User=buriedincode
 WorkingDirectory=/data/projects/Buried-In-Code/Book-Catalogue
-ExecStart=/bin/bash -c 'hatch run python run.py'
+ExecStart=/bin/bash -c 'pdm run python run.py'
 
 [Install]
 WantedBy=multi-user.target

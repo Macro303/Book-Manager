@@ -1,6 +1,6 @@
 [build-system]
-build-backend = "hatchling.build"
-requires = ["hatchling"]
+build-backend = "pdm.backend"
+requires = ["pdm-backend"]
 
 [project]
 authors = [
@@ -18,7 +18,7 @@ classifiers = [
   "Typing :: Typed"
 ]
 dependencies = [
-  "fastapi >= 0.90.0",
+  "fastapi >= 0.91.0",
   "jinja2 >= 3.1.2",
   "pony >= 0.7.16",
   "pydantic >= 1.10.4",
@@ -28,10 +28,10 @@ dependencies = [
   "tomli-w >= 1.0.0",
   "uvicorn >= 0.20.0"
 ]
-description = ""
+description = "It's a book catalogue.... for cataloging books."
 dynamic = ["version"]
 keywords = []
-license = "MIT"
+license = {text = "MIT"}
 name = "book-catalogue"
 readme = "README.md"
 requires-python = ">= 3.11"
@@ -53,8 +53,9 @@ Source = "https://github.com/Buried-In-Code/Book-Catalogue"
 line-length = 100
 target-version = ["py311"]
 
-[tool.hatch.version]
+[tool.pdm.version]
 path = "book_catalogue/__init__.py"
+source = "file"
 
 [tool.ruff]
 fix = true

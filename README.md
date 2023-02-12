@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11-green?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Beta-yellowgreen?style=flat-square)
 
-[![Hatch](https://img.shields.io/badge/Packaging-Hatch-4051b5?style=flat-square)](https://github.com/pypa/hatch)
+[![pdm-managed](https://img.shields.io/badge/pdm-managed-blueviolet)](https://pdm.fming.dev)
 [![Pre-Commit](https://img.shields.io/badge/Pre--Commit-Enabled-informational?style=flat-square&logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Black](https://img.shields.io/badge/Code--Style-Black-000000?style=flat-square)](https://github.com/psf/black)
 [![Ruff](https://img.shields.io/badge/Linter-Ruff-informational?style=flat-square)](https://github.com/charliermarsh/ruff)
@@ -20,7 +20,7 @@ It's a book catalogue.... for cataloging books.
 
 ### Github
 
-1. Make sure you have [Python](https://www.python.org/) installed: `python --version`
+1. Make sure you have a supported version of [Python](https://www.python.org/) installed: `python --version`
 2. Clone the repo: `git clone https://github.com/Buried-In-Code/Book-Catalogue`
 3. Install the project: `pip install .`
 

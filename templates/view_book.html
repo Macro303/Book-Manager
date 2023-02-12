@@ -116,15 +116,15 @@
           {% endif %}
         </div>
       </div>
-      <div class="block has-text-centered">
-        <h3 class="subtitle is-3">Creators</h3>
-      </div>
-      <div class="columns is-multiline is-centered is-mobile">
-        {% for _creator in book.creators %}
-        {{ creator_column(_creator, roles=_creator.roles) }}
-        {% endfor %}
-      </div>
     </div>
+  </div>
+  <div class="block has-text-centered">
+    <h3 class="subtitle is-3">Creators</h3>
+  </div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _creator in book.creators %}
+    {{ creator_column(_creator, roles=_creator.roles) }}
+    {% endfor %}
   </div>
   <div class="buttons is-centered">
     {% if book.is_collected %}
