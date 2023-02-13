@@ -56,9 +56,12 @@ def delete_book(book_id: int):
 @router.post(path="/lookup", status_code=201, responses={409: {"model": ErrorResponse}})
 def lookup_book(new_book: LookupBook) -> BookRead:
     with db_session:
-        return BookController.lookup_book(
-            isbn=new_book.isbn, wisher_id=new_book.wisher_id
-        ).to_schema()
+        book = BookController.lookup_book(isbn=new_book.isbn, wisher_id=new_book.wisher_id)
+        if new_book.collect:
+            book.is_collected = True
+            book.wishers = []
+        flush()
+        return book.to_schema()
 
 
 @router.put(path="", status_code=204)

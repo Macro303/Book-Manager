@@ -151,6 +151,7 @@ class BookWrite(BaseBook):
 
 
 class LookupBook(BaseModel):
+    collect: bool = False
     isbn: str
     wisher_id: int | None = None
 

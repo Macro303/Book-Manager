@@ -46,6 +46,7 @@ function addBook(){
     method: "POST",
     headers: headers,
     body: JSON.stringify({
+      "collect": true,
       "isbn": isbn,
     }),
   }).then((response) => {
