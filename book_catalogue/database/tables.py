@@ -175,11 +175,11 @@ class Publisher(db.Entity):
 
 class Reader(db.Entity):
     _table_ = "readers"
-    
+
     book: Book = Required(Book)
     user: "User" = Required("User")
     read_date: date | None = Optional(date, nullable=True)
-    
+
     PrimaryKey(book, user)
 
 

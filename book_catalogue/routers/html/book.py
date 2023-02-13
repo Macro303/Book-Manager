@@ -68,7 +68,9 @@ def list_books(
             ]
         else:
             book_list = [
-                x for x in book_list if token_user.user_id not in [y.user.user_id for y in x.readers]
+                x
+                for x in book_list
+                if token_user.user_id not in [y.user.user_id for y in x.readers]
             ]
         if series_id:
             if series_id == -1:
