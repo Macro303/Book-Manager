@@ -74,59 +74,50 @@
           </p>
         </div>
         {% endif %}
-        <div class="divider subtitle is-capitalized has-text-link is-size-4">Links</div>
-        <div class="buttons is-centered is-multiline">
-          <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-            <span class="icon is-medium">
-              <i class="fa-solid fa-lg fa-link"></i>
-            </span>
-            <span>Book Depository</span>
-          </a>
-          {% if not book.identifiers.goodreads_id %}
-          <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-            <span class="icon is-medium">
-              <i class="fa-brands fa-lg fa-goodreads"></i>
-            </span>
-            <span>Goodreads</span>
-          </a>
-          {% endif %}
-          {% if not book.identifiers.google_books_id %}
-          <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-            <span class="icon is-medium">
-              <i class="fa-brands fa-lg fa-google"></i>
-            </span>
-            <span>Google Books</span>
-          </a>
-          {% endif %}
-          {% if not book.identifiers.library_thing_id %}
-          <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-            <span class="icon is-medium">
-              <i class="fa-solid fa-lg fa-link"></i>
-            </span>
-            <span>LibraryThing</span>
-          </a>
-          {% endif %}
-          {% if not book.identifiers.open_library_id %}
-          <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-            <span class="icon is-medium">
-              <i class="fa-solid fa-lg fa-link"></i>
-            </span>
-            <span>OpenLibrary</span>
-          </a>
-          {% endif %}
-        </div>
       </div>
     </div>
   </div>
-  <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Creators</h3>
+  <div class="buttons is-centered is-multiline">
+    <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+      <span class="icon is-medium">
+        <i class="fa-solid fa-lg fa-link"></i>
+      </span>
+      <span>Book Depository</span>
+    </a>
+    {% if not book.identifiers.goodreads_id %}
+    <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+      <span class="icon is-medium">
+        <i class="fa-brands fa-lg fa-goodreads"></i>
+      </span>
+      <span>Goodreads</span>
+    </a>
+    {% endif %}
+    {% if not book.identifiers.google_books_id %}
+    <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+      <span class="icon is-medium">
+        <i class="fa-brands fa-lg fa-google"></i>
+      </span>
+      <span>Google Books</span>
+    </a>
+    {% endif %}
+    {% if not book.identifiers.library_thing_id %}
+    <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+      <span class="icon is-medium">
+        <i class="fa-solid fa-lg fa-link"></i>
+      </span>
+      <span>LibraryThing</span>
+    </a>
+    {% endif %}
+    {% if not book.identifiers.open_library_id %}
+    <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+      <span class="icon is-medium">
+        <i class="fa-solid fa-lg fa-link"></i>
+      </span>
+      <span>OpenLibrary</span>
+    </a>
+    {% endif %}
   </div>
-  <div class="columns is-multiline is-centered is-mobile">
-    {% for _creator in book.creators %}
-    {{ creator_column(_creator, roles=_creator.roles) }}
-    {% endfor %}
-  </div>
-  <div class="buttons is-centered">
+  <div class="buttons is-centered is-multiline">
     {% if book.is_collected %}
     <button class="button is-warning is-rounded" id="discard-book-button" type="button" onclick="discardBook()">
       <span class="icon is-medium">
@@ -180,29 +171,21 @@
     </a>
     {% endif %}
   </div>
+  <div class="divider subtitle is-capitalized is-size-3 has-text-primary-dark is-primary">Creators</div>
+  <div class="columns is-multiline is-centered is-mobile">
+    {% for _creator in book.creators %}
+    {{ creator_column(_creator, roles=_creator.roles) }}
+    {% endfor %}
+  </div>
   {% if book.is_collected %}
-  <div class="divider subtitle is-capitalized has-text-primary is-size-4">User Details</div>
-  {% if token_user in book.readers %}
-  <div class="box">
-    <div class="block">
-      <p>
-        <strong class="subtitle is-size-5 has-text-info">Read Date:</strong>
-      </p>
-    </div>
-  </div>
-  {% endif %}
-  <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Readers</h3>
-  </div>
+  <div class="divider subtitle is-capitalized is-size-3 has-text-primary-dark is-primary">Readers</div>
   <div class="columns is-multiline is-centered is-mobile">
     {% for _reader in book.readers %}
       {{ user_column(_reader) }}
     {% endfor %}
   </div>
   {% else %}
-  <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Wishers</h3>
-  </div>
+  <div class="divider subtitle is-capitalized is-size-3 has-text-primary-dark is-primary">Wishers</div>
   <div class="columns is-multiline is-mobile is-centered">
     {% for _wisher in book.wishers %}
       {{ user_column(_wisher) }}

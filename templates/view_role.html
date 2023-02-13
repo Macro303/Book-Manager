@@ -36,9 +36,7 @@
     {% endif %}
     <div class="column">
       {% for creator, book_list in creators.items() %}
-      <div class="block has-text-centered">
-        <h3 class="subtitle is-3">{{ creator.name }}</h3>
-      </div>
+      <div class="divider subtitle is-capitalized is-size-3 has-text-primary-dark is-primary">{{ creator.name }}</div>
       <div class="columns is-multiline is-mobile is-centered">
         {% for _book in book_list %}
           {{ book_column(_book, remove_button=True, creator_id=creator.creator_id) }}

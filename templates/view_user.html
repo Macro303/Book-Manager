@@ -24,9 +24,7 @@
       <span>Wishlist</span>
     </a>
   </div>
-  <div class="block has-text-centered">
-    <h3 class="subtitle is-3">Last Read</h3>
-  </div>
+  <div class="divider subtitle is-capitalized is-size-3 has-text-primary-dark is-primary">Last Read</div>
   <div class="columns is-multiline is-mobile is-centered">
     {% for _book in read_books %}
       {{ book_column(_book) }}

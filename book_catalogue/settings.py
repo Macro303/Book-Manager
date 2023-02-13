@@ -40,11 +40,7 @@ class Settings(SettingsModel):
 
     @validator("source")
     def validate_one_source(cls, v: SourceSettings) -> SourceSettings:
-        if v.google_books and v.open_library:
-            raise ValueError(
-                "Both GoogleBooks and OpenLibrary can be used as a source at the same time."
-            )
-        if not v.google_books and not v.open_library:
+        if (v.google_books and v.open_library) or (not v.google_books and not v.open_library):
             raise ValueError("Select one source, GoogleBooks or OpenLibrary.")
         return v
 
