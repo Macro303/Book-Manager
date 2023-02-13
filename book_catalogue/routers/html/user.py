@@ -60,7 +60,7 @@ def view_user(*, request: Request, user_id: int, token_user: User | None = Depen
             for x in sorted(
                 user.read_books,
                 reverse=True,
-                key=lambda x: (x.read_date or x.book.publish_date or date(2000, 1, 1)),
+                key=lambda x: (x.read_date or x.book.publish_date or date(2000, 1, 1), x.book),
             )[:4]
         ]
         return templates.TemplateResponse(
