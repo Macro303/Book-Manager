@@ -10,7 +10,7 @@
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       {{ book_filter("/users/" ~ user.user_id ~ "/wishlist") }}
       {% if token_user == user %}
-      {{ add_book() }}
+      {{ add_book(enable_book_depository=True) }}
       {% endif %}
     </div>
     <div class="column">

@@ -33,21 +33,13 @@ function addBook(){
   let formDetails = Object.fromEntries(new FormData(addForm));
   console.log(formDetails);
 
-  let book_depository_url = formDetails["book-depository-url"];
-  if (book_depository_url){
-    let segments = new URL(book_depository_url).pathname.split('/');
-    book_depository_url = segments.pop() || segments.pop();
-  }
-
-  let isbn = formDetails["isbn"] || book_depository_url;
-
   addLoading(caller);
   fetch("/api/v0/books/lookup", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
       "collect": true,
-      "isbn": isbn,
+      "isbn": formDetails["isbn"],
     }),
   }).then((response) => {
     if (!response.ok){

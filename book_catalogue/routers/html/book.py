@@ -107,7 +107,7 @@ def list_books(
                         for x in all_books
                     }
                 ),
-                "genre_list": sorted({y.genre.to_schema() for x in all_books for y in x.genres}),
+                "genre_list": sorted({y.to_schema() for x in all_books for y in x.genres}),
                 "publisher_list": sorted(
                     {
                         x.publisher.to_schema()

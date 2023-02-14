@@ -32,9 +32,9 @@ def lookup_book(
         if creator not in creators:
             creators[creator] = set()
         try:
-            role = RoleController.get_role_by_name(name="Writer")
+            role = RoleController.get_role_by_name(name="Author")
         except HTTPException:
-            role = RoleController.create_role(new_role=RoleWrite(name="Writer"))
+            role = RoleController.create_role(new_role=RoleWrite(name="Author"))
         creators[creator].add(role)
     for entry in edition.contributors:
         try:

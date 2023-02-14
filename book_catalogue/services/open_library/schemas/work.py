@@ -13,7 +13,7 @@ from book_catalogue.services.open_library.schemas import (
 
 class Author(BaseModel):
     author: Resource
-    type: Resource
+    type: Resource | str
 
     @property
     def author_id(self) -> str:

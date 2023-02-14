@@ -43,24 +43,24 @@ class GoogleBooks:
             response.raise_for_status()
             return response.json()
         except ConnectionError as err:
-            CONSOLE.print_exception(theme="ansi_dark")
+            CONSOLE.print(err)
             raise HTTPException(status_code=500, detail=f"Unable to connect to '{url}'") from err
         except HTTPError as err:
-            CONSOLE.print_exception(theme="ansi_dark")
+            CONSOLE.print(err)
             try:
                 raise HTTPException(status_code=500, detail=err.response.json()["error"]) from err
             except JSONDecodeError as sub_err:
-                CONSOLE.print_exception(theme="ansi_dark")
+                CONSOLE.print(err)
                 raise HTTPException(
                     status_code=500, detail=f"Unable to parse error response from '{url}' as Json"
                 ) from sub_err
         except JSONDecodeError as err:
-            CONSOLE.print_exception(theme="ansi_dark")
+            CONSOLE.print(err)
             raise HTTPException(
                 status_code=500, detail=f"Unable to parse response from '{url}' as Json"
             ) from err
         except ReadTimeout as err:
-            CONSOLE.print_exception(theme="ansi_dark")
+            CONSOLE.print(err)
             raise HTTPException(status_code=500, detail="Service took too long to respond") from err
 
     def _get_request(

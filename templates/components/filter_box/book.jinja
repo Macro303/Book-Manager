@@ -42,6 +42,28 @@
         </div>
       </div>
     </div>
+    {% if show_read %}
+    <div class="field">
+      <label class="label has-text-info-light">Only Read</label>
+      <div class="control is-expanded">
+        <input id="read-switch" type="checkbox" name="read" class="switch is-link is-rounded"{% if filters['read'] %} checked{% endif %}>
+        <label for="read-switch"></label>
+      </div>
+    </div>
+    {% endif %}
+    <div class="field">
+      <label class="label has-text-info-light">Publisher</label>
+      <div class="control is-expanded">
+        <div class="select is-fullwidth is-rounded">
+          <select name="publisher_id">
+            <option value=0{% if not filters['publisher_id'] %} selected{% endif %}>Select Publisher</option>
+            {% for _publisher in publisher_list %}
+            <option value={{ _publisher.publisher_id }}{% if filters['publisher_id'] == _publisher.publisher_id %} selected{% endif %}>{{ _publisher.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
     <div class="field">
       <label class="label has-text-info-light">Series</label>
       <div class="control is-expanded">
@@ -56,28 +78,6 @@
       </div>
     </div>
     {{ input("Title", "title", value=filters['title'] or '') }}
-    <div class="field">
-      <label class="label has-text-info-light">Publisher</label>
-      <div class="control is-expanded">
-        <div class="select is-fullwidth is-rounded">
-          <select name="publisher_id">
-            <option value=0{% if not filters['publisher_id'] %} selected{% endif %}>Select Publisher</option>
-            {% for _publisher in publisher_list %}
-            <option value={{ _publisher.publisher_id }}{% if filters['publisher_id'] == _publisher.publisher_id %} selected{% endif %}>{{ _publisher.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-    </div>
-    {% if show_read %}
-    <div class="field">
-      <label class="label has-text-info-light">Only Read</label>
-      <div class="control is-expanded">
-        <input id="read-switch" type="checkbox" name="read" class="switch is-link is-rounded"{% if filters['read'] %} checked{% endif %}>
-        <label for="read-switch"></label>
-      </div>
-    </div>
-    {% endif %}
     <div class="buttons is-centered">
       <button class="button is-link is-rounded">
         <span class="icon is-medium">
