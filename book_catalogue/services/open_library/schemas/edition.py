@@ -77,7 +77,7 @@ class Edition(BaseModel):
     publish_country: str | None = None
     publish_date: str | None = None
     publish_places: list[str] = Field(default_factory=list)
-    publishers: list[str]
+    publishers: list[str] = Field(default_factory=list)
     revision: int
     series: list[str] = Field(default_factory=list)
     source_records: list[str] = Field(default_factory=list)
