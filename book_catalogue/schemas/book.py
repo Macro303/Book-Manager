@@ -82,6 +82,10 @@ class BookRead(BaseBook):
     series: list[SeriesRead] = Field(default_factory=list)
     wishers: list[UserRead] = Field(default_factory=list)
 
+    @property
+    def is_available(self) -> bool:
+        return (self.publish_date <= date.today()) if self.publish_date else False
+    
     def get_first_series(self) -> SeriesRead | None:
         if temp := sorted(self.series):
             return temp[0]

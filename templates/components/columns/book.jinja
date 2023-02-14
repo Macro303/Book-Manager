@@ -12,7 +12,7 @@
     {% endif %}
     <div class="card-image">
       <figure class="image is-2by3">
-        <img alt="{{ obj.title }}: {{ obj.subtitle or '' }}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ obj.image_url or '/static/img/logo.png' }}" width="250"/>
+        <img alt="{{ obj.title }}: {{ obj.subtitle or '' }}" class="{% if not obj.is_available %}greyscale{% endif %}" height="375" loading="lazy" onerror="this.src='https://via.placeholder.com/750x500'" src="{{ obj.image_url or '/static/img/logo.png' }}" width="250"/>
       </figure>
     </div>
     <div class="card-content">

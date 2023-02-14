@@ -12,12 +12,17 @@ img.profile-large {
   object-fit: cover;
 }
 
-html,
-body {
+html, body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
+
 body > footer {
   margin-top: auto;
+}
+
+.greyscale {
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
 }
