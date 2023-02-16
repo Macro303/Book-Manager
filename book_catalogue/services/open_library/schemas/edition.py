@@ -32,6 +32,7 @@ class Identifiers(BaseModel):
     better_world_books: list[str] = Field(default_factory=list)
     goodreads: list[str] = Field(default_factory=list)
     google: list[str] = Field(default_factory=list)
+    issn: list[str] = Field(default_factory=list)
     librarything: list[str] = Field(default_factory=list)
     wikidata: list[str] = Field(default_factory=list)
 

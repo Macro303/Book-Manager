@@ -48,7 +48,7 @@ class Book(db.Entity):
 
     goodreads_id: str | None = Optional(str, nullable=True)
     google_books_id: str | None = Optional(str, nullable=True)
-    isbn: str = Required(str, unique=True)
+    isbn: str | None = Optional(str, unique=True, nullable=True)
     library_thing_id: str | None = Optional(str, nullable=True)
     open_library_id: str | None = Optional(str, nullable=True, unique=True)
 

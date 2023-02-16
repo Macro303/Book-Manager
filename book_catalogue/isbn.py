@@ -7,12 +7,14 @@ LOGGER = logging.getLogger(__name__)
 
 def to_isbn_13(value: str | None) -> str | None:
     if not value:
+        LOGGER.warning(f"Invalid Isbn: {value}")
         return None
     value = value.replace("-", "").strip()
     if len(value) == 10:
         value = _isbn_10_to_isbn_13(value)
     if _validate_isbn_13(value):
         return value
+    LOGGER.warning(f"Invalid Isbn: {value}")
     return None
 
 
@@ -32,4 +34,6 @@ def _get_check_digit(value: str) -> int:
 
 
 def _validate_isbn_13(isbn_13: str) -> bool:
+    if len(isbn_13) != 13:
+        return False
     return int(isbn_13[12]) == _get_check_digit(isbn_13[:12])

@@ -24,12 +24,12 @@ from book_catalogue.schemas.user import UserRead
 class Identifiers(BaseModel):
     goodreads_id: str | None = None
     google_books_id: str | None = None
-    isbn: str
+    isbn: str | None = None
     library_thing_id: str | None = None
     open_library_id: str | None = None
 
     @validator("isbn", pre=True)
-    def validate_isbn(cls, v: str) -> str:
+    def validate_isbn(cls, v: str) -> str | None:
         return to_isbn_13(value=v)
 
 

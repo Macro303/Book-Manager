@@ -30,7 +30,7 @@ def list_books() -> list[BookRead]:
 @router.post(path="", status_code=201, responses={409: {"model": ErrorResponse}})
 def create_book(new_book: BookWrite) -> BookRead:
     with db_session:
-        return BookController.create_book(new_book=new_book)
+        return BookController.create_book(new_book=new_book).to_schema()
 
 
 @router.get(path="/{book_id}", responses={404: {"model": ErrorResponse}})

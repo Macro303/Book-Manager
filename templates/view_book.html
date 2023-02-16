@@ -43,9 +43,11 @@
           </p>
         </div>
         <div class="divider subtitle is-capitalized has-text-info is-size-4">Identifiers</div>
+        {% if book.identifiers.isbn %}
         <div class="block">
           <p><strong class="subtitle is-size-5 has-text-info">Isbn:</strong> {{ book.identifiers.isbn }}</p>
         </div>
+        {% endif %}
         {% if book.identifiers.goodreads_id %}
         <div class="block">
           <p>
@@ -78,13 +80,15 @@
     </div>
   </div>
   <div class="buttons is-centered is-multiline">
+    {% if book.identifiers.isbn %}
     <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-link"></i>
       </span>
       <span>Book Depository</span>
     </a>
-    {% if not book.identifiers.goodreads_id %}
+    {% endif %}
+    {% if not book.identifiers.goodreads_id and book.identifiers.isbn %}
     <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
       <span class="icon is-medium">
         <i class="fa-brands fa-lg fa-goodreads"></i>
@@ -92,7 +96,7 @@
       <span>Goodreads</span>
     </a>
     {% endif %}
-    {% if not book.identifiers.google_books_id %}
+    {% if not book.identifiers.google_books_id and book.identifiers.isbn %}
     <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
       <span class="icon is-medium">
         <i class="fa-brands fa-lg fa-google"></i>
@@ -100,7 +104,7 @@
       <span>Google Books</span>
     </a>
     {% endif %}
-    {% if not book.identifiers.library_thing_id %}
+    {% if not book.identifiers.library_thing_id and book.identifiers.isbn %}
     <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-link"></i>
@@ -108,7 +112,7 @@
       <span>LibraryThing</span>
     </a>
     {% endif %}
-    {% if not book.identifiers.open_library_id %}
+    {% if not book.identifiers.open_library_id and book.identifiers.isbn %}
     <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-link"></i>
