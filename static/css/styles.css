@@ -1,5 +1,5 @@
-a {
-  font-family: "Overlock SC"
+a.navbar-link, a.card-footer-item {
+  font-family: "Overlock SC", sans-serif;
 }
 
 img.profile {

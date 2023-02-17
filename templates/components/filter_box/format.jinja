@@ -1,7 +1,7 @@
 {% from "components/forms.jinja" import input %}
 {% macro format_filter(action) %}
 <div class="box">
-  <h1 class="title is-5 has-text-link">Filter Formats</h1>
+  <h1 class="title is-5 has-text-info">Filter Formats</h1>
   <form accept-charset="UTF-8" action="{{ action }}" method="GET">
     {{ input("Name", "name", value=filters['name'] or '') }}
     <div class="buttons is-centered">

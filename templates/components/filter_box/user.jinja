@@ -1,7 +1,7 @@
 {% from "components/forms.jinja" import input %}
 {% macro user_filter(action) %}
 <div class="box">
-  <h1 class="title is-5 has-text-link">Filter Users</h1>
+  <h1 class="title is-5 has-text-info">Filter Users</h1>
   <form accept-charset="UTF-8" action="{{ action }}" method="GET">
     {{ input("Username", "username", value=filters['username'] or '') }}
     <div class="buttons is-centered">

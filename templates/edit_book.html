@@ -31,8 +31,9 @@
             </div>
           </div>
           <!-- endregion -->
+          {{ input("Image Url", "image-url", value=book.image_url or "") }}
           {{ input("Publish Date", "publish-date", value=book.publish_date) }}
-          <div class="divider is-info is-size-5">More Details</div>
+          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">More Details</div>
           {{ textarea("Description", "description", value=book.description or "") }}
           <!-- region Publisher -->
           <div class="field">
@@ -49,8 +50,7 @@
             </div>
           </div>
           <!-- endregion -->
-          <div class="divider is-info is-size-5">Identifiers</div>
-          {{ input("Image Url", "image-url", value=book.image_url or "") }}
+          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
           {{ input("Goodreads", "goodreads", value=book.identifiers.goodreads_id or "") }}
           {{ input("Google Books", "google-books", value=book.identifiers.google_books_id or "") }}
           {{ input("Isbn", "isbn", value=book.identifiers.isbn) }}

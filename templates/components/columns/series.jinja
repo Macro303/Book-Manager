@@ -1,24 +1,5 @@
 {% macro series_column(obj) %}
 <div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
-  <div class="card">
-    <div class="card-content">
-      <div class="media">
-        <div class="media-content">
-          <p class="title is-5 has-text-info">{{ obj.name }}</p>
-          {% if obj.number %}
-          <p class="subtitle is-6 has-text-info-dark">#{{ obj.number }}</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    <footer class="card-footer">
-      <a class="card-footer-item has-text-link" href="/series/{{ obj.series_id }}">
-        <span class="icon is-medium">
-          <i class="fa-solid fa-lg fa-eye"></i>
-        </span>
-        <span>View</span>
-      </a>
-    </footer>
-  </div>
+  <a class="box title is-5 has-text-info-light" href="/series/{{ obj.series_id }}">{{ obj.name }}</a>
 </div>
 {% endmacro %}

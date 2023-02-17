@@ -4,9 +4,9 @@
     {% if roles or series[0] %}
     <header class="card-header">
       {% if roles %}
-      <p class="card-header-title has-text-info-light">{{ roles }}</p>
+      <p class="card-header-title">{{ roles }}</p>
       {% elif series[0] %}
-      <p class="card-header-title has-text-info-light">{{ series[0] }}{% if series[1] %} #{{ series[1] }}{% endif %}</p>
+      <p class="card-header-title">{{ series[0] }}{% if series[1] %} #{{ series[1] }}{% endif %}</p>
       {% endif %}
     </header>
     {% endif %}
@@ -18,8 +18,8 @@
     <div class="card-content">
       <div class="media">
         <div class="media-content">
-          <p class="title is-5 has-text-info">{{ obj.title }}</p>
-          <p class="subtitle is-6 has-text-info-dark">{{ obj.subtitle or "" }}</p>
+          <p class="title is-5 has-text-info-light">{{ obj.title }}</p>
+          <p class="subtitle is-6 has-text-info">{{ obj.subtitle or "" }}</p>
         </div>
       </div>
       {% if remove_button %}
@@ -54,7 +54,7 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <div class="content">
-        <p class="modal-card-title has-text-primary-dark">Links</p>
+        <p class="modal-card-title has-text-primary">Links</p>
       </div>
     </header>
     <section class="modal-card-body">
@@ -67,48 +67,48 @@
           <span>Book Depository</span>
         </a>
         {% endif %}
+        {% if obj.identifiers.goodreads_id or obj.identifiers.isbn %}
         {% if obj.identifiers.goodreads_id %}
         <a class="button is-link is-rounded" href="https://goodreads.com/book/show/{{ obj.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">
-        {% elif obj.identifiers.isbn %}
+        {% else %}
         <a class="button is-link is-rounded" href="https://goodreads.com/book/isbn/{{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
         {% endif %}
-        {% if obj.identifiers.goodreads_id or obj.identifiers.isbn %}
           <span class="icon is-medium">
             <i class="fa-brands fa-lg fa-goodreads"></i>
           </span>
           <span>Goodreads</span>
         </a>
         {% endif %}
+        {% if obj.identifiers.google_books_id or obj.identifiers.isbn %}
         {% if obj.identifiers.google_books_id %}
         <a class="button is-link is-rounded" href="https://books.google.com/books?id={{ obj.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">
-        {% elif obj.identifiers.isbn %}
+        {% else %}
         <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
         {% endif %}
-        {% if obj.identifiers.google_books_id or obj.identifiers.isbn %}
           <span class="icon is-medium">
             <i class="fa-brands fa-lg fa-google"></i>
           </span>
           <span>Google Books</span>
         </a>
         {% endif %}
+        {% if obj.identifiers.library_thing_id or obj.identifiers.isbn %}
         {% if obj.identifiers.library_thing_id %}
         <a class="button is-link is-rounded" href="https://librarything.com/work/{{ obj.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">
-        {% elif obj.identifiers.isbn %}
+        {% else %}
         <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
         {% endif %}
-        {% if obj.identifiers.library_thing_id or obj.identifiers.isbn %}
           <span class="icon is-medium">
             <i class="fa-solid fa-lg fa-link"></i>
           </span>
           <span>LibraryThing</span>
         </a>
         {% endif %}
+        {% if obj.identifiers.open_library_id or obj.identifiers.isbn %}
         {% if obj.identifiers.open_library_id %}
         <a class="button is-link is-rounded" href="https://openlibrary.org/edition/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-        {% elif obj.identifiers.isbn %}
+        {% else %}
         <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ obj.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
         {% endif %}
-        {% if obj.identifiers.open_library_id or obj.identifiers.isbn %}
           <span class="icon is-medium">
             <i class="fa-solid fa-lg fa-link"></i>
           </span>

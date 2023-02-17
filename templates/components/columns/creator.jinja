@@ -9,9 +9,9 @@
           </figure>
         </div>
         <div class="media-content">
-          <p class="title is-5 has-text-info">{{ obj.name }}</p>
+          <p class="title is-5 has-text-info-light">{{ obj.name }}</p>
           {% if roles %}
-          <p class="subtitle is-6 has-text-info-dark">{{ roles|join(", ", attribute="name") }}</p>
+          <p class="subtitle is-6 has-text-info">{{ roles|join(", ", attribute="name") }}</p>
           {% endif %}
         </div>
       </div>
@@ -23,28 +23,29 @@
         </span>
         <span>View</span>
       </a>
+      {% if obj.identifiers.open_library_id %}
       <a class="card-footer-item has-text-link modal-trigger" data-target="{{ obj.creator_id }}-link-modal" id="{{ obj.creator_id }}-link-button">
         <span class="icon is-medium">
           <i class="fa-solid fa-lg fa-link"></i>
         </span>
         <span>Links</span>
       </a>
+      {% endif %}
     </footer>
   </div>
 </div>
+{% if obj.identifiers.open_library_id %}
 <div class="modal" id="{{ obj.creator_id }}-link-modal">
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">
       <div class="content">
-        <p class="modal-card-title has-text-primary-dark">Links</p>
+        <p class="modal-card-title has-text-primary">Links</p>
       </div>
     </header>
-    <section class="modal-card-body has-background-grey-darker">
+    <section class="modal-card-body">
       <div class="buttons is-centered">
-        {% if obj.identifiers.open_library_id %}
         <a class="button is-link is-rounded" href="https://openlibrary.org/creator/{{ obj.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">
-        {% endif %}
           <span class="icon is-medium">
             <i class="fa-solid fa-lg fa-link"></i>
           </span>
@@ -54,4 +55,5 @@
     </section>
   </div>
 </div>
+{% endif %}
 {% endmacro %}

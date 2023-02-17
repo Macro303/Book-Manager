@@ -15,11 +15,10 @@
       <div class="box">
         <form id="edit-form" onsubmit="return false;">
           {{ input("Username", "username", value=user.username) }}
-          {% if token_user.role > user.role %}
+          {{ input("Image Url", "image-url", value=user.image_url or "") }}
+          {% if token_user == user or token_user.role > user.role %}
           {{ number_input("Role", "role", value=user.role, max=token_user.role - 1) }}
           {% endif %}
-          <div class="divider is-info is-size-5">Identifiers</div>
-          {{ input("Image Url", "image-url", value=user.image_url or "") }}
         </form>
       </div>
     </div>
@@ -57,7 +56,7 @@ function saveUser(){
     headers: headers,
     body: JSON.stringify({
       "username": formDetails["username"],
-      "role": {% if token_user.role > user.role %}formDetails["role"]{% else %}{{ user.role }}{% endif %},
+      "role": {% if token_user == user or token_user.role > user.role %}formDetails["role"]{% else %}{{ user.role }}{% endif %},
       "image_url": formDetails["image-url"],
     }),
   }).then((response) => {

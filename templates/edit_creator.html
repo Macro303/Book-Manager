@@ -15,10 +15,10 @@
       <div class="box">
         <form id="edit-form" onsubmit="return false;">
           {{ input("Name", "name", value=creator.name) }}
-          <div class="divider is-info is-size-5">More Details</div>
-          {{ textarea("Bio", "bio", value=creator.bio or "") }}
-          <div class="divider is-info is-size-5">Identifiers</div>
           {{ input("Image Url", "image-url", value=creator.image_url or "") }}
+          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">More Details</div>
+          {{ textarea("Bio", "bio", value=creator.bio or "") }}
+          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
           {{ input("Goodreads", "goodreads", value=creator.identifiers.goodreads_id or "") }}
           {{ input("LibraryThing", "library-thing", value=creator.identifiers.library_thing_id or "") }}
           {{ input("OpenLibrary", "open-library", value=creator.identifiers.open_library_id or "") }}

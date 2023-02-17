@@ -10,7 +10,7 @@
       {{ format_filter("/formats") }}
       {% if token_user.role >= 1 %}
       <div class="box">
-        <h5 class="title is-5 has-text-link">Add Format</h5>
+        <h5 class="title is-5 has-text-info">Add Format</h5>
         <form id="add-form" onsubmit="return false;">
           {{ input("Name", "name") }}
           <div class="buttons is-centered">

@@ -47,7 +47,7 @@ function signIn(){
     }
     return Promise.reject(response);
   }).then((data) => {
-    if(data.length == 1){
+    if(data.length === 1){
       document.cookie = `token=${data[0].user_id};path=/;max-age=${60*60*24*30};SameSite=Strict`;
       window.location = `/users/${data[0].user_id}`;
     }else{

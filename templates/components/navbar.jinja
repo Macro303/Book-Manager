@@ -1,7 +1,7 @@
 <nav aria-label="main navigation" class="navbar is-fixed-top is-primary" role="navigation">
   <div class="navbar-brand">
-    <a class="navbar-item is-size-5 is-family-secondary" href="/users/{{ token_user.user_id }}" id="navbar-banner">
-      <img alt="Logo" src="/static/img/logo.png">
+    <a class="navbar-item is-size-4" href="/users/{{ token_user.user_id }}" id="navbar-banner">
+      <img alt="Logo" width="48px" height="48px" src="/static/img/logo.png" />
       <span>Book Catalogue</span>
     </a>
     <span class="navbar-burger burger" data-target="navMenu">
@@ -12,7 +12,7 @@
   </div>
   <div class="navbar-menu" id="navMenu">
     <div class="navbar-start">
-    <div class="navbar-item is-size-6 has-dropdown is-hoverable">
+      <div class="navbar-item is-size-6 has-dropdown is-hoverable">
         <a class="navbar-link">
           <span class="icon is-medium">
             <i class="fa-solid fa-lg fa-file-signature"></i>
@@ -106,7 +106,7 @@
     <div class="navbar-end">
       <div class="navbar-item is-size-6">
         <div class="buttons">
-          <button class="button is-primary" id="sign-out-button" type="button" onclick="signOut()">
+          <button class="button is-danger" id="sign-out-button" type="button" onclick="signOut()">
             <span class="icon is-medium">
               <i class="fa-solid fa-lg fa-right-from-bracket"></i>
             </span>
