@@ -54,6 +54,7 @@ source = "file"
 
 [tool.ruff]
 fix = true
+format = "grouped"
 ignore = [
   "A001",
   "A003",
