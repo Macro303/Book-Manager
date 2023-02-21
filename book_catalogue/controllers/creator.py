@@ -77,7 +77,7 @@ class CreatorController:
             raise HTTPException(
                 status_code=400, detail="No creator lookup available for GoogleBooks."
             )
-        else:  # noqa: RET506
+        else:
             raise HTTPException(
                 status_code=500, detail="Incorrect config setup, review source settings."
             )
@@ -99,7 +99,7 @@ class CreatorController:
             raise HTTPException(
                 status_code=400, detail="No creator lookup available for GoogleBooks."
             )
-        else:  # noqa: RET506
+        else:
             raise HTTPException(
                 status_code=500, detail="Incorrect config setup, review source settings."
             )
