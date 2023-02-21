@@ -1,12 +1,11 @@
-{% extends "base.jinja" %}
+{% extends "view_base.jinja" %}
 {% from "components/columns/creator.jinja" import creator_column %}
 {% from "components/columns/series.jinja" import series_column %}
 {% from "components/columns/user.jinja" import user_column %}
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ book.title }}{% endblock %}
 {% block subtitle %}{% if book.subtitle %}{{ book.subtitle }}{% endif %}{% endblock %}
-{% block content %}
-<section class="section">
+{% block details %}
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box">
@@ -38,77 +37,78 @@
         </div>
         <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
         {% if book.identifiers.isbn %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Isbn:</strong> {{ book.identifiers.isbn }}</p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">Isbn:</strong> {{ book.identifiers.isbn }}</p>
+          </div>
         {% endif %}
         {% if book.identifiers.goodreads_id %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.goodreads_id }}</a></p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.goodreads_id }}</a></p>
+          </div>
         {% endif %}
         {% if book.identifiers.google_books_id %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Google Books:</strong> <a class="is-family-primary has-text-link" href="https://books.google.com/books?id={{ book.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.google_books_id }}</a></p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">Google Books:</strong> <a class="is-family-primary has-text-link" href="https://books.google.com/books?id={{ book.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.google_books_id }}</a></p>
+          </div>
         {% endif %}
         {% if book.identifiers.library_thing_id %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.library_thing_id }}</a></p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.library_thing_id }}</a></p>
+          </div>
         {% endif %}
         {% if book.identifiers.open_library_id %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.open_library_id }}</a></p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.open_library_id }}</a></p>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
-  <div class="buttons is-centered is-multiline">
-    {% if book.identifiers.isbn %}
+{% endblock %}
+{% block link_buttons %}
+  {% if book.identifiers.isbn %}
     <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-link"></i>
       </span>
       <span>Book Depository</span>
     </a>
+    {% if not book.identifiers.goodreads_id %}
+      <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon is-medium">
+          <i class="fa-brands fa-lg fa-goodreads"></i>
+        </span>
+        <span>Goodreads</span>
+      </a>
     {% endif %}
-    {% if not book.identifiers.goodreads_id and book.identifiers.isbn %}
-    <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-      <span class="icon is-medium">
-        <i class="fa-brands fa-lg fa-goodreads"></i>
-      </span>
-      <span>Goodreads</span>
-    </a>
+    {% if not book.identifiers.google_books_id %}
+      <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon is-medium">
+          <i class="fa-brands fa-lg fa-google"></i>
+        </span>
+        <span>Google Books</span>
+      </a>
     {% endif %}
-    {% if not book.identifiers.google_books_id and book.identifiers.isbn %}
-    <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-      <span class="icon is-medium">
-        <i class="fa-brands fa-lg fa-google"></i>
-      </span>
-      <span>Google Books</span>
-    </a>
+    {% if not book.identifiers.library_thing_id %}
+      <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon is-medium">
+          <i class="fa-solid fa-lg fa-link"></i>
+        </span>
+        <span>LibraryThing</span>
+      </a>
     {% endif %}
-    {% if not book.identifiers.library_thing_id and book.identifiers.isbn %}
-    <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-link"></i>
-      </span>
-      <span>LibraryThing</span>
-    </a>
+    {% if not book.identifiers.open_library_id %}
+      <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon is-medium">
+          <i class="fa-solid fa-lg fa-link"></i>
+        </span>
+        <span>OpenLibrary</span>
+      </a>
     {% endif %}
-    {% if not book.identifiers.open_library_id and book.identifiers.isbn %}
-    <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-link"></i>
-      </span>
-      <span>OpenLibrary</span>
-    </a>
-    {% endif %}
-  </div>
-  <div class="buttons is-centered is-multiline">
-    {% if book.is_collected %}
+  {% endif %}
+{% endblock %}
+{% block action_buttons %}
+  {% if book.is_collected %}
     <button class="button is-warning is-rounded" id="discard-book-button" type="button" onclick="discardBook()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-rotate-left"></i>
@@ -116,21 +116,21 @@
       <span>Discard</span>
     </button>
     {% if token_user in book.readers %}
-    <button class="button is-warning is-rounded" id="unread-button" type="button" onclick="unreadBook()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-bookmark"></i>
-      </span>
-      <span>Unread</span>
-    </button>
+      <button class="button is-warning is-rounded" id="unread-button" type="button" onclick="unreadBook()">
+        <span class="icon is-medium">
+          <i class="fa-solid fa-lg fa-bookmark"></i>
+        </span>
+        <span>Unread</span>
+      </button>
     {% else %}
-    <button class="button is-success is-rounded modal-trigger" data-target="read-modal" id="read-modal-button" type="button">
-      <span class="icon is-medium">
-        <i class="fa-regular fa-lg fa-bookmark"></i>
-      </span>
-      <span>Read</span>
-    </button>
+      <button class="button is-success is-rounded modal-trigger" data-target="read-modal" id="read-modal-button" type="button">
+        <span class="icon is-medium">
+          <i class="fa-regular fa-lg fa-bookmark"></i>
+        </span>
+        <span>Read</span>
+      </button>
     {% endif %}
-    {% else %}
+  {% else %}
     <button class="button is-success is-rounded" id="collect-book-button" type="button" onclick="collectBook()">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-box-archive"></i>
@@ -140,74 +140,81 @@
     <button class="button {% if token_user in book.wishers %}is-warning{% else %}is-success{% endif %} is-rounded" id="wish-book-button" type="button" onclick="wishBook()">
       <span class="icon is-medium">
         {% if token_user in book.wishers %}
-        <i class="fa-solid fa-lg fa-star"></i>
+          <i class="fa-solid fa-lg fa-star"></i>
         {% else %}
-        <i class="fa-regular fa-lg fa-star"></i>
+          <i class="fa-regular fa-lg fa-star"></i>
         {% endif %}
       </span>
       {% if token_user in book.wishers %}
-      <span>Unwish</span>
+        <span>Unwish</span>
       {% else %}
-      <span>Wish</span>
+        <span>Wish</span>
       {% endif %}
     </button>
-    {% endif %}
-    {% if token_user.role >= 2 %}
+  {% endif %}
+  {% if token_user.role >= 2 %}
     <a class="button is-danger is-rounded" href="/books/{{ book.book_id }}/edit">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
-    {% endif %}
-  </div>
-  <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Creators</div>
-  <div class="columns is-multiline is-centered is-mobile">
-    {% for _creator in book.creators %}
-    {{ creator_column(_creator, roles=_creator.roles) }}
-    {% endfor %}
-  </div>
-  {% if book.is_collected %}
-  <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Readers</div>
-  <div class="columns is-multiline is-centered is-mobile">
-    {% for _reader in book.readers %}
-      {{ user_column(_reader) }}
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Wishers</div>
-  <div class="columns is-multiline is-mobile is-centered">
-    {% for _wisher in book.wishers %}
-      {{ user_column(_wisher) }}
-    {% endfor %}
-  </div>
   {% endif %}
-</section>
-{% if token_user not in book.readers %}
-<div class="modal" id="read-modal">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <div class="content">
-        <p class="modal-card-title has-text-primary">Read Date</p>
+{% endblock %}
+{% block sub_content %}
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      {% include "components/columns_slider.jinja" %}
+    </div>
+    <div class="column">
+      <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Creators</div>
+      <div class="columns is-multiline">
+        {% for _creator in book.creators %}
+          {{ creator_column(_creator, roles=_creator.roles) }}
+        {% endfor %}
       </div>
-    </header>
-    <section class="modal-card-body">
-      <form id="read-form" onsubmit="return false;">
-        {{ input("Read Date", "read-date", value=today) }}
-        <div class="buttons is-centered">
-          <button class="button is-success is-rounded" id="read-button" type="button" onclick="readBook()">
-            <span class="icon is-medium">
-              <i class="fa-regular fa-lg fa-bookmark"></i>
-            </span>
-            <span>Read Book</span>
-          </button>
+      {% if book.is_collected %}
+        <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Readers</div>
+        <div class="columns is-multiline">
+          {% for _reader in book.readers %}
+            {{ user_column(_reader) }}
+          {% endfor %}
         </div>
-      </form>
-    </section>
+      {% else %}
+        <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Wishers</div>
+        <div class="columns is-multiline">
+          {% for _wisher in book.wishers %}
+            {{ user_column(_wisher) }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
   </div>
-</div>
-{% endif %}
+  {% if token_user not in book.readers %}
+    <div class="modal" id="read-modal">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <div class="content">
+            <p class="modal-card-title has-text-primary">Read Date</p>
+          </div>
+        </header>
+        <section class="modal-card-body">
+          <form id="read-form" onsubmit="return false;">
+            {{ input("Read Date", "read-date", value=today) }}
+            <div class="buttons is-centered">
+              <button class="button is-success is-rounded" id="read-button" type="button" onclick="readBook()">
+                <span class="icon is-medium">
+                  <i class="fa-regular fa-lg fa-bookmark"></i>
+                </span>
+                <span>Read Book</span>
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}
 {% block js %}
 {{ super() }}

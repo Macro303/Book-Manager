@@ -1,39 +1,43 @@
-{% extends "base.jinja" %}
+{% extends "list_base.jinja" %}
 {% from "components/columns/role.jinja" import role_column %}
-{% from "components/filter_box/role.jinja" import role_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}Roles{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ role_filter("/roles") }}
-      {% if token_user.role >= 1 %}
-      <div class="box">
-        <h5 class="title is-5 has-text-info">Add Role</h5>
-        <form id="add-form" onsubmit="return false;">
-          {{ input("Name", "name") }}
-          <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-button" type="button" onclick="addRole()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-plus"></i>
-              </span>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
+{% block side_panel %}
+  <div class="box">
+    <h1 class="title is-5 has-text-info">Filter Roles</h1>
+    <form accept-charset="UTF-8" action="/roles" method="GET">
+      {{ input("Name", "name", value=filters['name'] or '') }}
+      <div class="buttons is-centered">
+        <button class="button is-link is-rounded">
+          <span class="icon is-medium">
+            <i class="fa-solid fa-lg fa-filter"></i>
+          </span>
+          <span>Filter</span>
+        </button>
       </div>
-      {% endif %}
-    </div>
-    <div class="column">
-      <div class="columns is-multiline is-centered is-mobile">
-        {% for _role in role_list %}
-          {{ role_column(_role) }}
-        {% endfor %}
-      </div>
-    </div>
+    </form>
   </div>
-</section>
+  {% if token_user.role >= 1 %}
+    <div class="box">
+      <h5 class="title is-5 has-text-info">Add Role</h5>
+      <form id="add-form" onsubmit="return false;">
+        {{ input("Name", "name") }}
+        <div class="buttons is-centered">
+          <button class="button is-link is-rounded" id="add-button" type="button" onclick="addRole()">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-plus"></i>
+            </span>
+            <span>Add</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block list_content %}
+  {% for _role in role_list %}
+    {{ role_column(_role) }}
+  {% endfor %}
 {% endblock %}
 {% block js %}
 {{ super() }}

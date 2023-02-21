@@ -1,5 +1,5 @@
 {% macro genre_column(obj) %}
-<div class="column is-full-mobile is-half-tablet is-two-fifths-desktop is-one-third-widescreen is-one-quarter-fullhd has-text-centered">
+<div class="adjustable-column column is-4 has-text-centered">
   <a class="box title is-5 has-text-info-light" href="/genres/{{ obj.genre_id }}">{{ obj.name }}</a>
 </div>
 {% endmacro %}

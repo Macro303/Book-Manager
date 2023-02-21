@@ -1,62 +1,66 @@
-{% extends "base.jinja" %}
+{% extends "list_base.jinja" %}
 {% from "components/columns/user.jinja" import user_column %}
-{% from "components/filter_box/user.jinja" import user_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}Users{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ user_filter("/users") }}
-      {% if token_user.role >= 1 %}
-      <div class="box">
-        <h1 class="title is-5 has-text-info">Add User</h1>
-        <form id="add-user-form" onsubmit="return false;">
-          {{ input("Username", "username") }}
-          <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-user-button" type="button" onclick="addUser()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-plus"></i>
-              </span>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
+{% block side_panel %}
+  <div class="box">
+    <h1 class="title is-5 has-text-info">Filter Users</h1>
+    <form accept-charset="UTF-8" action="/users" method="GET">
+      {{ input("Username", "username", value=filters['username'] or '') }}
+      <div class="buttons is-centered">
+        <button class="button is-link is-rounded">
+          <span class="icon is-medium">
+            <i class="fa-solid fa-lg fa-filter"></i>
+          </span>
+          <span>Filter</span>
+        </button>
       </div>
-      {% endif %}
-    </div>
-    <div class="column">
-      <div class="columns is-multiline is-centered is-mobile">
-        {% for _user in user_list %}
-          {{ user_column(_user) }}
-        {% endfor %}
-      </div>
-    </div>
+    </form>
   </div>
-</section>
+  {% if token_user.role >= 1 %}
+    <div class="box">
+      <h5 class="title is-5 has-text-info">Add User</h5>
+      <form id="add-form" onsubmit="return false;">
+        {{ input("Username", "username") }}
+        <div class="buttons is-centered">
+          <button class="button is-link is-rounded" id="add-button" type="button" onclick="addUser()">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-plus"></i>
+            </span>
+            <span>Add</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block list_content %}
+  {% for _user in user_list %}
+    {{ user_column(_user) }}
+  {% endfor %}
 {% endblock %}
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
 {% if token_user.role >= 1 %}
 function addUser(){
-  const caller = "add-user-button";
-  let addUserForm = document.getElementById("add-user-form");
-  let details = Object.fromEntries(new FormData(addUserForm));
-  console.log(details);
+  const caller = "add-button";
+  let addForm = document.getElementById("add-form");
+  let formDetails = Object.fromEntries(new FormData(addForm));
+  console.log(formDetails);
 
   addLoading(caller);
   fetch("/api/v0/users", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
-        "username": details["username"]
+        "username": formDetails["username"]
     }),
   }).then((response) => {
     if (!response.ok){
       return Promise.reject(response);
     }
-    addUserForm.reset();
+    addForm.reset();
     window.location.reload();
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);

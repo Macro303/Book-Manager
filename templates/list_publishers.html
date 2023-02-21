@@ -1,39 +1,43 @@
-{% extends "base.jinja" %}
+{% extends "list_base.jinja" %}
 {% from "components/columns/publisher.jinja" import publisher_column %}
-{% from "components/filter_box/publisher.jinja" import publisher_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}Publishers{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ publisher_filter("/publishers") }}
-      {% if token_user.role >= 1 %}
-      <div class="box">
-        <h5 class="title is-5 has-text-info">Add Publisher</h5>
-        <form id="add-form" onsubmit="return false;">
-          {{ input("Name", "name") }}
-          <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-button" type="button" onclick="addPublisher()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-plus"></i>
-              </span>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
+{% block side_panel %}
+  <div class="box">
+    <h1 class="title is-5 has-text-info">Filter Publishers</h1>
+    <form accept-charset="UTF-8" action="/publishers" method="GET">
+      {{ input("Name", "name", value=filters['name'] or '') }}
+      <div class="buttons is-centered">
+        <button class="button is-link is-rounded">
+          <span class="icon is-medium">
+            <i class="fa-solid fa-lg fa-filter"></i>
+          </span>
+          <span>Filter</span>
+        </button>
       </div>
-      {% endif %}
-    </div>
-    <div class="column">
-      <div class="columns is-multiline is-centered is-mobile">
-        {% for _publisher in publisher_list %}
-          {{ publisher_column(_publisher) }}
-        {% endfor %}
-      </div>
-    </div>
+    </form>
   </div>
-</section>
+  {% if token_user.role >= 1 %}
+    <div class="box">
+      <h5 class="title is-5 has-text-info">Add Publisher</h5>
+      <form id="add-form" onsubmit="return false;">
+        {{ input("Name", "name") }}
+        <div class="buttons is-centered">
+          <button class="button is-link is-rounded" id="add-button" type="button" onclick="addPublisher()">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-plus"></i>
+            </span>
+            <span>Add</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block list_content %}
+  {% for _publisher in publisher_list %}
+    {{ publisher_column(_publisher) }}
+  {% endfor %}
 {% endblock %}
 {% block js %}
 {{ super() }}

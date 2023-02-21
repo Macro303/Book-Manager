@@ -1,34 +1,40 @@
-{% extends "base.jinja" %}
-{% from "components/columns/book.jinja" import book_column %}
+{% extends "view_base.jinja" %}
 {% block title %}{{ user.username }}{% endblock %}
-{% block content %}
-<section class="section">
+{% block details %}
   <div class="has-text-centered">
     <figure class="image is-256x256 is-inline-block">
       <img alt="{{ user.username }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ user.image_url or '/static/img/logo.png' }}"/>
     </figure>
   </div>
-  <div class="buttons is-centered">
-    {% if token_user.user_id == user.user_id or (token_user.role >= 4 and token_user.role > user.role) %}
+{% endblock %}
+{% block action_buttons %}
+  {% if token_user.user_id == user.user_id or (token_user.role >= 4 and token_user.role > user.role) %}
     <a class="button is-warning is-rounded" href="/users/{{ user.user_id }}/edit">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
-    {% endif %}
-    <a class="button is-success is-rounded" href="/users/{{ user.user_id }}/wishlist">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-star"></i>
-      </span>
-      <span>Wishlist</span>
-    </a>
-  </div>
+  {% endif %}
+  <a class="button is-success is-rounded" href="/users/{{ user.user_id }}/wishlist">
+    <span class="icon is-medium">
+      <i class="fa-solid fa-lg fa-star"></i>
+    </span>
+    <span>Wishlist</span>
+  </a>
+{% endblock %}
+{% block sub_content %}
   <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Last Read</div>
-  <div class="columns is-multiline is-mobile is-centered">
-    {% for _book in read_books %}
-      {{ book_column(_book) }}
-    {% endfor %}
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      {% include "components/columns_slider.jinja" %}
+    </div>
+    <div class="column">
+      <div class="columns is-multiline">
+        {% for _book in last_read %}
+          {{ book_column(_book) }}
+        {% endfor %}
+      </div>
+    </div>
   </div>
-</section>
 {% endblock %}

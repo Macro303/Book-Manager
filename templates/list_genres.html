@@ -1,39 +1,43 @@
-{% extends "base.jinja" %}
+{% extends "list_base.jinja" %}
 {% from "components/columns/genre.jinja" import genre_column %}
-{% from "components/filter_box/genre.jinja" import genre_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}Genres{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ genre_filter("/genres") }}
-      {% if token_user.role >= 1 %}
-      <div class="box">
-        <h5 class="title is-5 has-text-info">Add Genre</h5>
-        <form id="add-form" onsubmit="return false;">
-          {{ input("Name", "name") }}
-          <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-button" type="button" onclick="addGenre()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-plus"></i>
-              </span>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
+{% block side_panel %}
+  <div class="box">
+    <h1 class="title is-5 has-text-info">Filter Genres</h1>
+    <form accept-charset="UTF-8" action="/genres" method="GET">
+      {{ input("Name", "name", value=filters['name'] or '') }}
+      <div class="buttons is-centered">
+        <button class="button is-link is-rounded">
+          <span class="icon is-medium">
+            <i class="fa-solid fa-lg fa-filter"></i>
+          </span>
+          <span>Filter</span>
+        </button>
       </div>
-      {% endif %}
-    </div>
-    <div class="column">
-      <div class="columns is-multiline is-centered is-mobile">
-        {% for _genre in genre_list %}
-          {{ genre_column(_genre) }}
-        {% endfor %}
-      </div>
-    </div>
+    </form>
   </div>
-</section>
+  {% if token_user.role >= 1 %}
+    <div class="box">
+      <h5 class="title is-5 has-text-info">Add Genre</h5>
+      <form id="add-form" onsubmit="return false;">
+        {{ input("Name", "name") }}
+        <div class="buttons is-centered">
+          <button class="button is-link is-rounded" id="add-button" type="button" onclick="addGenre()">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-plus"></i>
+            </span>
+            <span>Add</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block list_content %}
+  {% for _genre in genre_list %}
+    {{ genre_column(_genre) }}
+  {% endfor %}
 {% endblock %}
 {% block js %}
 {{ super() }}

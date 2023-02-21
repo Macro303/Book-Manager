@@ -1,62 +1,66 @@
-{% extends "base.jinja" %}
+{% extends "list_base.jinja" %}
 {% from "components/columns/creator.jinja" import creator_column %}
-{% from "components/filter_box/creator.jinja" import creator_filter with context %}
 {% from "components/forms.jinja" import input %}
 {% block title %}Creators{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ creator_filter("/creators") }}
-      {% if token_user.role >= 1 %}
-      <div class="box">
-        <h5 class="title is-5 has-text-info">Add Creator</h5>
-        <form id="add-creator-form" onsubmit="return false;">
-          {{ input("Name", "name") }}
-          <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-creator-button" type="button" onclick="addCreator()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-plus"></i>
-              </span>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
+{% block side_panel %}
+  <div class="box">
+    <h1 class="title is-5 has-text-info">Filter Creators</h1>
+    <form accept-charset="UTF-8" action="/creators" method="GET">
+      {{ input("Name", "name", value=filters['name'] or '') }}
+      <div class="buttons is-centered">
+        <button class="button is-link is-rounded">
+          <span class="icon is-medium">
+            <i class="fa-solid fa-lg fa-filter"></i>
+          </span>
+          <span>Filter</span>
+        </button>
       </div>
-      {% endif %}
-    </div>
-    <div class="column">
-      <div class="columns is-multiline is-centered is-mobile">
-        {% for _creator in creator_list %}
-          {{ creator_column(_creator) }}
-        {% endfor %}
-      </div>
-    </div>
+    </form>
   </div>
-</section>
+  {% if token_user.role >= 1 %}
+    <div class="box">
+      <h5 class="title is-5 has-text-info">Add Creator</h5>
+      <form id="add-form" onsubmit="return false;">
+        {{ input("Name", "name") }}
+        <div class="buttons is-centered">
+          <button class="button is-link is-rounded" id="add-button" type="button" onclick="addCreator()">
+            <span class="icon is-medium">
+              <i class="fa-solid fa-lg fa-plus"></i>
+            </span>
+            <span>Add</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block list_content %}
+  {% for _creator in creator_list %}
+    {{ creator_column(_creator) }}
+  {% endfor %}
 {% endblock %}
 {% block js %}
 {{ super() }}
 <script type="text/javascript">
 {% if token_user.role >= 1 %}
 function addCreator(){
-  const caller = "add-creator-button";
-  let addCreatorForm = document.getElementById("add-creator-form");
-  let details = Object.fromEntries(new FormData(addCreatorForm));
-  console.log(details);
+  const caller = "add-button";
+  let addForm = document.getElementById("add-form");
+  let formDetails = Object.fromEntries(new FormData(addForm));
+  console.log(formDetails);
 
   addLoading(caller);
   fetch("/api/v0/creators", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
-        "name": details["name"]
+        "name": formDetails["name"]
     }),
   }).then((response) => {
     if (!response.ok){
       return Promise.reject(response);
     }
-    addCreatorForm.reset();
+    addForm.reset();
     window.location.reload();
   }).catch((response) => response.json().then((msg) => {
     alert(`${response.status} ${response.statusText}: ${msg.details}`);

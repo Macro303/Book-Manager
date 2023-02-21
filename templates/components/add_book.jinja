@@ -1,10 +1,10 @@
 {% from "components/forms.jinja" import input %}
-{% macro add_book(enable_book_depository=False) %}
+{% macro add_book(show_book_depository=False) %}
 <div class="box">
   <h1 class="title is-5 has-text-info">Add Book</h1>
   <form id="add-form" onsubmit="return false;">
     {{ input("Isbn", "isbn") }}
-    {% if enable_book_depository %}
+    {% if show_book_depository %}
     <div class="divider subtitle is-size-6 is-info has-text-info-light">OR</div>
     {{ input("Book Depository Url", "book-depository-url") }}
     {% endif %}

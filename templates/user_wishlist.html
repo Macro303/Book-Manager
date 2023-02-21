@@ -1,27 +1,18 @@
-{% extends "base.jinja" %}
-{% from "components/add_box/book.jinja" import add_book %}
+{% extends "list_base.jinja" %}
+{% from "components/add_book.jinja" import add_book %}
 {% from "components/columns/book.jinja" import book_column %}
-{% from "components/filter_box/book.jinja" import book_filter with context %}
-{% from "components/forms.jinja" import input %}
+{% from "components/filter_books.jinja" import book_filter with context %}
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {{ book_filter("/users/" ~ user.user_id ~ "/wishlist") }}
-      {% if token_user == user %}
-      {{ add_book(enable_book_depository=True) }}
-      {% endif %}
-    </div>
-    <div class="column">
-      <div class="columns is-multiline is-centered is-mobile">
-        {% for _book in wishlist %}
-          {{ book_column(_book) }}
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</section>
+{% block side_panel %}
+  {{ book_filter("/users/" ~ user.user_id ~ "/wishlist") }}
+  {% if token_user == user %}
+    {{ add_book(show_book_depository=True) }}
+  {% endif %}
+{% endblock %}
+{% block list_content %}
+  {% for _book in wishlist %}
+    {{ book_column(_book) }}
+  {% endfor %}
 {% endblock %}
 {% block js %}
 {{ super() }}

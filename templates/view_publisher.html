@@ -1,23 +1,12 @@
-{% extends "base.jinja" %}
-{% from "components/columns/book.jinja" import book_column %}
+{% extends "view_base.jinja" %}
 {% block title %}{{ publisher.name }}{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="buttons is-centered">
-    {% if token_user.role >= 2 %}
+{% block action_buttons %}
+  {% if token_user.role >= 2 %}
     <a class="button is-warning is-rounded" href="/publishers/{{ publisher.publisher_id }}/edit">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
-    {% endif %}
-  </div>
-  <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Books</div>
-  <div class="columns is-multiline is-mobile is-centered">
-    {% for _book in book_list %}
-      {{ book_column(_book) }}
-    {% endfor %}
-  </div>
-</section>
+  {% endif %}
 {% endblock %}

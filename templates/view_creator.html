@@ -1,8 +1,6 @@
-{% extends "base.jinja" %}
-{% from "components/columns/book.jinja" import book_column %}
+{% extends "view_base.jinja" %}
 {% block title %}{{ creator.name }}{% endblock %}
-{% block content %}
-<section class="section">
+{% block details %}
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
       <div class="box has-text-centered">
@@ -18,38 +16,46 @@
         </div>
         <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
         {% if creator.identifiers.goodreads_id %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.goodreads_id }}</a></p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.goodreads_id }}</a></p>
+          </div>
         {% endif %}
         {% if creator.identifiers.library_thing_id %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.library_thing_id }}</a></p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.library_thing_id }}</a></p>
+          </div>
         {% endif %}
         {% if creator.identifiers.open_library_id %}
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/creator/{{ creator.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.open_library_id }}</a></p>
-        </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/creator/{{ creator.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.open_library_id }}</a></p>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
-  <div class="buttons is-centered">
-    {% if token_user.role >= 2 %}
+{% endblock %}
+{% block action_buttons %}
+  {% if token_user.role >= 2 %}
     <a class="button is-warning is-rounded" href="/creators/{{ creator.creator_id }}/edit">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
-    {% endif %}
-  </div>
+  {% endif %}
+{% endblock %}
+{% block sub_content %}
   <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Books</div>
-  <div class="columns is-multiline is-mobile is-centered">
-    {% for _book, roles in book_list %}
-      {{ book_column(_book, roles=roles|join(", ", attribute="name")) }}
-    {% endfor %}
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      {% include "components/columns_slider.jinja" %}
+    </div>
+    <div class="column">
+      <div class="columns is-multiline">
+        {% for _book, roles in book_list %}
+          {{ book_column(_book, roles=roles|join(", ", attribute="name")) }}
+        {% endfor %}
+      </div>
+    </div>
   </div>
-</section>
 {% endblock %}

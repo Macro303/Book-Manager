@@ -1,48 +1,46 @@
-{% extends "base.jinja" %}
-{% from "components/columns/book.jinja" import book_column %}
+{% extends "view_base.jinja" %}
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ genre.name }}{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="buttons is-centered">
-    {% if token_user.role >= 2 %}
+{% block action_buttons %}
+  {% if token_user.role >= 2 %}
     <a class="button is-warning is-rounded" href="/genres/{{ genre.genre_id }}/edit">
       <span class="icon is-medium">
         <i class="fa-solid fa-lg fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
-    {% endif %}
-  </div>
+  {% endif %}
+{% endblock %}
+{% block sub_content %}
   <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Books</div>
   <div class="columns">
-    {% if token_user.role >= 2 %}
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      <div class="box">
-        <h5 class="title is-5 has-text-info">Add Book to Genre</h5>
-        <form id="add-form" onsubmit="return false;">
-          {{ input("Book Id", "book-id") }}
-          <div class="buttons is-centered">
-            <button class="button is-link is-rounded" id="add-button" type="button" onclick="addBook()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-plus"></i>
-              </span>
-              <span>Add</span>
-            </button>
-          </div>
-        </form>
-      </div>
+      {% include "components/columns_slider.jinja" %}
+      {% if token_user.role >= 2 %}
+        <div class="box">
+          <h5 class="title is-5 has-text-info">Add Book to Genre</h5>
+          <form id="add-form" onsubmit="return false;">
+            {{ input("Book Id", "book-id") }}
+            <div class="buttons is-centered">
+              <button class="button is-link is-rounded" id="add-button" type="button" onclick="addBook()">
+                <span class="icon is-medium">
+                  <i class="fa-solid fa-lg fa-plus"></i>
+                </span>
+                <span>Add</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
     </div>
-    {% endif %}
     <div class="column">
-      <div class="columns is-multiline is-mobile">
+      <div class="columns is-multiline">
         {% for _book in book_list %}
-          {{ book_column(_book, remove_button=True) }}
+          {{ book_column(_book, show_remove_button=token_user.role >= 2) }}
         {% endfor %}
       </div>
     </div>
   </div>
-</section>
 {% endblock %}
 {% block js %}
 {{ super() }}

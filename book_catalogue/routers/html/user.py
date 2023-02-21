@@ -55,17 +55,17 @@ def view_user(*, request: Request, user_id: int, token_user: User | None = Depen
         return RedirectResponse("/")
     with db_session:
         user = UserController.get_user(user_id=user_id)
-        read_books = [
+        last_read = [
             x.book.to_schema()
             for x in sorted(
                 user.read_books,
                 reverse=True,
                 key=lambda x: (x.read_date or x.book.publish_date or date(2000, 1, 1), x.book),
-            )[:4]
+            )[:5]
         ]
         return templates.TemplateResponse(
             "view_user.html",
-            {"request": request, "token_user": token_user, "user": user, "read_books": read_books},
+            {"request": request, "token_user": token_user, "user": user, "last_read": last_read},
         )
 
 
