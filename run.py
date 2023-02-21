@@ -4,7 +4,7 @@ from book_catalogue.settings import Settings
 
 
 def main() -> None:
-    settings = Settings.load().save()
+    settings = Settings().save()
 
     uvicorn.run(
         "book_catalogue.__main__:app",

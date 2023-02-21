@@ -33,7 +33,7 @@ app = create_app()
 
 @app.on_event(event_type="startup")
 async def startup_event() -> None:
-    settings = Settings.load()
+    settings = Settings()
     setup_logging()
 
     LOGGER.info(f"Listening on {settings.website.host}:{settings.website.port}")

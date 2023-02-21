@@ -123,7 +123,7 @@ class BookController:
                 return book
             raise HTTPException(status_code=409, detail="Book already exists.")
 
-        settings = Settings.load()
+        settings = Settings()
         if settings.source.open_library:
             new_book = open_library.lookup_book(isbn=isbn, open_library_id=None)
         elif settings.source.google_books:
@@ -141,7 +141,7 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        settings = Settings.load()
+        settings = Settings()
         if settings.source.open_library:
             updates = open_library.lookup_book(
                 isbn=book.isbn,
@@ -175,7 +175,7 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        settings = Settings.load()
+        settings = Settings()
         if settings.source.open_library:
             updates = open_library.lookup_book(isbn=book.isbn, open_library_id=book.open_library_id)
             updates.series = [

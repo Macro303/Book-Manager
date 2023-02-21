@@ -68,7 +68,7 @@ class CreatorController:
 
         from book_catalogue.services import open_library
 
-        settings = Settings.load()
+        settings = Settings()
         if settings.source.open_library:
             new_creator = open_library.lookup_creator(open_library_id=open_library_id)
             if creator := Creator.get(name=new_creator.name):
@@ -92,7 +92,7 @@ class CreatorController:
 
         from book_catalogue.services import open_library
 
-        settings = Settings.load()
+        settings = Settings()
         if settings.source.open_library:
             updates = open_library.lookup_creator(open_library_id=creator.open_library_id)
         elif settings.source.google_books:

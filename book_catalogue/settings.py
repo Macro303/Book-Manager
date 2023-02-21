@@ -1,6 +1,7 @@
 __all__ = ["Settings"]
 
 import tomllib as tomlreader
+from pathlib import Path
 from typing import ClassVar
 
 import tomli_w as tomlwriter
@@ -32,8 +33,9 @@ class WebsiteSettings(SettingsModel):
     reload: bool = False
 
 
-class Settings(SettingsModel):
-    FILENAME: ClassVar = get_config_root() / "settings.toml"
+class _Settings(SettingsModel):
+    FILENAME: ClassVar[Path] = get_config_root() / "settings.toml"
+    _instance: ClassVar["_Settings"] = None
     database: DatabaseSettings = DatabaseSettings()
     source: SourceSettings = SourceSettings()
     website: WebsiteSettings = WebsiteSettings()
@@ -45,15 +47,21 @@ class Settings(SettingsModel):
         return v
 
     @classmethod
-    def load(cls) -> "Settings":
+    def load(cls) -> "_Settings":
         if not cls.FILENAME.exists():
-            Settings().save()
+            _Settings().save()
         with cls.FILENAME.open("rb") as stream:
             content = tomlreader.load(stream)
-        return Settings(**content)
+        return _Settings(**content)
 
-    def save(self) -> "Settings":
+    def save(self) -> "_Settings":
         with self.FILENAME.open("wb") as stream:
             content = self.dict(by_alias=False)
             tomlwriter.dump(content, stream)
         return self
+
+
+def Settings() -> _Settings:  # noqa: N802
+    if _Settings._instance is None:
+        _Settings._instance = _Settings.load()
+    return _Settings._instance

@@ -7,7 +7,7 @@ from book_catalogue.database.enum_converter import EnumConverter
 from book_catalogue.database.tables import db
 from book_catalogue.settings import Settings
 
-sqlite_filepath = get_data_root() / Settings.load().database.name
+sqlite_filepath = get_data_root() / Settings().database.name
 db.bind(
     provider="sqlite",
     filename=str(sqlite_filepath),
