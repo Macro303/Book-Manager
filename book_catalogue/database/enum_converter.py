@@ -7,7 +7,7 @@ from pony.orm.dbapiprovider import StrConverter
 
 
 class EnumConverter(StrConverter):
-    def validate(self, val: Any, obj=None) -> Enum:  # noqa: ANN001, ARG002, ANN401
+    def validate(self, val: Any, obj=None) -> Enum:  # noqa: ANN001, ARG002
         if not isinstance(val, Enum):
             raise ValueError(f"Must be an Enum.  Got {type(val)}")
         return val

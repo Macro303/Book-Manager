@@ -50,7 +50,7 @@ async def startup_event() -> None:
 
 
 @app.middleware(middleware_type="http")
-async def logger_middleware(request: Request, call_next: Callable) -> Any:  # noqa: ANN401
+async def logger_middleware(request: Request, call_next: Callable) -> Any:
     LOGGER.info(
         f"{request.method.upper():<7} {request.scope['path']} - {request.headers['user-agent']}"
     )
