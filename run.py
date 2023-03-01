@@ -1,13 +1,13 @@
 import uvicorn
 
-from book_catalogue.settings import Settings
+from bookshelf.settings import Settings
 
 
 def main() -> None:
     settings = Settings().save()
 
     uvicorn.run(
-        "book_catalogue.__main__:app",
+        "bookshelf.__main__:app",
         host=settings.website.host,
         port=settings.website.port,
         use_colors=True,

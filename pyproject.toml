@@ -28,30 +28,30 @@ dependencies = [
   "tomli-w >= 1.0.0",
   "uvicorn >= 0.20.0"
 ]
-description = "It's a book catalogue.... for cataloging books."
+description = "Tool for tracking books on your bookshelf or books you wish were on it."
 dynamic = ["version"]
 keywords = []
 license = {text = "MIT"}
-name = "book-catalogue"
+name = "bookshelf"
 readme = "README.md"
 requires-python = ">= 3.11"
 
 [project.optional-dependencies]
 dev = [
-  "pre-commit >= 3.0.4"
+  "pre-commit >= 3.1.1"
 ]
 
 [project.urls]
-Documentation = "https://github.com/Buried-In-Code/Book-Catalogue#readme"
-Issues = "https://github.com/Buried-In-Code/Book-Catalogue/issues"
-Source = "https://github.com/Buried-In-Code/Book-Catalogue"
+Documentation = "https://github.com/Buried-In-Code/Bookshelf#readme"
+Issues = "https://github.com/Buried-In-Code/Bookshelf/issues"
+Source = "https://github.com/Buried-In-Code/Bookshelf"
 
 [tool.black]
 line-length = 100
 target-version = ["py311"]
 
 [tool.hatch.version]
-path = "book_catalogue/__init__.py"
+path = "bookshelf/__init__.py"
 
 [tool.ruff]
 fix = true
@@ -115,4 +115,4 @@ max-complexity = 18
 classmethod-decorators = ["classmethod", "pydantic.validator"]
 
 [tool.ruff.per-file-ignores]
-"book_catalogue/routers/*" = ["ANN201", "ANN202", "B008"]
+"bookshelf/routers/*" = ["ANN201", "ANN202", "B008"]
