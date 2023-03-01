@@ -13,9 +13,9 @@ from bookshelf.controllers.publisher import PublisherController
 from bookshelf.controllers.series import SeriesController
 from bookshelf.controllers.user import UserController
 from bookshelf.database.tables import User
-from bookshelf.routers.html.utils import get_token_user, templates
 from bookshelf.models.format import Format
 from bookshelf.models.publisher import Publisher
+from bookshelf.routers.html.utils import get_token_user, templates
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
