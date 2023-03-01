@@ -6,15 +6,15 @@ from bookshelf.controllers.creator import CreatorController
 from bookshelf.controllers.genre import GenreController
 from bookshelf.controllers.publisher import PublisherController
 from bookshelf.controllers.role import RoleController
-from bookshelf.models.book import BookCreatorWrite, BookWrite, Identifiers
-from bookshelf.models.creator import CreatorWrite
-from bookshelf.models.genre import GenreWrite
-from bookshelf.models.publisher import PublisherWrite
-from bookshelf.models.role import RoleWrite
+from bookshelf.models.book import BookCreatorIn, BookIn, Identifiers
+from bookshelf.models.creator import CreatorIn
+from bookshelf.models.genre import GenreIn
+from bookshelf.models.publisher import PublisherIn
+from bookshelf.models.role import RoleIn
 from bookshelf.services.google_books.service import GoogleBooks
 
 
-def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
+def lookup_book(isbn: str, google_books_id: str | None = None) -> BookIn:
     session = GoogleBooks()
     if google_books_id:
         result = session.get_book(book_id=google_books_id)
@@ -23,14 +23,14 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
     creators = []
     for _creator in result.volume_info.creators:
         try:
-            role = RoleController.get_role_by_name(name="Writer")
+            role = RoleController.get_role_by_name(name="Author")
         except HTTPException:
-            role = RoleController.create_role(new_role=RoleWrite(name="Writer"))
+            role = RoleController.create_role(new_role=RoleIn(name="Author"))
         try:
             creator = CreatorController.get_creator_by_name(name=_creator)
         except HTTPException:
-            creator = CreatorController.create_creator(new_creator=CreatorWrite(name=_creator))
-        creators.append(BookCreatorWrite(creator_id=creator.creator_id, role_ids=[role.role_id]))
+            creator = CreatorController.create_creator(new_creator=CreatorIn(name=_creator))
+        creators.append(BookCreatorIn(creator_id=creator.creator_id, role_ids=[role.role_id]))
 
     publisher = None
     if result.volume_info.publisher:
@@ -38,7 +38,7 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
             publisher = PublisherController.get_publisher_by_name(name=result.volume_info.publisher)
         except HTTPException:
             publisher = PublisherController.create_publisher(
-                new_publisher=PublisherWrite(name=result.volume_info.publisher)
+                new_publisher=PublisherIn(name=result.volume_info.publisher)
             )
 
     genre_ids = set()
@@ -47,10 +47,10 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookWrite:
             try:
                 genre = GenreController.get_genre_by_name(name=part.strip())
             except HTTPException:
-                genre = GenreController.create_genre(new_genre=GenreWrite(name=part.strip()))
+                genre = GenreController.create_genre(new_genre=GenreIn(name=part.strip()))
             genre_ids.add(genre.genre_id)
 
-    return BookWrite(
+    return BookIn(
         creators=creators,
         description=result.volume_info.description,
         # TODO: Format Id

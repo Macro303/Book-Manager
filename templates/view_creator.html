@@ -14,7 +14,7 @@
         <div class="block">
           <p><strong class="subtitle is-size-5 has-text-info-light">Bio:</strong> {{ creator.bio or "" }}</p>
         </div>
-        <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
+        <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
         {% if creator.identifiers.goodreads_id %}
           <div class="block">
             <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.goodreads_id }}</a></p>
@@ -45,12 +45,12 @@
   {% endif %}
 {% endblock %}
 {% block sub_content %}
-  <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Books</div>
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {% include "components/columns_slider.jinja" %}
+      {% include "components/settings_box.jinja" %}
     </div>
     <div class="column">
+      <h3 class="subtitle is-3 has-text-primary-light">Books</h3>
       <div class="columns is-multiline">
         {% for _book, roles in book_list %}
           {{ book_column(_book, roles=roles|join(", ", attribute="name")) }}

@@ -7,18 +7,18 @@ from bookshelf.controllers.format import FormatController
 from bookshelf.controllers.genre import GenreController
 from bookshelf.controllers.publisher import PublisherController
 from bookshelf.controllers.role import RoleController
-from bookshelf.models.book import BookCreatorWrite, BookWrite, Identifiers
-from bookshelf.models.creator import CreatorWrite, Identifiers as CreatorIdentifiers
-from bookshelf.models.format import FormatWrite
-from bookshelf.models.genre import GenreWrite
-from bookshelf.models.publisher import PublisherWrite
-from bookshelf.models.role import RoleWrite
+from bookshelf.models.book import BookCreatorIn, BookIn, Identifiers
+from bookshelf.models.creator import CreatorIn, Identifiers as CreatorIdentifiers
+from bookshelf.models.format import FormatIn
+from bookshelf.models.genre import GenreIn
+from bookshelf.models.publisher import PublisherIn
+from bookshelf.models.role import RoleIn
 from bookshelf.services.open_library.service import OpenLibrary
 
 
 def lookup_book(
     isbn: str, open_library_id: str | None = None, google_books_id: str | None = None
-) -> BookWrite:
+) -> BookIn:
     session = OpenLibrary()
     if open_library_id:
         edition = session.get_edition(edition_id=open_library_id)
@@ -34,22 +34,22 @@ def lookup_book(
         try:
             role = RoleController.get_role_by_name(name="Author")
         except HTTPException:
-            role = RoleController.create_role(new_role=RoleWrite(name="Author"))
+            role = RoleController.create_role(new_role=RoleIn(name="Author"))
         creators[creator].add(role)
     for entry in edition.contributors:
         try:
             creator = CreatorController.get_creator_by_name(name=entry.name)
         except HTTPException:
-            creator = CreatorController.create_creator(new_creator=CreatorWrite(name=entry.name))
+            creator = CreatorController.create_creator(new_creator=CreatorIn(name=entry.name))
         if creator not in creators:
             creators[creator] = set()
         try:
             role = RoleController.get_role_by_name(name=entry.role)
         except HTTPException:
-            role = RoleController.create_role(new_role=RoleWrite(name=entry.role))
+            role = RoleController.create_role(new_role=RoleIn(name=entry.role))
         creators[creator].add(role)
     creators = [
-        BookCreatorWrite(creator_id=key.creator_id, role_ids=[x.role_id for x in value])
+        BookCreatorIn(creator_id=key.creator_id, role_ids=[x.role_id for x in value])
         for key, value in creators.items()
     ]
 
@@ -59,7 +59,7 @@ def lookup_book(
             format = FormatController.get_format_by_name(name=edition.physical_format)
         except HTTPException:
             format = FormatController.create_format(
-                new_format=FormatWrite(name=edition.physical_format)
+                new_format=FormatIn(name=edition.physical_format)
             )
 
     genre_ids = set()
@@ -67,7 +67,7 @@ def lookup_book(
         try:
             genre = GenreController.get_genre_by_name(name=_genre)
         except HTTPException:
-            genre = GenreController.create_genre(new_genre=GenreWrite(name=_genre))
+            genre = GenreController.create_genre(new_genre=GenreIn(name=_genre))
         genre_ids.add(genre.genre_id)
 
     publisher_list = []
@@ -77,12 +77,12 @@ def lookup_book(
                 publisher = PublisherController.get_publisher_by_name(name=y.strip())
             except HTTPException:
                 publisher = PublisherController.create_publisher(
-                    new_publisher=PublisherWrite(name=y.strip())
+                    new_publisher=PublisherIn(name=y.strip())
                 )
             publisher_list.append(publisher)
     publisher = next(iter(sorted(publisher_list, key=lambda x: x.name)), None)
 
-    return BookWrite(
+    return BookIn(
         creators=creators,
         description=edition.get_description() or work.get_description(),
         format_id=format.format_id if format else None,
@@ -106,13 +106,13 @@ def lookup_book(
     )
 
 
-def lookup_creator(open_library_id: str | None = None) -> CreatorWrite:
+def lookup_creator(open_library_id: str | None = None) -> CreatorIn:
     session = OpenLibrary()
     creator = session.get_author(author_id=open_library_id)
 
     photo_id = next(iter(creator.photos), None)
 
-    return CreatorWrite(
+    return CreatorIn(
         bio=creator.get_bio(),
         identifiers=CreatorIdentifiers(
             goodreads_id=creator.remote_ids.goodreads,

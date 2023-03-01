@@ -13,9 +13,9 @@ from bookshelf.controllers.publisher import PublisherController
 from bookshelf.controllers.series import SeriesController
 from bookshelf.controllers.user import UserController
 from bookshelf.database.tables import User
-from bookshelf.routers.html._utils import get_token_user, templates
-from bookshelf.schemas.format import FormatRead
-from bookshelf.schemas.publisher import PublisherRead
+from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.models.format import Format
+from bookshelf.models.publisher import Publisher
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -159,7 +159,7 @@ def user_wishlist(
                 ),
                 "format_list": sorted(
                     {
-                        x.format.to_model() if x.format else FormatRead(format_id=-1, name="None")
+                        x.format.to_model() if x.format else Format(format_id=-1, name="None")
                         for x in all_wishlist
                     }
                 ),
@@ -167,7 +167,7 @@ def user_wishlist(
                     {
                         x.publisher.to_model()
                         if x.publisher
-                        else PublisherRead(publisher_id=-1, name="None")
+                        else Publisher(publisher_id=-1, name="None")
                         for x in all_wishlist
                     }
                 ),

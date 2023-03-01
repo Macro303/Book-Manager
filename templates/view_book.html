@@ -17,17 +17,16 @@
     <div class="column">
       <div class="box">
         <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Format:</strong> <a class="is-family-primary has-text-link" href="/formats/{{ book.format.format_id }}">{{ book.format.name }}</a></p>
-        </div>
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Publish Date:</strong> {% if book.publish_date %}{{ book.publish_date_str }}{% endif %}</p>
-        </div>
-        <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">More Details</div>
-        <div class="block">
           <p><strong class="subtitle is-size-5 has-text-info-light">Description:</strong> {{ book.description or "" }}</p>
         </div>
         <div class="block">
+          <p><strong class="subtitle is-size-5 has-text-info-light">Format:</strong> <a class="is-family-primary has-text-link" href="/formats/{{ book.format.format_id }}">{{ book.format.name }}</a></p>
+        </div>
+        <div class="block">
           <p><strong class="subtitle is-size-5 has-text-info-light">Genres:</strong> {% for _genre in book.genres %}<a class="is-family-primary has-text-link" href="/genres/{{ _genre.genre_id }}">{{ _genre.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        </div>
+        <div class="block">
+          <p><strong class="subtitle is-size-5 has-text-info-light">Publish Date:</strong> {% if book.publish_date %}{{ book.publish_date_str }}{% endif %}</p>
         </div>
         <div class="block">
           <p><strong class="subtitle is-size-5 has-text-info-light">Publisher:</strong> <a class="is-family-primary has-text-link" href="/publishers/{{ book.publisher.publisher_id }}">{{ book.publisher.name }}</a></p>
@@ -35,7 +34,7 @@
         <div class="block">
           <p><strong class="subtitle is-size-5 has-text-info-light">Series:</strong> {% for _series in book.series %}<a class="is-family-primary has-text-link" href="/series/{{ _series.series_id }}">{{ _series.name }}{% if _series.number %} #{{ _series.number }}{% endif %}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
         </div>
-        <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
+        <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
         {% if book.identifiers.isbn %}
           <div class="block">
             <p><strong class="subtitle is-size-5 has-text-info-light">Isbn:</strong> {{ book.identifiers.isbn }}</p>
@@ -164,24 +163,24 @@
 {% block sub_content %}
   <div class="columns">
     <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {% include "components/columns_slider.jinja" %}
+      {% include "components/settings_box.jinja" %}
     </div>
     <div class="column">
-      <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Creators</div>
+      <h3 class="subtitle is-3 has-text-primary-light">Creators</h3>
       <div class="columns is-multiline">
         {% for _creator in book.creators %}
           {{ creator_column(_creator, roles=_creator.roles) }}
         {% endfor %}
       </div>
       {% if book.is_collected %}
-        <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Readers</div>
+        <h3 class="subtitle is-3 has-text-primary-light">Readers</h3>
         <div class="columns is-multiline">
           {% for _reader in book.readers %}
             {{ user_column(_reader) }}
           {% endfor %}
         </div>
       {% else %}
-        <div class="divider subtitle is-capitalized is-size-3 is-primary has-text-primary-light">Wishers</div>
+        <h3 class="subtitle is-3 has-text-primary-light">Wishers</h3>
         <div class="columns is-multiline">
           {% for _wisher in book.wishers %}
             {{ user_column(_wisher) }}

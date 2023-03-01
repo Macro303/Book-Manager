@@ -43,13 +43,15 @@
       </div>
     </div>
     {% if show_read %}
-    <div class="field">
-      <label class="label has-text-info-light">Only Read</label>
-      <div class="control is-expanded">
-        <input id="read-switch" type="checkbox" name="read" class="switch is-info is-rounded is-outlined"{% if filters['read'] %} checked{% endif %}>
-        <label for="read-switch"></label>
+      <div class="field">
+        <label class="label has-text-info-light">Show Read</label>
+        <div class="control is-expanded">
+          <label class="label">
+            <input name="read" type="checkbox"{% if filters['read'] %} checked{% endif %}>
+            Only Showing {% if filters['read'] %}Read{% else %}Unread{% endif %}
+          </label>
+        </div>
       </div>
-    </div>
     {% endif %}
     <div class="field">
       <label class="label has-text-info-light">Publisher</label>
