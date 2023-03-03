@@ -114,8 +114,8 @@ class BookController:
         book.delete()
 
     @classmethod
-    def lookup_book(cls, isbn: str, wisher_id: int | None) -> Book:
-        if book := Book.get(isbn=isbn):
+    def lookup_book(cls, isbn: str | None, edition_id: str | None, wisher_id: int | None) -> Book:
+        if book := Book.get(isbn=isbn) or Book.get(open_library_id=edition_id):
             if wisher_id and (wisher := UserController.get_user(user_id=wisher_id)):
                 if wisher in book.wishers:
                     raise HTTPException(status_code=409, detail="Book already wished for.")
@@ -125,7 +125,7 @@ class BookController:
 
         settings = Settings()
         if settings.source.open_library:
-            new_book = open_library.lookup_book(isbn=isbn, open_library_id=None)
+            new_book = open_library.lookup_book(isbn=isbn, open_library_id=edition_id)
         elif settings.source.google_books:
             new_book = google_books.lookup_book(isbn=isbn, google_books_id=None)
         else:

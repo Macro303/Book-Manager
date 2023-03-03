@@ -137,9 +137,12 @@ class BookIn(BaseBook):
 
 class LookupBook(BaseModel):
     collect: bool = False
-    isbn: str
+    edition_id: str | None = None
+    isbn: str | None = None
     wisher_id: int | None = None
 
     @validator("isbn", pre=True)
-    def validate_isbn(cls, v: str) -> str:
-        return to_isbn_13(value=v)
+    def validate_isbn(cls, v: str | None) -> str | None:
+        if v:
+            return to_isbn_13(value=v)
+        return None

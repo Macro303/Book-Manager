@@ -29,16 +29,23 @@ function addBook(){
     let segments = new URL(book_depository_url).pathname.split('/');
     book_depository_url = segments.pop() || segments.pop();
   }
-
   let isbn = formDetails["isbn"] || book_depository_url;
+
+  let open_library_url = formDetails["open-library-url"];
+  if (open_library_url){
+    let segments = new URL(open_library_url).pathname.split('/');
+    open_library_url = segments.pop() || segments.pop();
+  }
+  let edition_id = formDetails["open-library-id"] || open_library_url;
 
   addLoading(caller);
   fetch("/api/v0/books/lookup", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
+      "edition_id": edition_id,
       "isbn": isbn,
-      "wisher_id": {{ token_user.user_id }},
+      "wisher_id": {{ token_user.user_id }}
     }),
   }).then((response) => {
     if (!response.ok){

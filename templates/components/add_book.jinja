@@ -1,13 +1,15 @@
 {% from "components/forms.jinja" import input %}
 {% macro add_book(show_book_depository=False) %}
 <div class="box">
-  <h1 class="title is-5 has-text-info">Add Book</h1>
+  <h5 class="title is-5 has-text-info">Add Book</h5>
   <form id="add-form" onsubmit="return false;">
     {{ input("Isbn", "isbn") }}
+    {{ input("OpenLibrary Id", "open-library-id") }}
+    <h6 class="subtitle is-6 has-text-centered has-text-info">OR</h6>
     {% if show_book_depository %}
-    <div class="divider subtitle is-size-6 is-info has-text-info-light">OR</div>
-    {{ input("Book Depository Url", "book-depository-url") }}
+      {{ input("Book Depository Url", "book-depository-url") }}
     {% endif %}
+    {{ input("OpenLibrary Url", "open-library-url") }}
     <div class="buttons is-centered">
       <button class="button is-link is-rounded" id="add-button" type="button" onclick="addBook()">
         <span class="icon is-medium">

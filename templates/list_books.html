@@ -24,13 +24,21 @@ function addBook(){
   let formDetails = Object.fromEntries(new FormData(addForm));
   console.log(formDetails);
 
+  let open_library_url = formDetails["open-library-url"];
+  if (open_library_url){
+    let segments = new URL(open_library_url).pathname.split('/');
+    open_library_url = segments.pop() || segments.pop();
+  }
+  let edition_id = formDetails["open-library-id"] || open_library_url;
+
   addLoading(caller);
   fetch("/api/v0/books/lookup", {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
       "collect": true,
-      "isbn": formDetails["isbn"],
+      "edition_id": edition_id,
+      "isbn": formDetails["isbn"]
     }),
   }).then((response) => {
     if (!response.ok){

@@ -54,9 +54,13 @@ def delete_book(book_id: int):
 
 
 @router.post(path="/lookup", status_code=201, responses={409: {"model": ErrorResponse}})
-def lookup_book(new_book: LookupBook) -> BookIn:
+def lookup_book(new_book: LookupBook) -> Book:
+    if not new_book.isbn and not new_book.edition_id:
+        raise HTTPException(status_code=400, detail="Isbn or OpenLibrary Edition Id required")
     with db_session:
-        book = BookController.lookup_book(isbn=new_book.isbn, wisher_id=new_book.wisher_id)
+        book = BookController.lookup_book(
+            isbn=new_book.isbn, edition_id=new_book.edition_id, wisher_id=new_book.wisher_id
+        )
         if new_book.collect:
             book.is_collected = True
             book.wishers = []
