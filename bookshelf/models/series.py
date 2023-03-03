@@ -21,15 +21,17 @@ class Series(BaseSeries):
     def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, Series):
             raise NotImplementedError()
-        return self.name < other.name
+        if self.name != other.name:
+            return self.name < other.name
+        return (self.number or 0) < (other.number or 0)
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Series):
             raise NotImplementedError()
-        return self.name == other.name
+        return (self.name, self.number or 0) == (other.name, other.number or 0)
 
     def __hash__(self):
-        return hash((type(self), self.name))
+        return hash((type(self), self.name, self.number or 0))
 
 
 class SeriesIn(BaseSeries):
