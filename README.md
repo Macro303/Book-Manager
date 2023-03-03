@@ -15,7 +15,7 @@
 [![Github - Contributors](https://img.shields.io/github/contributors/Buried-In-Code/Bookshelf?logo=Github&label=Contributors&style=flat-square)](https://github.com/Buried-In-Code/Bookshelf/graphs/contributors)
 
 Tool for tracking books on your bookshelf or books you wish were on it.
-Uses [OpenLibrary](<>) or [GoogleBooks](<>) to source book information.
+Uses [OpenLibrary](https://openlibrary.org) or [GoogleBooks](https://books.google.com/books) to source book information.
 
 ## Installation
 
