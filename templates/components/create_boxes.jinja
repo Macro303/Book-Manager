@@ -73,3 +73,22 @@
     </form>
   </div>
 {% endmacro %}
+
+
+
+{% macro series() %}
+  <div class="box">
+    <h5 class="title is-5 has-text-info-light">Create Series</h5>
+    <form id="create-form" onsubmit="return false;">
+      {{ input("Name", "name") }}
+      <div class="buttons is-centered">
+        <button class="button is-success" id="create-button" onclick="createSeries()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-add"></i>
+          </span>
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}

@@ -73,3 +73,22 @@
     </form>
   </div>
 {% endmacro %}
+
+
+
+{% macro series(filters) %}
+  <div class="box">
+    <h1 class="title is-5 has-text-info-light">Filter Series</h1>
+    <form accept-charset="UTF-8" action="/series" method="GET">
+      {{ input("Name", "name", value=filters['name'] or '') }}
+      <div class="buttons is-centered">
+        <button class="button is-link">
+          <span class="icon">
+            <i class="fa-solid fa-filter"></i>
+          </span>
+          <span>Filter</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}
