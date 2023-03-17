@@ -41,7 +41,10 @@ def list_publishers(
 
 @router.get(path="/{publisher_id}", response_class=HTMLResponse)
 def view_publisher(
-    *, request: Request, publisher_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    publisher_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")
@@ -61,7 +64,10 @@ def view_publisher(
 
 @router.get(path="/{publisher_id}/edit", response_class=HTMLResponse)
 def edit_publisher(
-    *, request: Request, publisher_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    publisher_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")

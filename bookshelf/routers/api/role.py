@@ -45,18 +45,22 @@ def delete_role(role_id: int):
 
 @router.post(path="/{role_id}/books", responses={404: {"model": ErrorResponse}})
 def add_book_creator_to_role(
-    role_id: int, book_id: int = Body(embed=True), creator_id: int = Body(embed=True)
+    role_id: int,
+    book_id: int = Body(embed=True),
+    creator_id: int = Body(embed=True),
 ) -> Role:
     with db_session:
         role = RoleController.get_role(role_id=role_id)
         book = BookController.get_book(book_id=book_id)
         creator = CreatorController.get_creator(creator_id=creator_id)
         book_creator = BookCreator.get(book=book, creator=creator) or BookCreator(
-            book=book, creator=creator
+            book=book,
+            creator=creator,
         )
         if book_creator and role in book_creator.roles:
             raise HTTPException(
-                status_code=400, detail="Role has already been assigned to BookCreator"
+                status_code=400,
+                detail="Role has already been assigned to BookCreator",
             )
         book_creator.roles.add(role)
         flush()
@@ -64,7 +68,8 @@ def add_book_creator_to_role(
 
 
 @router.delete(
-    path="/{role_id}/books/{creator_id}/{book_id}", responses={404: {"model": ErrorResponse}}
+    path="/{role_id}/books/{creator_id}/{book_id}",
+    responses={404: {"model": ErrorResponse}},
 )
 def remove_book_creator_from_role(role_id: int, creator_id: int, book_id: int) -> Role:
     with db_session:

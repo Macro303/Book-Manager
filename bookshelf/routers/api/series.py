@@ -44,7 +44,9 @@ def delete_series(series_id: int):
 
 @router.post(path="/{series_id}/books", responses={404: {"model": ErrorResponse}})
 def add_book_to_series(
-    series_id: int, book_id: int = Body(embed=True), series_num: int = Body(default=0, embed=True)
+    series_id: int,
+    book_id: int = Body(embed=True),
+    series_num: int = Body(default=0, embed=True),
 ) -> Series:
     with db_session:
         series = SeriesController.get_series(series_id=series_id)

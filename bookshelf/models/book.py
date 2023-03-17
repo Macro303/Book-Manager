@@ -74,7 +74,7 @@ class Book(BaseBook):
 
     def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, Book):
-            raise NotImplementedError()
+            raise NotImplementedError
         self_first_series = self.get_first_series()
         other_first_series = other.get_first_series()
         if self_first_series and other_first_series and self_first_series != other_first_series:
@@ -90,7 +90,7 @@ class Book(BaseBook):
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, Book):
-            raise NotImplementedError()
+            raise NotImplementedError
         if self.get_first_series() and other.get_first_series():
             return (
                 self.get_first_series(),

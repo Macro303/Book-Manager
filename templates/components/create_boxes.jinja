@@ -1,0 +1,75 @@
+{% from "components/forms.jinja" import input %}
+
+{% macro format() %}
+  <div class="box">
+    <h5 class="title is-5 has-text-info-light">Create Format</h5>
+    <form id="create-form" onsubmit="return false;">
+      {{ input("Name", "name") }}
+      <div class="buttons is-centered">
+        <button class="button is-success" id="create-button" onclick="createFormat()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-add"></i>
+          </span>
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}
+
+
+
+{% macro genre() %}
+  <div class="box">
+    <h5 class="title is-5 has-text-info-light">Create Genre</h5>
+    <form id="create-form" onsubmit="return false;">
+      {{ input("Name", "name") }}
+      <div class="buttons is-centered">
+        <button class="button is-success" id="create-button" onclick="createGenre()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-add"></i>
+          </span>
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}
+
+
+
+{% macro publisher() %}
+  <div class="box">
+    <h5 class="title is-5 has-text-info-light">Create Publisher</h5>
+    <form id="create-form" onsubmit="return false;">
+      {{ input("Name", "name") }}
+      <div class="buttons is-centered">
+        <button class="button is-success" id="create-button" onclick="createPublisher()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-add"></i>
+          </span>
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}
+
+
+
+{% macro role() %}
+  <div class="box">
+    <h5 class="title is-5 has-text-info-light">Create Role</h5>
+    <form id="create-form" onsubmit="return false;">
+      {{ input("Name", "name") }}
+      <div class="buttons is-centered">
+        <button class="button is-success" id="create-button" onclick="createRole()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-add"></i>
+          </span>
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}

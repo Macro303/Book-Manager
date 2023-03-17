@@ -29,7 +29,8 @@ def get_creator(creator_id: int) -> Creator:
 
 
 @router.patch(
-    path="/{creator_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}}
+    path="/{creator_id}",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
 def update_creator(creator_id: int, updates: CreatorIn) -> Creator:
     with db_session:

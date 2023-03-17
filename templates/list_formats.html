@@ -1,71 +1,49 @@
 {% extends "list_base.jinja" %}
-{% from "components/columns/format.jinja" import format_column %}
-{% from "components/forms.jinja" import input %}
+{% from "components/create_boxes.jinja" import format as create_box %}
+{% from "components/filter_boxes.jinja" import format as filter_box %}
+{% from "components/list_boxes.jinja" import format as list_box %}
 {% block title %}Formats{% endblock %}
-{% block side_panel %}
-  <div class="box">
-    <h1 class="title is-5 has-text-info">Filter Formats</h1>
-    <form accept-charset="UTF-8" action="/formats" method="GET">
-      {{ input("Name", "name", value=filters['name'] or '') }}
-      <div class="buttons is-centered">
-        <button class="button is-link is-rounded">
-          <span class="icon is-medium">
-            <i class="fa-solid fa-lg fa-filter"></i>
-          </span>
-          <span>Filter</span>
-        </button>
-      </div>
-    </form>
-  </div>
+{% block sidebar %}
+  {{ super() }}
+  {{ filter_box(filters=filters) }}
   {% if token_user.role >= 1 %}
-    <div class="box">
-      <h5 class="title is-5 has-text-info">Add Format</h5>
-      <form id="add-form" onsubmit="return false;">
-        {{ input("Name", "name") }}
-        <div class="buttons is-centered">
-          <button class="button is-link is-rounded" id="add-button" type="button" onclick="addFormat()">
-            <span class="icon is-medium">
-              <i class="fa-solid fa-lg fa-plus"></i>
-            </span>
-            <span>Add</span>
-          </button>
-        </div>
-      </form>
-    </div>
+    {{ create_box() }}
   {% endif %}
 {% endblock %}
 {% block list_content %}
-  {% for _format in format_list %}
-    {{ format_column(_format) }}
+  {% for entry in format_list %}
+    <div class="adjustable-column column has-text-centered">
+      {{ list_box(obj=entry) }}
+    </div>
   {% endfor %}
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-{% if token_user.role >= 1 %}
-function addFormat(){
-  const caller = "add-button";
-  let addForm = document.getElementById("add-form");
-  let formDetails = Object.fromEntries(new FormData(addForm));
-  console.log(formDetails);
+  {{ super() }}
+  <script type="text/javascript">
+    {% if token_user.role >= 1 %}
+      function createFormat(){
+        const caller = "create-button";
+        let createForm = document.getElementById("create-form");
+        let formDetails = Object.fromEntries(new FormData(createForm));
+        console.log(formDetails);
 
-  addLoading(caller);
-  fetch("/api/v0/formats", {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
-        "name": formDetails["name"]
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    addForm.reset();
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+        addLoading(caller);
+        fetch("/api/v0/formats", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({
+              "name": formDetails["name"]
+          }),
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          createForm.reset();
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
+  </script>
 {% endblock %}

@@ -75,11 +75,13 @@ class CreatorController:
                 return cls.update_creator(creator_id=creator.creator_id, updates=new_creator)
         elif settings.source.google_books:
             raise HTTPException(
-                status_code=400, detail="No creator lookup available for GoogleBooks."
+                status_code=400,
+                detail="No creator lookup available for GoogleBooks.",
             )
         else:
             raise HTTPException(
-                status_code=500, detail="Incorrect config setup, review source settings."
+                status_code=500,
+                detail="Incorrect config setup, review source settings.",
             )
         return cls.create_creator(new_creator=new_creator)
 
@@ -98,10 +100,12 @@ class CreatorController:
             updates = open_library.lookup_creator(open_library_id=creator.open_library_id)
         elif settings.source.google_books:
             raise HTTPException(
-                status_code=400, detail="No creator lookup available for GoogleBooks."
+                status_code=400,
+                detail="No creator lookup available for GoogleBooks.",
             )
         else:
             raise HTTPException(
-                status_code=500, detail="Incorrect config setup, review source settings."
+                status_code=500,
+                detail="Incorrect config setup, review source settings.",
             )
         return cls.update_creator(creator_id=creator_id, updates=updates)

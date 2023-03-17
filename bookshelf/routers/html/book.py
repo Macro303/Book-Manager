@@ -99,13 +99,13 @@ def list_books(
                 "token_user": token_user.to_model(),
                 "book_list": sorted({x.to_model() for x in book_list}),
                 "creator_list": sorted(
-                    {y.creator.to_model() for x in all_books for y in x.creators}
+                    {y.creator.to_model() for x in all_books for y in x.creators},
                 ),
                 "format_list": sorted(
                     {
                         x.format.to_model() if x.format else Format(format_id=-1, name="None")
                         for x in all_books
-                    }
+                    },
                 ),
                 "genre_list": sorted({y.to_model() for x in all_books for y in x.genres}),
                 "publisher_list": sorted(
@@ -114,7 +114,7 @@ def list_books(
                         if x.publisher
                         else Publisher(publisher_id=-1, name="None")
                         for x in all_books
-                    }
+                    },
                 ),
                 "series_list": sorted({y.series.to_model() for x in all_books for y in x.series}),
                 "filters": {

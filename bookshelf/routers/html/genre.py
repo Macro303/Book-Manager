@@ -41,7 +41,10 @@ def list_genres(
 
 @router.get(path="/{genre_id}", response_class=HTMLResponse)
 def view_genre(
-    *, request: Request, genre_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    genre_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")
@@ -61,7 +64,10 @@ def view_genre(
 
 @router.get(path="/{genre_id}/edit", response_class=HTMLResponse)
 def edit_genre(
-    *, request: Request, genre_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    genre_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")

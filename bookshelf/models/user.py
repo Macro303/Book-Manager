@@ -14,12 +14,12 @@ class User(BaseUser):
 
     def __lt__(self, other) -> int:  # noqa: ANN001
         if not isinstance(other, User):
-            raise NotImplementedError()
+            raise NotImplementedError
         return self.username < other.username
 
     def __eq__(self, other) -> bool:  # noqa: ANN001
         if not isinstance(other, User):
-            raise NotImplementedError()
+            raise NotImplementedError
         return self.username == other.username
 
     def __hash__(self):

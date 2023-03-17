@@ -17,7 +17,9 @@ from bookshelf.services.open_library.service import OpenLibrary
 
 
 def lookup_book(
-    isbn: str, open_library_id: str | None = None, google_books_id: str | None = None
+    isbn: str,
+    open_library_id: str | None = None,
+    google_books_id: str | None = None,
 ) -> BookIn:
     session = OpenLibrary()
     if open_library_id:
@@ -59,7 +61,7 @@ def lookup_book(
             format = FormatController.get_format_by_name(name=edition.physical_format)
         except HTTPException:
             format = FormatController.create_format(
-                new_format=FormatIn(name=edition.physical_format)
+                new_format=FormatIn(name=edition.physical_format),
             )
 
     genre_ids = set()
@@ -77,7 +79,7 @@ def lookup_book(
                 publisher = PublisherController.get_publisher_by_name(name=y.strip())
             except HTTPException:
                 publisher = PublisherController.create_publisher(
-                    new_publisher=PublisherIn(name=y.strip())
+                    new_publisher=PublisherIn(name=y.strip()),
                 )
             publisher_list.append(publisher)
     publisher = next(iter(sorted(publisher_list, key=lambda x: x.name)), None)

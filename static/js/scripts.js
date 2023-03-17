@@ -13,14 +13,20 @@ function removeLoading(caller){
   element.classList.remove("is-loading");
 }
 
-function signOut(){
-  const caller = "sign-out-button"
-  addLoading(caller);
-
-  document.cookie = "token=0;path=/;max-age=0";
-  window.location = "/";
-
-  removeLoading(caller);
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }
 
 function ready(fn) {
@@ -29,4 +35,14 @@ function ready(fn) {
     return;
   }
   document.addEventListener('DOMContentLoaded', fn);
+}
+
+function signOut(){
+  const caller = "sign-out-button"
+  addLoading(caller);
+
+  document.cookie = "token=0;path=/;max-age=0";
+  window.location = "/";
+
+  removeLoading(caller);
 }

@@ -40,7 +40,8 @@ def get_book(book_id: int) -> Book:
 
 
 @router.patch(
-    path="/{book_id}", responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}}
+    path="/{book_id}",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
 def update_book(book_id: int, updates: BookIn) -> Book:
     with db_session:
@@ -59,7 +60,9 @@ def lookup_book(new_book: LookupBook) -> Book:
         raise HTTPException(status_code=400, detail="Isbn or OpenLibrary Edition Id required")
     with db_session:
         book = BookController.lookup_book(
-            isbn=new_book.isbn, edition_id=new_book.edition_id, wisher_id=new_book.wisher_id
+            isbn=new_book.isbn,
+            edition_id=new_book.edition_id,
+            wisher_id=new_book.wisher_id,
         )
         if new_book.collect:
             book.is_collected = True
@@ -117,7 +120,8 @@ def discard_book(book_id: int) -> Book:
 
 
 @router.put(
-    path="/{book_id}/wish", responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}}
+    path="/{book_id}/wish",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
 def wish_book(book_id: int, wisher_id: int = Body(embed=True)) -> Book:
     with db_session:

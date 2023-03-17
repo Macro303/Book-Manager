@@ -32,7 +32,8 @@ def get_publisher(publisher_id: int) -> Publisher:
 def update_publisher(publisher_id: int, updates: PublisherIn) -> Publisher:
     with db_session:
         return PublisherController.update_publisher(
-            publisher_id=publisher_id, updates=updates
+            publisher_id=publisher_id,
+            updates=updates,
         ).to_model()
 
 

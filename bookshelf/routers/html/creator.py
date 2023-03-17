@@ -41,7 +41,10 @@ def list_creators(
 
 @router.get(path="/{creator_id}", response_class=HTMLResponse)
 def view_creator(
-    *, request: Request, creator_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    creator_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")
@@ -53,7 +56,8 @@ def view_creator(
             roles = sorted({x.to_model() for x in temp.roles})
             book_dict[temp_book] = roles
         book_list = sorted(
-            [(key, values) for key, values in book_dict.items()], key=lambda x: (x[1][0], x[0])
+            [(key, values) for key, values in book_dict.items()],
+            key=lambda x: (x[1][0], x[0]),
         )
         return templates.TemplateResponse(
             "view_creator.html",
@@ -68,7 +72,10 @@ def view_creator(
 
 @router.get(path="/{creator_id}/edit", response_class=HTMLResponse)
 def edit_creator(
-    *, request: Request, creator_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    creator_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")

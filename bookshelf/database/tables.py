@@ -220,5 +220,8 @@ class User(db.Entity):
 
     def to_model(self) -> ModelUser:
         return ModelUser(
-            user_id=self.user_id, username=self.username, role=self.role, image_url=self.image_url
+            user_id=self.user_id,
+            username=self.username,
+            role=self.role,
+            image_url=self.image_url,
         )

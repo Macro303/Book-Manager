@@ -41,7 +41,10 @@ def list_series(
 
 @router.get(path="/{series_id}", response_class=HTMLResponse)
 def view_series(
-    *, request: Request, series_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    series_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")
@@ -64,7 +67,10 @@ def view_series(
 
 @router.get(path="/{series_id}/edit", response_class=HTMLResponse)
 def edit_series(
-    *, request: Request, series_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    series_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")

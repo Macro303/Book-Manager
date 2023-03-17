@@ -52,12 +52,14 @@ class GoogleBooks:
             except JSONDecodeError as sub_err:
                 CONSOLE.print(err)
                 raise HTTPException(
-                    status_code=500, detail=f"Unable to parse error response from '{url}' as Json"
+                    status_code=500,
+                    detail=f"Unable to parse error response from '{url}' as Json",
                 ) from sub_err
         except JSONDecodeError as err:
             CONSOLE.print(err)
             raise HTTPException(
-                status_code=500, detail=f"Unable to parse response from '{url}' as Json"
+                status_code=500,
+                detail=f"Unable to parse response from '{url}' as Json",
             ) from err
         except ReadTimeout as err:
             CONSOLE.print(err)

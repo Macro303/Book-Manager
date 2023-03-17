@@ -38,7 +38,7 @@ def lookup_book(isbn: str, google_books_id: str | None = None) -> BookIn:
             publisher = PublisherController.get_publisher_by_name(name=result.volume_info.publisher)
         except HTTPException:
             publisher = PublisherController.create_publisher(
-                new_publisher=PublisherIn(name=result.volume_info.publisher)
+                new_publisher=PublisherIn(name=result.volume_info.publisher),
             )
 
     genre_ids = set()

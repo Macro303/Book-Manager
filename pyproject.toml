@@ -18,15 +18,15 @@ classifiers = [
   "Typing :: Typed"
 ]
 dependencies = [
-  "fastapi >= 0.92.0",
+  "fastapi >= 0.94.1",
   "jinja2 >= 3.1.2",
   "pony >= 0.7.16",
-  "pydantic >= 1.10.5",
+  "pydantic >= 1.10.6",
   "ratelimit >= 2.2.1",
   "requests >= 2.28.2",
-  "rich >= 13.3.1",
+  "rich >= 13.3.2",
   "tomli-w >= 1.0.0",
-  "uvicorn >= 0.20.0"
+  "uvicorn >= 0.21.1"
 ]
 description = "Tool for tracking books on your bookshelf or books you wish were on it."
 dynamic = ["version"]
@@ -64,7 +64,9 @@ ignore = [
   "ANN204",
   "ANN206",
   "ANN401",
-  "C901"
+  "C901",
+  "RET504",
+  "SIM105"
 ]
 line-length = 100
 select = [
@@ -73,23 +75,40 @@ select = [
   "ARG",
   "B",
   "BLE",
-  "C4",
+  "C40",
   "C90",
+  "COM",
   # "D",
+  "DJ",
   "E",
   "ERA",
   "F",
+  "G",
   "I",
   "ICN",
+  "INP",
+  "ISC",
   "N",
+  "NPY",
+  "PD",
+  "PGH",
+  "PIE",
   "PLC",
   "PLE",
   "PLW",
+  "PT",
+  "PTH",
+  "PYI",
   "Q",
   "RET",
+  "RSE",
   "RUF",
   "S",
   "SIM",
+  "SLF",
+  "T10",
+  "T20",
+  "TCH",
   "TID",
   "UP",
   "W",

@@ -155,13 +155,13 @@ def user_wishlist(
                 "user": user.to_model(),
                 "wishlist": sorted({x.to_model() for x in wishlist}),
                 "creator_list": sorted(
-                    {y.creator.to_model() for x in all_wishlist for y in x.creators}
+                    {y.creator.to_model() for x in all_wishlist for y in x.creators},
                 ),
                 "format_list": sorted(
                     {
                         x.format.to_model() if x.format else Format(format_id=-1, name="None")
                         for x in all_wishlist
-                    }
+                    },
                 ),
                 "publisher_list": sorted(
                     {
@@ -169,10 +169,10 @@ def user_wishlist(
                         if x.publisher
                         else Publisher(publisher_id=-1, name="None")
                         for x in all_wishlist
-                    }
+                    },
                 ),
                 "series_list": sorted(
-                    {y.series.to_model() for x in all_wishlist for y in x.series}
+                    {y.series.to_model() for x in all_wishlist for y in x.series},
                 ),
                 "filters": {
                     "creator_id": creator_id,

@@ -1,9 +1,20 @@
-function adjustColumns(){
+function changeColumnCount(){
   let settingsForm = document.getElementById("settings-form");
   let formDetails = Object.fromEntries(new FormData(settingsForm));
   console.log(formDetails);
 
   let columnCount = formDetails["column-count"];
+
+  adjustColumns(columnCount);
+}
+
+function adjustColumns(columnCount = null){
+  if (columnCount === null){
+    columnCount = getCookie("column-count");
+  }
+  columnCount = columnCount || 3;
+  let settingsForm = document.getElementById("column-count").value=columnCount;
+  document.cookie = `column-count=${columnCount};path=/;max-age=${60*60*24*30};SameSite=Strict`;
 
   let elements = document.getElementsByClassName("adjustable-column");
   for(let x=0; x < elements.length; x++){

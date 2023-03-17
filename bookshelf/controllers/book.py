@@ -73,7 +73,8 @@ class BookController:
             creator = CreatorController.get_creator(creator_id=x.creator_id)
             flush()
             temp = BookCreator.get(book=book, creator=creator) or BookCreator(
-                book=book, creator=creator
+                book=book,
+                creator=creator,
             )
             temp.roles = [RoleController.get_role(role_id=y) for y in x.role_ids]
         book.description = updates.description
@@ -130,7 +131,8 @@ class BookController:
             new_book = google_books.lookup_book(isbn=isbn, google_books_id=None)
         else:
             raise HTTPException(
-                status_code=500, detail="Incorrect config setup, review source settings."
+                status_code=500,
+                detail="Incorrect config setup, review source settings.",
             )
         if wisher_id:
             new_book.wisher_ids = [wisher_id]
@@ -163,7 +165,8 @@ class BookController:
             updates.subtitle = book.subtitle
         else:
             raise HTTPException(
-                status_code=500, detail="Incorrect config setup, review source settings."
+                status_code=500,
+                detail="Incorrect config setup, review source settings.",
             )
         updates.is_collected = book.is_collected
         updates.reader_ids = [x.user_id for x in book.readers]
@@ -193,7 +196,8 @@ class BookController:
             updates.subtitle = book.subtitle
         else:
             raise HTTPException(
-                status_code=500, detail="Incorrect config setup, review source settings."
+                status_code=500,
+                detail="Incorrect config setup, review source settings.",
             )
         book.publish_date = updates.publish_date
         book.genres = [GenreController.get_genre(genre_id=x) for x in updates.genre_ids]

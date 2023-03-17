@@ -41,7 +41,10 @@ def list_formats(
 
 @router.get(path="/{format_id}", response_class=HTMLResponse)
 def view_format(
-    *, request: Request, format_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    format_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")
@@ -61,7 +64,10 @@ def view_format(
 
 @router.get(path="/{format_id}/edit", response_class=HTMLResponse)
 def edit_format(
-    *, request: Request, format_id: int, token_user: User | None = Depends(get_token_user)
+    *,
+    request: Request,
+    format_id: int,
+    token_user: User | None = Depends(get_token_user),
 ):
     if not token_user:
         return RedirectResponse("/")
