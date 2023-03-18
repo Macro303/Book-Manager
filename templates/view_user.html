@@ -1,40 +1,61 @@
 {% extends "view_base.jinja" %}
+{% from "components/list_boxes.jinja" import book as book_box %}
 {% block title %}{{ user.username }}{% endblock %}
-{% block details %}
-  <div class="has-text-centered">
-    <figure class="image is-256x256 is-inline-block">
-      <img alt="{{ user.username }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ user.image_url or '/static/img/logo.png' }}"/>
-    </figure>
-  </div>
+{% block image %}
+  <figure class="image is-256x256 is-inline-block">
+    <img class="profile-large is-rounded" loading="lazy" src="{{ user.image_url or '/static/img/logo.png' }}" />
+  </figure>
 {% endblock %}
 {% block action_buttons %}
   {% if token_user.user_id == user.user_id or (token_user.role >= 4 and token_user.role > user.role) %}
-    <a class="button is-warning is-rounded" href="/users/{{ user.user_id }}/edit">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-pen-to-square"></i>
+    <a class="button is-warning" href="/users/{{ user.user_id }}/edit">
+      <span class="icon">
+        <i class="fa-solid fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
+    <button class="button is-danger" id="delete-button" type="button" onclick="deleteUser()">
+      <span class="icon">
+        <i class="fa-solid fa-trash"></i>
+      </span>
+      <span>Delete</span>
+    </button>
   {% endif %}
-  <a class="button is-success is-rounded" href="/users/{{ user.user_id }}/wishlist">
-    <span class="icon is-medium">
-      <i class="fa-solid fa-lg fa-star"></i>
+  <a class="button is-link" href="/users/{{ user.user_id }}/wishlist">
+    <span class="icon">
+      <i class="fa-solid fa-star"></i>
     </span>
     <span>Wishlist</span>
   </a>
 {% endblock %}
-{% block sub_content %}
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {% include "components/settings_box.jinja" %}
+{% block sub_content_title %}Last Read{% endblock %}
+{% block list_content %}
+  {% for entry in last_read %}
+    <div class="adjustable-column column has-text-centered">
+      {{ book_box(obj=entry) }}
     </div>
-    <div class="column">
-      <h3 class="subtitle is-3 has-text-primary-light">Last Read</h3>
-      <div class="columns is-multiline">
-        {% for _book in last_read %}
-          {{ book_column(_book) }}
-        {% endfor %}
-      </div>
-    </div>
-  </div>
+  {% endfor %}
+{% endblock %}
+{% block js %}
+  {{ super() }}
+  <script type="text/javascript">
+    {% if token_user.user_id == user.user_id or (token_user.role >= 4 and token_user.role > user.role) %}
+      function deleteUser(){
+        const caller = "delete-button";
+  
+        addLoading(caller);
+        fetch("/api/v0/users/{{ user.user_id }}", {
+          method: "DELETE",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location = "/users";
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
+  </script>
 {% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.jinja" %}
+{% block content %}
+  <div class="box">
+    <form id="edit-form" onsubmit="return false;">
+      {% block form required %}{% endblock %}
+    </form>
+  </div>
+  <div class="buttons is-multiline is-centered">
+    {% block action_buttons %}{% endblock %}
+  </div>
+{% endblock %}

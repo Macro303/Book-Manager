@@ -1,73 +1,40 @@
-{% extends "base.jinja" %}
-{% from "components/forms.jinja" import input, textarea %}
-{% block title %}{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="box">
-    <form id="edit-form" onsubmit="return false;">
-      {{ input("Name", "name", value=publisher.name) }}
-    </form>
-  </div>
-  <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-button" type="button" onclick="savePublisher()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-floppy-disk"></i>
-      </span>
-      <span>Save</span>
-    </button>
-    {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deletePublisher()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-trash"></i>
-      </span>
-      <span>Delete</span>
-    </button>
-    {% endif %}
-  </div>
-</section>
+{% extends "edit_base.jinja" %}
+{% from "components/forms.jinja" import input %}
+{% block title %}Edit Publisher{% endblock %}
+{% block form %}
+  {{ input("Name", "name", value=publisher.name) }}
+{% endblock %}
+{% block action_buttons %}
+  <a class="button is-success" id="save-button" onclick="savePublisher()" type="button">
+    <span class="icon">
+      <i class="fa-solid fa-floppy-disk"></i>
+    </span>
+    <span>Save</span>
+  </a>
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-function savePublisher(){
-  const caller = "save-button";
-  let editForm = document.getElementById("edit-form");
-  let formDetails = Object.fromEntries(new FormData(editForm));
-  console.log(formDetails);
+  <script type="text/javascript">
+    function savePublisher(){
+      const caller = "save-button";
+      let editForm = document.getElementById("edit-form");
+      let formDetails = Object.fromEntries(new FormData(editForm));
+      console.log(formDetails);
 
-  addLoading(caller);
-  fetch("/api/v0/publisher/{{ publisher.publisher_id }}", {
-    method: "PATCH",
-    headers: headers,
-    body: JSON.stringify({
-      "name": formDetails["name"],
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
+      addLoading(caller);
+      fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify({
+          "name": formDetails["name"],
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/publishers/{{ publisher.publisher_id }}";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
     }
-    window.location = "/publishers/{{ publisher.publisher_id }}";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% if token_user.role >= 3 %}
-function deletePublisher(){
-  const caller = "delete-button";
-
-  addLoading(caller);
-  fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
-    method: "DELETE",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location = "/publishers";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+  </script>
 {% endblock %}

@@ -1,55 +1,58 @@
 {% extends "list_base.jinja" %}
-{% from "components/add_book.jinja" import add_book %}
-{% from "components/columns/book.jinja" import book_column %}
-{% from "components/filter_books.jinja" import book_filter with context %}
+{% from "components/create_boxes.jinja" import book as create_box %}
+{% from "components/filter_boxes.jinja" import book as filter_box %}
+{% from "components/list_boxes.jinja" import book as list_card %}
 {% block title %}Books{% endblock %}
-{% block side_panel %}
-  {{ book_filter("/books", show_read=True) }}
+{% block sidebar %}
+  {{ super() }}
+  {{ filter_box(filters=filters, action="/books", show_read=True) }}
   {% if token_user.role >= 1 %}
-    {{ add_book() }}
+    {{ create_box() }}
   {% endif %}
 {% endblock %}
 {% block list_content %}
-  {% for _book in book_list %}
-    {{ book_column(_book) }}
+  {% for entry in book_list %}
+    <div class="adjustable-column column has-text-centered">
+      {{ list_card(obj=entry) }}
+    </div>
   {% endfor %}
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-{% if token_user.role >= 1 %}
-function addBook(){
-  const caller = "add-button";
-  let addForm = document.getElementById("add-form");
-  let formDetails = Object.fromEntries(new FormData(addForm));
-  console.log(formDetails);
-
-  let open_library_url = formDetails["open-library-url"];
-  if (open_library_url){
-    let segments = new URL(open_library_url).pathname.split('/');
-    open_library_url = segments.pop() || segments.pop();
-  }
-  let edition_id = formDetails["open-library-id"] || open_library_url;
-
-  addLoading(caller);
-  fetch("/api/v0/books/lookup", {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
-      "collect": true,
-      "edition_id": edition_id,
-      "isbn": formDetails["isbn"]
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    addForm.reset();
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+  {{ super() }}
+  <script type="text/javascript">
+    {% if token_user.role >= 1 %}
+      function createBook(){
+        const caller = "create-button";
+        let createForm = document.getElementById("create-form");
+        let formDetails = Object.fromEntries(new FormData(createForm));
+        console.log(formDetails);
+      
+        let open_library_url = formDetails["open-library-url"];
+        if (open_library_url){
+          let segments = new URL(open_library_url).pathname.split('/');
+          open_library_url = segments.pop() || segments.pop();
+        }
+        let edition_id = formDetails["open-library-id"] || open_library_url;
+      
+        addLoading(caller);
+        fetch("/api/v0/books/lookup", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({
+            "collect": true,
+            "edition_id": edition_id,
+            "isbn": formDetails["isbn"]
+          }),
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          createForm.reset();
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
+  </script>
 {% endblock %}

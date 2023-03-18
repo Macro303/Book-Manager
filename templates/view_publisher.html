@@ -1,12 +1,52 @@
 {% extends "view_base.jinja" %}
+{% from "components/list_boxes.jinja" import book as book_box %}
 {% block title %}{{ publisher.name }}{% endblock %}
 {% block action_buttons %}
   {% if token_user.role >= 2 %}
-    <a class="button is-warning is-rounded" href="/publishers/{{ publisher.publisher_id }}/edit">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-pen-to-square"></i>
+    <a class="button is-warning" href="/publishers/{{ publisher.publisher_id }}/edit">
+      <span class="icon">
+        <i class="fa-solid fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
+    {% if token_user.role >= 3 %}
+      <button class="button is-danger" id="delete-button" type="button" onclick="deletePublisher()">
+        <span class="icon">
+          <i class="fa-solid fa-trash"></i>
+        </span>
+        <span>Delete</span>
+      </button>
+    {% endif %}
   {% endif %}
+{% endblock %}
+{% block sub_content_title %}Books{% endblock %}
+{% block list_content %}
+  {% for entry in book_list %}
+    <div class="adjustable-column column has-text-centered">
+      {{ book_box(obj=entry) }}
+    </div>
+  {% endfor %}
+{% endblock %}
+{% block js %}
+  {{ super() }}
+  <script type="text/javascript">
+    {% if token_user.role >= 3 %}
+      function deletePublisher(){
+        const caller = "delete-button";
+  
+        addLoading(caller);
+        fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
+          method: "DELETE",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location = "/publishers";
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
+  </script>
 {% endblock %}

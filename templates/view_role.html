@@ -1,14 +1,23 @@
 {% extends "view_base.jinja" %}
+{% from "components/list_boxes.jinja" import book as book_box %}
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ role.name }}{% endblock %}
 {% block action_buttons %}
   {% if token_user.role >= 2 %}
-    <a class="button is-warning is-rounded" href="/roles/{{ role.role_id }}/edit">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-pen-to-square"></i>
+    <a class="button is-warning" href="/roles/{{ role.role_id }}/edit">
+      <span class="icon">
+        <i class="fa-solid fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
+    {% if token_user.role >= 3 %}
+      <button class="button is-danger" id="delete-button" type="button" onclick="deleteRole()">
+        <span class="icon">
+          <i class="fa-solid fa-trash"></i>
+        </span>
+        <span>Delete</span>
+      </button>
+    {% endif %}
   {% endif %}
 {% endblock %}
 {% block sub_content %}
@@ -17,14 +26,14 @@
       {% include "components/settings_box.jinja" %}
       {% if token_user.role >= 2 %}
         <div class="box">
-          <h5 class="title is-5 has-text-info">Add BookCreator to Role</h5>
+          <h5 class="title is-5 has-text-info-light">Add BookCreator to Role</h5>
           <form id="add-form" onsubmit="return false;">
             {{ input("Book Id", "book-id") }}
             {{ input("Creator Id", "creator-id") }}
             <div class="buttons is-centered">
-              <button class="button is-link is-rounded" id="add-button" type="button" onclick="addBook()">
-                <span class="icon is-medium">
-                  <i class="fa-solid fa-lg fa-plus"></i>
+              <button class="button is-success" id="add-button" type="button" onclick="addBook()">
+                <span class="icon">
+                  <i class="fa-solid fa-plus"></i>
                 </span>
                 <span>Add</span>
               </button>
@@ -35,10 +44,12 @@
     </div>
     <div class="column">
       {% for creator, book_list in creators.items() %}
-        <h3 class="subtitle is-3 has-text-primary-light">{{ creator.name }}</h3>
-        <div class="columns is-multiline">
-          {% for _book in book_list %}
-            {{ book_column(_book, show_remove_button=token_user.role >= 2, creator_id=creator.creator_id) }}
+        <a class="subtitle is-size-3 has-text-link-dark" href="/creators/{{ creator.creator_id }}">{{ creator.name }}</a>
+        <div class="columns is-multiline is-centered">
+          {% for entry in book_list %}
+            <div class="adjustable-column column has-text-centered">
+              {{ book_box(obj=entry, show_remove_button=token_user.role >= 2, creator_id=creator.creator_id) }}
+            </div>
           {% endfor %}
         </div>
       {% endfor %}
@@ -46,48 +57,66 @@
   </div>
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-{% if token_user.role >= 2 %}
-function addBook(){
-  const caller = "add-button";
-  let addForm = document.getElementById("add-form");
-  let formDetails = Object.fromEntries(new FormData(addForm));
-  console.log(formDetails);
-
-  addLoading(caller);
-  fetch("/api/v0/roles/{{ role.role_id }}/books", {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
-      "book_id": formDetails["book-id"],
-      "creator_id": formDetails["creator-id"],
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    addForm.reset();
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-
-function removeBook(caller, bookId, creatorId){
-  addLoading(caller);
-  fetch(`/api/v0/roles/{{ role.role_id }}/books/${creatorId}/${bookId}`, {
-    method: "DELETE",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+  {{ super() }}
+  <script type="text/javascript">
+    {% if token_user.role >= 2 %}
+      function addBook(){
+        const caller = "add-button";
+        let addForm = document.getElementById("add-form");
+        let formDetails = Object.fromEntries(new FormData(addForm));
+        console.log(formDetails);
+      
+        addLoading(caller);
+        fetch("/api/v0/roles/{{ role.role_id }}/books", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({
+            "book_id": formDetails["book-id"],
+            "creator_id": formDetails["creator-id"],
+          }),
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          addForm.reset();
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+      
+      function removeBook(caller, bookId, creatorId){
+        addLoading(caller);
+        fetch(`/api/v0/roles/{{ role.role_id }}/books/${creatorId}/${bookId}`, {
+          method: "DELETE",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+      {% if token_user.role >= 3 %}
+        function deleteRole(){
+          const caller = "delete-button";
+    
+          addLoading(caller);
+          fetch("/api/v0/roles/{{ role.role_id }}", {
+            method: "DELETE",
+            headers: headers,
+          }).then((response) => {
+            if (!response.ok){
+              return Promise.reject(response);
+            }
+            window.location = "/roles";
+          }).catch((response) => response.json().then((msg) => {
+            alert(`${response.status} ${response.statusText}: ${msg.details}`);
+          })).finally(() => removeLoading(caller));
+        }
+      {% endif %}
+    {% endif %}
+  </script>
 {% endblock %}

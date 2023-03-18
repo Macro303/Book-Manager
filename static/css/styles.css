@@ -3,7 +3,7 @@ a.navbar-link, a.card-footer-item {
 }
 
 img.profile {
-  height: 64px !important;
+  height: 128px !important;
   object-fit: cover;
 }
 

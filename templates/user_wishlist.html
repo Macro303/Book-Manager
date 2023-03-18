@@ -1,62 +1,65 @@
 {% extends "list_base.jinja" %}
-{% from "components/add_book.jinja" import add_book %}
-{% from "components/columns/book.jinja" import book_column %}
-{% from "components/filter_books.jinja" import book_filter with context %}
+{% from "components/create_boxes.jinja" import book as create_box %}
+{% from "components/filter_boxes.jinja" import book as filter_box %}
+{% from "components/list_boxes.jinja" import book as list_card %}
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
-{% block side_panel %}
-  {{ book_filter("/users/" ~ user.user_id ~ "/wishlist") }}
+{% block sidebar %}
+  {{ super() }}
+  {{ filter_box(filters=filters, action="/users/" ~ user.user_id ~ "/wishlist") }}
   {% if token_user == user %}
-    {{ add_book(show_book_depository=True) }}
+    {{ create_box(show_book_depository=True) }}
   {% endif %}
 {% endblock %}
 {% block list_content %}
-  {% for _book in wishlist %}
-    {{ book_column(_book) }}
+  {% for entry in wishlist %}
+    <div class="adjustable-column column has-text-centered">
+      {{ list_card(obj=entry) }}
+    </div>
   {% endfor %}
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-{% if token_user == user %}
-function addBook(){
-  const caller = "add-button";
-  let addForm = document.getElementById("add-form");
-  let formDetails = Object.fromEntries(new FormData(addForm));
-  console.log(formDetails);
-
-  let book_depository_url = formDetails["book-depository-url"];
-  if (book_depository_url){
-    let segments = new URL(book_depository_url).pathname.split('/');
-    book_depository_url = segments.pop() || segments.pop();
-  }
-  let isbn = formDetails["isbn"] || book_depository_url;
-
-  let open_library_url = formDetails["open-library-url"];
-  if (open_library_url){
-    let segments = new URL(open_library_url).pathname.split('/');
-    open_library_url = segments.pop() || segments.pop();
-  }
-  let edition_id = formDetails["open-library-id"] || open_library_url;
-
-  addLoading(caller);
-  fetch("/api/v0/books/lookup", {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
-      "edition_id": edition_id,
-      "isbn": isbn,
-      "wisher_id": {{ token_user.user_id }}
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    addForm.reset();
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+  {{ super() }}
+  <script type="text/javascript">
+    {% if token_user == user %}
+      function createBook(){
+        const caller = "create-button";
+        let createForm = document.getElementById("create-form");
+        let formDetails = Object.fromEntries(new FormData(createForm));
+        console.log(formDetails);
+      
+        let book_depository_url = formDetails["book-depository-url"];
+        if (book_depository_url){
+          let segments = new URL(book_depository_url).pathname.split('/');
+          book_depository_url = segments.pop() || segments.pop();
+        }
+        let isbn = formDetails["isbn"] || book_depository_url;
+      
+        let open_library_url = formDetails["open-library-url"];
+        if (open_library_url){
+          let segments = new URL(open_library_url).pathname.split('/');
+          open_library_url = segments.pop() || segments.pop();
+        }
+        let edition_id = formDetails["open-library-id"] || open_library_url;
+      
+        addLoading(caller);
+        fetch("/api/v0/books/lookup", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({
+            "edition_id": edition_id,
+            "isbn": isbn,
+            "wisher_id": {{ token_user.user_id }}
+          }),
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          createForm.reset();
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
+  </script>
 {% endblock %}

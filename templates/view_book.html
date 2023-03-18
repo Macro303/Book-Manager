@@ -1,105 +1,96 @@
 {% extends "view_base.jinja" %}
-{% from "components/columns/creator.jinja" import creator_column %}
-{% from "components/columns/series.jinja" import series_column %}
-{% from "components/columns/user.jinja" import user_column %}
-{% from "components/forms.jinja" import input %}
+{% from "components/list_boxes.jinja" import creator as creator_box, user as user_box %}
 {% block title %}{{ book.title }}{% endblock %}
-{% block subtitle %}{% if book.subtitle %}{{ book.subtitle }}{% endif %}{% endblock %}
+{% block subtitle %}{{ book.subtitle or "" }}{% endblock %}
+{% block image %}
+  <figure class="image is-2by3">
+    <img loading="lazy" src="{{ book.image_url or 'https://via.placeholder.com/1500x1000' }}" />
+  </figure>
+{% endblock %}
 {% block details %}
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      <div class="box">
-        <figure class="image is-2by3">
-          <img alt="{{ book.title }} by {{ book.creators|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url or '/static/img/logo.png' }}" width="500"/>
-        </figure>
-      </div>
+  <div class="box">
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info-light">Description:</strong> {{ book.description or "" }}</p>
     </div>
-    <div class="column">
-      <div class="box">
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Description:</strong> {{ book.description or "" }}</p>
-        </div>
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Format:</strong> <a class="is-family-primary has-text-link" href="/formats/{{ book.format.format_id }}">{{ book.format.name }}</a></p>
-        </div>
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Genres:</strong> {% for _genre in book.genres %}<a class="is-family-primary has-text-link" href="/genres/{{ _genre.genre_id }}">{{ _genre.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
-        </div>
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Publish Date:</strong> {% if book.publish_date %}{{ book.publish_date_str }}{% endif %}</p>
-        </div>
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Publisher:</strong> <a class="is-family-primary has-text-link" href="/publishers/{{ book.publisher.publisher_id }}">{{ book.publisher.name }}</a></p>
-        </div>
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Series:</strong> {% for _series in book.series %}<a class="is-family-primary has-text-link" href="/series/{{ _series.series_id }}">{{ _series.name }}{% if _series.number %} #{{ _series.number }}{% endif %}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
-        </div>
-        <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
-        {% if book.identifiers.isbn %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">Isbn:</strong> {{ book.identifiers.isbn }}</p>
-          </div>
-        {% endif %}
-        {% if book.identifiers.goodreads_id %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.goodreads_id }}</a></p>
-          </div>
-        {% endif %}
-        {% if book.identifiers.google_books_id %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">Google Books:</strong> <a class="is-family-primary has-text-link" href="https://books.google.com/books?id={{ book.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.google_books_id }}</a></p>
-          </div>
-        {% endif %}
-        {% if book.identifiers.library_thing_id %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.library_thing_id }}</a></p>
-          </div>
-        {% endif %}
-        {% if book.identifiers.open_library_id %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.open_library_id }}</a></p>
-          </div>
-        {% endif %}
-      </div>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info-light">Format:</strong> <a class="is-family-primary has-text-link" href="/formats/{{ book.format.format_id }}">{{ book.format.name }}</a></p>
     </div>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info-light">Genres:</strong> {% for _genre in book.genres %}<a class="is-family-primary has-text-link" href="/genres/{{ _genre.genre_id }}">{{ _genre.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    </div>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info-light">Publish Date:</strong> {% if book.publish_date %}{{ book.publish_date_str }}{% endif %}</p>
+    </div>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info-light">Publisher:</strong> <a class="is-family-primary has-text-link" href="/publishers/{{ book.publisher.publisher_id }}">{{ book.publisher.name }}</a></p>
+    </div>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info-light">Series:</strong> {% for _series in book.series %}<a class="is-family-primary has-text-link" href="/series/{{ _series.series_id }}">{{ _series.name }}{% if _series.number %} #{{ _series.number }}{% endif %}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    </div>
+    <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
+    {% if book.identifiers.isbn %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">Isbn:</strong> {{ book.identifiers.isbn }}</p>
+      </div>
+    {% endif %}
+    {% if book.identifiers.goodreads_id %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/{{ book.identifiers.goodreads_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.goodreads_id }}</a></p>
+      </div>
+    {% endif %}
+    {% if book.identifiers.google_books_id %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">Google Books:</strong> <a class="is-family-primary has-text-link" href="https://books.google.com/books?id={{ book.identifiers.google_books_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.google_books_id }}</a></p>
+      </div>
+    {% endif %}
+    {% if book.identifiers.library_thing_id %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/{{ book.identifiers.library_thing_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.library_thing_id }}</a></p>
+      </div>
+    {% endif %}
+    {% if book.identifiers.open_library_id %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/{{ book.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ book.identifiers.open_library_id }}</a></p>
+      </div>
+    {% endif %}
   </div>
 {% endblock %}
 {% block link_buttons %}
   {% if book.identifiers.isbn %}
-    <a class="button is-link is-rounded" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-link"></i>
+    <a class="button is-link" href="https://www.bookdepository.com/search?searchIsbn={{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+      <span class="icon">
+        <i class="fa-solid fa-link"></i>
       </span>
       <span>Book Depository</span>
     </a>
     {% if not book.identifiers.goodreads_id %}
-      <a class="button is-link is-rounded" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-        <span class="icon is-medium">
-          <i class="fa-brands fa-lg fa-goodreads"></i>
+      <a class="button is-link" href="https://www.goodreads.com/book/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon">
+          <i class="fa-brands fa-goodreads"></i>
         </span>
         <span>Goodreads</span>
       </a>
     {% endif %}
     {% if not book.identifiers.google_books_id %}
-      <a class="button is-link is-rounded" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-        <span class="icon is-medium">
-          <i class="fa-brands fa-lg fa-google"></i>
+      <a class="button is-link" href="https://books.google.com/books?vid=ISBN{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon">
+          <i class="fa-brands fa-google"></i>
         </span>
         <span>Google Books</span>
       </a>
     {% endif %}
     {% if not book.identifiers.library_thing_id %}
-      <a class="button is-link is-rounded" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-        <span class="icon is-medium">
-          <i class="fa-solid fa-lg fa-link"></i>
+      <a class="button is-link" href="https://librarything.com/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon">
+          <i class="fa-solid fa-link"></i>
         </span>
         <span>LibraryThing</span>
       </a>
     {% endif %}
     {% if not book.identifiers.open_library_id %}
-      <a class="button is-link is-rounded" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
-        <span class="icon is-medium">
-          <i class="fa-solid fa-lg fa-link"></i>
+      <a class="button is-link" href="https://openlibrary.org/isbn/{{ book.identifiers.isbn }}" rel="noopener noreferrer" target="_blank">
+        <span class="icon">
+          <i class="fa-solid fa-link"></i>
         </span>
         <span>OpenLibrary</span>
       </a>
@@ -108,40 +99,40 @@
 {% endblock %}
 {% block action_buttons %}
   {% if book.is_collected %}
-    <button class="button is-warning is-rounded" id="discard-book-button" type="button" onclick="discardBook()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-rotate-left"></i>
+    <button class="button is-warning" id="discard-book-button" type="button" onclick="discardBook()">
+      <span class="icon">
+        <i class="fa-solid fa-rotate-left"></i>
       </span>
       <span>Discard</span>
     </button>
     {% if token_user in book.readers %}
-      <button class="button is-warning is-rounded" id="unread-button" type="button" onclick="unreadBook()">
-        <span class="icon is-medium">
-          <i class="fa-solid fa-lg fa-bookmark"></i>
+      <button class="button is-warning" id="unread-button" type="button" onclick="unreadBook()">
+        <span class="icon">
+          <i class="fa-solid fa-bookmark"></i>
         </span>
         <span>Unread</span>
       </button>
     {% else %}
-      <button class="button is-success is-rounded modal-trigger" data-target="read-modal" id="read-modal-button" type="button">
-        <span class="icon is-medium">
-          <i class="fa-regular fa-lg fa-bookmark"></i>
+      <button disabled class="button is-success" data-target="read-modal" id="read-modal-button" type="button">
+        <span class="icon">
+          <i class="fa-regular fa-bookmark"></i>
         </span>
         <span>Read</span>
       </button>
     {% endif %}
   {% else %}
-    <button class="button is-success is-rounded" id="collect-book-button" type="button" onclick="collectBook()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-box-archive"></i>
+    <button class="button is-success" id="collect-book-button" type="button" onclick="collectBook()">
+      <span class="icon">
+        <i class="fa-solid fa-box-archive"></i>
       </span>
       <span>Collect</span>
     </button>
-    <button class="button {% if token_user in book.wishers %}is-warning{% else %}is-success{% endif %} is-rounded" id="wish-book-button" type="button" onclick="wishBook()">
-      <span class="icon is-medium">
+    <button class="button {% if token_user in book.wishers %}is-warning{% else %}is-success{% endif %}" id="wish-book-button" type="button" onclick="wishBook()">
+      <span class="icon">
         {% if token_user in book.wishers %}
-          <i class="fa-solid fa-lg fa-star"></i>
+          <i class="fa-solid fa-star"></i>
         {% else %}
-          <i class="fa-regular fa-lg fa-star"></i>
+          <i class="fa-regular fa-star"></i>
         {% endif %}
       </span>
       {% if token_user in book.wishers %}
@@ -152,9 +143,9 @@
     </button>
   {% endif %}
   {% if token_user.role >= 2 %}
-    <a class="button is-danger is-rounded" href="/books/{{ book.book_id }}/edit">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-pen-to-square"></i>
+    <a class="button is-danger" href="/books/{{ book.book_id }}/edit">
+      <span class="icon">
+        <i class="fa-solid fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
@@ -166,157 +157,138 @@
       {% include "components/settings_box.jinja" %}
     </div>
     <div class="column">
-      <h3 class="subtitle is-3 has-text-primary-light">Creators</h3>
-      <div class="columns is-multiline">
-        {% for _creator in book.creators %}
-          {{ creator_column(_creator, roles=_creator.roles) }}
+      <h3 class="subtitle is-3 has-text-primary-dark">Creators</h3>
+      <div class="columns is-multiline is-centered">
+        {% for entry in book.creators %}
+          <div class="adjustable-column column has-text-centered">
+            {{ creator_box(obj=entry, roles=entry.roles) }}
+          </div>
         {% endfor %}
       </div>
       {% if book.is_collected %}
-        <h3 class="subtitle is-3 has-text-primary-light">Readers</h3>
-        <div class="columns is-multiline">
-          {% for _reader in book.readers %}
-            {{ user_column(_reader) }}
+        <h3 class="subtitle is-3 has-text-primary-dark">Readers</h3>
+        <div class="columns is-multiline is-centered">
+          {% for entry in book.readers %}
+            <div class="adjustable-column column has-text-centered">
+              {{ user_box(obj=entry) }}
+            </div>
           {% endfor %}
         </div>
       {% else %}
-        <h3 class="subtitle is-3 has-text-primary-light">Wishers</h3>
-        <div class="columns is-multiline">
-          {% for _wisher in book.wishers %}
-            {{ user_column(_wisher) }}
+        <h3 class="subtitle is-3 has-text-primary-dark">Wishers</h3>
+        <div class="columns is-multiline is-centered">
+          {% for entry in book.wishers %}
+            <div class="adjustable-column column has-text-centered">
+              {{ user_box(obj=entry) }}
+            </div>
           {% endfor %}
         </div>
       {% endif %}
     </div>
   </div>
-  {% if token_user not in book.readers %}
-    <div class="modal" id="read-modal">
-      <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <div class="content">
-            <p class="modal-card-title has-text-primary">Read Date</p>
-          </div>
-        </header>
-        <section class="modal-card-body">
-          <form id="read-form" onsubmit="return false;">
-            {{ input("Read Date", "read-date", value=today) }}
-            <div class="buttons is-centered">
-              <button class="button is-success is-rounded" id="read-button" type="button" onclick="readBook()">
-                <span class="icon is-medium">
-                  <i class="fa-regular fa-lg fa-bookmark"></i>
-                </span>
-                <span>Read Book</span>
-              </button>
-            </div>
-          </form>
-        </section>
-      </div>
-    </div>
-  {% endif %}
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-{% if book.is_collected %}
-function discardBook(){
-  const caller = "discard-book-button";
-
-  addLoading(caller);
-  fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
-    method: "DELETE",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-      alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% if token_user in book.readers %}
-function unreadBook(){
-  const caller = "unread-button";
-
-  addLoading(caller);
-  fetch(`/api/v0/books/{{ book.book_id }}/read`, {
-    method: "DELETE",
-    headers: headers,
-    body: JSON.stringify({
-      "reader_id": {{ token_user.user_id }}
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-      alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% else %}
-function readBook(){
-  const caller = "read-modal-button";
-  let readForm = document.getElementById("read-form");
-  let formDetails = Object.fromEntries(new FormData(readForm));
-  console.log(formDetails);
-
-  addLoading(caller);
-  fetch(`/api/v0/books/{{ book.book_id }}/read`, {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
-      "reader_id": {{ token_user.user_id }},
-      "read_date": formDetails["read-date"]
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-      alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-{% else %}
-function collectBook(){
-  const caller = "collect-book-button";
-
-  addLoading(caller);
-  fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
-    method: "POST",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-      alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-
-function wishBook(){
-  const caller = "wish-book-button";
-
-  addLoading(caller);
-  fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
-    method: "PUT",
-    headers: headers,
-    body: JSON.stringify({
-      "wisher_id": {{ token_user.user_id }}
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location.reload();
-  }).catch((response) => response.json().then((msg) => {
-      alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+  {{ super() }}
+  <script type="text/javascript">
+    {% if book.is_collected %}
+      function discardBook(){
+        const caller = "discard-book-button";
+      
+        addLoading(caller);
+        fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
+          method: "DELETE",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+            alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+      {% if token_user in book.readers %}
+        function unreadBook(){
+          const caller = "unread-button";
+        
+          addLoading(caller);
+          fetch(`/api/v0/books/{{ book.book_id }}/read`, {
+            method: "DELETE",
+            headers: headers,
+            body: JSON.stringify({
+              "reader_id": {{ token_user.user_id }}
+            }),
+          }).then((response) => {
+            if (!response.ok){
+              return Promise.reject(response);
+            }
+            window.location.reload();
+          }).catch((response) => response.json().then((msg) => {
+              alert(`${response.status} ${response.statusText}: ${msg.details}`);
+          })).finally(() => removeLoading(caller));
+        }
+      {% else %}
+        function readBook(){
+          const caller = "read-modal-button";
+          let readForm = document.getElementById("read-form");
+          let formDetails = Object.fromEntries(new FormData(readForm));
+          console.log(formDetails);
+        
+          addLoading(caller);
+          fetch(`/api/v0/books/{{ book.book_id }}/read`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+              "reader_id": {{ token_user.user_id }},
+              "read_date": formDetails["read-date"]
+            }),
+          }).then((response) => {
+            if (!response.ok){
+              return Promise.reject(response);
+            }
+            window.location.reload();
+          }).catch((response) => response.json().then((msg) => {
+              alert(`${response.status} ${response.statusText}: ${msg.details}`);
+          })).finally(() => removeLoading(caller));
+        }
+      {% endif %}
+    {% else %}
+      function collectBook(){
+        const caller = "collect-book-button";
+      
+        addLoading(caller);
+        fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
+          method: "POST",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+            alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+      
+      function wishBook(){
+        const caller = "wish-book-button";
+      
+        addLoading(caller);
+        fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
+          method: "PUT",
+          headers: headers,
+          body: JSON.stringify({
+            "wisher_id": {{ token_user.user_id }}
+          }),
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location.reload();
+        }).catch((response) => response.json().then((msg) => {
+            alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
+  </script>
 {% endblock %}

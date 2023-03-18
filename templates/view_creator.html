@@ -1,61 +1,80 @@
 {% extends "view_base.jinja" %}
+{% from "components/list_boxes.jinja" import book as book_box %}
 {% block title %}{{ creator.name }}{% endblock %}
+{% block image %}
+  <figure class="image is-256x256 is-inline-block">
+    <img class="profile-large is-rounded" loading="lazy" src="{{ creator.image_url or '/static/img/logo.png' }}" />
+  </figure>
+{% endblock %}
 {% block details %}
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      <div class="box has-text-centered">
-        <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ creator.name }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ creator.image_url or '/static/img/logo.png' }}"/>
-        </figure>
-      </div>
+  <div class="box">
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info-light">Bio:</strong> {{ creator.bio or "" }}</p>
     </div>
-    <div class="column">
-      <div class="box">
-        <div class="block">
-          <p><strong class="subtitle is-size-5 has-text-info-light">Bio:</strong> {{ creator.bio or "" }}</p>
-        </div>
-        <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
-        {% if creator.identifiers.goodreads_id %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.goodreads_id }}</a></p>
-          </div>
-        {% endif %}
-        {% if creator.identifiers.library_thing_id %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.library_thing_id }}</a></p>
-          </div>
-        {% endif %}
-        {% if creator.identifiers.open_library_id %}
-          <div class="block">
-            <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/creator/{{ creator.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.open_library_id }}</a></p>
-          </div>
-        {% endif %}
+    <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
+    {% if creator.identifiers.goodreads_id %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">Goodreads:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.goodreads_id }}</a></p>
       </div>
-    </div>
+    {% endif %}
+    {% if creator.identifiers.library_thing_id %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="#" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.library_thing_id }}</a></p>
+      </div>
+    {% endif %}
+    {% if creator.identifiers.open_library_id %}
+      <div class="block">
+        <p><strong class="subtitle is-size-5 has-text-info-light">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/creator/{{ creator.identifiers.open_library_id }}" rel="noopener noreferrer" target="_blank">{{ creator.identifiers.open_library_id }}</a></p>
+      </div>
+    {% endif %}
   </div>
 {% endblock %}
 {% block action_buttons %}
   {% if token_user.role >= 2 %}
-    <a class="button is-warning is-rounded" href="/creators/{{ creator.creator_id }}/edit">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-pen-to-square"></i>
+    <a class="button is-warning" href="/creators/{{ creator.creator_id }}/edit">
+      <span class="icon">
+        <i class="fa-solid fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
+    {% if token_user.role >= 3 %}
+      <button class="button is-danger" id="delete-button" type="button" onclick="deleteCreator()">
+        <span class="icon">
+          <i class="fa-solid fa-trash"></i>
+        </span>
+        <span>Delete</span>
+      </button>
+    {% endif %}
   {% endif %}
 {% endblock %}
-{% block sub_content %}
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      {% include "components/settings_box.jinja" %}
+{% block sub_content_title %}Books{% endblock %}
+{% block list_content %}
+  {% for entry, roles in book_list %}
+    <div class="adjustable-column column has-text-centered">
+      {{ book_box(obj=entry, roles=roles|join(", ", attribute="name")) }}
     </div>
-    <div class="column">
-      <h3 class="subtitle is-3 has-text-primary-light">Books</h3>
-      <div class="columns is-multiline">
-        {% for _book, roles in book_list %}
-          {{ book_column(_book, roles=roles|join(", ", attribute="name")) }}
-        {% endfor %}
-      </div>
-    </div>
-  </div>
+  {% endfor %}
+{% endblock %}
+{% block js %}
+  {{ super() }}
+  <script type="text/javascript">
+    {% if token_user.role >= 3 %}
+      function deleteCreator(){
+        const caller = "delete-button";
+  
+        addLoading(caller);
+        fetch("/api/v0/creators/{{ creator.creator_id }}", {
+          method: "DELETE",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location = "/creators";
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
+  </script>
 {% endblock %}

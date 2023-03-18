@@ -1,3 +1,74 @@
+{% macro book(obj, roles="", series=("", ""), show_remove_button=False, creator_id="") %}
+  {% if show_remove_button %}
+    <div class="box">
+  {% else %}
+    <a class="box" href="/books/{{ obj.book_id }}">
+  {% endif %}
+    <div class="columns is-mobile">
+      <div class="column is-one-third">
+        <figure class="image is-2by3">
+          <img {% if not obj.is_available %}class="greyscale" {% endif %}loading="lazy" src="{{ obj.image_url or 'https://via.placeholder.com/750x500' }}" />
+        </figure>
+      </div>
+      <div class="column content">
+        <div class="block">
+          <h5 class="title is-5 has-text-info-light">{{ obj.title }}</h5>
+          <h6 class="subtitle is-6 has-text-info">{{ obj.subtitle or "--" }}</h6>
+        </div>
+        <div class="block">
+          {% if roles %}
+            <p>{{ roles }}</p>
+          {% elif series[0] %}
+            <p>{{ series[0] }}{% if series[1] %} #{{ series[1] }}{% endif %}</p>
+          {% endif %}
+        </div>
+        {% if show_remove_button %}
+          <div class="buttons is-centered">
+            <button class="button is-danger is-outlined" type="button" id="{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-remove-button" onclick="removeBook('{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-remove-button', {{ obj.book_id }}{% if creator_id %}, {{ creator_id }}{% endif %})">
+              <span class="icon">
+                <i class="fa-solid fa-minus"></i>
+              </span>
+              <span>Remove</span>
+            </button>
+            <a class="button is-link is-outlined" href="/books/{{ obj.book_id }}">
+              <span class="icon">
+                <i class="fa-solid fa-eye"></i>
+              </span>
+              <span>View</span>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% if show_remove_button %}
+    </div>
+  {% else %}
+    </a>
+  {% endif %}
+{% endmacro %}
+
+
+
+{% macro creator(obj, roles=[]) %}
+  <a class="box" href="/creators/{{ obj.creator_id }}">
+    <div class="columns is-mobile">
+      <div class="column is-narrow">
+        <figure class="image is-128x128">
+          <img class="profile is-rounded" loading="lazy" src="{{ obj.image_url or '/static/img/logo.png' }}" />
+        </figure>
+      </div>
+      <div class="column">
+        <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
+        {% if roles %}
+          <h6 class="subtitle is-6 has-text-info">{{ roles|join(", ", attribute="name") }}</h6>
+        {% endif %}
+      </div>
+    </div>
+  </a>
+{% endmacro %}
+
+
+
 {% macro format(obj) %}
   <a class="box" href="/formats/{{ obj.format_id }}">
     <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
@@ -34,4 +105,37 @@
   <a class="box" href="/series/{{ obj.series_id }}">
     <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
   </a>
+{% endmacro %}
+
+
+
+{% macro user(obj) %}
+  <div class="box">
+    <div class="columns is-mobile">
+      <div class="column is-narrow">
+        <figure class="image is-128x128">
+          <img class="profile is-rounded" loading="lazy" src="{{ obj.image_url or '/static/img/logo.png' }}" />
+        </figure>
+      </div>
+      <div class="column content">
+        <div class="block">
+          <h5 class="title is-5 has-text-info-light">{{ obj.username }}</h5>
+        </div>
+        <div class="buttons is-centered">
+          <a class="button is-link is-outlined" href="/users/{{ obj.user_id }}">
+            <span class="icon">
+              <i class="fa-solid fa-eye"></i>
+            </span>
+            <span>View</span>
+          </a>
+          <a class="button is-link is-outlined" href="/users/{{ obj.user_id }}/wishlist">
+            <span class="icon">
+              <i class="fa-solid fa-star"></i>
+            </span>
+            <span>Wishlist</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endmacro %}

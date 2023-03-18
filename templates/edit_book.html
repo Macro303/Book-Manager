@@ -1,180 +1,135 @@
-{% extends "base.jinja" %}
+{% extends "edit_base.jinja" %}
 {% from "components/forms.jinja" import input, textarea %}
-{% block title %}{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      <div class="box">
-        <figure class="image is-2by3">
-          <img alt="{{ book.title }} by {{ book.creators|join(', ', attribute='display_name') }}" height="750" loading="lazy" onerror="this.src='https://via.placeholder.com/1500x1000'" src="{{ book.image_url or '/static/img/logo.png' }}" width="500"/>
-        </figure>
-      </div>
-    </div>
-    <div class="column">
-      <div class="box">
-        <form id="edit-form" onsubmit="return false;">
-          {{ input("Title", "title", value=book.title) }}
-          {{ input("Subtitle", "subtitle", value=book.subtitle or "") }}
-          <!-- region Format -->
-          <div class="field">
-            <label class="label has-text-info-light">Format</label>
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select name="format">
-                  <option disabled hidden {% if not book.format %}selected {% endif %}value="">Select Format</option>
-                  {% for _format in format_list %}
-                  <option {% if book.format and _format == book.format %}selected {% endif %}value={{ _format.format_id }}>{{ _format.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-          </div>
-          <!-- endregion -->
-          {{ input("Image Url", "image-url", value=book.image_url or "") }}
-          {{ input("Publish Date", "publish-date", value=book.publish_date) }}
-          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">More Details</div>
-          {{ textarea("Description", "description", value=book.description or "") }}
-          <!-- region Publisher -->
-          <div class="field">
-            <label class="label has-text-info-light">Publisher</label>
-            <div class="control is-expanded">
-              <div class="select is-fullwidth is-rounded">
-                <select name="publisher">
-                  <option disabled hidden {% if not book.publisher %}selected {% endif %}value="">Select Publisher</option>
-                  {% for _publisher in publisher_list %}
-                  <option {% if book.publisher and _publisher == book.publisher %}selected {% endif %}value={{ _publisher.publisher_id }}>{{ _publisher.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-          </div>
-          <!-- endregion -->
-          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
-          {{ input("Goodreads", "goodreads", value=book.identifiers.goodreads_id or "") }}
-          {{ input("Google Books", "google-books", value=book.identifiers.google_books_id or "") }}
-          {{ input("Isbn", "isbn", value=book.identifiers.isbn) }}
-          {{ input("LibraryThing", "library-thing", value=book.identifiers.library_thing_id or "") }}
-          {{ input("OpenLibrary", "open-library", value=book.identifiers.open_library_id or "") }}
-        </form>
+{% block title %}Edit Book{% endblock %}
+{% block form %}
+  {{ textarea("Description", "description", value=book.description or "") }}
+  <!-- region Format -->
+  <div class="field">
+    <label class="label has-text-info">Format</label>
+    <div class="control is-expanded">
+      <div class="select is-fullwidth">
+        <select name="format">
+          <option disabled hidden {% if not book.format %}selected {% endif %}value="">Select Format</option>
+          {% for _format in format_list %}
+            <option {% if book.format and _format == book.format %}selected {% endif %}value={{ _format.format_id }}>{{ _format.name }}</option>
+          {% endfor %}
+        </select>
       </div>
     </div>
   </div>
-  <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveBook()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-floppy-disk"></i>
-      </span>
-      <span>Save</span>
-    </button>
-    <button class="button is-warning is-rounded" id="refresh-button" type="button" onclick="refreshBook()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-rotate-left"></i>
-      </span>
-      <span>Refresh</span>
-    </button>
-    {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteBook()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-trash"></i>
-      </span>
-      <span>Delete</span>
-    </button>
-    {% endif %}
+  <!-- endregion -->
+  {{ input("Image Url", "image-url", value=book.image_url or "") }}
+  {{ input("Publish Date", "publish-date", value=book.publish_date) }}
+  <!-- region Publisher -->
+  <div class="field">
+    <label class="label has-text-info">Publisher</label>
+    <div class="control is-expanded">
+      <div class="select is-fullwidth">
+        <select name="publisher">
+          <option disabled hidden {% if not book.publisher %}selected {% endif %}value="">Select Publisher</option>
+          {% for _publisher in publisher_list %}
+            <option {% if book.publisher and _publisher == book.publisher %}selected {% endif %}value={{ _publisher.publisher_id }}>{{ _publisher.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
   </div>
-</section>
+  <!-- endregion -->
+  {{ input("Subtitle", "subtitle", value=book.subtitle or "") }}
+  {{ input("Title", "title", value=book.title) }}
+  <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
+  {{ input("Goodreads", "goodreads", value=book.identifiers.goodreads_id or "") }}
+  {{ input("Google Books", "google-books", value=book.identifiers.google_books_id or "") }}
+  {{ input("Isbn", "isbn", value=book.identifiers.isbn) }}
+  {{ input("LibraryThing", "library-thing", value=book.identifiers.library_thing_id or "") }}
+  {{ input("OpenLibrary", "open-library", value=book.identifiers.open_library_id or "") }}
+{% endblock %}
+{% block action_buttons %}
+  <a class="button is-success" id="save-button" onclick="saveBook()" type="button">
+    <span class="icon">
+      <i class="fa-solid fa-floppy-disk"></i>
+    </span>
+    <span>Save</span>
+  </a>
+  <button class="button is-warning" id="refresh-button" onclick="refreshBook()" type="button">
+    <span class="icon">
+      <i class="fa-solid fa-rotate-left"></i>
+    </span>
+    <span>Refresh</span>
+  </button>
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-function saveBook(){
-  const caller = "save-button";
-  let editForm = document.getElementById("edit-form");
-  let formDetails = Object.fromEntries(new FormData(editForm));
-  console.log(formDetails);
+  {{ super() }}
+  <script type="text/javascript">
+    function saveBook(){
+      const caller = "save-button";
+      let editForm = document.getElementById("edit-form");
+      let formDetails = Object.fromEntries(new FormData(editForm));
+      console.log(formDetails);
 
-  addLoading(caller);
-  fetch("/api/v0/books/{{ book.book_id }}", {
-    method: "PATCH",
-    headers: headers,
-    body: JSON.stringify({
-      "creators": [
-        {% for _creator in book.creators %}
-        {
-          "creator_id": {{ _creator.creator_id }},
-          "role_ids": [{{ _creator.roles|join(", ", attribute="role_id") }}]
-        },
-        {% endfor %}
-      ],
-      "description": formDetails["description"],
-      "format_id": formDetails["format"],
-      "identifiers": {
-        "goodreads_id": formDetails["goodreads"],
-        "google_books_id": formDetails["google-books"],
-        "isbn": formDetails["isbn"],
-        "library_thing_id": formDetails["library-thing"],
-        "open_library_id": formDetails["open-library"]
-      },
-      "image_url": formDetails["image-url"],
-      "publish_date": formDetails["publish-date"],
-      "publisher_id": formDetails["publisher"],
-      "reader_ids": [{{ book.readers|join(", ", attribute="user_id") }}],
-      "series": [
-        {% for _series in book.series %}
-        {
-          "series_id": {{ _series.series_id }},
-          "number": {{ _series.number or 0 }}
-        },
-        {% endfor %}
-      ],
-      "subtitle": formDetails["subtitle"],
-      "title": formDetails["title"],
-      "wisher_ids": [{{ book.wishers|join(", ", attribute="user_id") }}],
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
+      addLoading(caller);
+      fetch("/api/v0/books/{{ book.book_id }}", {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify({
+          "creators": [
+            {% for _creator in book.creators %}
+            {
+              "creator_id": {{ _creator.creator_id }},
+              "role_ids": [{{ _creator.roles|join(", ", attribute="role_id") }}]
+            },
+            {% endfor %}
+          ],
+          "description": formDetails["description"],
+          "format_id": formDetails["format"],
+          "identifiers": {
+            "goodreads_id": formDetails["goodreads"],
+            "google_books_id": formDetails["google-books"],
+            "isbn": formDetails["isbn"],
+            "library_thing_id": formDetails["library-thing"],
+            "open_library_id": formDetails["open-library"]
+          },
+          "image_url": formDetails["image-url"],
+          "publish_date": formDetails["publish-date"],
+          "publisher_id": formDetails["publisher"],
+          "reader_ids": [{{ book.readers|join(", ", attribute="user_id") }}],
+          "series": [
+            {% for _series in book.series %}
+            {
+              "series_id": {{ _series.series_id }},
+              "number": {{ _series.number or 0 }}
+            },
+            {% endfor %}
+          ],
+          "subtitle": formDetails["subtitle"],
+          "title": formDetails["title"],
+          "wisher_ids": [{{ book.wishers|join(", ", attribute="user_id") }}],
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/books/{{ book.book_id }}";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
     }
-    window.location = "/books/{{ book.book_id }}";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-
-function refreshBook(){
-  const caller = "refresh-button";
-
-  addLoading(caller);
-  fetch("/api/v0/books/{{ book.book_id }}", {
-    method: "PUT",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
+    
+    function refreshBook(){
+      const caller = "refresh-button";
+    
+      addLoading(caller);
+      fetch("/api/v0/books/{{ book.book_id }}", {
+        method: "PUT",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/books/{{ book.book_id }}";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
     }
-    window.location = "/books/{{ book.book_id }}";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-
-{% if token_user.role >= 3 %}
-function deleteBook(){
-  const caller = "delete-button";
-
-  addLoading(caller);
-  fetch("/api/v0/books/{{ book.book_id }}", {
-    method: "DELETE",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location = "/books";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+  </script>
 {% endblock %}

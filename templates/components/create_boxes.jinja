@@ -1,5 +1,49 @@
 {% from "components/forms.jinja" import input %}
 
+{% macro book(show_book_depository=False) %}
+  <div class="box">
+    <h5 class="title is-5 has-text-info-light">Create Book</h5>
+    <form id="add-form" onsubmit="return false;">
+      {{ input("Isbn", "isbn") }}
+      {{ input("OpenLibrary Id", "open-library-id") }}
+      <h6 class="subtitle is-6 has-text-centered has-text-info">OR</h6>
+      {% if show_book_depository %}
+        {{ input("Book Depository Url", "book-depository-url") }}
+      {% endif %}
+      {{ input("OpenLibrary Url", "open-library-url") }}
+      <div class="buttons is-centered">
+        <button class="button is-success" id="create-button" onclick="createBook()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-add"></i>
+          </span>
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}
+
+
+
+{% macro creator() %}
+  <div class="box">
+    <h5 class="title is-5 has-text-info-light">Create Creator</h5>
+    <form id="create-form" onsubmit="return false;">
+      {{ input("Name", "name") }}
+      <div class="buttons is-centered">
+        <button class="button is-success" id="create-button" onclick="createCreator()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-add"></i>
+          </span>
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}
+
+
+
 {% macro format() %}
   <div class="box">
     <h5 class="title is-5 has-text-info-light">Create Format</h5>

@@ -3,7 +3,7 @@
 {% block navbar %}{% endblock %}
 {% block title_image %}
 <figure class="image is-128x128 is-inline-block">
-  <img alt="Book Catalogue logo" loading="lazy" src="/static/img/logo.png"/>
+  <img class="profile" loading="lazy" src="/static/img/logo.png"/>
 </figure>
 {% endblock %}
 {% block title %}Bookshelf{% endblock %}
@@ -15,9 +15,9 @@
         <form id="sign-in-form" onsubmit="return false;">
           {{ input("Username", "username") }}
           <div class="buttons is-centered">
-            <button class="button is-primary is-rounded" id="sign-in-button" type="button" onclick="signIn()">
-              <span class="icon is-medium">
-                <i class="fa-solid fa-lg fa-right-to-bracket"></i>
+            <button class="button is-primary" id="sign-in-button" type="button" onclick="signIn()">
+              <span class="icon">
+                <i class="fa-solid fa-right-to-bracket"></i>
               </span>
               <span>Sign In</span>
             </button>

@@ -1,121 +1,76 @@
-{% extends "base.jinja" %}
+{% extends "edit_base.jinja" %}
 {% from "components/forms.jinja" import input, textarea %}
-{% block title %}{% endblock %}
-{% block content %}
-<section class="section">
-  <div class="columns">
-    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-      <div class="box has-text-centered">
-        <figure class="image is-256x256 is-inline-block">
-          <img alt="{{ creator.name }}'s Profile Image" class="profile-large is-rounded" loading="lazy" onerror="this.src='https://via.placeholder.com/512x512'" src="{{ creator.image_url or '/static/img/logo.png' }}"/>
-        </figure>
-      </div>
-    </div>
-    <div class="column">
-      <div class="box">
-        <form id="edit-form" onsubmit="return false;">
-          {{ input("Name", "name", value=creator.name) }}
-          {{ input("Image Url", "image-url", value=creator.image_url or "") }}
-          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">More Details</div>
-          {{ textarea("Bio", "bio", value=creator.bio or "") }}
-          <div class="divider subtitle is-capitalized is-info has-text-info-light is-size-4">Identifiers</div>
-          {{ input("Goodreads", "goodreads", value=creator.identifiers.goodreads_id or "") }}
-          {{ input("LibraryThing", "library-thing", value=creator.identifiers.library_thing_id or "") }}
-          {{ input("OpenLibrary", "open-library", value=creator.identifiers.open_library_id or "") }}
-        </form>
-      </div>
-    </div>
-  </div>
-  <div class="buttons is-centered">
-    <button class="button is-success is-rounded" id="save-button" type="button" onclick="saveCreator()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-floppy-disk"></i>
-      </span>
-      <span>Save</span>
-    </button>
-    <button class="button is-warning is-rounded" id="refresh-button" type="button" onclick="refreshCreator()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-rotate-left"></i>
-      </span>
-      <span>Refresh</span>
-    </button>
-    {% if token_user.role >= 3 %}
-    <button class="button is-danger is-rounded" id="delete-button" type="button" onclick="deleteCreator()">
-      <span class="icon is-medium">
-        <i class="fa-solid fa-lg fa-trash"></i>
-      </span>
-      <span>Delete</span>
-    </button>
-    {% endif %}
-  </div>
-</section>
+{% block title %}Edit Creator{% endblock %}
+{% block form %}
+  {{ textarea("Bio", "bio", value=creator.bio or "") }}
+  {{ input("Image Url", "image-url", value=creator.image_url or "") }}
+  {{ input("Name", "name", value=creator.name) }}
+  <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
+  {{ input("Goodreads", "goodreads", value=creator.identifiers.goodreads_id or "") }}
+  {{ input("LibraryThing", "library-thing", value=creator.identifiers.library_thing_id or "") }}
+  {{ input("OpenLibrary", "open-library", value=creator.identifiers.open_library_id or "") }}
+{% endblock %}
+{% block action_buttons %}
+  <a class="button is-success" id="save-button" onclick="saveCreator()" type="button">
+    <span class="icon">
+      <i class="fa-solid fa-floppy-disk"></i>
+    </span>
+    <span>Save</span>
+  </a>
+  <button class="button is-warning" id="refresh-button" onclick="refreshCreator()" type="button">
+    <span class="icon">
+      <i class="fa-solid fa-rotate-left"></i>
+    </span>
+    <span>Refresh</span>
+  </button>
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-function saveCreator(){
-  const caller = "save-button";
-  let editForm = document.getElementById("edit-form");
-  let formDetails = Object.fromEntries(new FormData(editForm));
-  console.log(formDetails);
+  <script type="text/javascript">
+    function saveCreator(){
+      const caller = "save-button";
+      let editForm = document.getElementById("edit-form");
+      let formDetails = Object.fromEntries(new FormData(editForm));
+      console.log(formDetails);
 
-  addLoading(caller);
-  fetch("/api/v0/creators/{{ creator.creator_id }}", {
-    method: "PATCH",
-    headers: headers,
-    body: JSON.stringify({
-      "name": details["name"],
-      "bio": details["bio"],
-      "image_url": details["image-url"],
-      "identifiers": {
-        "goodreads_id": details["goodreads"],
-        "library_thing_id": details["library-thing"],
-        "open_library_id": details["open-library"]
-      },
-    }),
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
+      addLoading(caller);
+      fetch("/api/v0/creators/{{ creator.creator_id }}", {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify({
+          "name": formDetails["name"],
+          "bio": formDetails["bio"],
+          "image_url": formDetails["image-url"],
+          "identifiers": {
+            "goodreads_id": formDetails["goodreads"],
+            "library_thing_id": formDetails["library-thing"],
+            "open_library_id": formDetails["open-library"]
+          },
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/creators/{{ creator.creator_id }}";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
     }
-    window.location = "/creators/{{ creator.creator_id }}";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-
-function refreshCreator(){
-  const caller = "refresh-button";
-
-  addLoading(caller);
-  fetch("/api/v0/creators/{{ creator.creator_id }}", {
-    method: "PUT",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
+    
+    function refreshCreator(){
+      const caller = "refresh-button";
+    
+      addLoading(caller);
+      fetch("/api/v0/creators/{{ creator.creator_id }}", {
+        method: "PUT",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/creators/{{ creator.creator_id }}";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
     }
-    window.location = "/creators/{{ creator.creator_id }}";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% if token_user.role >= 3 %}
-function deleteCreator(){
-  const caller = "delete-button";
-
-  addLoading(caller);
-  fetch("/api/v0/creators/{{ creator.creator_id }}", {
-    method: "DELETE",
-    headers: headers,
-  }).then((response) => {
-    if (!response.ok){
-      return Promise.reject(response);
-    }
-    window.location = "/creators";
-  }).catch((response) => response.json().then((msg) => {
-    alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-{% endif %}
-</script>
+  </script>
 {% endblock %}
