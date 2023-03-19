@@ -24,7 +24,7 @@
         </div>
         {% if show_remove_button %}
           <div class="buttons is-centered">
-            <button class="button is-danger is-outlined" type="button" id="{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-remove-button" onclick="removeBook('{% if creator_id %}{{ creator_id }}-{% endif %}{{ obj.book_id }}-remove-button', {{ obj.book_id }}{% if creator_id %}, {{ creator_id }}{% endif %})">
+            <button class="button is-danger" id="remove-book-{{ obj.book_id }}{% if creator_id %}-{{ creator_id }}{% endif %}-button" onclick="removeBook({{ obj.book_id }}{% if creator_id %}, {{ creator_id }}{% endif %})" type="button">
               <span class="icon">
                 <i class="fa-solid fa-minus"></i>
               </span>
@@ -49,8 +49,12 @@
 
 
 
-{% macro creator(obj, roles=[]) %}
-  <a class="box" href="/creators/{{ obj.creator_id }}">
+{% macro creator(obj, roles=[], show_remove=False) %}
+  {% if show_remove %}
+    <div class="box">
+  {% else %}
+    <a class="box" href="/creators/{{ obj.creator_id }}">
+  {% endif %}
     <div class="columns is-mobile">
       <div class="column is-narrow">
         <figure class="image is-128x128">
@@ -58,13 +62,35 @@
         </figure>
       </div>
       <div class="column">
-        <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
-        {% if roles %}
-          <h6 class="subtitle is-6 has-text-info">{{ roles|join(", ", attribute="name") }}</h6>
+        <div class="block">
+          <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
+          {% if roles %}
+            <h6 class="subtitle is-6 has-text-info">{{ roles|join(", ", attribute="name") }}</h6>
+          {% endif %}
+        </div>
+        {% if show_remove %}
+          <div class="buttons is-centered is-multiline">
+            <button class="button is-danger" id="remove-creator-{{ obj.creator_id }}-button" onclick="removeCreator({{ obj.creator_id }})" type="button">
+              <span class="icon">
+                <i class="fa-solid fa-minus"></i>
+              </span>
+              <span>Remove</span>
+            </button>
+            <a class="button is-link is-outlined" href="/creators/{{ obj.creator_id }}">
+              <span class="icon">
+                <i class="fa-solid fa-eye"></i>
+              </span>
+              <span>View</span>
+            </a>
+          </div>
         {% endif %}
       </div>
     </div>
-  </a>
+  {% if show_remove %}
+    </div>
+  {% else %}
+    </a>
+  {% endif %}
 {% endmacro %}
 
 
@@ -77,10 +103,36 @@
 
 
 
-{% macro genre(obj) %}
-  <a class="box" href="/genres/{{ obj.genre_id }}">
-    <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
-  </a>
+{% macro genre(obj, show_remove=False) %}
+  {% if show_remove %}
+    <div class="box">
+  {% else %}
+    <a class="box" href="/genres/{{ obj.genre_id }}">
+  {% endif %}
+    <div class="block">
+      <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
+    </div>
+    {% if show_remove %}
+      <div class="buttons is-centered is-multiline">
+        <button class="button is-danger" id="remove-genre-{{ obj.genre_id }}-button" onclick="removeGenre({{ obj.genre_id }})" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-minus"></i>
+          </span>
+          <span>Remove</span>
+        </button>
+        <a class="button is-link is-outlined" href="/genres/{{ obj.genre_id }}">
+          <span class="icon">
+            <i class="fa-solid fa-eye"></i>
+          </span>
+          <span>View</span>
+        </a>
+      </div>
+    {% endif %}
+  {% if show_remove %}
+    </div>
+  {% else %}
+    </a>
+  {% endif %}
 {% endmacro %}
 
 
@@ -101,10 +153,37 @@
 
 
 
-{% macro series(obj) %}
-  <a class="box" href="/series/{{ obj.series_id }}">
-    <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
-  </a>
+{% macro series(obj, show_remove=False) %}
+  {% if show_remove %}
+    <div class="box">
+  {% else %}
+    <a class="box" href="/series/{{ obj.series_id }}">
+  {% endif %}
+    <div class="block">
+      <h5 class="title is-5 has-text-info-light">{{ obj.name }}</h5>
+      <h6 class="subtitle is-6 has-text-info">{% if obj.number %}#{{ obj.number }}{% endif %}</h6>
+    </div>
+    {% if show_remove %}
+      <div class="buttons is-centered is-multiline">
+        <button class="button is-danger" id="remove-series-{{ obj.series_id }}-button" onclick="removeSeries({{ obj.series_id }})" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-minus"></i>
+          </span>
+          <span>Remove</span>
+        </button>
+        <a class="button is-link is-outlined" href="/series/{{ obj.series_id }}">
+          <span class="icon">
+            <i class="fa-solid fa-eye"></i>
+          </span>
+          <span>View</span>
+        </a>
+      </div>
+    {% endif %}
+  {% if show_remove %}
+    </div>
+  {% else %}
+    </a>
+  {% endif %}
 {% endmacro %}
 
 
@@ -121,7 +200,7 @@
         <div class="block">
           <h5 class="title is-5 has-text-info-light">{{ obj.username }}</h5>
         </div>
-        <div class="buttons is-centered">
+        <div class="buttons is-centered is-multiline">
           <a class="button is-link is-outlined" href="/users/{{ obj.user_id }}">
             <span class="icon">
               <i class="fa-solid fa-eye"></i>

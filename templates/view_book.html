@@ -1,5 +1,5 @@
 {% extends "view_base.jinja" %}
-{% from "components/list_boxes.jinja" import creator as creator_box, user as user_box %}
+{% from "components/list_boxes.jinja" import creator as creator_box, genre as genre_box, series as series_box, user as user_box %}
 {% block title %}{{ book.title }}{% endblock %}
 {% block subtitle %}{{ book.subtitle or "" }}{% endblock %}
 {% block image %}
@@ -16,16 +16,10 @@
       <p><strong class="subtitle is-size-5 has-text-info-light">Format:</strong> <a class="is-family-primary has-text-link" href="/formats/{{ book.format.format_id }}">{{ book.format.name }}</a></p>
     </div>
     <div class="block">
-      <p><strong class="subtitle is-size-5 has-text-info-light">Genres:</strong> {% for _genre in book.genres %}<a class="is-family-primary has-text-link" href="/genres/{{ _genre.genre_id }}">{{ _genre.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
-    </div>
-    <div class="block">
       <p><strong class="subtitle is-size-5 has-text-info-light">Publish Date:</strong> {% if book.publish_date %}{{ book.publish_date_str }}{% endif %}</p>
     </div>
     <div class="block">
       <p><strong class="subtitle is-size-5 has-text-info-light">Publisher:</strong> <a class="is-family-primary has-text-link" href="/publishers/{{ book.publisher.publisher_id }}">{{ book.publisher.name }}</a></p>
-    </div>
-    <div class="block">
-      <p><strong class="subtitle is-size-5 has-text-info-light">Series:</strong> {% for _series in book.series %}<a class="is-family-primary has-text-link" href="/series/{{ _series.series_id }}">{{ _series.name }}{% if _series.number %} #{{ _series.number }}{% endif %}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
     </div>
     <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
     {% if book.identifiers.isbn %}
@@ -99,21 +93,21 @@
 {% endblock %}
 {% block action_buttons %}
   {% if book.is_collected %}
-    <button class="button is-warning" id="discard-book-button" type="button" onclick="discardBook()">
+    <button class="button is-warning" id="discard-button" onclick="discardBook()" type="button">
       <span class="icon">
         <i class="fa-solid fa-rotate-left"></i>
       </span>
       <span>Discard</span>
     </button>
     {% if token_user in book.readers %}
-      <button class="button is-warning" id="unread-button" type="button" onclick="unreadBook()">
+      <button class="button is-warning" id="unread-button" onclick="unreadBook()" type="buutoj">
         <span class="icon">
           <i class="fa-solid fa-bookmark"></i>
         </span>
         <span>Unread</span>
       </button>
     {% else %}
-      <button disabled class="button is-success" data-target="read-modal" id="read-modal-button" type="button">
+      <button class="button is-success" disabled id="read-button" onclick="readBook()" type="button">
         <span class="icon">
           <i class="fa-regular fa-bookmark"></i>
         </span>
@@ -121,26 +115,27 @@
       </button>
     {% endif %}
   {% else %}
-    <button class="button is-success" id="collect-book-button" type="button" onclick="collectBook()">
+    <button class="button is-success" id="collect-button" onclick="collectBook()" type="button">
       <span class="icon">
         <i class="fa-solid fa-box-archive"></i>
       </span>
       <span>Collect</span>
     </button>
-    <button class="button {% if token_user in book.wishers %}is-warning{% else %}is-success{% endif %}" id="wish-book-button" type="button" onclick="wishBook()">
-      <span class="icon">
-        {% if token_user in book.wishers %}
+    {% if token_user in book.wishers %}
+      <button class="button is-warning" id="unwish-button" onclick="unwishBook()" type="button">
+        <span class="icon">
           <i class="fa-solid fa-star"></i>
-        {% else %}
-          <i class="fa-regular fa-star"></i>
-        {% endif %}
-      </span>
-      {% if token_user in book.wishers %}
+        </span>
         <span>Unwish</span>
-      {% else %}
+      </button>
+    {% else %}
+      <button class="button is-success" id="wish-button" onclick="wishBook()" type="button">
+        <span class="icon">
+          <i class="fa-regular fa-star"></i>
+        </span>
         <span>Wish</span>
-      {% endif %}
-    </button>
+      </button>
+    {% endif %}
   {% endif %}
   {% if token_user.role >= 2 %}
     <a class="button is-danger" href="/books/{{ book.book_id }}/edit">
@@ -159,27 +154,73 @@
     <div class="column">
       <h3 class="subtitle is-3 has-text-primary-dark">Creators</h3>
       <div class="columns is-multiline is-centered">
-        {% for entry in book.creators %}
+        {% for entry in book.creators if book.creators %}
           <div class="adjustable-column column has-text-centered">
-            {{ creator_box(obj=entry, roles=entry.roles) }}
+            {{ creator_box(obj=entry, roles=entry.roles, show_remove=token_user.role >= 2) }}
+          </div>
+        {% else %}
+          <div class="column has-text-centered">
+            <div class="box">
+              <h5 class="title is-5 has-text-danger-light">No Creators associated with this book.</h5>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <h3 class="subtitle is-3 has-text-primary-dark">Genres</h3>
+      <div class="columns is-multiline is-centered">
+        {% for entry in book.genres if book.genres %}
+          <div class="adjustable-column column has-text-centered">
+            {{ genre_box(obj=entry, show_remove=token_user.role >= 2) }}
+          </div>
+        {% else %}
+          <div class="column has-text-centered">
+            <div class="box">
+              <h5 class="title is-5 has-text-danger-light">No Genres associated with this book.</h5>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <h3 class="subtitle is-3 has-text-primary-dark">Series</h3>
+      <div class="columns is-multiline is-centered">
+        {% for entry in book.series if book.series %}
+          <div class="adjustable-column column has-text-centered">
+            {{ series_box(obj=entry, show_remove=token_user.role >= 2) }}
+          </div>
+        {% else %}
+          <div class="column has-text-centered">
+            <div class="box">
+              <h5 class="title is-5 has-text-danger-light">No Series associated with this book.</h5>
+            </div>
           </div>
         {% endfor %}
       </div>
       {% if book.is_collected %}
         <h3 class="subtitle is-3 has-text-primary-dark">Readers</h3>
         <div class="columns is-multiline is-centered">
-          {% for entry in book.readers %}
+          {% for entry in book.readers if book.readers %}
             <div class="adjustable-column column has-text-centered">
               {{ user_box(obj=entry) }}
+            </div>
+          {% else %}
+            <div class="column has-text-centered">
+              <div class="box">
+                <h5 class="title is-5 has-text-danger-light">No Users have read this book.</h5>
+              </div>
             </div>
           {% endfor %}
         </div>
       {% else %}
         <h3 class="subtitle is-3 has-text-primary-dark">Wishers</h3>
         <div class="columns is-multiline is-centered">
-          {% for entry in book.wishers %}
+          {% for entry in book.wishers if book.wishers %}
             <div class="adjustable-column column has-text-centered">
               {{ user_box(obj=entry) }}
+            </div>
+          {% else %}
+            <div class="column has-text-centered">
+              <div class="box">
+                <h5 class="title is-5 has-text-danger-light">No Users have wished for this book.</h5>
+              </div>
             </div>
           {% endfor %}
         </div>
@@ -192,7 +233,7 @@
   <script type="text/javascript">
     {% if book.is_collected %}
       function discardBook(){
-        const caller = "discard-book-button";
+        const caller = "discard-button";
       
         addLoading(caller);
         fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
@@ -229,10 +270,7 @@
         }
       {% else %}
         function readBook(){
-          const caller = "read-modal-button";
-          let readForm = document.getElementById("read-form");
-          let formDetails = Object.fromEntries(new FormData(readForm));
-          console.log(formDetails);
+          const caller = "read-button";
         
           addLoading(caller);
           fetch(`/api/v0/books/{{ book.book_id }}/read`, {
@@ -254,7 +292,7 @@
       {% endif %}
     {% else %}
       function collectBook(){
-        const caller = "collect-book-button";
+        const caller = "collect-button";
       
         addLoading(caller);
         fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
@@ -269,26 +307,104 @@
             alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-      
-      function wishBook(){
-        const caller = "wish-book-button";
-      
-        addLoading(caller);
-        fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
-          method: "PUT",
-          headers: headers,
-          body: JSON.stringify({
-            "wisher_id": {{ token_user.user_id }}
-          }),
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-            alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
+      {% if token_user in book.wishers %}
+        function unwishBook(){
+          const caller = "unwish-button";
+        
+          addLoading(caller);
+          fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
+            method: "DELETE",
+            headers: headers,
+            body: JSON.stringify({
+              "wisher_id": {{ token_user.user_id }}
+            }),
+          }).then((response) => {
+            if (!response.ok){
+              return Promise.reject(response);
+            }
+            window.location.reload();
+          }).catch((response) => response.json().then((msg) => {
+              alert(`${response.status} ${response.statusText}: ${msg.details}`);
+          })).finally(() => removeLoading(caller));
+        }
+      {% else %}
+        function wishBook(){
+          const caller = "wish-button";
+        
+          addLoading(caller);
+          fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+              "wisher_id": {{ token_user.user_id }}
+            }),
+          }).then((response) => {
+            if (!response.ok){
+              return Promise.reject(response);
+            }
+            window.location.reload();
+          }).catch((response) => response.json().then((msg) => {
+              alert(`${response.status} ${response.statusText}: ${msg.details}`);
+          })).finally(() => removeLoading(caller));
+        }
+      {% endif %}
     {% endif %}
+    function removeCreator(creatorId){
+      const caller = `remove-creator-${creatorId}-button`;
+        
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/creators`, {
+        method: "DELETE",
+        headers: headers,
+        body: JSON.stringify({
+          "creator_id": creatorId
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function removeGenre(genreId){
+      const caller = `remove-genre-${genreId}-button`;
+        
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/genres`, {
+        method: "DELETE",
+        headers: headers,
+        body: JSON.stringify({
+          "genre_id": genreId
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function removeSeries(seriesId){
+      const caller = `remove-series-${seriesId}-button`;
+        
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/series`, {
+        method: "DELETE",
+        headers: headers,
+        body: JSON.stringify({
+          "series_id": seriesId
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
   </script>
 {% endblock %}

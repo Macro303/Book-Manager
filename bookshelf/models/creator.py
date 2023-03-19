@@ -43,3 +43,8 @@ class Creator(BaseCreator):
 
 class CreatorIn(BaseCreator):
     role_ids: list[int] = Field(default_factory=list)
+
+
+class CreatorBookIn(BaseModel):
+    book_id: int
+    role_ids: list[int] = Field(default_factory=list)

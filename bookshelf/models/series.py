@@ -36,3 +36,8 @@ class Series(BaseSeries):
 
 class SeriesIn(BaseSeries):
     pass
+
+
+class SeriesBookIn(BaseModel):
+    book_id: int
+    number: int | None = None

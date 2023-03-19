@@ -1,6 +1,7 @@
 __all__ = ["router"]
 
 from datetime import date
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -19,13 +20,14 @@ from bookshelf.models.publisher import Publisher
 from bookshelf.routers.html.utils import get_token_user, templates
 
 router = APIRouter(prefix="/books", tags=["Books"])
+TokenUser = Annotated[User | None, Depends(get_token_user)]
 
 
 @router.get(path="", response_class=HTMLResponse)
 def list_books(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    token_user: TokenUser,
     creator_id: int = 0,
     format_id: int = 0,
     genre_id: int = 0,
@@ -131,7 +133,7 @@ def list_books(
 
 
 @router.get(path="/{book_id}", response_class=HTMLResponse)
-def view_book(*, request: Request, book_id: int, token_user: User | None = Depends(get_token_user)):
+def view_book(*, request: Request, book_id: int, token_user: TokenUser):
     if not token_user:
         return RedirectResponse("/")
     with db_session:
@@ -148,7 +150,7 @@ def view_book(*, request: Request, book_id: int, token_user: User | None = Depen
 
 
 @router.get(path="/{book_id}/edit", response_class=HTMLResponse)
-def edit_book(*, request: Request, book_id: int, token_user: User | None = Depends(get_token_user)):
+def edit_book(*, request: Request, book_id: int, token_user: TokenUser):
     if not token_user:
         return RedirectResponse("/")
     if token_user.role < 2:

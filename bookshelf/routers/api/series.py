@@ -6,7 +6,7 @@ from pony.orm import db_session, flush
 from bookshelf.controllers.book import BookController
 from bookshelf.controllers.series import SeriesController
 from bookshelf.database.tables import BookSeries
-from bookshelf.models.series import Series, SeriesIn
+from bookshelf.models.series import Series, SeriesBookIn, SeriesIn
 from bookshelf.responses import ErrorResponse
 
 router = APIRouter(prefix="/series", tags=["Series"])
@@ -42,30 +42,41 @@ def delete_series(series_id: int):
         SeriesController.delete_series(series_id=series_id)
 
 
-@router.post(path="/{series_id}/books", responses={404: {"model": ErrorResponse}})
-def add_book_to_series(
+@router.post(
+    path="/{series_id}/books",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def add_book(
     series_id: int,
-    book_id: int = Body(embed=True),
-    series_num: int = Body(default=0, embed=True),
+    new_book: SeriesBookIn,
 ) -> Series:
     with db_session:
         series = SeriesController.get_series(series_id=series_id)
-        book = BookController.get_book(book_id=book_id)
-        if book in [x.book for x in series.books]:
-            raise HTTPException(status_code=400, detail="Book already exists in Series")
-        BookSeries(book=book, series=series, number=series_num)
+        book = BookController.get_book(book_id=new_book.book_id)
+        if BookSeries.get(book=book, series=series):
+            raise HTTPException(
+                status_code=409,
+                detail="The Book is already linked to this Series.",
+            )
+        BookSeries(book=book, series=series, number=new_book.number)
         flush()
         return series.to_model()
 
 
-@router.delete(path="/{series_id}/books/{book_id}", responses={404: {"model": ErrorResponse}})
-def remove_book_from_series(series_id: int, book_id: int) -> Series:
+@router.delete(
+    path="/{series_id}/books",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def remove_book(series_id: int, book_id: int = Body(embed=True)) -> Series:
     with db_session:
         series = SeriesController.get_series(series_id=series_id)
         book = BookController.get_book(book_id=book_id)
         book_series = BookSeries.get(book=book, series=series)
         if not book_series:
-            raise HTTPException(status_code=400, detail="Book doesn't exist in Series")
+            raise HTTPException(
+                status_code=400,
+                detail="The Book isnt associated with this Series.",
+            )
         book_series.delete()
         flush()
         return series.to_model()

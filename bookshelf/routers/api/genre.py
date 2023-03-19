@@ -41,25 +41,31 @@ def delete_genre(genre_id: int):
         GenreController.delete_genre(genre_id=genre_id)
 
 
-@router.post(path="/{genre_id}/books", responses={404: {"model": ErrorResponse}})
-def add_book_to_genre(genre_id: int, book_id: int = Body(embed=True)) -> Genre:
+@router.post(
+    path="/{genre_id}/books",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def add_book(*, genre_id: int, book_id: int = Body(embed=True)) -> Genre:
     with db_session:
         genre = GenreController.get_genre(genre_id=genre_id)
         book = BookController.get_book(book_id=book_id)
         if book in genre.books:
-            raise HTTPException(status_code=400, detail="Book already exists in Genre")
+            raise HTTPException(status_code=409, detail="The Book is already linked to this Genre.")
         genre.books.add(book)
         flush()
         return genre.to_model()
 
 
-@router.delete(path="/{genre_id}/books/{book_id}", responses={404: {"model": ErrorResponse}})
-def remove_book_from_genre(genre_id: int, book_id: int) -> Genre:
+@router.delete(
+    path="/{genre_id}/books",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def remove_book(*, genre_id: int, book_id: int = Body(embed=True)) -> Genre:
     with db_session:
         genre = GenreController.get_genre(genre_id=genre_id)
         book = BookController.get_book(book_id=book_id)
         if book not in genre.books:
-            raise HTTPException(status_code=400, detail="Book doesn't exist in Genre")
+            raise HTTPException(status_code=400, detail="The Book isnt associated with this Genre.")
         genre.books.remove(book)
         flush()
         return genre.to_model()

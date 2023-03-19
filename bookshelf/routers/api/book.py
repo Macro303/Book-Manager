@@ -7,13 +7,16 @@ from pony.orm import db_session, flush
 
 from bookshelf.controllers.book import BookController
 from bookshelf.controllers.creator import CreatorController
+from bookshelf.controllers.genre import GenreController
 from bookshelf.controllers.role import RoleController
+from bookshelf.controllers.series import SeriesController
 from bookshelf.controllers.user import UserController
-from bookshelf.database.tables import BookCreator, Reader
+from bookshelf.database.tables import BookCreator, BookSeries, Reader
 from bookshelf.models.book import (
     Book,
     BookCreatorIn,
     BookIn,
+    BookSeriesIn,
     LookupBook,
 )
 from bookshelf.responses import ErrorResponse
@@ -72,7 +75,7 @@ def lookup_book(new_book: LookupBook) -> Book:
 
 
 @router.put(path="", status_code=204)
-def reset_all_books(load_new_fields: bool = False):
+def refresh_all_books(load_new_fields: bool = False):
     with db_session:
         for _book in BookController.list_books():
             if load_new_fields:
@@ -82,7 +85,7 @@ def reset_all_books(load_new_fields: bool = False):
 
 
 @router.put(path="/{book_id}", responses={404: {"model": ErrorResponse}})
-def reset_book(book_id: int, load_new_fields: bool = False) -> Book:
+def refresh_book(book_id: int, load_new_fields: bool = False) -> Book:
     with db_session:
         if load_new_fields:
             return BookController.load_new_field(book_id=book_id).to_model()
@@ -119,7 +122,7 @@ def discard_book(book_id: int) -> Book:
         return book.to_model()
 
 
-@router.put(
+@router.post(
     path="/{book_id}/wish",
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
@@ -130,9 +133,25 @@ def wish_book(book_id: int, wisher_id: int = Body(embed=True)) -> Book:
             raise HTTPException(status_code=400, detail="Book has not been collected.")
         user = UserController.get_user(user_id=wisher_id)
         if user in book.wishers:
-            book.wishers.remove(user)
-        else:
-            book.wishers.add(user)
+            raise HTTPException(status_code=400, detail="Book has already been wished for by user.")
+        book.wishers.add(user)
+        flush()
+        return book.to_model()
+
+
+@router.delete(
+    path="/{book_id}/wish",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def unwish_book(book_id: int, wisher_id: int = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        if book.is_collected:
+            raise HTTPException(status_code=400, detail="Book has not been collected.")
+        user = UserController.get_user(user_id=wisher_id)
+        if user not in book.wishers:
+            raise HTTPException(status_code=400, detail="Book has not been wished for by user yet.")
+        book.wishers.remove(user)
         flush()
         return book.to_model()
 
@@ -148,7 +167,7 @@ def read_book(
         if not book.is_collected:
             raise HTTPException(status_code=400, detail="Book has not been collected.")
         user = UserController.get_user(user_id=reader_id)
-        if _ := Reader.get(book=book, user=user):
+        if Reader.get(book=book, user=user):
             raise HTTPException(status_code=400, detail="Book has already been read by user.")
         Reader(book=book, user=user, read_date=read_date)
         flush()
@@ -170,21 +189,109 @@ def unread_book(book_id: int, reader_id: int = Body(embed=True)) -> Book:
         return book.to_model()
 
 
-@router.patch(
+@router.post(
     path="/{book_id}/creators",
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
-def set_creators(book_id: int, creators: list[BookCreatorIn] = Body(embed=True)) -> Book:
+def add_creator(*, book_id: int, new_creator: BookCreatorIn) -> Book:
     with db_session:
         book = BookController.get_book(book_id=book_id)
-        for _creator in book.creators:
-            _creator.delete()
-        flush()
-        for _creator in creators:
-            BookCreator(
-                book=book,
-                creator=CreatorController.get_creator(creator_id=_creator.creator_id),
-                roles=[RoleController.get_role(role_id=x) for x in _creator.role_ids],
+        creator = CreatorController.get_creator(creator_id=new_creator.creator_id)
+        if BookCreator.get(book=book, creator=creator):
+            raise HTTPException(
+                status_code=409,
+                detail="The Creator is already linked to this Book.",
             )
+        BookCreator(
+            book=book,
+            creator=creator,
+            roles=[RoleController.get_role(role_id=x) for x in new_creator.role_ids],
+        )
+        flush()
+        return book.to_model()
+
+
+@router.delete(
+    path="/{book_id}/creators",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def remove_creator(*, book_id: int, creator_id: int = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        creator = CreatorController.get_creator(creator_id=creator_id)
+        book_creator = BookCreator.get(book=book, creator=creator)
+        if not book_creator:
+            raise HTTPException(
+                status_code=400,
+                detail="The Creator isnt associated with this Book.",
+            )
+        book_creator.delete()
+        flush()
+        return book.to_model()
+
+
+@router.post(
+    path="/{book_id}/genres",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def add_genre(*, book_id: int, genre_id: int = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        genre = GenreController.get_genre(genre_id=genre_id)
+        if genre in book.genres:
+            raise HTTPException(status_code=409, detail="The Genre is already linked to this Book.")
+        book.genres.add(genre)
+        flush()
+        return book.to_model()
+
+
+@router.delete(
+    path="/{book_id}/genres",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def remove_genre(*, book_id: int, genre_id: int = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        genre = GenreController.get_genre(genre_id=genre_id)
+        if genre not in book.genres:
+            raise HTTPException(status_code=400, detail="The Genre isnt associated with this Book.")
+        book.genres.remove(genre)
+        flush()
+        return book.to_model()
+
+
+@router.post(
+    path="/{book_id}/series",
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def add_series(*, book_id: int, new_series: BookSeriesIn) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        series = SeriesController.get_series(series_id=new_series.series_id)
+        if BookSeries.get(book=book, series=series):
+            raise HTTPException(
+                status_code=409,
+                detail="The Series is already linked to this Book.",
+            )
+        BookSeries(book=book, series=series, number=new_series.number)
+        flush()
+        return book.to_model()
+
+
+@router.delete(
+    path="/{book_id}/series",
+    responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+def remove_series(*, book_id: int, series_id: int = Body(embed=True)) -> Book:
+    with db_session:
+        book = BookController.get_book(book_id=book_id)
+        series = SeriesController.get_series(series_id=series_id)
+        book_series = BookSeries.get(book=book, series=series)
+        if not book_series:
+            raise HTTPException(
+                status_code=400,
+                detail="The Series isnt associated with this Book.",
+            )
+        book_series.delete()
         flush()
         return book.to_model()
