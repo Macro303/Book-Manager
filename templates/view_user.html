@@ -42,7 +42,7 @@
     {% if token_user.user_id == user.user_id or (token_user.role >= 4 and token_user.role > user.role) %}
       function deleteUser(){
         const caller = "delete-button";
-  
+
         addLoading(caller);
         fetch("/api/v0/users/{{ user.user_id }}", {
           method: "DELETE",

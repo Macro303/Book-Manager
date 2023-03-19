@@ -61,7 +61,7 @@
     {% if token_user.role >= 3 %}
       function deleteCreator(){
         const caller = "delete-button";
-  
+
         addLoading(caller);
         fetch("/api/v0/creators/{{ creator.creator_id }}", {
           method: "DELETE",

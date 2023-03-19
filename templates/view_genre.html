@@ -56,7 +56,7 @@
         let addForm = document.getElementById("add-form");
         let formDetails = Object.fromEntries(new FormData(addForm));
         console.log(formDetails);
-      
+
         addLoading(caller);
         fetch("/api/v0/genres/{{ genre.genre_id }}/books", {
           method: "POST",
@@ -74,7 +74,7 @@
           alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-      
+
       function removeBook(caller, bookId){
         addLoading(caller);
         fetch(`/api/v0/genres/{{ genre.genre_id }}/books/${bookId}`, {
@@ -92,7 +92,7 @@
       {% if token_user.role >= 3 %}
         function deleteGenre(){
           const caller = "delete-button";
-    
+
           addLoading(caller);
           fetch("/api/v0/genres/{{ genre.genre_id }}", {
             method: "DELETE",

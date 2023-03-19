@@ -26,21 +26,21 @@
         let createForm = document.getElementById("create-form");
         let formDetails = Object.fromEntries(new FormData(createForm));
         console.log(formDetails);
-      
+
         let book_depository_url = formDetails["book-depository-url"];
         if (book_depository_url){
           let segments = new URL(book_depository_url).pathname.split('/');
           book_depository_url = segments.pop() || segments.pop();
         }
         let isbn = formDetails["isbn"] || book_depository_url;
-      
+
         let open_library_url = formDetails["open-library-url"];
         if (open_library_url){
           let segments = new URL(open_library_url).pathname.split('/');
           open_library_url = segments.pop() || segments.pop();
         }
         let edition_id = formDetails["open-library-id"] || open_library_url;
-      
+
         addLoading(caller);
         fetch("/api/v0/books/lookup", {
           method: "POST",

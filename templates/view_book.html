@@ -234,7 +234,7 @@
     {% if book.is_collected %}
       function discardBook(){
         const caller = "discard-button";
-      
+
         addLoading(caller);
         fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
           method: "DELETE",
@@ -251,7 +251,7 @@
       {% if token_user in book.readers %}
         function unreadBook(){
           const caller = "unread-button";
-        
+
           addLoading(caller);
           fetch(`/api/v0/books/{{ book.book_id }}/read`, {
             method: "DELETE",
@@ -271,7 +271,7 @@
       {% else %}
         function readBook(){
           const caller = "read-button";
-        
+
           addLoading(caller);
           fetch(`/api/v0/books/{{ book.book_id }}/read`, {
             method: "POST",
@@ -293,7 +293,7 @@
     {% else %}
       function collectBook(){
         const caller = "collect-button";
-      
+
         addLoading(caller);
         fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
           method: "POST",
@@ -310,7 +310,7 @@
       {% if token_user in book.wishers %}
         function unwishBook(){
           const caller = "unwish-button";
-        
+
           addLoading(caller);
           fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
             method: "DELETE",
@@ -330,7 +330,7 @@
       {% else %}
         function wishBook(){
           const caller = "wish-button";
-        
+
           addLoading(caller);
           fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
             method: "POST",
@@ -351,7 +351,7 @@
     {% endif %}
     function removeCreator(creatorId){
       const caller = `remove-creator-${creatorId}-button`;
-        
+
       addLoading(caller);
       fetch(`/api/v0/books/{{ book.book_id }}/creators`, {
         method: "DELETE",
@@ -370,7 +370,7 @@
     }
     function removeGenre(genreId){
       const caller = `remove-genre-${genreId}-button`;
-        
+
       addLoading(caller);
       fetch(`/api/v0/books/{{ book.book_id }}/genres`, {
         method: "DELETE",
@@ -389,7 +389,7 @@
     }
     function removeSeries(seriesId){
       const caller = `remove-series-${seriesId}-button`;
-        
+
       addLoading(caller);
       fetch(`/api/v0/books/{{ book.book_id }}/series`, {
         method: "DELETE",

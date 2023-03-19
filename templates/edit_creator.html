@@ -55,10 +55,10 @@
         alert(`${response.status} ${response.statusText}: ${msg.details}`);
       })).finally(() => removeLoading(caller));
     }
-    
+
     function refreshCreator(){
       const caller = "refresh-button";
-    
+
       addLoading(caller);
       fetch("/api/v0/creators/{{ creator.creator_id }}", {
         method: "PUT",

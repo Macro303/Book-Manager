@@ -33,7 +33,7 @@
     {% if token_user.role >= 3 %}
       function deleteFormat(){
         const caller = "delete-button";
-  
+
         addLoading(caller);
         fetch("/api/v0/formats/{{ format.format_id }}", {
           method: "DELETE",

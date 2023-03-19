@@ -114,10 +114,10 @@
         alert(`${response.status} ${response.statusText}: ${msg.details}`);
       })).finally(() => removeLoading(caller));
     }
-    
+
     function refreshBook(){
       const caller = "refresh-button";
-    
+
       addLoading(caller);
       fetch("/api/v0/books/{{ book.book_id }}", {
         method: "PUT",
