@@ -1,6 +1,6 @@
 <nav aria-label="main navigation" class="navbar is-fixed-top is-primary" role="navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="/users/{{ token_user.user_id }}" id="navbar-banner">Bookshelf</a>
+    <a class="navbar-item" href="/users/{{ current_user.user_id }}" id="navbar-banner">Bookshelf</a>
     <span class="navbar-burger burger" data-target="navMenu">
       <span></span>
       <span></span>
@@ -85,13 +85,13 @@
             </span>
             <span>List</span>
           </a>
-          <a class="navbar-item" href="/users/{{ token_user.user_id }}">
+          <a class="navbar-item" href="/users/{{ current_user.user_id }}">
             <span class="icon">
               <i class="fa-solid fa-user"></i>
             </span>
             <span>My Profile</span>
           </a>
-          <a class="navbar-item" href="/users/{{ token_user.user_id }}/wishlist">
+          <a class="navbar-item" href="/users/{{ current_user.user_id }}/wishlist">
             <span class="icon">
               <i class="fa-solid fa-star"></i>
             </span>

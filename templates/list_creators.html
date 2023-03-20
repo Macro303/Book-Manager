@@ -6,7 +6,7 @@
 {% block sidebar %}
   {{ super() }}
   {{ filter_box(filters=filters) }}
-  {% if token_user.role >= 1 %}
+  {% if current_user.role >= 1 %}
     {{ create_box() }}
   {% endif %}
 {% endblock %}
@@ -26,7 +26,7 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if token_user.role >= 1 %}
+    {% if current_user.role >= 1 %}
       function createCreator(){
         const caller = "create-button";
         let createForm = document.getElementById("create-form");

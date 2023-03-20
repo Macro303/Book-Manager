@@ -2,60 +2,60 @@
 {% from "components/forms.jinja" import input %}
 {% block navbar %}{% endblock %}
 {% block title_image %}
-<figure class="image is-128x128 is-inline-block">
-  <img class="profile" loading="lazy" src="/static/img/logo.png"/>
-</figure>
+  <figure class="image is-128x128 is-inline-block">
+    <img class="profile" loading="lazy" src="/static/img/logo.png"/>
+  </figure>
 {% endblock %}
 {% block title %}Bookshelf{% endblock %}
 {% block content %}
-<section class="section">
-  <div class="columns is-centered">
-    <div class="column is-one-quarter">
-      <div class="box">
-        <form id="sign-in-form" onsubmit="return false;">
-          {{ input("Username", "username") }}
-          <div class="buttons is-centered">
-            <button class="button is-primary" id="sign-in-button" type="button" onclick="signIn()">
-              <span class="icon">
-                <i class="fa-solid fa-right-to-bracket"></i>
-              </span>
-              <span>Sign In</span>
-            </button>
-          </div>
-        </form>
+  <section class="section">
+    <div class="columns is-centered">
+      <div class="column is-one-quarter">
+        <div class="box">
+          <form id="sign-in-form" onsubmit="return false;">
+            {{ input("Username", "username") }}
+            <div class="buttons is-centered">
+              <button class="button is-primary" id="sign-in-button" type="button" onclick="signIn()">
+                <span class="icon">
+                  <i class="fa-solid fa-right-to-bracket"></i>
+                </span>
+                <span>Sign In</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 {% endblock %}
 {% block js %}
-{{ super() }}
-<script type="text/javascript">
-function signIn(){
-  const caller = "sign-in-button";
-  let signInForm = document.getElementById("sign-in-form");
-  let details = Object.fromEntries(new FormData(signInForm));
-  console.log(details);
+  {{ super() }}
+  <script type="text/javascript">
+    function signIn(){
+      const caller = "sign-in-button";
+      let signInForm = document.getElementById("sign-in-form");
+      let details = Object.fromEntries(new FormData(signInForm));
+      console.log(details);
 
-  addLoading(caller);
-  fetch(`/api/v0/users?username="${details['username']}"`, {
-    method: "GET",
-    headers: headers,
-  }).then((response) => {
-    if (response.ok){
-      return response.json();
+      addLoading(caller);
+      fetch(`/api/v0/users?username="${details['username']}"`, {
+        method: "GET",
+        headers: headers,
+      }).then((response) => {
+        if (response.ok){
+          return response.json();
+        }
+        return Promise.reject(response);
+      }).then((data) => {
+        if(data.length === 1){
+          document.cookie = `token=${data[0].user_id};path=/;max-age=${60*60*24*30};SameSite=Strict`;
+          window.location = `/users/${data[0].user_id}`;
+        }else{
+          alert(`404 Not Found: ["User not found."]`);
+        }
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
     }
-    return Promise.reject(response);
-  }).then((data) => {
-    if(data.length === 1){
-      document.cookie = `token=${data[0].user_id};path=/;max-age=${60*60*24*30};SameSite=Strict`;
-      window.location = `/users/${data[0].user_id}`;
-    }else{
-      alert(`404 Not Found: ["User not found."]`);
-    }
-  }).catch((response) => response.json().then((msg) => {
-      alert(`${response.status} ${response.statusText}: ${msg.details}`);
-  })).finally(() => removeLoading(caller));
-}
-</script>
+  </script>
 {% endblock %}

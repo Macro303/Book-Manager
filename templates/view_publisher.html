@@ -2,14 +2,14 @@
 {% from "components/list_boxes.jinja" import book as book_box %}
 {% block title %}{{ publisher.name }}{% endblock %}
 {% block action_buttons %}
-  {% if token_user.role >= 2 %}
+  {% if current_user.role >= 2 %}
     <a class="button is-warning" href="/publishers/{{ publisher.publisher_id }}/edit">
       <span class="icon">
         <i class="fa-solid fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
-    {% if token_user.role >= 3 %}
+    {% if current_user.role >= 3 %}
       <button class="button is-danger" id="delete-button" type="button" onclick="deletePublisher()">
         <span class="icon">
           <i class="fa-solid fa-trash"></i>
@@ -36,7 +36,7 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if token_user.role >= 3 %}
+    {% if current_user.role >= 3 %}
       function deletePublisher(){
         const caller = "delete-button";
 

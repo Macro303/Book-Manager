@@ -3,14 +3,14 @@
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ genre.name }}{% endblock %}
 {% block action_buttons %}
-  {% if token_user.role >= 2 %}
+  {% if current_user.role >= 2 %}
     <a class="button is-warning" href="/genres/{{ genre.genre_id }}/edit">
       <span class="icon">
         <i class="fa-solid fa-pen-to-square"></i>
       </span>
       <span>Edit</span>
     </a>
-    {% if token_user.role >= 3 %}
+    {% if current_user.role >= 3 %}
       <button class="button is-danger" id="delete-button" type="button" onclick="deleteGenre()">
         <span class="icon">
           <i class="fa-solid fa-trash"></i>
@@ -22,7 +22,7 @@
 {% endblock %}
 {% block sidebar %}
   {{ super() }}
-  {% if token_user.role >= 2 %}
+  {% if current_user.role >= 2 %}
     <div class="box">
       <h5 class="title is-5 has-text-info-light">Add Book to Genre</h5>
       <form id="add-form" onsubmit="return false;">
@@ -43,7 +43,7 @@
 {% block list_content %}
   {% for entry in book_list if book_list %}
     <div class="adjustable-column column has-text-centered">
-      {{ book_box(obj=entry, show_remove_button=token_user.role >= 2) }}
+      {{ book_box(obj=entry, show_remove_button=current_user.role >= 2) }}
     </div>
   {% else %}
     <div class="column has-text-centered">
@@ -56,7 +56,7 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if token_user.role >= 2 %}
+    {% if current_user.role >= 2 %}
       function addBook(){
         const caller = "add-button";
         let addForm = document.getElementById("add-form");
@@ -95,7 +95,7 @@
           alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-      {% if token_user.role >= 3 %}
+      {% if current_user.role >= 3 %}
         function deleteGenre(){
           const caller = "delete-button";
 

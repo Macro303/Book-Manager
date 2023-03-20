@@ -6,7 +6,7 @@
 {% block sidebar %}
   {{ super() }}
   {{ filter_box(filters=filters, action="/users/" ~ user.user_id ~ "/wishlist") }}
-  {% if token_user == user %}
+  {% if current_user == user %}
     {{ create_box(show_book_depository=True) }}
   {% endif %}
 {% endblock %}
@@ -26,7 +26,7 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if token_user == user %}
+    {% if current_user == user %}
       function createBook(){
         const caller = "create-button";
         let createForm = document.getElementById("create-form");
@@ -54,7 +54,7 @@
           body: JSON.stringify({
             "edition_id": edition_id,
             "isbn": isbn,
-            "wisher_id": {{ token_user.user_id }}
+            "wisher_id": {{ user.user_id }}
           }),
         }).then((response) => {
           if (!response.ok){

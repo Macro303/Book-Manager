@@ -99,7 +99,7 @@
       </span>
       <span>Discard</span>
     </button>
-    {% if token_user in book.readers %}
+    {% if current_user in book.readers %}
       <button class="button is-warning" id="unread-button" onclick="unreadBook()" type="buutoj">
         <span class="icon">
           <i class="fa-solid fa-bookmark"></i>
@@ -107,7 +107,7 @@
         <span>Unread</span>
       </button>
     {% else %}
-      <button class="button is-success" disabled id="read-button" onclick="readBook()" type="button">
+      <button class="button is-success" id="read-button" onclick="readBook()" type="button">
         <span class="icon">
           <i class="fa-regular fa-bookmark"></i>
         </span>
@@ -121,7 +121,7 @@
       </span>
       <span>Collect</span>
     </button>
-    {% if token_user in book.wishers %}
+    {% if current_user in book.wishers %}
       <button class="button is-warning" id="unwish-button" onclick="unwishBook()" type="button">
         <span class="icon">
           <i class="fa-solid fa-star"></i>
@@ -137,7 +137,7 @@
       </button>
     {% endif %}
   {% endif %}
-  {% if token_user.role >= 2 %}
+  {% if current_user.role >= 2 %}
     <a class="button is-danger" href="/books/{{ book.book_id }}/edit">
       <span class="icon">
         <i class="fa-solid fa-pen-to-square"></i>
@@ -156,7 +156,7 @@
       <div class="columns is-multiline is-centered">
         {% for entry in book.creators if book.creators %}
           <div class="adjustable-column column has-text-centered">
-            {{ creator_box(obj=entry, roles=entry.roles, show_remove=token_user.role >= 2) }}
+            {{ creator_box(obj=entry, roles=entry.roles, show_remove=current_user.role >= 2) }}
           </div>
         {% else %}
           <div class="column has-text-centered">
@@ -170,7 +170,7 @@
       <div class="columns is-multiline is-centered">
         {% for entry in book.genres if book.genres %}
           <div class="adjustable-column column has-text-centered">
-            {{ genre_box(obj=entry, show_remove=token_user.role >= 2) }}
+            {{ genre_box(obj=entry, show_remove=current_user.role >= 2) }}
           </div>
         {% else %}
           <div class="column has-text-centered">
@@ -184,7 +184,7 @@
       <div class="columns is-multiline is-centered">
         {% for entry in book.series if book.series %}
           <div class="adjustable-column column has-text-centered">
-            {{ series_box(obj=entry, show_remove=token_user.role >= 2) }}
+            {{ series_box(obj=entry, show_remove=current_user.role >= 2) }}
           </div>
         {% else %}
           <div class="column has-text-centered">
@@ -248,7 +248,7 @@
             alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-      {% if token_user in book.readers %}
+      {% if current_user in book.readers %}
         function unreadBook(){
           const caller = "unread-button";
 
@@ -257,7 +257,7 @@
             method: "DELETE",
             headers: headers,
             body: JSON.stringify({
-              "reader_id": {{ token_user.user_id }}
+              "reader_id": {{ current_user.user_id }}
             }),
           }).then((response) => {
             if (!response.ok){
@@ -277,8 +277,8 @@
             method: "POST",
             headers: headers,
             body: JSON.stringify({
-              "reader_id": {{ token_user.user_id }},
-              "read_date": formDetails["read-date"]
+              "reader_id": {{ current_user.user_id }},
+              "read_date": new Date().toISOString().slice(0, 10)
             }),
           }).then((response) => {
             if (!response.ok){
@@ -307,7 +307,7 @@
             alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-      {% if token_user in book.wishers %}
+      {% if current_user in book.wishers %}
         function unwishBook(){
           const caller = "unwish-button";
 
@@ -316,7 +316,7 @@
             method: "DELETE",
             headers: headers,
             body: JSON.stringify({
-              "wisher_id": {{ token_user.user_id }}
+              "wisher_id": {{ current_user.user_id }}
             }),
           }).then((response) => {
             if (!response.ok){
@@ -336,7 +336,7 @@
             method: "POST",
             headers: headers,
             body: JSON.stringify({
-              "wisher_id": {{ token_user.user_id }}
+              "wisher_id": {{ current_user.user_id }}
             }),
           }).then((response) => {
             if (!response.ok){

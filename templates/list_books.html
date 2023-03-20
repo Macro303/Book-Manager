@@ -6,7 +6,7 @@
 {% block sidebar %}
   {{ super() }}
   {{ filter_box(filters=filters, action="/books", show_read=True) }}
-  {% if token_user.role >= 1 %}
+  {% if current_user.role >= 1 %}
     {{ create_box() }}
   {% endif %}
 {% endblock %}
@@ -26,7 +26,7 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if token_user.role >= 1 %}
+    {% if current_user.role >= 1 %}
       function createBook(){
         const caller = "create-button";
         let createForm = document.getElementById("create-form");
