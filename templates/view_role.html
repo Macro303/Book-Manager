@@ -28,8 +28,36 @@
         <div class="box">
           <h5 class="title is-5 has-text-info-light">Add BookCreator to Role</h5>
           <form id="add-form" onsubmit="return false;">
-            {{ input("Book Id", "book-id") }}
-            {{ input("Creator Id", "creator-id") }}
+            <!-- region Book -->
+            <div class="field">
+              <label class="label has-text-info">Book</label>
+              <div class="control is-expanded">
+                <div class="select is-fullwidth">
+                  <select name="book-id">
+                    <option disabled hidden selected value="">Select Book</option>
+                    {% for entry in all_books %}
+                      <option value={{ entry.book_id }}>{{ entry.title }}{% if entry.subtitle %}: {{ entry.subtitle }}{% endif %}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <!-- endregion -->
+            <!-- region Creator -->
+            <div class="field">
+              <label class="label has-text-info">Creator</label>
+              <div class="control is-expanded">
+                <div class="select is-fullwidth">
+                  <select name="creator-id">
+                    <option disabled hidden selected value="">Select Creator</option>
+                    {% for entry in all_creators %}
+                      <option value={{ entry.creator_id }}>{{ entry.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <!-- endregion -->
             <div class="buttons is-centered">
               <button class="button is-success" id="add-button" type="button" onclick="addBook()">
                 <span class="icon">

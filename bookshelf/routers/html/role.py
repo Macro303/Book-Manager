@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
+from bookshelf.controllers.book import BookController
+from bookshelf.controllers.creator import CreatorController
 from bookshelf.controllers.role import RoleController
 from bookshelf.database.tables import User
 from bookshelf.routers.html.utils import get_token_user, templates
@@ -59,6 +61,8 @@ def view_role(*, request: Request, role_id: int, token_user: User | None = Depen
                 "token_user": token_user.to_model(),
                 "role": role.to_model(),
                 "creators": creator_dict,
+                "all_books": sorted({x.to_model() for x in BookController.list_books()}),
+                "all_creators": sorted({x.to_model() for x in CreatorController.list_creators()}),
             },
         )
 

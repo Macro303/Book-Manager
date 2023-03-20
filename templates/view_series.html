@@ -26,7 +26,21 @@
     <div class="box">
       <h5 class="title is-5 has-text-info-light">Add Book to Series</h5>
       <form id="add-form" onsubmit="return false;">
-        {{ input("Book Id", "book-id") }}
+        <!-- region Book -->
+        <div class="field">
+          <label class="label has-text-info">Book</label>
+          <div class="control is-expanded">
+            <div class="select is-fullwidth">
+              <select name="book-id">
+                <option disabled hidden selected value="">Select Book</option>
+                {% for entry in all_books %}
+                  <option value={{ entry.book_id }}>{{ entry.title }}{% if entry.subtitle %}: {{ entry.subtitle }}{% endif %}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- endregion -->
         {{ number_input("Series Number", "series-num") }}
         <div class="buttons is-centered">
           <button class="button is-success" id="add-button" type="button" onclick="addBook()">

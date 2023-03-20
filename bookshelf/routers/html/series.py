@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
+from bookshelf.controllers.book import BookController
 from bookshelf.controllers.series import SeriesController
 from bookshelf.database.tables import User
 from bookshelf.routers.html.utils import get_token_user, templates
@@ -50,6 +51,9 @@ def view_series(
         return RedirectResponse("/")
     with db_session:
         series = SeriesController.get_series(series_id=series_id)
+        all_books = {
+            x for x in BookController.list_books() if series not in [y.series for y in x.series]
+        }
         book_list = sorted(
             {(x.book.to_model(), x.number) for x in series.books},
             key=lambda x: (x[1] or 0, x[0].title, x[0].subtitle or ""),
@@ -61,6 +65,7 @@ def view_series(
                 "token_user": token_user.to_model(),
                 "series": series.to_model(),
                 "book_list": book_list,
+                "all_books": sorted({x.to_model() for x in all_books}),
             },
         )
 
