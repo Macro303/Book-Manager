@@ -1,12 +1,11 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
 from bookshelf.controllers.publisher import PublisherController
-from bookshelf.database.tables import User
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/publishers", tags=["Publishers"])
 
@@ -15,10 +14,10 @@ router = APIRouter(prefix="/publishers", tags=["Publishers"])
 def list_publishers(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     name: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         publisher_list = PublisherController.list_publishers()
@@ -32,7 +31,7 @@ def list_publishers(
             "list_publishers.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "publisher_list": sorted({x.to_model() for x in publisher_list}),
                 "filters": {"name": name},
             },
@@ -44,9 +43,9 @@ def view_publisher(
     *,
     request: Request,
     publisher_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         publisher = PublisherController.get_publisher(publisher_id=publisher_id)
@@ -55,7 +54,7 @@ def view_publisher(
             "view_publisher.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "publisher": publisher.to_model(),
                 "book_list": book_list,
             },
@@ -67,11 +66,11 @@ def edit_publisher(
     *,
     request: Request,
     publisher_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
-    if token_user.role < 2:
+    if current_user.role < 2:
         return RedirectResponse(f"/publishers/{publisher_id}")
     with db_session:
         publisher = PublisherController.get_publisher(publisher_id=publisher_id)
@@ -79,7 +78,7 @@ def edit_publisher(
             "edit_publisher.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "publisher": publisher.to_model(),
             },
         )

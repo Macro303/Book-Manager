@@ -1,6 +1,8 @@
-__all__ = ["templates", "get_token_user"]
+__all__ = ["templates", "CurrentUser"]
 
-from fastapi import Cookie
+from typing import Annotated
+
+from fastapi import Cookie, Depends
 from fastapi.templating import Jinja2Templates
 from pony.orm import db_session
 
@@ -16,3 +18,6 @@ def get_token_user(token: int | None = Cookie(default=None)) -> User | None:
         return None
     with db_session:
         return UserController.get_user(user_id=token)
+
+
+CurrentUser = Annotated[User | None, Depends(get_token_user)]

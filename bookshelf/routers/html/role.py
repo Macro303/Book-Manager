@@ -1,14 +1,13 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
 from bookshelf.controllers.book import BookController
 from bookshelf.controllers.creator import CreatorController
 from bookshelf.controllers.role import RoleController
-from bookshelf.database.tables import User
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/roles", tags=["Roles"])
 
@@ -17,10 +16,10 @@ router = APIRouter(prefix="/roles", tags=["Roles"])
 def list_roles(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     name: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         role_list = RoleController.list_roles()
@@ -34,7 +33,7 @@ def list_roles(
             "list_roles.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "role_list": sorted({x.to_model() for x in role_list}),
                 "filters": {"name": name},
             },
@@ -42,8 +41,8 @@ def list_roles(
 
 
 @router.get(path="/{role_id}", response_class=HTMLResponse)
-def view_role(*, request: Request, role_id: int, token_user: User | None = Depends(get_token_user)):
-    if not token_user:
+def view_role(*, request: Request, role_id: int, current_user: CurrentUser):
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         role = RoleController.get_role(role_id=role_id)
@@ -58,7 +57,7 @@ def view_role(*, request: Request, role_id: int, token_user: User | None = Depen
             "view_role.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "role": role.to_model(),
                 "creators": creator_dict,
                 "all_books": sorted({x.to_model() for x in BookController.list_books()}),
@@ -68,10 +67,10 @@ def view_role(*, request: Request, role_id: int, token_user: User | None = Depen
 
 
 @router.get(path="/{role_id}/edit", response_class=HTMLResponse)
-def edit_role(*, request: Request, role_id: int, token_user: User | None = Depends(get_token_user)):
-    if not token_user:
+def edit_role(*, request: Request, role_id: int, current_user: CurrentUser):
+    if not current_user:
         return RedirectResponse("/")
-    if token_user.role < 2:
+    if current_user.role < 2:
         return RedirectResponse(f"/roles/{role_id}")
     with db_session:
         role = RoleController.get_role(role_id=role_id)
@@ -79,7 +78,7 @@ def edit_role(*, request: Request, role_id: int, token_user: User | None = Depen
             "edit_role.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "role": role.to_model(),
             },
         )

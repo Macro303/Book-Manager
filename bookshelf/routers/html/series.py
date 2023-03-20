@@ -1,13 +1,12 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
 from bookshelf.controllers.book import BookController
 from bookshelf.controllers.series import SeriesController
-from bookshelf.database.tables import User
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/series", tags=["Series"])
 
@@ -16,10 +15,10 @@ router = APIRouter(prefix="/series", tags=["Series"])
 def list_series(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     name: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         series_list = SeriesController.list_series()
@@ -33,7 +32,7 @@ def list_series(
             "list_series.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "series_list": sorted({x.to_model() for x in series_list}),
                 "filters": {"name": name},
             },
@@ -45,9 +44,9 @@ def view_series(
     *,
     request: Request,
     series_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         series = SeriesController.get_series(series_id=series_id)
@@ -62,7 +61,7 @@ def view_series(
             "view_series.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "series": series.to_model(),
                 "book_list": book_list,
                 "all_books": sorted({x.to_model() for x in all_books}),
@@ -75,11 +74,11 @@ def edit_series(
     *,
     request: Request,
     series_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
-    if token_user.role < 2:
+    if current_user.role < 2:
         return RedirectResponse(f"/series/{series_id}")
     with db_session:
         series = SeriesController.get_series(series_id=series_id)
@@ -87,7 +86,7 @@ def edit_series(
             "edit_series.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "series": series.to_model(),
             },
         )

@@ -1,9 +1,7 @@
 __all__ = ["router"]
 
-from datetime import date
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
@@ -14,20 +12,18 @@ from bookshelf.controllers.genre import GenreController
 from bookshelf.controllers.publisher import PublisherController
 from bookshelf.controllers.role import RoleController
 from bookshelf.controllers.series import SeriesController
-from bookshelf.database.tables import User
 from bookshelf.models.format import Format
 from bookshelf.models.publisher import Publisher
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/books", tags=["Books"])
-TokenUser = Annotated[User | None, Depends(get_token_user)]
 
 
 @router.get(path="", response_class=HTMLResponse)
 def list_books(
     *,
     request: Request,
-    token_user: TokenUser,
+    current_user: CurrentUser,
     creator_id: int = 0,
     format_id: int = 0,
     genre_id: int = 0,
@@ -36,7 +32,7 @@ def list_books(
     series_id: int = 0,
     title: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         all_books = book_list = [x for x in BookController.list_books() if x.is_collected]
@@ -66,13 +62,13 @@ def list_books(
                 book_list = [x for x in book_list if publisher == x.publisher]
         if read:
             book_list = [
-                x for x in book_list if token_user.user_id in [y.user.user_id for y in x.readers]
+                x for x in book_list if current_user.user_id in [y.user.user_id for y in x.readers]
             ]
         else:
             book_list = [
                 x
                 for x in book_list
-                if token_user.user_id not in [y.user.user_id for y in x.readers]
+                if current_user.user_id not in [y.user.user_id for y in x.readers]
             ]
         if series_id:
             if series_id == -1:
@@ -98,27 +94,31 @@ def list_books(
             "list_books.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "book_list": sorted({x.to_model() for x in book_list}),
-                "creator_list": sorted(
-                    {y.creator.to_model() for x in all_books for y in x.creators},
-                ),
-                "format_list": sorted(
-                    {
-                        x.format.to_model() if x.format else Format(format_id=-1, name="None")
-                        for x in all_books
-                    },
-                ),
-                "genre_list": sorted({y.to_model() for x in all_books for y in x.genres}),
-                "publisher_list": sorted(
-                    {
-                        x.publisher.to_model()
-                        if x.publisher
-                        else Publisher(publisher_id=-1, name="None")
-                        for x in all_books
-                    },
-                ),
-                "series_list": sorted({y.series.to_model() for x in all_books for y in x.series}),
+                "options": {
+                    "creator_list": sorted(
+                        {y.creator.to_model() for x in all_books for y in x.creators},
+                    ),
+                    "format_list": sorted(
+                        {
+                            x.format.to_model() if x.format else Format(format_id=-1, name="None")
+                            for x in all_books
+                        },
+                    ),
+                    "genre_list": sorted({y.to_model() for x in all_books for y in x.genres}),
+                    "publisher_list": sorted(
+                        {
+                            x.publisher.to_model()
+                            if x.publisher
+                            else Publisher(publisher_id=-1, name="None")
+                            for x in all_books
+                        },
+                    ),
+                    "series_list": sorted(
+                        {y.series.to_model() for x in all_books for y in x.series},
+                    ),
+                },
                 "filters": {
                     "creator_id": creator_id,
                     "format_id": format_id,
@@ -133,27 +133,22 @@ def list_books(
 
 
 @router.get(path="/{book_id}", response_class=HTMLResponse)
-def view_book(*, request: Request, book_id: int, token_user: TokenUser):
-    if not token_user:
+def view_book(*, request: Request, book_id: int, current_user: CurrentUser):
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         book = BookController.get_book(book_id=book_id)
         return templates.TemplateResponse(
             "view_book.html",
-            {
-                "request": request,
-                "token_user": token_user.to_model(),
-                "book": book.to_model(),
-                "today": date.today(),
-            },
+            {"request": request, "current_user": current_user.to_model(), "book": book.to_model()},
         )
 
 
 @router.get(path="/{book_id}/edit", response_class=HTMLResponse)
-def edit_book(*, request: Request, book_id: int, token_user: TokenUser):
-    if not token_user:
+def edit_book(*, request: Request, book_id: int, current_user: CurrentUser):
+    if not current_user:
         return RedirectResponse("/")
-    if token_user.role < 2:
+    if current_user.role < 2:
         return RedirectResponse(f"/books/{book_id}")
     with db_session:
         book = BookController.get_book(book_id=book_id)
@@ -167,13 +162,15 @@ def edit_book(*, request: Request, book_id: int, token_user: TokenUser):
             "edit_book.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "book": book.to_model(),
-                "creator_list": sorted({x.to_model() for x in creator_list}),
-                "format_list": sorted({x.to_model() for x in format_list}),
-                "genre_list": sorted({x.to_model() for x in genre_list}),
-                "publisher_list": sorted({x.to_model() for x in publisher_list}),
-                "role_list": sorted({x.to_model() for x in role_list}),
-                "series_list": sorted({x.to_model() for x in series_list}),
+                "options": {
+                    "creator_list": sorted({x.to_model() for x in creator_list}),
+                    "format_list": sorted({x.to_model() for x in format_list}),
+                    "genre_list": sorted({x.to_model() for x in genre_list}),
+                    "publisher_list": sorted({x.to_model() for x in publisher_list}),
+                    "role_list": sorted({x.to_model() for x in role_list}),
+                    "series_list": sorted({x.to_model() for x in series_list}),
+                },
             },
         )

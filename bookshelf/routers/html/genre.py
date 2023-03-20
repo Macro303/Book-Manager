@@ -1,12 +1,11 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
 from bookshelf.controllers.genre import GenreController
-from bookshelf.database.tables import User
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/genres", tags=["Genres"])
 
@@ -15,10 +14,10 @@ router = APIRouter(prefix="/genres", tags=["Genres"])
 def list_genres(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     name: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         genre_list = GenreController.list_genres()
@@ -32,7 +31,7 @@ def list_genres(
             "list_genres.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "genre_list": sorted({x.to_model() for x in genre_list}),
                 "filters": {"name": name},
             },
@@ -44,9 +43,9 @@ def view_genre(
     *,
     request: Request,
     genre_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         genre = GenreController.get_genre(genre_id=genre_id)
@@ -55,7 +54,7 @@ def view_genre(
             "view_genre.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "genre": genre.to_model(),
                 "book_list": book_list,
             },
@@ -67,11 +66,11 @@ def edit_genre(
     *,
     request: Request,
     genre_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
-    if token_user.role < 2:
+    if current_user.role < 2:
         return RedirectResponse(f"/genres/{genre_id}")
     with db_session:
         genre = GenreController.get_genre(genre_id=genre_id)
@@ -79,7 +78,7 @@ def edit_genre(
             "edit_genre.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "genre": genre.to_model(),
             },
         )

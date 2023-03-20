@@ -1,12 +1,11 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
 from bookshelf.controllers.creator import CreatorController
-from bookshelf.database.tables import User
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/creators", tags=["Creators"])
 
@@ -15,10 +14,10 @@ router = APIRouter(prefix="/creators", tags=["Creators"])
 def list_creators(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     name: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         creator_list = CreatorController.list_creators()
@@ -32,7 +31,7 @@ def list_creators(
             "list_creators.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "creator_list": sorted({x.to_model() for x in creator_list}),
                 "filters": {"name": name},
             },
@@ -44,9 +43,9 @@ def view_creator(
     *,
     request: Request,
     creator_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         creator = CreatorController.get_creator(creator_id=creator_id)
@@ -63,7 +62,7 @@ def view_creator(
             "view_creator.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "creator": creator.to_model(),
                 "book_list": book_list,
             },
@@ -75,11 +74,11 @@ def edit_creator(
     *,
     request: Request,
     creator_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
-    if token_user.role < 2:
+    if current_user.role < 2:
         return RedirectResponse(f"/creators/{creator_id}")
     with db_session:
         creator = CreatorController.get_creator(creator_id=creator_id)
@@ -87,7 +86,7 @@ def edit_creator(
             "edit_creator.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "creator": creator.to_model(),
             },
         )

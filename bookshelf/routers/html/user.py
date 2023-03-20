@@ -2,7 +2,7 @@ __all__ = ["router"]
 
 from datetime import date
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
@@ -12,10 +12,9 @@ from bookshelf.controllers.format import FormatController
 from bookshelf.controllers.publisher import PublisherController
 from bookshelf.controllers.series import SeriesController
 from bookshelf.controllers.user import UserController
-from bookshelf.database.tables import User
 from bookshelf.models.format import Format
 from bookshelf.models.publisher import Publisher
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -24,10 +23,10 @@ router = APIRouter(prefix="/users", tags=["Users"])
 def list_users(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     username: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         user_list = UserController.list_users()
@@ -42,7 +41,7 @@ def list_users(
             "list_users.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "user_list": sorted({x.to_model() for x in user_list}),
                 "filters": {"username": username},
             },
@@ -50,8 +49,8 @@ def list_users(
 
 
 @router.get(path="/{user_id}", response_class=HTMLResponse)
-def view_user(*, request: Request, user_id: int, token_user: User | None = Depends(get_token_user)):
-    if not token_user:
+def view_user(*, request: Request, user_id: int, current_user: CurrentUser):
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         user = UserController.get_user(user_id=user_id)
@@ -65,25 +64,30 @@ def view_user(*, request: Request, user_id: int, token_user: User | None = Depen
         ]
         return templates.TemplateResponse(
             "view_user.html",
-            {"request": request, "token_user": token_user, "user": user, "last_read": last_read},
+            {
+                "request": request,
+                "current_user": current_user,
+                "user": user,
+                "last_read": last_read,
+            },
         )
 
 
 @router.get(path="/{user_id}/edit", response_class=HTMLResponse)
-def edit_user(*, request: Request, user_id: int, token_user: User | None = Depends(get_token_user)):
-    if not token_user:
+def edit_user(*, request: Request, user_id: int, current_user: CurrentUser):
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         user = UserController.get_user(user_id=user_id)
-        if token_user.user_id != user.user_id and (
-            token_user.role < 4 or token_user.role <= user.role
+        if current_user.user_id != user.user_id and (
+            current_user.role < 4 or current_user.role <= user.role
         ):
             return RedirectResponse(f"/users/{user_id}")
         return templates.TemplateResponse(
             "edit_user.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "user": user.to_model(),
             },
         )
@@ -94,14 +98,14 @@ def user_wishlist(
     *,
     request: Request,
     user_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     creator_id: int = 0,
     format_id: int = 0,
     publisher_id: int = 0,
     series_id: int = 0,
     title: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         user = UserController.get_user(user_id=user_id)
@@ -151,29 +155,31 @@ def user_wishlist(
             "user_wishlist.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "user": user.to_model(),
                 "wishlist": sorted({x.to_model() for x in wishlist}),
-                "creator_list": sorted(
-                    {y.creator.to_model() for x in all_wishlist for y in x.creators},
-                ),
-                "format_list": sorted(
-                    {
-                        x.format.to_model() if x.format else Format(format_id=-1, name="None")
-                        for x in all_wishlist
-                    },
-                ),
-                "publisher_list": sorted(
-                    {
-                        x.publisher.to_model()
-                        if x.publisher
-                        else Publisher(publisher_id=-1, name="None")
-                        for x in all_wishlist
-                    },
-                ),
-                "series_list": sorted(
-                    {y.series.to_model() for x in all_wishlist for y in x.series},
-                ),
+                "options": {
+                    "creator_list": sorted(
+                        {y.creator.to_model() for x in all_wishlist for y in x.creators},
+                    ),
+                    "format_list": sorted(
+                        {
+                            x.format.to_model() if x.format else Format(format_id=-1, name="None")
+                            for x in all_wishlist
+                        },
+                    ),
+                    "publisher_list": sorted(
+                        {
+                            x.publisher.to_model()
+                            if x.publisher
+                            else Publisher(publisher_id=-1, name="None")
+                            for x in all_wishlist
+                        },
+                    ),
+                    "series_list": sorted(
+                        {y.series.to_model() for x in all_wishlist for y in x.series},
+                    ),
+                },
                 "filters": {
                     "creator_id": creator_id,
                     "format_id": format_id,

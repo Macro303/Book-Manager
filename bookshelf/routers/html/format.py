@@ -1,12 +1,11 @@
 __all__ = ["router"]
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
 from bookshelf.controllers.format import FormatController
-from bookshelf.database.tables import User
-from bookshelf.routers.html.utils import get_token_user, templates
+from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/formats", tags=["Formats"])
 
@@ -15,10 +14,10 @@ router = APIRouter(prefix="/formats", tags=["Formats"])
 def list_formats(
     *,
     request: Request,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
     name: str = "",
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         format_list = FormatController.list_formats()
@@ -32,7 +31,7 @@ def list_formats(
             "list_formats.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "format_list": sorted({x.to_model() for x in format_list}),
                 "filters": {"name": name},
             },
@@ -44,9 +43,9 @@ def view_format(
     *,
     request: Request,
     format_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
     with db_session:
         format = FormatController.get_format(format_id=format_id)
@@ -55,7 +54,7 @@ def view_format(
             "view_format.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "format": format.to_model(),
                 "book_list": book_list,
             },
@@ -67,11 +66,11 @@ def edit_format(
     *,
     request: Request,
     format_id: int,
-    token_user: User | None = Depends(get_token_user),
+    current_user: CurrentUser,
 ):
-    if not token_user:
+    if not current_user:
         return RedirectResponse("/")
-    if token_user.role < 2:
+    if current_user.role < 2:
         return RedirectResponse(f"/formats/{format_id}")
     with db_session:
         format = FormatController.get_format(format_id=format_id)
@@ -79,7 +78,7 @@ def edit_format(
             "edit_format.html",
             {
                 "request": request,
-                "token_user": token_user.to_model(),
+                "current_user": current_user.to_model(),
                 "format": format.to_model(),
             },
         )
