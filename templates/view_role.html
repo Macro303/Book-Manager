@@ -43,7 +43,7 @@
       {% endif %}
     </div>
     <div class="column">
-      {% for creator, book_list in creators.items() %}
+      {% for creator, book_list in creators.items() if creators %}
         <a class="subtitle is-size-3 has-text-link-dark" href="/creators/{{ creator.creator_id }}">{{ creator.name }}</a>
         <div class="columns is-multiline is-centered">
           {% for entry in book_list %}
@@ -51,6 +51,12 @@
               {{ book_box(obj=entry, show_remove_button=token_user.role >= 2, creator_id=creator.creator_id) }}
             </div>
           {% endfor %}
+        </div>
+      {% else %}
+        <div class="column has-text-centered">
+          <div class="box">
+            <h5 class="title is-5 has-text-danger-light">No Books or Creators associated with this Role.</h5>
+          </div>
         </div>
       {% endfor %}
     </div>

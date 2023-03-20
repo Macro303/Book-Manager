@@ -21,9 +21,15 @@
 {% endblock %}
 {% block sub_content_title %}Books{% endblock %}
 {% block list_content %}
-  {% for entry in book_list %}
+  {% for entry in book_list if book_list %}
     <div class="adjustable-column column has-text-centered">
       {{ book_box(obj=entry) }}
+    </div>
+  {% else %}
+    <div class="column has-text-centered">
+      <div class="box">
+        <h5 class="title is-5 has-text-danger-light">No Books associated with this Publisher.</h5>
+      </div>
     </div>
   {% endfor %}
 {% endblock %}

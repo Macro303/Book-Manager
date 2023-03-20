@@ -30,9 +30,15 @@
 {% endblock %}
 {% block sub_content_title %}Last Read{% endblock %}
 {% block list_content %}
-  {% for entry in last_read %}
+  {% for entry in last_read if last_read %}
     <div class="adjustable-column column has-text-centered">
       {{ book_box(obj=entry) }}
+    </div>
+  {% else %}
+    <div class="column has-text-centered">
+      <div class="box">
+        <h5 class="title is-5 has-text-danger-light">No Books have been read by this User.</h5>
+      </div>
     </div>
   {% endfor %}
 {% endblock %}

@@ -5,15 +5,23 @@
 {% block title %}Roles{% endblock %}
 {% block sidebar %}
   {{ super() }}
-  {{ filter_box(filters=filters) }}
+  {% if role_list %}
+    {{ filter_box(filters=filters) }}
+  {% endif %}
   {% if token_user.role >= 1 %}
     {{ create_box() }}
   {% endif %}
 {% endblock %}
 {% block list_content %}
-  {% for entry in role_list %}
+  {% for entry in role_list if role_list %}
     <div class="adjustable-column column has-text-centered">
       {{ list_box(obj=entry) }}
+    </div>
+  {% else %}
+    <div class="column has-text-centered">
+      <div class="box">
+        <h5 class="title is-5 has-text-danger-light">No Roles found.</h5>
+      </div>
     </div>
   {% endfor %}
 {% endblock %}
