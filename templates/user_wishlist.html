@@ -5,9 +5,7 @@
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
 {% block sidebar %}
   {{ super() }}
-  {% if wishlist %}
-    {{ filter_box(filters=filters, action="/users/" ~ user.user_id ~ "/wishlist") }}
-  {% endif %}
+  {{ filter_box(filters=filters, action="/users/" ~ user.user_id ~ "/wishlist") }}
   {% if token_user == user %}
     {{ create_box(show_book_depository=True) }}
   {% endif %}

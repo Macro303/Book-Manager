@@ -1,4 +1,4 @@
-<img src="./static/img/logo.png" align="left" width="128" height="128" alt="Book Manager Logo"/>
+<img src="./static/img/logo.png" align="left" width="128" height="128" alt="Bookshelf Logo"/>
 
 # Bookshelf
 
