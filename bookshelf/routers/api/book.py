@@ -17,7 +17,7 @@ from bookshelf.models.book import (
     BookCreatorIn,
     BookIn,
     BookSeriesIn,
-    LookupBook,
+    ImportBook,
 )
 from bookshelf.responses import ErrorResponse
 
@@ -57,12 +57,12 @@ def delete_book(book_id: int):
         BookController.delete_book(book_id=book_id)
 
 
-@router.post(path="/lookup", status_code=201, responses={409: {"model": ErrorResponse}})
-def lookup_book(new_book: LookupBook) -> Book:
+@router.post(path="/import", status_code=201, responses={409: {"model": ErrorResponse}})
+def import_book(new_book: ImportBook) -> Book:
     if not new_book.isbn and not new_book.edition_id:
         raise HTTPException(status_code=400, detail="Isbn or OpenLibrary Edition Id required")
     with db_session:
-        book = BookController.lookup_book(
+        book = BookController.import_book(
             isbn=new_book.isbn,
             edition_id=new_book.edition_id,
             wisher_id=new_book.wisher_id,

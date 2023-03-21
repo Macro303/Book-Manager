@@ -115,7 +115,7 @@ class BookController:
         book.delete()
 
     @classmethod
-    def lookup_book(cls, isbn: str | None, edition_id: str | None, wisher_id: int | None) -> Book:
+    def import_book(cls, isbn: str | None, edition_id: str | None, wisher_id: int | None) -> Book:
         if book := Book.get(isbn=isbn) or Book.get(open_library_id=edition_id):
             if wisher_id and (wisher := UserController.get_user(user_id=wisher_id)):
                 if wisher in book.wishers:

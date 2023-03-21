@@ -4,7 +4,7 @@ __all__ = [
     "BookIn",
     "BookCreatorIn",
     "BookSeriesIn",
-    "LookupBook",
+    "ImportBook",
 ]
 
 from datetime import date
@@ -135,7 +135,7 @@ class BookIn(BaseBook):
     wisher_ids: list[int] = Field(default_factory=list)
 
 
-class LookupBook(BaseModel):
+class ImportBook(BaseModel):
     collect: bool = False
     edition_id: str | None = None
     isbn: str | None = None

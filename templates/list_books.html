@@ -1,5 +1,5 @@
 {% extends "list_base.jinja" %}
-{% from "components/create_boxes.jinja" import book as create_box %}
+{% from "components/import_book.jinja" import import_book %}
 {% from "components/filter_boxes.jinja" import book as filter_box %}
 {% from "components/list_boxes.jinja" import book as list_card %}
 {% block title %}Books{% endblock %}
@@ -7,7 +7,7 @@
   {{ super() }}
   {{ filter_box(filters=filters, action="/books", show_read=True) }}
   {% if current_user.role >= 1 %}
-    {{ create_box() }}
+    {{ import_book() }}
   {% endif %}
 {% endblock %}
 {% block list_content %}
@@ -27,33 +27,33 @@
   {{ super() }}
   <script type="text/javascript">
     {% if current_user.role >= 1 %}
-      function createBook(){
-        const caller = "create-button";
-        let createForm = document.getElementById("create-form");
-        let formDetails = Object.fromEntries(new FormData(createForm));
+      function importBook(){
+        const caller = "import-button";
+        let importForm = document.getElementById("import-form");
+        let formDetails = Object.fromEntries(new FormData(importForm));
         console.log(formDetails);
 
+        let edition_id = null;
         let open_library_url = formDetails["open-library-url"];
         if (open_library_url){
           let segments = new URL(open_library_url).pathname.split('/');
-          open_library_url = segments.pop() || segments.pop();
+          edition_id = segments.pop() || segments.pop();
         }
-        let edition_id = formDetails["open-library-id"] || open_library_url;
 
         addLoading(caller);
-        fetch("/api/v0/books/lookup", {
+        fetch("/api/v0/books/import", {
           method: "POST",
           headers: headers,
           body: JSON.stringify({
             "collect": true,
-            "edition_id": edition_id,
-            "isbn": formDetails["isbn"]
+            "edition_id": edition_id || null,
+            "isbn": formDetails["isbn"] || null
           }),
         }).then((response) => {
           if (!response.ok){
             return Promise.reject(response);
           }
-          createForm.reset();
+          importForm.reset();
           window.location.reload();
         }).catch((response) => response.json().then((msg) => {
           alert(`${response.status} ${response.statusText}: ${msg.details}`);

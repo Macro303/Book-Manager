@@ -1,5 +1,5 @@
 {% extends "list_base.jinja" %}
-{% from "components/create_boxes.jinja" import book as create_box %}
+{% from "components/import_book.jinja" import import_book %}
 {% from "components/filter_boxes.jinja" import book as filter_box %}
 {% from "components/list_boxes.jinja" import book as list_card %}
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
@@ -7,7 +7,7 @@
   {{ super() }}
   {{ filter_box(filters=filters, action="/users/" ~ user.user_id ~ "/wishlist") }}
   {% if current_user == user %}
-    {{ create_box(show_book_depository=True) }}
+    {{ import_book(show_book_depository=True) }}
   {% endif %}
 {% endblock %}
 {% block list_content %}
@@ -27,10 +27,10 @@
   {{ super() }}
   <script type="text/javascript">
     {% if current_user == user %}
-      function createBook(){
-        const caller = "create-button";
-        let createForm = document.getElementById("create-form");
-        let formDetails = Object.fromEntries(new FormData(createForm));
+      function importBook(){
+        const caller = "import-button";
+        let importForm = document.getElementById("import-form");
+        let formDetails = Object.fromEntries(new FormData(importForm));
         console.log(formDetails);
 
         let book_depository_url = formDetails["book-depository-url"];
@@ -40,27 +40,27 @@
         }
         let isbn = formDetails["isbn"] || book_depository_url;
 
+        let edition_id = null;
         let open_library_url = formDetails["open-library-url"];
         if (open_library_url){
           let segments = new URL(open_library_url).pathname.split('/');
-          open_library_url = segments.pop() || segments.pop();
+          edition_id = segments.pop() || segments.pop();
         }
-        let edition_id = formDetails["open-library-id"] || open_library_url;
 
         addLoading(caller);
-        fetch("/api/v0/books/lookup", {
+        fetch("/api/v0/books/import", {
           method: "POST",
           headers: headers,
           body: JSON.stringify({
-            "edition_id": edition_id,
-            "isbn": isbn,
+            "edition_id": edition_id || null,
+            "isbn": isbn || null,
             "wisher_id": {{ user.user_id }}
           }),
         }).then((response) => {
           if (!response.ok){
             return Promise.reject(response);
           }
-          createForm.reset();
+          importForm.reset();
           window.location.reload();
         }).catch((response) => response.json().then((msg) => {
           alert(`${response.status} ${response.statusText}: ${msg.details}`);
