@@ -99,6 +99,23 @@
       </span>
       <span>Discard</span>
     </button>
+  {% else %}
+    <button class="button is-success" id="collect-button" onclick="collectBook()" type="button">
+      <span class="icon">
+        <i class="fa-solid fa-box-archive"></i>
+      </span>
+      <span>Collect</span>
+    </button>
+  {% endif %}
+  {% if current_user.role >= 2 %}
+    <a class="button is-danger" href="/books/{{ book.book_id }}/edit">
+      <span class="icon">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </span>
+      <span>Edit</span>
+    </a>
+  {% endif %}
+  {% if book.is_collected %}
     {% if current_user in book.readers %}
       <button class="button is-warning" id="unread-button" onclick="unreadBook()" type="buutoj">
         <span class="icon">
@@ -115,12 +132,6 @@
       </button>
     {% endif %}
   {% else %}
-    <button class="button is-success" id="collect-button" onclick="collectBook()" type="button">
-      <span class="icon">
-        <i class="fa-solid fa-box-archive"></i>
-      </span>
-      <span>Collect</span>
-    </button>
     {% if current_user in book.wishers %}
       <button class="button is-warning" id="unwish-button" onclick="unwishBook()" type="button">
         <span class="icon">
@@ -136,14 +147,6 @@
         <span>Wish</span>
       </button>
     {% endif %}
-  {% endif %}
-  {% if current_user.role >= 2 %}
-    <a class="button is-danger" href="/books/{{ book.book_id }}/edit">
-      <span class="icon">
-        <i class="fa-solid fa-pen-to-square"></i>
-      </span>
-      <span>Edit</span>
-    </a>
   {% endif %}
 {% endblock %}
 {% block sub_content %}

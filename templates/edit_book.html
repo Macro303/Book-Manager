@@ -10,7 +10,7 @@
       <div class="select is-fullwidth">
         <select name="format">
           <option disabled hidden {% if not book.format %}selected {% endif %}value="">Select Format</option>
-          {% for _format in format_list %}
+          {% for _format in options.format_list %}
             <option {% if book.format and _format == book.format %}selected {% endif %}value={{ _format.format_id }}>{{ _format.name }}</option>
           {% endfor %}
         </select>
@@ -27,7 +27,7 @@
       <div class="select is-fullwidth">
         <select name="publisher">
           <option disabled hidden {% if not book.publisher %}selected {% endif %}value="">Select Publisher</option>
-          {% for _publisher in publisher_list %}
+          {% for _publisher in options.publisher_list %}
             <option {% if book.publisher and _publisher == book.publisher %}selected {% endif %}value={{ _publisher.publisher_id }}>{{ _publisher.name }}</option>
           {% endfor %}
         </select>
