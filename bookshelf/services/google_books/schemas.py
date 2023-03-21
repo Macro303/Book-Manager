@@ -141,7 +141,7 @@ class VolumeInfo(CamelModel):
 
     def get_isbn(self) -> str | None:
         if temp := next(iter([x for x in self.industry_identifiers if x.type == "ISBN_13"]), None):
-            return temp.identifier
+            return to_isbn_13(temp.identifier)
         if temp := next(iter([x for x in self.industry_identifiers if x.type == "ISBN_10"]), None):
             return to_isbn_13(temp.identifier)
         return None

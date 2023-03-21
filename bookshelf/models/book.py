@@ -143,6 +143,4 @@ class LookupBook(BaseModel):
 
     @validator("isbn", pre=True)
     def validate_isbn(cls, v: str | None) -> str | None:
-        if v:
-            return to_isbn_13(value=v)
-        return None
+        return to_isbn_13(value=v)

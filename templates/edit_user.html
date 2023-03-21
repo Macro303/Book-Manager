@@ -3,7 +3,7 @@
 {% block title %}Edit User{% endblock %}
 {% block form %}
   {{ input("Image Url", "image-url", value=user.image_url or "") }}
-  {% if current_user == user or current_user.role > user.role %}
+  {% if current_user.role > 0 and (current_user == user or current_user.role > user.role) %}
     {{ number_input("Role", "role", value=user.role, max=current_user.role - 1) }}
   {% endif %}
   {{ input("Username", "username", value=user.username) }}
