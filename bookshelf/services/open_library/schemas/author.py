@@ -31,6 +31,7 @@ class Author(BaseModel):
     bio: str | TextResource | None = None
     birth_date: str | None = None
     created: DatetimeResource | None = None
+    date: str | None = None
     death_date: str | None = None
     entity_type: str | None = None
     id: int | None = None
