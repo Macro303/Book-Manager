@@ -1,5 +1,5 @@
 {% extends "view_base.jinja" %}
-{% from "components/list_boxes.jinja" import book as book_box %}
+{% from "components/list_boxes/view.jinja" import book as view_book %}
 {% block title %}{{ user.username }}{% endblock %}
 {% block image %}
   <figure class="image is-256x256 is-inline-block">
@@ -32,7 +32,7 @@
 {% block list_content %}
   {% for entry in last_read if last_read %}
     <div class="adjustable-column column has-text-centered">
-      {{ book_box(obj=entry) }}
+      {{ view_book(obj=entry) }}
     </div>
   {% else %}
     <div class="column has-text-centered">
@@ -45,8 +45,7 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.user_id == user.user_id or (current_user.role >= 4 and current_user.role > user.role) %}
-      function deleteUser(){
+    function deleteUser(){
         const caller = "delete-button";
 
         addLoading(caller);
@@ -62,6 +61,5 @@
           alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-    {% endif %}
   </script>
 {% endblock %}

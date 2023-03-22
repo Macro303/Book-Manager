@@ -49,14 +49,14 @@ def view_creator(
         return RedirectResponse("/")
     with db_session:
         creator = CreatorController.get_creator(creator_id=creator_id)
-        book_dict = {}
-        for temp in creator.books:
-            temp_book = temp.book.to_model()
-            roles = sorted({x.to_model() for x in temp.roles})
-            book_dict[temp_book] = roles
-        book_list = sorted(
-            [(key, values) for key, values in book_dict.items()],
-            key=lambda x: (x[1][0], x[0]),
+        roles_dict = {}
+        for entry in creator.books:
+            for role in entry.roles:
+                if role not in roles_dict:
+                    roles_dict[role] = set()
+                roles_dict[role].add(entry.book)
+        role_list = sorted(
+            [(key.to_model(), sorted({x.to_model() for x in values})) for key, values in roles_dict.items()],
         )
         return templates.TemplateResponse(
             "view_creator.html",
@@ -64,7 +64,7 @@ def view_creator(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "creator": creator.to_model(),
-                "book_list": book_list,
+                "role_list": role_list,
             },
         )
 

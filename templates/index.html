@@ -86,7 +86,7 @@
             alert(`404 Not Found: ["User not found."]`);
           }
         }).catch((response) => response.json().then((msg) => {
-            alert(`${response.status} ${response.statusText}: ${msg.details}`);
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
     {% endif %}

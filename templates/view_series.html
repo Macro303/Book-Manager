@@ -1,5 +1,5 @@
 {% extends "view_base.jinja" %}
-{% from "components/list_boxes.jinja" import book as book_box %}
+{% from "components/list_boxes/view.jinja" import book as view_book %}
 {% from "components/forms.jinja" import input, number_input %}
 {% block title %}{{ series.name }}{% endblock %}
 {% block action_buttons %}
@@ -58,7 +58,7 @@
 {% block list_content %}
   {% for entry, number in book_list if book_list %}
     <div class="adjustable-column column has-text-centered">
-      {{ book_box(obj=entry, show_remove_button=current_user.role >= 2, series=(series.name, number)) }}
+      {{ view_book(obj=entry, series=(series.name, number)) }}
     </div>
   {% else %}
     <div class="column has-text-centered">
@@ -71,7 +71,6 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 2 %}
       function addBook(){
         const caller = "add-button";
         let addForm = document.getElementById("add-form");
@@ -96,7 +95,6 @@
           alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-
       function removeBook(caller, bookId){
         addLoading(caller);
         fetch(`/api/v0/series/{{ series.series_id }}/books/${bookId}`, {
@@ -111,24 +109,21 @@
           alert(`${response.status} ${response.statusText}: ${msg.details}`);
         })).finally(() => removeLoading(caller));
       }
-      {% if current_user.role >= 3 %}
-        function deleteSeries(){
-          const caller = "delete-button";
+      function deleteSeries(){
+        const caller = "delete-button";
 
-          addLoading(caller);
-          fetch("/api/v0/series/{{ series.series_id }}", {
-            method: "DELETE",
-            headers: headers,
-          }).then((response) => {
-            if (!response.ok){
-              return Promise.reject(response);
-            }
-            window.location = "/series";
-          }).catch((response) => response.json().then((msg) => {
-            alert(`${response.status} ${response.statusText}: ${msg.details}`);
-          })).finally(() => removeLoading(caller));
-        }
-      {% endif %}
-    {% endif %}
+        addLoading(caller);
+        fetch("/api/v0/series/{{ series.series_id }}", {
+          method: "DELETE",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location = "/series";
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
   </script>
 {% endblock %}

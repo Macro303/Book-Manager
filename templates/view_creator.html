@@ -1,5 +1,6 @@
 {% extends "view_base.jinja" %}
-{% from "components/list_boxes.jinja" import book as book_box %}
+{% from "components/list_boxes/edit.jinja" import book as edit_book %}
+{% from "components/list_boxes/view.jinja" import book as view_book %}
 {% block title %}{{ creator.name }}{% endblock %}
 {% block image %}
   <figure class="image is-256x256 is-inline-block">
@@ -38,7 +39,7 @@
       <span>Edit</span>
     </a>
     {% if current_user.role >= 3 %}
-      <button class="button is-danger" id="delete-button" type="button" onclick="deleteCreator()">
+      <button class="button is-danger" id="delete-button" type="button" onclick="deleteCreator({{ creator.creator_id }})">
         <span class="icon">
           <i class="fa-solid fa-trash"></i>
         </span>
@@ -47,40 +48,75 @@
     {% endif %}
   {% endif %}
 {% endblock %}
-{% block sub_content_title %}Books{% endblock %}
-{% block list_content %}
-  {% for entry, roles in book_list if book_list %}
-    <div class="adjustable-column column has-text-centered">
-      {{ book_box(obj=entry, roles=roles|join(", ", attribute="name")) }}
+{% block sub_content %}
+  <div class="columns">
+    <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+      {% include "components/settings_box.jinja" %}
     </div>
-  {% else %}
-    <div class="column has-text-centered">
-      <div class="box">
-        <h5 class="title is-5 has-text-danger-light">No Books associated with this Creator.</h5>
-      </div>
+    <div class="column">
+      {% for role, book_list in role_list if role_list %}
+        <a class="subtitle is-size-3 has-text-link-dark" href="/roles/{{ role.role_id }}">{{ role.name }}</a>
+        <div class="columns is-multiline is-centered">
+          {% for entry in book_list %}
+            <div class="adjustable-column column has-text-centered">
+              {% if current_user.role >= 2 %}
+                {{ edit_book(obj=entry) }}
+              {% else %}
+                {{ view_book(obj=entry) }}
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="column has-text-centered">
+          <div class="box">
+            <h5 class="title is-5 has-text-danger-light">No Books associated with this Creator.</h5>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-  {% endfor %}
+  </div>
 {% endblock %}
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 3 %}
-      function deleteCreator(){
-        const caller = "delete-button";
-
-        addLoading(caller);
-        fetch("/api/v0/creators/{{ creator.creator_id }}", {
-          method: "DELETE",
-          headers: headers,
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          window.location = "/creators";
-        }).catch((response) => response.json().then((msg) => {
-          alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-    {% endif %}
+    function deleteCreator(){
+      const caller = "delete-button";
+  
+      addLoading(caller);
+      fetch(`/api/v0/creators/{{ creator.creator_id }}`, {
+        method: "DELETE",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/creators";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function addBookRole(){
+      alert("Not Yet Implemented")
+    }
+    function removeBook(bookId){
+      const caller = `remove-book-${bookId}-button`;
+      
+      addLoading(caller);
+      fetch(`/api/v0/books/${bookId}/creators`, {
+        method: "DELETE",
+        headers: headers,
+        body: JSON.stringify({
+          "creator_id": creatorId
+        })
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
   </script>
 {% endblock %}

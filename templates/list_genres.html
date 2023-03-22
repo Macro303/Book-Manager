@@ -1,7 +1,7 @@
 {% extends "list_base.jinja" %}
 {% from "components/create_boxes.jinja" import genre as create_box %}
 {% from "components/filter_boxes.jinja" import genre as filter_box %}
-{% from "components/list_boxes.jinja" import genre as list_box %}
+{% from "components/list_boxes/view.jinja" import genre as list_box %}
 {% block title %}Genres{% endblock %}
 {% block sidebar %}
   {{ super() }}
@@ -26,30 +26,28 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 1 %}
-      function createGenre(){
-        const caller = "create-button";
-        let createForm = document.getElementById("create-form");
-        let formDetails = Object.fromEntries(new FormData(createForm));
-        console.log(formDetails);
+    function createGenre(){
+      const caller = "create-button";
+      let createForm = document.getElementById("create-form");
+      let formDetails = Object.fromEntries(new FormData(createForm));
+      console.log(formDetails);
 
-        addLoading(caller);
-        fetch("/api/v0/genres", {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify({
-              "name": formDetails["name"]
-          }),
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          createForm.reset();
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-          alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-    {% endif %}
+      addLoading(caller);
+      fetch("/api/v0/genres", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+            "name": formDetails["name"]
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        createForm.reset();
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
   </script>
 {% endblock %}

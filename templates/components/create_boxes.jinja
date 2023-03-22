@@ -1,9 +1,11 @@
-{% from "components/forms.jinja" import input %}
+{% from "components/forms.jinja" import input, textarea %}
 
 {% macro creator() %}
   <div class="box">
     <h5 class="title is-5 has-text-info-light">Create Creator</h5>
     <form id="create-form" onsubmit="return false;">
+      {{ textarea("Bio", "bio") }}
+      {{ input("Image Url", "image-url") }}
       {{ input("Name", "name") }}
       <div class="buttons is-centered">
         <button class="button is-success" id="create-button" onclick="createCreator()" type="button">

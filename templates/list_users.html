@@ -1,7 +1,7 @@
 {% extends "list_base.jinja" %}
 {% from "components/create_boxes.jinja" import user as create_box %}
 {% from "components/filter_boxes.jinja" import user as filter_box %}
-{% from "components/list_boxes.jinja" import user as list_card %}
+{% from "components/list_boxes/view.jinja" import user as list_box %}
 {% block title %}Users{% endblock %}
 {% block sidebar %}
   {{ super() }}
@@ -13,7 +13,7 @@
 {% block list_content %}
   {% for entry in user_list if user_list %}
     <div class="adjustable-column column has-text-centered">
-      {{ list_card(obj=entry) }}
+      {{ list_box(obj=entry) }}
     </div>
   {% else %}
     <div class="column has-text-centered">
@@ -26,30 +26,28 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 1 %}
-      function createUser(){
-        const caller = "create-button";
-        let createForm = document.getElementById("create-form");
-        let formDetails = Object.fromEntries(new FormData(createForm));
-        console.log(formDetails);
+    function createUser(){
+      const caller = "create-button";
+      let createForm = document.getElementById("create-form");
+      let formDetails = Object.fromEntries(new FormData(createForm));
+      console.log(formDetails);
 
-        addLoading(caller);
-        fetch("/api/v0/users", {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify({
-              "username": formDetails["username"]
-          }),
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          createForm.reset();
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-          alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-    {% endif %}
+      addLoading(caller);
+      fetch("/api/v0/users", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+            "username": formDetails["username"]
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        createForm.reset();
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
   </script>
 {% endblock %}

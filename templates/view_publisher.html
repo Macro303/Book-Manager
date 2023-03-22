@@ -1,5 +1,5 @@
 {% extends "view_base.jinja" %}
-{% from "components/list_boxes.jinja" import book as book_box %}
+{% from "components/list_boxes/view.jinja" import book as view_book %}
 {% block title %}{{ publisher.name }}{% endblock %}
 {% block action_buttons %}
   {% if current_user.role >= 2 %}
@@ -23,7 +23,7 @@
 {% block list_content %}
   {% for entry in book_list if book_list %}
     <div class="adjustable-column column has-text-centered">
-      {{ book_box(obj=entry) }}
+      {{ view_book(obj=entry) }}
     </div>
   {% else %}
     <div class="column has-text-centered">
@@ -36,23 +36,21 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 3 %}
-      function deletePublisher(){
-        const caller = "delete-button";
+    function deletePublisher(){
+      const caller = "delete-button";
 
-        addLoading(caller);
-        fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
-          method: "DELETE",
-          headers: headers,
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          window.location = "/publishers";
-        }).catch((response) => response.json().then((msg) => {
-          alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-    {% endif %}
+      addLoading(caller);
+      fetch("/api/v0/publishers/{{ publisher.publisher_id }}", {
+        method: "DELETE",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/publishers";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
   </script>
 {% endblock %}

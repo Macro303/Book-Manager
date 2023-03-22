@@ -1,7 +1,7 @@
 {% extends "list_base.jinja" %}
 {% from "components/import_book.jinja" import import_book %}
 {% from "components/filter_boxes.jinja" import book as filter_box %}
-{% from "components/list_boxes.jinja" import book as list_card %}
+{% from "components/list_boxes/view.jinja" import book as list_box %}
 {% block title %}Books{% endblock %}
 {% block sidebar %}
   {{ super() }}
@@ -13,7 +13,7 @@
 {% block list_content %}
   {% for entry in book_list if book_list %}
     <div class="adjustable-column column has-text-centered">
-      {{ list_card(obj=entry) }}
+      {{ list_box(obj=entry) }}
     </div>
   {% else %}
     <div class="column has-text-centered">
@@ -26,39 +26,37 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 1 %}
-      function importBook(){
-        const caller = "import-button";
-        let importForm = document.getElementById("import-form");
-        let formDetails = Object.fromEntries(new FormData(importForm));
-        console.log(formDetails);
+    function importBook(){
+      const caller = "import-button";
+      let importForm = document.getElementById("import-form");
+      let formDetails = Object.fromEntries(new FormData(importForm));
+      console.log(formDetails);
 
-        let edition_id = null;
-        let open_library_url = formDetails["open-library-url"];
-        if (open_library_url){
-          let segments = new URL(open_library_url).pathname.split('/');
-          edition_id = segments.pop() || segments.pop();
-        }
-
-        addLoading(caller);
-        fetch("/api/v0/books/import", {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify({
-            "collect": true,
-            "edition_id": edition_id || null,
-            "isbn": formDetails["isbn"] || null
-          }),
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          importForm.reset();
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-          alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
+      let edition_id = null;
+      let open_library_url = formDetails["open-library-url"];
+      if (open_library_url){
+        let segments = new URL(open_library_url).pathname.split('/');
+        edition_id = segments.pop() || segments.pop();
       }
-    {% endif %}
+
+      addLoading(caller);
+      fetch("/api/v0/books/import", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+          "collect": true,
+          "edition_id": edition_id || null,
+          "isbn": formDetails["isbn"] || null
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        importForm.reset();
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
   </script>
 {% endblock %}

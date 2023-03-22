@@ -66,8 +66,8 @@ def view_user(*, request: Request, user_id: int, current_user: CurrentUser):
             "view_user.html",
             {
                 "request": request,
-                "current_user": current_user,
-                "user": user,
+                "current_user": current_user.to_model(),
+                "user": user.to_model(),
                 "last_read": last_read,
             },
         )

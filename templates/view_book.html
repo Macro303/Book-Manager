@@ -1,5 +1,5 @@
 {% extends "view_base.jinja" %}
-{% from "components/list_boxes.jinja" import creator as creator_box, genre as genre_box, series as series_box, user as user_box %}
+{% from "components/list_boxes/view.jinja" import creator as creator_box, genre as genre_box, series as series_box, user as user_box %}
 {% block title %}{{ book.title }}{% endblock %}
 {% block subtitle %}{{ book.subtitle or "" }}{% endblock %}
 {% block image %}
@@ -167,7 +167,7 @@
       <div class="columns is-multiline is-centered">
         {% for entry in book.creators if book.creators %}
           <div class="adjustable-column column has-text-centered">
-            {{ creator_box(obj=entry, roles=entry.roles, show_remove=current_user.role >= 2) }}
+            {{ creator_box(obj=entry, roles=entry.roles) }}
           </div>
         {% else %}
           <div class="column has-text-centered">
@@ -181,7 +181,7 @@
       <div class="columns is-multiline is-centered">
         {% for entry in book.genres if book.genres %}
           <div class="adjustable-column column has-text-centered">
-            {{ genre_box(obj=entry, show_remove=current_user.role >= 2) }}
+            {{ genre_box(obj=entry) }}
           </div>
         {% else %}
           <div class="column has-text-centered">
@@ -195,7 +195,7 @@
       <div class="columns is-multiline is-centered">
         {% for entry in book.series if book.series %}
           <div class="adjustable-column column has-text-centered">
-            {{ series_box(obj=entry, show_remove=current_user.role >= 2) }}
+            {{ series_box(obj=entry) }}
           </div>
         {% else %}
           <div class="column has-text-centered">
@@ -242,142 +242,131 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 3 %}
-      function deleteBook(){
-        const caller = "delete-button";
+    function deleteBook(){
+      const caller = "delete-button";
 
-        addLoading(caller);
-        fetch("/api/v0/books/{{ book.book_id }}", {
-          method: "DELETE",
-          headers: headers,
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          window.location = "/books";
-        }).catch((response) => response.json().then((msg) => {
+      addLoading(caller);
+      fetch("/api/v0/books/{{ book.book_id }}", {
+        method: "DELETE",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/books";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function discardBook(){
+      const caller = "discard-button";
+
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
+        method: "DELETE",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
           alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-    {% endif %}
-    {% if book.is_collected %}
-      function discardBook(){
-        const caller = "discard-button";
+      })).finally(() => removeLoading(caller));
+    }
+    function unreadBook(){
+      const caller = "unread-button";
 
-        addLoading(caller);
-        fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
-          method: "DELETE",
-          headers: headers,
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-            alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-      {% if current_user in book.readers %}
-        function unreadBook(){
-          const caller = "unread-button";
-
-          addLoading(caller);
-          fetch(`/api/v0/books/{{ book.book_id }}/read`, {
-            method: "DELETE",
-            headers: headers,
-            body: JSON.stringify({
-              "reader_id": {{ current_user.user_id }}
-            }),
-          }).then((response) => {
-            if (!response.ok){
-              return Promise.reject(response);
-            }
-            window.location.reload();
-          }).catch((response) => response.json().then((msg) => {
-              alert(`${response.status} ${response.statusText}: ${msg.details}`);
-          })).finally(() => removeLoading(caller));
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/read`, {
+        method: "DELETE",
+        headers: headers,
+        body: JSON.stringify({
+          "reader_id": {{ current_user.user_id }}
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
         }
-      {% else %}
-        function readBook(){
-          const caller = "read-button";
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function readBook(){
+      const caller = "read-button";
 
-          addLoading(caller);
-          fetch(`/api/v0/books/{{ book.book_id }}/read`, {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({
-              "reader_id": {{ current_user.user_id }},
-              "read_date": new Date().toISOString().slice(0, 10)
-            }),
-          }).then((response) => {
-            if (!response.ok){
-              return Promise.reject(response);
-            }
-            window.location.reload();
-          }).catch((response) => response.json().then((msg) => {
-              alert(`${response.status} ${response.statusText}: ${msg.details}`);
-          })).finally(() => removeLoading(caller));
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/read`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+          "reader_id": {{ current_user.user_id }},
+          "read_date": new Date().toISOString().slice(0, 10)
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
         }
-      {% endif %}
-    {% else %}
-      function collectBook(){
-        const caller = "collect-button";
-
-        addLoading(caller);
-        fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
-          method: "POST",
-          headers: headers,
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-            alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-      {% if current_user in book.wishers %}
-        function unwishBook(){
-          const caller = "unwish-button";
-
-          addLoading(caller);
-          fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
-            method: "DELETE",
-            headers: headers,
-            body: JSON.stringify({
-              "wisher_id": {{ current_user.user_id }}
-            }),
-          }).then((response) => {
-            if (!response.ok){
-              return Promise.reject(response);
-            }
-            window.location.reload();
-          }).catch((response) => response.json().then((msg) => {
-              alert(`${response.status} ${response.statusText}: ${msg.details}`);
-          })).finally(() => removeLoading(caller));
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function collectBook(){
+      const caller = "collect-button";
+  
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/collect`, {
+        method: "POST",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
         }
-      {% else %}
-        function wishBook(){
-          const caller = "wish-button";
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function unwishBook(){
+      const caller = "unwish-button";
 
-          addLoading(caller);
-          fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({
-              "wisher_id": {{ current_user.user_id }}
-            }),
-          }).then((response) => {
-            if (!response.ok){
-              return Promise.reject(response);
-            }
-            window.location.reload();
-          }).catch((response) => response.json().then((msg) => {
-              alert(`${response.status} ${response.statusText}: ${msg.details}`);
-          })).finally(() => removeLoading(caller));
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
+        method: "DELETE",
+        headers: headers,
+        body: JSON.stringify({
+          "wisher_id": {{ current_user.user_id }}
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
         }
-      {% endif %}
-    {% endif %}
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function wishBook(){
+      const caller = "wish-button";
+
+      addLoading(caller);
+      fetch(`/api/v0/books/{{ book.book_id }}/wish`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+          "wisher_id": {{ current_user.user_id }}
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
     function removeCreator(creatorId){
       const caller = `remove-creator-${creatorId}-button`;
 

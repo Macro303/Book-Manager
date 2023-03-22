@@ -1,5 +1,5 @@
 {% extends "view_base.jinja" %}
-{% from "components/list_boxes.jinja" import book as book_box %}
+{% from "components/list_boxes/view.jinja" import book as view_book %}
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ role.name }}{% endblock %}
 {% block action_buttons %}
@@ -76,7 +76,7 @@
         <div class="columns is-multiline is-centered">
           {% for entry in book_list %}
             <div class="adjustable-column column has-text-centered">
-              {{ book_box(obj=entry, show_remove_button=current_user.role >= 2, creator_id=creator.creator_id) }}
+              {{ view_book(obj=entry) }}
             </div>
           {% endfor %}
         </div>
@@ -93,64 +93,65 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
-    {% if current_user.role >= 2 %}
-      function addBook(){
-        const caller = "add-button";
-        let addForm = document.getElementById("add-form");
-        let formDetails = Object.fromEntries(new FormData(addForm));
-        console.log(formDetails);
+    function addBook(){
+      const caller = "add-button";
+      let addForm = document.getElementById("add-form");
+      let formDetails = Object.fromEntries(new FormData(addForm));
+      console.log(formDetails);
 
-        addLoading(caller);
-        fetch("/api/v0/roles/{{ role.role_id }}/books", {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify({
-            "book_id": formDetails["book-id"],
-            "creator_id": formDetails["creator-id"],
-          }),
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          addForm.reset();
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-          alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-
-      function removeBook(caller, bookId, creatorId){
-        addLoading(caller);
-        fetch(`/api/v0/roles/{{ role.role_id }}/books/${creatorId}/${bookId}`, {
-          method: "DELETE",
-          headers: headers,
-        }).then((response) => {
-          if (!response.ok){
-            return Promise.reject(response);
-          }
-          window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-          alert(`${response.status} ${response.statusText}: ${msg.details}`);
-        })).finally(() => removeLoading(caller));
-      }
-      {% if current_user.role >= 3 %}
-        function deleteRole(){
-          const caller = "delete-button";
-
-          addLoading(caller);
-          fetch("/api/v0/roles/{{ role.role_id }}", {
-            method: "DELETE",
-            headers: headers,
-          }).then((response) => {
-            if (!response.ok){
-              return Promise.reject(response);
-            }
-            window.location = "/roles";
-          }).catch((response) => response.json().then((msg) => {
-            alert(`${response.status} ${response.statusText}: ${msg.details}`);
-          })).finally(() => removeLoading(caller));
+      addLoading(caller);
+      fetch("/api/v0/roles/{{ role.role_id }}/books", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+          "book_id": formDetails["book-id"],
+          "creator_id": formDetails["creator-id"],
+        }),
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
         }
-      {% endif %}
-    {% endif %}
+        addForm.reset();
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function removeBook(bookId){
+    let caller = `remove-book-${bookId}-button`;
+    
+    addLoading(caller);
+      fetch(`/api/v0/books/${bookId}/creators`, {
+        method: "DELETE",
+        headers: headers,
+        body: JSON.stringify({
+          "creator_id": creatorId,
+          "role_id": {{ role.role_id }}
+        })
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location.reload();
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
+    function deleteRole(){
+      const caller = "delete-button";
+
+      addLoading(caller);
+      fetch("/api/v0/roles/{{ role.role_id }}", {
+        method: "DELETE",
+        headers: headers,
+      }).then((response) => {
+        if (!response.ok){
+          return Promise.reject(response);
+        }
+        window.location = "/roles";
+      }).catch((response) => response.json().then((msg) => {
+        alert(`${response.status} ${response.statusText}: ${msg.details}`);
+      })).finally(() => removeLoading(caller));
+    }
   </script>
 {% endblock %}
