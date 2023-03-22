@@ -82,7 +82,7 @@
   <script type="text/javascript">
     function deleteCreator(){
       const caller = "delete-button";
-  
+
       addLoading(caller);
       fetch(`/api/v0/creators/{{ creator.creator_id }}`, {
         method: "DELETE",
@@ -101,7 +101,7 @@
     }
     function removeBook(bookId){
       const caller = `remove-book-${bookId}-button`;
-      
+
       addLoading(caller);
       fetch(`/api/v0/books/${bookId}/creators`, {
         method: "DELETE",

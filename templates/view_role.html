@@ -119,7 +119,7 @@
     }
     function removeBook(bookId){
     let caller = `remove-book-${bookId}-button`;
-    
+
     addLoading(caller);
       fetch(`/api/v0/books/${bookId}/creators`, {
         method: "DELETE",

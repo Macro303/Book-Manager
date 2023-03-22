@@ -38,7 +38,7 @@
   <script type="text/javascript">
     function deleteFormat(){
       const caller = "delete-button";
-      
+
       addLoading(caller);
       fetch(`/api/v0/formats/{{ format.format_id }}`, {
         method: "DELETE",

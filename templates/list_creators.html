@@ -31,7 +31,7 @@
       let createForm = document.getElementById("create-form");
       let formDetails = Object.fromEntries(new FormData(createForm));
       console.log(formDetails);
-      
+
       addLoading(caller);
       fetch("/api/v0/creators", {
         method: "POST",

@@ -77,7 +77,7 @@
   <script type="text/javascript">
     function deleteGenre(){
       const caller = "delete-button";
-      
+
       addLoading(caller);
       fetch(`/api/v0/genres/{{ genre.genre_id }}`, {
         method: "DELETE",
@@ -96,7 +96,7 @@
       let addForm = document.getElementById("add-form");
       let formDetails = Object.fromEntries(new FormData(addForm));
       console.log(formDetails);
-      
+
       addLoading(caller);
       fetch(`/api/v0/books/${formDetails["book-id"]}/genres`, {
         method: "POST",
@@ -116,7 +116,7 @@
     }
     function removeBook(bookId){
       let caller = `remove-book-${bookId}-button`;
-      
+
       addLoading(caller);
       fetch(`/api/v0/books/${bookId}/genres`, {
         method: "DELETE",

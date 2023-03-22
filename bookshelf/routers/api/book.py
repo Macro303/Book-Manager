@@ -215,7 +215,12 @@ def add_creator(*, book_id: int, new_creator: BookCreatorIn) -> Book:
     path="/{book_id}/creators",
     responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-def remove_creator(*, book_id: int, creator_id: int = Body(embed=True), role_id: int | None = Body(default=None, embed=True)) -> Book:
+def remove_creator(
+    *,
+    book_id: int,
+    creator_id: int = Body(embed=True),
+    role_id: int | None = Body(default=None, embed=True),
+) -> Book:
     with db_session:
         book = BookController.get_book(book_id=book_id)
         creator = CreatorController.get_creator(creator_id=creator_id)
@@ -233,10 +238,10 @@ def remove_creator(*, book_id: int, creator_id: int = Body(embed=True), role_id:
                 if not book_creator.roles:
                     book_creator.delete()
             else:
-              raise HTTPException(
-                  status_code=400,
-                  detail="The Role isnt associated with this BookCreator."
-              )
+                raise HTTPException(
+                    status_code=400,
+                    detail="The Role isnt associated with this BookCreator.",
+                )
         else:
             book_creator.delete()
         flush()

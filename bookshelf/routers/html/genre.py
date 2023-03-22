@@ -4,8 +4,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
 
-from bookshelf.controllers.genre import GenreController
 from bookshelf.controllers.book import BookController
+from bookshelf.controllers.genre import GenreController
 from bookshelf.routers.html.utils import CurrentUser, templates
 
 router = APIRouter(prefix="/genres", tags=["Genres"])
@@ -50,9 +50,7 @@ def view_genre(
         return RedirectResponse("/")
     with db_session:
         genre = GenreController.get_genre(genre_id=genre_id)
-        all_books = {
-            x for x in BookController.list_books() if genre not in x.genres
-        }
+        all_books = {x for x in BookController.list_books() if genre not in x.genres}
         book_list = sorted({x.to_model() for x in genre.books})
         return templates.TemplateResponse(
             "view_genre.html",

@@ -56,7 +56,10 @@ def view_creator(
                     roles_dict[role] = set()
                 roles_dict[role].add(entry.book)
         role_list = sorted(
-            [(key.to_model(), sorted({x.to_model() for x in values})) for key, values in roles_dict.items()],
+            [
+                (key.to_model(), sorted({x.to_model() for x in values}))
+                for key, values in roles_dict.items()
+            ],
         )
         return templates.TemplateResponse(
             "view_creator.html",
