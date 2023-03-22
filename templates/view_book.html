@@ -114,6 +114,14 @@
       </span>
       <span>Edit</span>
     </a>
+    {% if current_user.role >= 3 %}
+      <button class="button is-danger" id="delete-button" type="button" onclick="deleteBook()">
+        <span class="icon">
+          <i class="fa-solid fa-trash"></i>
+        </span>
+        <span>Delete</span>
+      </button>
+    {% endif %}
   {% endif %}
   {% if book.is_collected %}
     {% if current_user in book.readers %}
@@ -234,6 +242,24 @@
 {% block js %}
   {{ super() }}
   <script type="text/javascript">
+    {% if current_user.role >= 3 %}
+      function deleteBook(){
+        const caller = "delete-button";
+
+        addLoading(caller);
+        fetch("/api/v0/books/{{ book.book_id }}", {
+          method: "DELETE",
+          headers: headers,
+        }).then((response) => {
+          if (!response.ok){
+            return Promise.reject(response);
+          }
+          window.location = "/books";
+        }).catch((response) => response.json().then((msg) => {
+          alert(`${response.status} ${response.statusText}: ${msg.details}`);
+        })).finally(() => removeLoading(caller));
+      }
+    {% endif %}
     {% if book.is_collected %}
       function discardBook(){
         const caller = "discard-button";

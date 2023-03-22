@@ -41,7 +41,7 @@
           </div>
         </div>
         <!-- endregion -->
-        {{ number_input("Series Number", "series-num") }}
+        {{ number_input("Series Number", "number") }}
         <div class="buttons is-centered">
           <button class="button is-success" id="add-button" type="button" onclick="addBook()">
             <span class="icon">
@@ -84,7 +84,7 @@
           headers: headers,
           body: JSON.stringify({
             "book_id": formDetails["book-id"],
-            "series_num": formDetails["series-num"]
+            "number": formDetails["number"]
           }),
         }).then((response) => {
           if (!response.ok){
