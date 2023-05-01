@@ -2,7 +2,7 @@ __all__ = ["Author"]
 
 from pydantic import Field
 
-from bookshelf.services.open_library.schemas import (
+from bookshelf.open_library.schemas import (
     BaseModel,
     DatetimeResource,
     Resource,

@@ -3,6 +3,7 @@ __all__ = ["BookController"]
 from fastapi import HTTPException
 from pony.orm import flush
 
+from bookshelf import open_library
 from bookshelf.controllers.creator import CreatorController
 from bookshelf.controllers.format import FormatController
 from bookshelf.controllers.genre import GenreController
@@ -12,8 +13,6 @@ from bookshelf.controllers.series import SeriesController
 from bookshelf.controllers.user import UserController
 from bookshelf.database.tables import Book, BookCreator, BookSeries
 from bookshelf.models.book import BookIn, BookSeriesIn
-from bookshelf.services import google_books, open_library
-from bookshelf.settings import Settings
 
 
 class BookController:
@@ -124,16 +123,7 @@ class BookController:
                 return book
             raise HTTPException(status_code=409, detail="Book already exists.")
 
-        settings = Settings()
-        if settings.source.open_library:
-            new_book = open_library.lookup_book(isbn=isbn, open_library_id=edition_id)
-        elif settings.source.google_books:
-            new_book = google_books.lookup_book(isbn=isbn, google_books_id=None)
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="Incorrect config setup, review source settings.",
-            )
+        new_book = open_library.lookup_book(isbn=isbn, open_library_id=edition_id)
         if wisher_id:
             new_book.wisher_ids = [wisher_id]
         return cls.create_book(new_book=new_book)
@@ -143,31 +133,14 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        settings = Settings()
-        if settings.source.open_library:
-            updates = open_library.lookup_book(
-                isbn=book.isbn,
-                open_library_id=book.open_library_id,
-                google_books_id=book.google_books_id,
-            )
-            updates.series = [
-                BookSeriesIn(series_id=x.series.series_id, number=x.number) for x in book.series
-            ]
-        elif settings.source.google_books:
-            updates = google_books.lookup_book(isbn=book.isbn, google_books_id=book.google_books_id)
-            updates.format_id = book.format.format_id if book.format else None
-            updates.identifiers.goodreads_id = book.goodreads_id
-            updates.identifiers.library_thing_id = book.library_thing_id
-            updates.identifiers.open_library_id = book.open_library_id
-            updates.series = [
-                BookSeriesIn(series_id=x.series.series_id, number=x.number) for x in book.series
-            ]
-            updates.subtitle = book.subtitle
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="Incorrect config setup, review source settings.",
-            )
+        updates = open_library.lookup_book(
+            isbn=book.isbn,
+            open_library_id=book.open_library_id,
+            google_books_id=book.google_books_id,
+        )
+        updates.series = [
+            BookSeriesIn(series_id=x.series.series_id, number=x.number) for x in book.series
+        ]
         updates.is_collected = book.is_collected
         updates.reader_ids = [x.user_id for x in book.readers]
         updates.wisher_ids = [x.user_id for x in book.wishers]
@@ -178,27 +151,10 @@ class BookController:
         if not (book := cls.get_book(book_id=book_id)):
             raise HTTPException(status_code=404, detail="Book not found.")
 
-        settings = Settings()
-        if settings.source.open_library:
-            updates = open_library.lookup_book(isbn=book.isbn, open_library_id=book.open_library_id)
-            updates.series = [
-                BookSeriesIn(series_id=x.series.series_id, number=x.number) for x in book.series
-            ]
-        elif settings.source.google_books:
-            updates = google_books.lookup_book(isbn=book.isbn, google_books_id=book.google_books_id)
-            updates.format_id = book.format.format_id if book.format else None
-            updates.identifiers.goodreads_id = book.goodreads_id
-            updates.identifiers.library_thing_id = book.library_thing_id
-            updates.identifiers.open_library_id = book.open_library_id
-            updates.series = [
-                BookSeriesIn(series_id=x.series.series_id, number=x.number) for x in book.series
-            ]
-            updates.subtitle = book.subtitle
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="Incorrect config setup, review source settings.",
-            )
+        updates = open_library.lookup_book(isbn=book.isbn, open_library_id=book.open_library_id)
+        updates.series = [
+            BookSeriesIn(series_id=x.series.series_id, number=x.number) for x in book.series
+        ]
         book.publish_date = updates.publish_date
         book.genres = [GenreController.get_genre(genre_id=x) for x in updates.genre_ids]
         flush()

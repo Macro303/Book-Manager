@@ -65,24 +65,11 @@ class CreatorController:
         if creator := Creator.get(open_library_id=open_library_id):
             return creator
 
-        from bookshelf.services import open_library
-        from bookshelf.settings import Settings
+        from bookshelf import open_library
 
-        settings = Settings()
-        if settings.source.open_library:
-            new_creator = open_library.lookup_creator(open_library_id=open_library_id)
-            if creator := Creator.get(name=new_creator.name):
-                return cls.update_creator(creator_id=creator.creator_id, updates=new_creator)
-        elif settings.source.google_books:
-            raise HTTPException(
-                status_code=400,
-                detail="No creator lookup available for GoogleBooks.",
-            )
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="Incorrect config setup, review source settings.",
-            )
+        new_creator = open_library.lookup_creator(open_library_id=open_library_id)
+        if creator := Creator.get(name=new_creator.name):
+            return cls.update_creator(creator_id=creator.creator_id, updates=new_creator)
         return cls.create_creator(new_creator=new_creator)
 
     @classmethod
@@ -92,20 +79,7 @@ class CreatorController:
         if not creator.open_library_id:
             raise HTTPException(status_code=400, detail="Creator doesn't have an OpenLibrary Id.")
 
-        from bookshelf.services import open_library
-        from bookshelf.settings import Settings
+        from bookshelf import open_library
 
-        settings = Settings()
-        if settings.source.open_library:
-            updates = open_library.lookup_creator(open_library_id=creator.open_library_id)
-        elif settings.source.google_books:
-            raise HTTPException(
-                status_code=400,
-                detail="No creator lookup available for GoogleBooks.",
-            )
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="Incorrect config setup, review source settings.",
-            )
+        updates = open_library.lookup_creator(open_library_id=creator.open_library_id)
         return cls.update_creator(creator_id=creator_id, updates=updates)

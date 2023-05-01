@@ -5,7 +5,7 @@ from datetime import date, datetime
 from pydantic import Field
 
 from bookshelf.console import CONSOLE
-from bookshelf.services.open_library.schemas import (
+from bookshelf.open_library.schemas import (
     BaseModel,
     DatetimeResource,
     Link,

@@ -13,13 +13,13 @@ from requests.exceptions import ConnectionError, HTTPError, JSONDecodeError, Rea
 
 from bookshelf import __version__
 from bookshelf.console import CONSOLE
-from bookshelf.services.open_library.schemas.author import Author
-from bookshelf.services.open_library.schemas.edition import Edition
-from bookshelf.services.open_library.schemas.work import Work
-from bookshelf.services.sqlite_cache import SQLiteCache
+from bookshelf.open_library.schemas.author import Author
+from bookshelf.open_library.schemas.edition import Edition
+from bookshelf.open_library.schemas.work import Work
+from bookshelf.open_library.sqlite_cache import SQLiteCache
 
 MINUTE = 60
-LOGGER = logging.getLogger("bookshelf.services.open_library")
+LOGGER = logging.getLogger(__name__)
 
 
 class OpenLibrary:

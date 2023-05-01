@@ -13,7 +13,7 @@ from bookshelf.models.format import FormatIn
 from bookshelf.models.genre import GenreIn
 from bookshelf.models.publisher import PublisherIn
 from bookshelf.models.role import RoleIn
-from bookshelf.services.open_library.service import OpenLibrary
+from bookshelf.open_library.service import OpenLibrary
 
 
 def lookup_book(
