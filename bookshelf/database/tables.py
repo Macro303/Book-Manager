@@ -200,11 +200,16 @@ class Series(db.Entity):
 
     series_id: int = PrimaryKey(int, auto=True)
     name: str = Required(str, unique=True)
+    is_reading_order: bool = Optional(bool, default=False, sql_default=False)
 
     books: list[BookSeries] = Set(BookSeries)
 
     def to_model(self) -> ModelSeries:
-        return ModelSeries(series_id=self.series_id, name=self.name)
+        return ModelSeries(
+            series_id=self.series_id,
+            name=self.name,
+            is_reading_order=self.is_reading_order,
+        )
 
 
 class User(db.Entity):

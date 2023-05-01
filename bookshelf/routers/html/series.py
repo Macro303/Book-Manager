@@ -34,7 +34,7 @@ def list_series(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "series_list": sorted({x.to_model() for x in series_list}),
-                "filters": {"name": name},
+                "selected": {"name": name},
             },
         )
 

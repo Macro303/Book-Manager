@@ -13,40 +13,36 @@
   <div class="navbar-menu" id="navMenu">
     <div class="navbar-start">
       <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          <span class="icon">
-            <i class="fa-solid fa-file-signature"></i>
-          </span>
-          <span>Creators</span>
-        </a>
+        <a class="navbar-link">Home</a>
         <div class="navbar-dropdown">
-          <a class="navbar-item" href="/creators">
+          <a class="navbar-item" href="/users/{{ current_user.user_id }}">
             <span class="icon">
-              <i class="fa-solid fa-list"></i>
+              <i class="fa-solid fa-user"></i>
             </span>
-            <span>List</span>
+            <span>My Profile</span>
           </a>
-          <a class="navbar-item" href="/roles">
+          <a class="navbar-item" href="/users/{{ current_user.user_id }}/wishlist">
             <span class="icon">
-              <i class="fa-solid fa-tags"></i>
+              <i class="fa-solid fa-star"></i>
             </span>
-            <span>Roles</span>
+            <span>My Wishlist</span>
           </a>
         </div>
       </div>
       <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          <span class="icon">
-            <i class="fa-solid fa-book"></i>
-          </span>
-          <span>Books</span>
-        </a>
+        <a class="navbar-link">Browse</a>
         <div class="navbar-dropdown">
           <a class="navbar-item" href="/books">
             <span class="icon">
-              <i class="fa-solid fa-list"></i>
+              <i class="fa-solid fa-book"></i>
             </span>
-            <span>List</span>
+            <span>Books</span>
+          </a>
+          <a class="navbar-item" href="/creators">
+            <span class="icon">
+              <i class="fa-solid fa-file-signature"></i>
+            </span>
+            <span>Creators</span>
           </a>
           <a class="navbar-item" href="/formats">
             <span class="icon">
@@ -66,39 +62,23 @@
             </span>
             <span>Publishers</span>
           </a>
-        </div>
-      </div>
-      <a class="navbar-item" href="/series">
-        <span class="icon">
-          <i class="fa-solid fa-layer-group"></i>
-        </span>
-        <span>Series</span>
-      </a>
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          <span class="icon">
-            <i class="fa-solid fa-users"></i>
-          </span>
-          <span>Users</span>
-        </a>
-        <div class="navbar-dropdown">
+          <a class="navbar-item" href="/roles">
+            <span class="icon">
+              <i class="fa-solid fa-tags"></i>
+            </span>
+            <span>Roles</span>
+          </a>
+          <a class="navbar-item" href="/series">
+            <span class="icon">
+              <i class="fa-solid fa-layer-group"></i>
+            </span>
+            <span>Series</span>
+          </a>
           <a class="navbar-item" href="/users">
             <span class="icon">
-              <i class="fa-solid fa-list"></i>
+              <i class="fa-solid fa-users"></i>
             </span>
-            <span>List</span>
-          </a>
-          <a class="navbar-item" href="/users/{{ current_user.user_id }}">
-            <span class="icon">
-              <i class="fa-solid fa-user"></i>
-            </span>
-            <span>My Profile</span>
-          </a>
-          <a class="navbar-item" href="/users/{{ current_user.user_id }}/wishlist">
-            <span class="icon">
-              <i class="fa-solid fa-star"></i>
-            </span>
-            <span>My Wishlist</span>
+            <span>Users</span>
           </a>
         </div>
       </div>
@@ -106,7 +86,7 @@
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <button class="button is-danger" id="sign-out-button" type="button" onclick="signOut()">
+          <button class="button is-warning" id="sign-out-button" type="button" onclick="signOut()">
             <span class="icon">
               <i class="fa-solid fa-right-from-bracket"></i>
             </span>

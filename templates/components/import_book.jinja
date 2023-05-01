@@ -1,13 +1,10 @@
 {% from "components/forms.jinja" import input %}
 
-{% macro import_book(show_book_depository=False) %}
+{% macro import_book() %}
   <div class="box">
     <h5 class="title is-5 has-text-info-light">Import Book</h5>
     <form id="import-form" onsubmit="return false;">
       {{ input("Isbn", "isbn") }}
-      {% if show_book_depository %}
-        {{ input("Book Depository Url", "book-depository-url") }}
-      {% endif %}
       {{ input("OpenLibrary Url", "open-library-url") }}
       <div class="buttons is-centered">
         <button class="button is-success" id="import-button" onclick="importBook()" type="button">

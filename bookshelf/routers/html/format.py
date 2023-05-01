@@ -33,7 +33,7 @@ def list_formats(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "format_list": sorted({x.to_model() for x in format_list}),
-                "filters": {"name": name},
+                "selected": {"name": name},
             },
         )
 

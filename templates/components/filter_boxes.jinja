@@ -1,86 +1,96 @@
 {% from "components/forms.jinja" import input %}
 
-{% macro book(filters, action, show_read=False) %}
+{% macro book(options, selected, action="/books", show_read=False) %}
   <div class="box">
     <h5 class="title is-5 has-text-info-light">Filter Books</h5>
     <form accept-charset="UTF-8" action="{{ action }}" method="GET">
+      <!-- region Creator -->
       <div class="field">
         <label class="label has-text-info">Creator</label>
         <div class="control is-expanded">
           <div class="select is-fullwidth">
             <select name="creator_id">
-              <option value=0{% if not filters['creator_id'] %} selected{% endif %}>Select Creator</option>
-              {% for _creator in creator_list %}
-                <option value={{ _creator.creator_id }}{% if filters['creator_id'] == _creator.creator_id %} selected{% endif %}>{{ _creator.name }}</option>
+              <option value=0{% if not selected['creator_id'] %} selected{% endif %}>Select Creator</option>
+              {% for _creator in options['creators'] %}
+                <option value={{ _creator.creator_id }}{% if selected['creator_id'] == _creator.creator_id %} selected{% endif %}>{{ _creator.name }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
       </div>
+      <!-- endregion -->
+      <!-- region Format -->
       <div class="field">
         <label class="label has-text-info">Format</label>
         <div class="control is-expanded">
           <div class="select is-fullwidth">
             <select name="format_id">
-              <option value=0{% if not filters['format_id'] %} selected{% endif %}>Select Format</option>
-              {% for _format in format_list %}
-                <option value={{ _format.format_id }}{% if filters['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name }}</option>
+              <option value=0{% if not selected['format_id'] %} selected{% endif %}>Select Format</option>
+              {% for _format in options['formats'] %}
+                <option value={{ _format.format_id }}{% if selected['format_id'] == _format.format_id %} selected{% endif %}>{{ _format.name }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
       </div>
+      <!-- endregion -->
+      <!-- region Genre -->
       <div class="field">
         <label class="label has-text-info">Genre</label>
         <div class="control is-expanded">
           <div class="select is-fullwidth">
             <select name="genre_id">
-              <option value=0{% if not filters['genre_id'] %} selected{% endif %}>Select Genre</option>
-              {% for _genre in genre_list %}
-                <option value={{ _genre.genre_id }}{% if filters['genre_id'] == _genre.genre_id %} selected{% endif %}>{{ _genre.name }}</option>
+              <option value=0{% if not selected['genre_id'] %} selected{% endif %}>Select Genre</option>
+              {% for _genre in options['genres'] %}
+                <option value={{ _genre.genre_id }}{% if selected['genre_id'] == _genre.genre_id %} selected{% endif %}>{{ _genre.name }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
       </div>
+      <!-- endregion -->
       {% if show_read %}
         <div class="field">
           <label class="label has-text-info">Show Read</label>
           <div class="control is-expanded">
             <label class="label">
-              <input name="read" type="checkbox"{% if filters['read'] %} checked{% endif %}>
-              Only Showing {% if filters['read'] %}Read{% else %}Unread{% endif %}
+              <input name="read" type="checkbox"{% if selected['read'] %} checked{% endif %}>
+              Only Showing {% if selected['read'] %}Read{% else %}Unread{% endif %}
             </label>
           </div>
         </div>
       {% endif %}
+      <!-- region Publisher -->
       <div class="field">
         <label class="label has-text-info">Publisher</label>
         <div class="control is-expanded">
           <div class="select is-fullwidth">
             <select name="publisher_id">
-              <option value=0{% if not filters['publisher_id'] %} selected{% endif %}>Select Publisher</option>
-              {% for _publisher in publisher_list %}
-                <option value={{ _publisher.publisher_id }}{% if filters['publisher_id'] == _publisher.publisher_id %} selected{% endif %}>{{ _publisher.name }}</option>
+              <option value=0{% if not selected['publisher_id'] %} selected{% endif %}>Select Publisher</option>
+              {% for _publisher in options['publishers'] %}
+                <option value={{ _publisher.publisher_id }}{% if selected['publisher_id'] == _publisher.publisher_id %} selected{% endif %}>{{ _publisher.name }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
       </div>
+      <!-- endregion -->
+      <!-- region Series -->
       <div class="field">
         <label class="label has-text-info">Series</label>
         <div class="control is-expanded">
           <div class="select is-fullwidth">
             <select name="series_id">
-              <option value=0{% if not filters['series_id'] %} selected{% endif %}>Select Series</option>
-              {% for _series in series_list %}
-                <option value={{ _series.series_id }}{% if filters['series_id'] == _series.series_id %} selected{% endif %}>{{ _series.name }}</option>
+              <option value=0{% if not selected['series_id'] %} selected{% endif %}>Select Series</option>
+              {% for _series in options['series'] %}
+                <option value={{ _series.series_id }}{% if selected['series_id'] == _series.series_id %} selected{% endif %}>{{ _series.name }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
       </div>
-      {{ input("Title", "title", value=filters['title'] or '') }}
+      <!-- endregion -->
+      {{ input("Title", "title", value=selected['title'] or '') }}
       <div class="buttons is-centered">
         <button class="button is-info">
           <span class="icon">
@@ -95,11 +105,11 @@
 
 
 
-{% macro creator(filters) %}
+{% macro name_filter(title, action, selected) %}
   <div class="box">
-    <h1 class="title is-5 has-text-info-light">Filter Creators</h1>
-    <form accept-charset="UTF-8" action="/creators" method="GET">
-      {{ input("Name", "name", value=filters['name'] or '') }}
+    <h1 class="title is-5 has-text-info-light">Filter {{ title }}</h1>
+    <form accept-charset="UTF-8" action={{ action }} method="GET">
+      {{ input(label="Name", name="name", value=selected['name'] or '') }}
       <div class="buttons is-centered">
         <button class="button is-info">
           <span class="icon">
@@ -114,106 +124,11 @@
 
 
 
-{% macro format(filters) %}
-  <div class="box">
-    <h1 class="title is-5 has-text-info-light">Filter Formats</h1>
-    <form accept-charset="UTF-8" action="/formats" method="GET">
-      {{ input("Name", "name", value=filters['name'] or '') }}
-      <div class="buttons is-centered">
-        <button class="button is-info">
-          <span class="icon">
-            <i class="fa-solid fa-filter"></i>
-          </span>
-          <span>Filter</span>
-        </button>
-      </div>
-    </form>
-  </div>
-{% endmacro %}
-
-
-
-{% macro genre(filters) %}
-  <div class="box">
-    <h1 class="title is-5 has-text-info-light">Filter Genres</h1>
-    <form accept-charset="UTF-8" action="/genres" method="GET">
-      {{ input("Name", "name", value=filters['name'] or '') }}
-      <div class="buttons is-centered">
-        <button class="button is-info">
-          <span class="icon">
-            <i class="fa-solid fa-filter"></i>
-          </span>
-          <span>Filter</span>
-        </button>
-      </div>
-    </form>
-  </div>
-{% endmacro %}
-
-
-
-{% macro publisher(filters) %}
-  <div class="box">
-    <h1 class="title is-5 has-text-info-light">Filter Publishers</h1>
-    <form accept-charset="UTF-8" action="/publishers" method="GET">
-      {{ input("Name", "name", value=filters['name'] or '') }}
-      <div class="buttons is-centered">
-        <button class="button is-info">
-          <span class="icon">
-            <i class="fa-solid fa-filter"></i>
-          </span>
-          <span>Filter</span>
-        </button>
-      </div>
-    </form>
-  </div>
-{% endmacro %}
-
-
-
-{% macro role(filters) %}
-  <div class="box">
-    <h1 class="title is-5 has-text-info-light">Filter Roles</h1>
-    <form accept-charset="UTF-8" action="/roles" method="GET">
-      {{ input("Name", "name", value=filters['name'] or '') }}
-      <div class="buttons is-centered">
-        <button class="button is-info">
-          <span class="icon">
-            <i class="fa-solid fa-filter"></i>
-          </span>
-          <span>Filter</span>
-        </button>
-      </div>
-    </form>
-  </div>
-{% endmacro %}
-
-
-
-{% macro series(filters) %}
-  <div class="box">
-    <h1 class="title is-5 has-text-info-light">Filter Series</h1>
-    <form accept-charset="UTF-8" action="/series" method="GET">
-      {{ input("Name", "name", value=filters['name'] or '') }}
-      <div class="buttons is-centered">
-        <button class="button is-info">
-          <span class="icon">
-            <i class="fa-solid fa-filter"></i>
-          </span>
-          <span>Filter</span>
-        </button>
-      </div>
-    </form>
-  </div>
-{% endmacro %}
-
-
-
-{% macro user(filters) %}
+{% macro user(selected) %}
   <div class="box">
     <h1 class="title is-5 has-text-info-light">Filter Users</h1>
     <form accept-charset="UTF-8" action="/users" method="GET">
-      {{ input("Username", "username", value=filters['username'] or '') }}
+      {{ input("Username", "username", value=selected['username'] or '') }}
       <div class="buttons is-centered">
         <button class="button is-info">
           <span class="icon">

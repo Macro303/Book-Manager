@@ -33,7 +33,7 @@ def list_publishers(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "publisher_list": sorted({x.to_model() for x in publisher_list}),
-                "filters": {"name": name},
+                "selected": {"name": name},
             },
         )
 

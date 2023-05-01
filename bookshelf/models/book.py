@@ -68,6 +68,8 @@ class Book(BaseBook):
         return (self.publish_date <= date.today()) if self.publish_date else False
 
     def get_first_series(self) -> Series | None:
+        if temp := sorted({x for x in self.series if not x.is_reading_order}):
+            return temp[0]
         if temp := sorted(self.series):
             return temp[0]
         return None

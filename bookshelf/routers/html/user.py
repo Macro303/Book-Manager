@@ -9,6 +9,7 @@ from pony.orm import db_session
 from bookshelf.controllers.book import BookController
 from bookshelf.controllers.creator import CreatorController
 from bookshelf.controllers.format import FormatController
+from bookshelf.controllers.genre import GenreController
 from bookshelf.controllers.publisher import PublisherController
 from bookshelf.controllers.series import SeriesController
 from bookshelf.controllers.user import UserController
@@ -43,7 +44,7 @@ def list_users(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "user_list": sorted({x.to_model() for x in user_list}),
-                "filters": {"username": username},
+                "selected": {"username": username},
             },
         )
 
@@ -62,6 +63,18 @@ def view_user(*, request: Request, user_id: int, current_user: CurrentUser):
                 key=lambda x: (x.read_date or x.book.publish_date or date(2000, 1, 1), x.book),
             )[:5]
         ]
+        wishlist_books = {
+            *user.wished_books,
+            *{x for x in BookController.list_books() if not x.is_collected and not x.wishers},
+        }
+        wishlist_count = len(wishlist_books)
+        read_count = len(user.read_books)
+        unread_books = {
+            x
+            for x in BookController.list_books()
+            if x.is_collected and user not in {y.user for y in x.readers}
+        }
+        unread_count = len(unread_books)
         return templates.TemplateResponse(
             "view_user.html",
             {
@@ -69,6 +82,11 @@ def view_user(*, request: Request, user_id: int, current_user: CurrentUser):
                 "current_user": current_user.to_model(),
                 "user": user.to_model(),
                 "last_read": last_read,
+                "stats": {
+                    "wishlist": wishlist_count,
+                    "unread": unread_count,
+                    "read": read_count,
+                },
             },
         )
 
@@ -101,6 +119,7 @@ def user_wishlist(
     current_user: CurrentUser,
     creator_id: int = 0,
     format_id: int = 0,
+    genre_id: int = 0,
     publisher_id: int = 0,
     series_id: int = 0,
     title: str = "",
@@ -125,6 +144,12 @@ def user_wishlist(
             else:
                 format = FormatController.get_format(format_id=format_id)
                 wishlist = [x for x in wishlist if x.format == format]
+        if genre_id:
+            if genre_id == -1:
+                wishlist = [x for x in wishlist if not x.genres]
+            else:
+                genre = GenreController.get_genre(genre_id=genre_id)
+                wishlist = [x for x in wishlist if genre == x.genre]
         if publisher_id:
             if publisher_id == -1:
                 wishlist = [x for x in wishlist if not x.publisher]
@@ -159,16 +184,17 @@ def user_wishlist(
                 "user": user.to_model(),
                 "wishlist": sorted({x.to_model() for x in wishlist}),
                 "options": {
-                    "creator_list": sorted(
+                    "creators": sorted(
                         {y.creator.to_model() for x in all_wishlist for y in x.creators},
                     ),
-                    "format_list": sorted(
+                    "formats": sorted(
                         {
                             x.format.to_model() if x.format else Format(format_id=-1, name="None")
                             for x in all_wishlist
                         },
                     ),
-                    "publisher_list": sorted(
+                    "genres": sorted({y.to_model() for x in all_wishlist for y in x.genres}),
+                    "publishers": sorted(
                         {
                             x.publisher.to_model()
                             if x.publisher
@@ -176,13 +202,12 @@ def user_wishlist(
                             for x in all_wishlist
                         },
                     ),
-                    "series_list": sorted(
-                        {y.series.to_model() for x in all_wishlist for y in x.series},
-                    ),
+                    "series": sorted({y.series.to_model() for x in all_wishlist for y in x.series}),
                 },
-                "filters": {
+                "selected": {
                     "creator_id": creator_id,
                     "format_id": format_id,
+                    "genre_id": genre_id,
                     "publisher_id": publisher_id,
                     "series_id": series_id,
                     "title": title,

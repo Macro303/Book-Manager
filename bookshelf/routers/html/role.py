@@ -35,7 +35,7 @@ def list_roles(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "role_list": sorted({x.to_model() for x in role_list}),
-                "filters": {"name": name},
+                "selected": {"name": name},
             },
         )
 

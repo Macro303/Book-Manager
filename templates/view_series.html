@@ -1,7 +1,9 @@
 {% extends "view_base.jinja" %}
 {% from "components/list_boxes/view.jinja" import book as view_book %}
+{% from "components/list_boxes/edit.jinja" import book as edit_book %}
 {% from "components/forms.jinja" import input, number_input %}
 {% block title %}{{ series.name }}{% endblock %}
+{% block subtitle %}{% if series.is_reading_order %}Reading Order{% endif %}{% endblock %}
 {% block action_buttons %}
   {% if current_user.role >= 2 %}
     <a class="button is-warning" href="/series/{{ series.series_id }}/edit">
@@ -58,7 +60,11 @@
 {% block list_content %}
   {% for entry, number in book_list if book_list %}
     <div class="adjustable-column column has-text-centered">
-      {{ view_book(obj=entry, series=(series.name, number)) }}
+      {% if current_user.role >= 2 %}
+        {{ edit_book(obj=entry, series=(series.name, number)) }}
+      {% else %}
+        {{ view_book(obj=entry, series=(series.name, number)) }}
+      {% endif %}
     </div>
   {% else %}
     <div class="column has-text-centered">

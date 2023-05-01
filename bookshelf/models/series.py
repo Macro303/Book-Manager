@@ -5,6 +5,7 @@ from bookshelf.models._base import BaseModel
 
 class BaseSeries(BaseModel):
     name: str
+    is_reading_order: bool = False
 
 
 class Series(BaseSeries):

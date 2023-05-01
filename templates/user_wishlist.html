@@ -5,9 +5,9 @@
 {% block title %}{{ user.username }}'s Wishlist{% endblock %}
 {% block sidebar %}
   {{ super() }}
-  {{ filter_box(filters=filters, action="/users/" ~ user.user_id ~ "/wishlist") }}
+  {{ filter_box(options=options, selected=selected, action="/users/" ~ user.user_id ~ "/wishlist") }}
   {% if current_user == user %}
-    {{ import_book(show_book_depository=True) }}
+    {{ import_book() }}
   {% endif %}
 {% endblock %}
 {% block list_content %}
@@ -32,13 +32,6 @@
       let formDetails = Object.fromEntries(new FormData(importForm));
       console.log(formDetails);
 
-      let book_depository_url = formDetails["book-depository-url"];
-      if (book_depository_url){
-        let segments = new URL(book_depository_url).pathname.split('/');
-        book_depository_url = segments.pop() || segments.pop();
-      }
-      let isbn = formDetails["isbn"] || book_depository_url;
-
       let edition_id = null;
       let open_library_url = formDetails["open-library-url"];
       if (open_library_url){
@@ -52,7 +45,7 @@
         headers: headers,
         body: JSON.stringify({
           "edition_id": edition_id || null,
-          "isbn": isbn || null,
+          "isbn": formDetails["isbn"] || null,
           "wisher_id": {{ user.user_id }}
         }),
       }).then((response) => {

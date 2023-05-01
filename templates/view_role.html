@@ -1,5 +1,6 @@
 {% extends "view_base.jinja" %}
 {% from "components/list_boxes/view.jinja" import book as view_book %}
+{% from "components/list_boxes/edit.jinja" import book as edit_book %}
 {% from "components/forms.jinja" import input %}
 {% block title %}{{ role.name }}{% endblock %}
 {% block action_buttons %}
@@ -76,7 +77,11 @@
         <div class="columns is-multiline is-centered">
           {% for entry in book_list %}
             <div class="adjustable-column column has-text-centered">
-              {{ view_book(obj=entry) }}
+              {% if current_user.role >= 2 %}
+                {{ edit_book(obj=entry) }}
+              {% else %}
+                {{ view_book(obj=entry) }}
+              {% endif %}
             </div>
           {% endfor %}
         </div>

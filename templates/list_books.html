@@ -5,7 +5,7 @@
 {% block title %}Books{% endblock %}
 {% block sidebar %}
   {{ super() }}
-  {{ filter_box(filters=filters, action="/books", show_read=True) }}
+  {{ filter_box(options=options, selected=selected, action="/books", show_read=True) }}
   {% if current_user.role >= 1 %}
     {{ import_book() }}
   {% endif %}

@@ -1,11 +1,11 @@
 {% extends "list_base.jinja" %}
 {% from "components/create_boxes.jinja" import series as create_box %}
-{% from "components/filter_boxes.jinja" import series as filter_box %}
+{% from "components/filter_boxes.jinja" import name_filter as filter_box %}
 {% from "components/list_boxes/view.jinja" import series as list_box %}
 {% block title %}Series{% endblock %}
 {% block sidebar %}
   {{ super() }}
-  {{ filter_box(filters=filters) }}
+  {{ filter_box(title="Series", action="/series", selected=selected) }}
   {% if current_user.role >= 1 %}
     {{ create_box() }}
   {% endif %}

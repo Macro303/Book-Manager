@@ -34,7 +34,7 @@ def list_genres(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "genre_list": sorted({x.to_model() for x in genre_list}),
-                "filters": {"name": name},
+                "selected": {"name": name},
             },
         )
 

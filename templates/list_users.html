@@ -5,7 +5,7 @@
 {% block title %}Users{% endblock %}
 {% block sidebar %}
   {{ super() }}
-  {{ filter_box(filters=filters) }}
+  {{ filter_box(selected=selected) }}
   {% if current_user.role >= 1 %}
     {{ create_box() }}
   {% endif %}

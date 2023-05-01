@@ -33,7 +33,7 @@ def list_creators(
                 "request": request,
                 "current_user": current_user.to_model(),
                 "creator_list": sorted({x.to_model() for x in creator_list}),
-                "filters": {"name": name},
+                "selected": {"name": name},
             },
         )
 

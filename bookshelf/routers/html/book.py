@@ -1,6 +1,5 @@
 __all__ = ["router"]
 
-
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pony.orm import db_session
@@ -97,17 +96,17 @@ def list_books(
                 "current_user": current_user.to_model(),
                 "book_list": sorted({x.to_model() for x in book_list}),
                 "options": {
-                    "creator_list": sorted(
+                    "creators": sorted(
                         {y.creator.to_model() for x in all_books for y in x.creators},
                     ),
-                    "format_list": sorted(
+                    "formats": sorted(
                         {
                             x.format.to_model() if x.format else Format(format_id=-1, name="None")
                             for x in all_books
                         },
                     ),
-                    "genre_list": sorted({y.to_model() for x in all_books for y in x.genres}),
-                    "publisher_list": sorted(
+                    "genres": sorted({y.to_model() for x in all_books for y in x.genres}),
+                    "publishers": sorted(
                         {
                             x.publisher.to_model()
                             if x.publisher
@@ -115,11 +114,9 @@ def list_books(
                             for x in all_books
                         },
                     ),
-                    "series_list": sorted(
-                        {y.series.to_model() for x in all_books for y in x.series},
-                    ),
+                    "series": sorted({y.series.to_model() for x in all_books for y in x.series}),
                 },
-                "filters": {
+                "selected": {
                     "creator_id": creator_id,
                     "format_id": format_id,
                     "genre_id": genre_id,
@@ -138,9 +135,24 @@ def view_book(*, request: Request, book_id: int, current_user: CurrentUser):
         return RedirectResponse("/")
     with db_session:
         book = BookController.get_book(book_id=book_id)
+        role_dict = {}
+        for entry in book.creators:
+            for role in entry.roles:
+                if role not in role_dict:
+                    role_dict[role] = set()
+                role_dict[role].add(entry.creator)
+        role_dict = {
+            key.to_model(): sorted({x.to_model() for x in role_dict[key]})
+            for key in sorted(role_dict.keys())
+        }
         return templates.TemplateResponse(
             "view_book.html",
-            {"request": request, "current_user": current_user.to_model(), "book": book.to_model()},
+            {
+                "request": request,
+                "current_user": current_user.to_model(),
+                "book": book.to_model(),
+                "role_dict": role_dict,
+            },
         )
 
 

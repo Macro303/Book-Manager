@@ -3,6 +3,15 @@
 {% block title %}Edit Series{% endblock %}
 {% block form %}
   {{ input("Name", "name", value=series.name) }}
+  <div class="field">
+    <label class="label has-text-info">Reading Order</label>
+    <div class="control is-expanded">
+      <label class="label">
+        <input name="reading-order" type="checkbox"{% if series.is_reading_order %} checked{% endif %}>
+        Series is {% if not series.is_reading_order %}not {% endif %}a reading order.
+      </label>
+    </div>
+  </div>
 {% endblock %}
 {% block action_buttons %}
   <a class="button is-success" id="save-button" onclick="saveSeries()" type="button">
@@ -26,6 +35,7 @@
         headers: headers,
         body: JSON.stringify({
           "name": formDetails["name"],
+          "is_reading_order": formDetails["reading-order"] === "on" ? "True" : "False"
         }),
       }).then((response) => {
         if (!response.ok){

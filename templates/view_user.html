@@ -3,8 +3,22 @@
 {% block title %}{{ user.username }}{% endblock %}
 {% block image %}
   <figure class="image is-256x256 is-inline-block">
-    <img class="profile-large is-rounded" loading="lazy" src="{{ user.image_url or '/static/img/logo.png' }}" />
+    <img class="profile-large" loading="lazy" src="{{ user.image_url or '/static/img/logo.png' }}" />
   </figure>
+{% endblock %}
+{% block details %}
+  <div class="box">
+    <h4 class="subtitle is-4 has-text-centered has-text-info-light">Stats</h4>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info">Wishlist:</strong> {{ stats.wishlist }}</p>
+    </div>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info">Unread:</strong> {{ stats.unread }}</p>
+    </div>
+    <div class="block">
+      <p><strong class="subtitle is-size-5 has-text-info">Read:</strong> {{ stats.read }}</p>
+    </div>
+  </div>
 {% endblock %}
 {% block action_buttons %}
   {% if current_user.user_id == user.user_id or (current_user.role >= 4 and current_user.role > user.role) %}
@@ -21,7 +35,7 @@
       <span>Delete</span>
     </button>
   {% endif %}
-  <a class="button is-link" href="/users/{{ user.user_id }}/wishlist">
+  <a class="button is-info" href="/users/{{ user.user_id }}/wishlist">
     <span class="icon">
       <i class="fa-solid fa-star"></i>
     </span>
