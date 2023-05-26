@@ -10,7 +10,8 @@ import java.util.*
 class Settings private constructor(
     var databaseName: String = "bookshelf-java.sqlite",
     var websiteHost: String = "127.0.0.1",
-    var websitePort: Int = 8003
+    var websitePort: Int = 8003,
+    var websiteDevelopment: Boolean = true
 ) {
     fun save(): Settings {
         try {
@@ -19,6 +20,7 @@ class Settings private constructor(
                 properties.setProperty("database.name", databaseName)
                 properties.setProperty("website.host", websiteHost)
                 properties.setProperty("website.port", websitePort.toString())
+                properties.setProperty("website.development", websiteDevelopment.toString())
                 properties.store(stream, null)
             }
         } catch (ioe: IOException) {
@@ -45,6 +47,7 @@ class Settings private constructor(
                     settings.databaseName = properties.getProperty("database.name")
                     settings.websiteHost = properties.getProperty("website.host")
                     settings.websitePort = properties.getProperty("website.port").toInt()
+                    settings.websiteDevelopment = properties.getProperty("website.development").toBoolean()
                     return settings.save()
                 }
             } catch (ioe: IOException) {

@@ -1,6 +1,5 @@
-@import github.buriedincode.bookshelf.models.Genre
-@import gg.jte.support.ForSupport
-@param genre: Genre
+@import github.buriedincode.bookshelf.models.User
+@param user: User
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -19,37 +18,68 @@
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">${genre.title}</h1>
+                <h1 class="title is-1">${user.username}</h1>
             </header>
+            <div class="columns">
+                <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
+                    <figure class="image is-256x256 is-inline-block">
+                        @if(user.imageUrl == null)
+                            <img class="profile-large" loading="lazy" src="/static/img/logo.png" />
+                        @else
+                            <img class="profile-large" loading="lazy" src="${user.imageUrl}" />
+                        @endif
+                    </figure>
+                </div>
+                <div class="column">
+                    <div class="box"> 
+                        <h4 class="subtitle is-4 has-text-centered has-text-info-light">Stats</h4> 
+                        <div class="block"> 
+                            <p><strong class="subtitle is-size-5 has-text-info">Wishlist:</strong> ${user.wishedBooks.count()}</p> 
+                        </div> 
+                        <div class="block"> 
+                            <p><strong class="subtitle is-size-5 has-text-info">Unread:</strong> -1</p> 
+                        </div> 
+                        <div class="block"> 
+                            <p><strong class="subtitle is-size-5 has-text-info">Read:</strong> ${user.readBooks.count()}</p> 
+                        </div> 
+                    </div>
+                </div>
+            </div>
             <div class="buttons is-multiline is-centered">
-                <a class="button is-warning" href="/genres/${genre.id.value}/edit">
+                <a class="button is-warning" href="/users/${user.id.value}/edit">
                     <span class="icon">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </span>
                     <span>Edit</span>
                 </a>
-                <button class="button is-danger" id="delete-genre-button" onclick="deleteGenre()" type="button">
+                <button class="button is-danger" id="delete-user-button" onclick="deleteUser()" type="button">
                     <span class="icon">
                         <i class="fa-solid fa-trash"></i>
                     </span>
                     <span>Delete</span>
                 </button>
+                <a class="button is-info" href="/users/${user.id.value}/wishlist">
+                    <span class="icon">
+                        <i class="fa-solid fa-star"></i>
+                    </span>
+                    <span>Wishlist</span>
+                </a>
             </div>
             <div class="columns">
                 <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
                     @template.components.settings_box()
                 </div>
                 <div class="column">
-                    <h3 class="subtitle is-3 has-text-primary-dark">Books</h3>
+                    <h3 class="subtitle is-3 has-text-primary-dark">Last Read Books</h3>
                     <div class="columns is-multiline is-centered">
-                        @if(genre.books.empty())
+                        @if(user.readBooks.empty())
                             <div class="column has-text-centered">
                                 <div class="box">
-                                    <h5 class="title is-5 has-text-danger-light">No Books have this genre.</h5>
+                                    <h5 class="title is-5 has-text-danger-light">No Books have been read by this user.</h5>
                                 </div>
                             </div>
                         @else
-                            @for(entry in genre.books)
+                            @for(entry in user.readBooks)
                                 <div class="adjustable-column column has-text-centered">
                                     @template.components.view_box.book(entry = entry)
                                 </div>

@@ -64,10 +64,10 @@ object SeriesApiRouter : Logging {
                 BookSeries.new {
                     book = _book
                     series = result
-                    number = it.number
+                    number = if(it.number == 0) null else it.number
                 }
             else
-                bookSeries.number = it.number
+                bookSeries.number = if(it.number == 0) null else it.number
         }
 
         ctx.status(HttpStatus.CREATED).json(result.toJson(showAll = true))
@@ -136,10 +136,10 @@ object SeriesApiRouter : Logging {
                 BookSeries.new {
                     book = _book
                     series = result
-                    number = it.number
+                    number = if(it.number == 0) null else it.number
                 }
             else
-                bookSeries.number = it.number
+                bookSeries.number = if(it.number == 0) null else it.number
         }
 
         ctx.json(result.toJson(showAll = true))

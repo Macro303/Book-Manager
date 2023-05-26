@@ -4,6 +4,7 @@ plugins {
     application
     id("com.github.ben-manes.versions") version "0.46.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.18"
+    id("gg.jte.gradle") version "2.3.2"
 }
 
 group = "github.buriedincode"
@@ -53,4 +54,16 @@ kotlin {
 
 application {
     mainClass.set("github.buriedincode.bookshelf.AppKt")
+}
+
+jte {
+    precompile()
+}
+
+tasks.jar {
+    dependsOn(tasks.precompileJte)
+    from(fileTree("jte-classes") {
+        include("**/*.class")
+        include("**/*.bin") // Only required if you use binary templates
+    })
 }

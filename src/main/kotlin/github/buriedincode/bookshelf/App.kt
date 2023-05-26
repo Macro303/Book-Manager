@@ -15,11 +15,17 @@ import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import org.apache.logging.log4j.kotlin.logger
+import gg.jte.resolve.DirectoryCodeResolver
+import gg.jte.TemplateEngine
+import gg.jte.ContentType
+import io.javalin.rendering.template.JavalinJte
+import java.nio.file.Path
 
 private const val VERSION = "0.0.0"
 
 fun main() {
     val logger = logger("github.buriedincode.bookshelf.App")
+    JavalinJte.init(templateEngine = createTemplateEngine())
     val app = Javalin.create {
         it.requestLogger.http { ctx, ms ->
             logger.info("${ctx.method()} - ${ctx.path()} - ${ctx.statusCode()} - ${ctx.ip()} => ${ms}ms")
@@ -93,6 +99,7 @@ fun main() {
                 path("{user-id}") {
                     get(UserHtmlRouter::viewEndpoint)
                     get("edit", UserHtmlRouter::editEndpoint)
+                    get("wishlist", UserHtmlRouter::wishlistEndpoint)
                 }
             }
         }
@@ -147,4 +154,13 @@ fun main() {
         }
     }
     app.start(Settings.INSTANCE.websiteHost, Settings.INSTANCE.websitePort)
+}
+
+private fun createTemplateEngine(): TemplateEngine {
+    return if (Settings.INSTANCE.websiteDevelopment) {
+        val codeResolver = DirectoryCodeResolver(Path.of("src", "main", "jte"))
+        TemplateEngine.create(codeResolver, ContentType.Html)
+    } else {
+        TemplateEngine.createPrecompiled(Path.of("jte-classes"), ContentType.Html)
+    }
 }
