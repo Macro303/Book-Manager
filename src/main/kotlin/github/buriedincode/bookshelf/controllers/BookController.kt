@@ -49,13 +49,13 @@ object BookController : Logging {
         try {
             input = ctx.bodyAsClass<BookInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
         val result = Book.new {
             description = input.description
             format = input.format
             genres = SizedCollection(input.genreIds.map {
-                Genre.findById(id = it) ?: throw BadRequestResponse("Invalid Genre Id")
+                Genre.findById(id = it) ?: throw NotFoundResponse(message = "Genre not found")
             })
             goodreadsId = input.goodreadsId
             googleBooksId = input.googleBooksId
@@ -65,18 +65,20 @@ object BookController : Logging {
             libraryThingId = input.libraryThingId
             openLibraryId = input.openLibraryId
             publishDate = input.publishDate
-            publisher = input.publisherId?.let { Publisher.findById(id = it) ?: throw BadRequestResponse("Invalid Publisher Id") }
+            publisher = input.publisherId?.let {
+                Publisher.findById(id = it) ?: throw NotFoundResponse(message = "Publisher not found")
+            }
             readers = SizedCollection(input.readerIds.map {
-                User.findById(id = it) ?: throw BadRequestResponse(message = "Invalid User Id")
+                User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
             })
             subtitle = input.subtitle
             title = input.title
             wishers = SizedCollection(input.wisherIds.map {
-                User.findById(id = it) ?: throw BadRequestResponse(message = "Invalid User Id")
+                User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
             })
         }
         input.series.forEach {
-            val _series = Series.findById(id = it.seriesId) ?: throw BadRequestResponse(message = "Invalid Series Id")
+            val _series = Series.findById(id = it.seriesId) ?: throw NotFoundResponse(message = "Series not found")
             val bookSeries = BookSeries.find {
                 (bookCol eq result.id) and (seriesCol eq _series.id)
             }.firstOrNull()
@@ -109,8 +111,9 @@ object BookController : Logging {
     )
     fun getBook(ctx: Context): Unit = Utils.query(description = "Get Book") {
         val bookId = ctx.pathParam("book-id")
-        val result = bookId.toLongOrNull()?.let { Book.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Book Id")
+        val result = bookId.toLongOrNull()?.let {
+            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
+        } ?: throw BadRequestResponse(message = "Invalid Book Id")
         ctx.json(result.toJson(showAll = true))
     }
 
@@ -134,14 +137,15 @@ object BookController : Logging {
         try {
             input = ctx.bodyAsClass<BookInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
-        val result = bookId.toLongOrNull()?.let { Book.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Book Id")
+        val result = bookId.toLongOrNull()?.let {
+            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
+        } ?: throw BadRequestResponse(message = "Invalid Book Id")
         result.description = input.description
         result.format = input.format
         result.genres = SizedCollection(input.genreIds.map {
-            Genre.findById(id = it) ?: throw BadRequestResponse("Invalid Genre Id")
+            Genre.findById(id = it) ?: throw NotFoundResponse(message = "Genre not found")
         })
         result.goodreadsId = input.goodreadsId
         result.googleBooksId = input.googleBooksId
@@ -151,17 +155,19 @@ object BookController : Logging {
         result.libraryThingId = input.libraryThingId
         result.openLibraryId = input.openLibraryId
         result.publishDate = input.publishDate
-        result.publisher = input.publisherId?.let { Publisher.findById(id = it) ?: throw BadRequestResponse("Invalid Publisher Id") }
+        result.publisher = input.publisherId?.let {
+            Publisher.findById(id = it) ?: throw NotFoundResponse(message = "Publisher not found")
+        }
         result.readers = SizedCollection(input.wisherIds.map {
-            User.findById(id = it) ?: throw BadRequestResponse(message = "Invalid User Id")
+            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
         })
         result.subtitle = input.subtitle
         result.title = input.title
         result.wishers = SizedCollection(input.wisherIds.map {
-            User.findById(id = it) ?: throw BadRequestResponse(message = "Invalid User Id")
+            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
         })
         input.series.forEach {
-            val _series = Series.findById(id = it.seriesId) ?: throw BadRequestResponse(message = "Invalid Series Id")
+            val _series = Series.findById(id = it.seriesId) ?: throw NotFoundResponse(message = "Series not found")
             val bookSeries = BookSeries.find {
                 (bookCol eq result.id) and (seriesCol eq _series.id)
             }.firstOrNull()
@@ -194,8 +200,9 @@ object BookController : Logging {
     )
     fun deleteBook(ctx: Context): Unit = Utils.query(description = "Delete Book") {
         val bookId = ctx.pathParam("book-id")
-        val result = bookId.toLongOrNull()?.let { Book.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Book Id")
+        val result = bookId.toLongOrNull()?.let {
+            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
+        } ?: throw BadRequestResponse(message = "Invalid Book Id")
         result.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

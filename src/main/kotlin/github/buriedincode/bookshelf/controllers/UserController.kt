@@ -2,13 +2,9 @@ package github.buriedincode.bookshelf.controllers
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import github.buriedincode.bookshelf.Utils
-import github.buriedincode.bookshelf.docs.PublisherEntry
 import github.buriedincode.bookshelf.docs.UserEntry
 import github.buriedincode.bookshelf.models.*
-import io.javalin.http.BadRequestResponse
-import io.javalin.http.Context
-import io.javalin.http.HttpStatus
-import io.javalin.http.bodyAsClass
+import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
@@ -50,17 +46,17 @@ object UserController : Logging {
         try {
             input = ctx.bodyAsClass<UserInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
         val result = User.new {
             imageUrl = input.imageUrl
             readBooks = SizedCollection(input.readBookIds.map {
-                Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
+                Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
             })
             role = input.role
             username = input.username
             wishedBooks = SizedCollection(input.wishedBookIds.map {
-                Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
+                Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
             })
         }
 
@@ -83,8 +79,9 @@ object UserController : Logging {
     )
     fun getUser(ctx: Context): Unit = Utils.query(description = "Get User") {
         val userId = ctx.pathParam("user-id")
-        val result = userId.toLongOrNull()?.let { User.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid User Id")
+        val result = userId.toLongOrNull()?.let {
+            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
+        } ?: throw BadRequestResponse(message = "Invalid User Id")
         ctx.json(result.toJson(showAll = true))
     }
 
@@ -108,18 +105,19 @@ object UserController : Logging {
         try {
             input = ctx.bodyAsClass<UserInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
-        val result = userId.toLongOrNull()?.let { User.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid User Id")
+        val result = userId.toLongOrNull()?.let {
+            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
+        } ?: throw BadRequestResponse(message = "Invalid User Id")
         result.imageUrl = input.imageUrl
         result.readBooks = SizedCollection(input.readBookIds.map {
-            Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
+            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
         })
         result.role = input.role
         result.username = input.username
         result.wishedBooks = SizedCollection(input.wishedBookIds.map {
-            Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
+            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
         })
 
         ctx.json(result.toJson(showAll = true))
@@ -141,8 +139,9 @@ object UserController : Logging {
     )
     fun deleteUser(ctx: Context): Unit = Utils.query(description = "Delete User") {
         val userId = ctx.pathParam("user-id")
-        val result = userId.toLongOrNull()?.let { User.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid User Id")
+        val result = userId.toLongOrNull()?.let {
+            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
+        } ?: throw BadRequestResponse(message = "Invalid User Id")
         result.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

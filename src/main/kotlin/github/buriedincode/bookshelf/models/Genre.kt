@@ -23,10 +23,6 @@ class Genre(id: EntityID<Long>) : LongEntity(id) {
             output["books"] = books.map { it.toJson() }
         return output.toSortedMap()
     }
-
-    override fun toString(): String {
-        return "Genre(books=$books, title='$title')"
-    }
 }
 
 class GenreInput(

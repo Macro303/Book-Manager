@@ -3,15 +3,9 @@ package github.buriedincode.bookshelf.controllers
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.SeriesEntry
-import github.buriedincode.bookshelf.models.Book
-import github.buriedincode.bookshelf.models.BookSeries
-import github.buriedincode.bookshelf.models.Series
-import github.buriedincode.bookshelf.models.SeriesInput
+import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.tables.BookSeriesTable
-import io.javalin.http.BadRequestResponse
-import io.javalin.http.Context
-import io.javalin.http.HttpStatus
-import io.javalin.http.bodyAsClass
+import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
@@ -42,7 +36,10 @@ object SeriesController : Logging {
         pathParams = [],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(SeriesInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "201",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
         ],
         security = [],
         summary = "Create Series",
@@ -53,13 +50,13 @@ object SeriesController : Logging {
         try {
             input = ctx.bodyAsClass<SeriesInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
         val result = Series.new {
             title = input.title
         }
         input.books.forEach {
-            val _book = Book.findById(id = it.bookId) ?: throw BadRequestResponse(message = "Invalid Book Id")
+            val _book = Book.findById(id = it.bookId) ?: throw NotFoundResponse(message = "Book not found")
             val bookSeries = BookSeries.find {
                 (BookSeriesTable.bookCol eq _book.id) and (BookSeriesTable.seriesCol eq result.id)
             }.firstOrNull()
@@ -84,7 +81,10 @@ object SeriesController : Logging {
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = []),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
         ],
         security = [],
         summary = "Get Series by id",
@@ -92,8 +92,9 @@ object SeriesController : Logging {
     )
     fun getSeries(ctx: Context): Unit = Utils.query(description = "Get Series") {
         val seriesId = ctx.pathParam("series-id")
-        val result = seriesId.toLongOrNull()?.let { Series.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Series Id")
+        val result = seriesId.toLongOrNull()?.let {
+            Series.findById(id = it) ?: throw NotFoundResponse(message = "Series not found")
+        } ?: throw BadRequestResponse(message = "Invalid Series Id")
         ctx.json(result.toJson(showAll = true))
     }
 
@@ -105,7 +106,10 @@ object SeriesController : Logging {
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(SeriesInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
         ],
         security = [],
         summary = "Update Series",
@@ -117,13 +121,14 @@ object SeriesController : Logging {
         try {
             input = ctx.bodyAsClass<SeriesInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
-        val result = seriesId.toLongOrNull()?.let { Series.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Series Id")
+        val result = seriesId.toLongOrNull()?.let {
+            Series.findById(id = it) ?: throw NotFoundResponse(message = "Series not found")
+        } ?: throw BadRequestResponse(message = "Invalid Series Id")
         result.title = input.title
         input.books.forEach {
-            val _book = Book.findById(id = it.bookId) ?: throw BadRequestResponse(message = "Invalid Book Id")
+            val _book = Book.findById(id = it.bookId) ?: throw NotFoundResponse(message = "Book not found")
             val bookSeries = BookSeries.find {
                 (BookSeriesTable.bookCol eq _book.id) and (BookSeriesTable.seriesCol eq result.id)
             }.firstOrNull()
@@ -156,8 +161,9 @@ object SeriesController : Logging {
     )
     fun deleteSeries(ctx: Context): Unit = Utils.query(description = "Delete Series") {
         val seriesId = ctx.pathParam("series-id")
-        val result = seriesId.toLongOrNull()?.let { Series.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Series Id")
+        val result = seriesId.toLongOrNull()?.let {
+            Series.findById(id = it) ?: throw NotFoundResponse(message = "Series not found")
+        } ?: throw BadRequestResponse(message = "Invalid Series Id")
         result.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

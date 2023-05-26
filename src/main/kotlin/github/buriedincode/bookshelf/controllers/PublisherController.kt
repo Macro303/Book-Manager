@@ -5,10 +5,7 @@ import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.PublisherEntry
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.PublisherInput
-import io.javalin.http.BadRequestResponse
-import io.javalin.http.Context
-import io.javalin.http.HttpStatus
-import io.javalin.http.bodyAsClass
+import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -38,7 +35,10 @@ object PublisherController : Logging {
         pathParams = [],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(PublisherInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
+            OpenApiResponse(
+                status = "201",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+            ),
         ],
         security = [],
         summary = "Create Publisher",
@@ -49,7 +49,7 @@ object PublisherController : Logging {
         try {
             input = ctx.bodyAsClass<PublisherInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
         val result = Publisher.new {
             title = input.title
@@ -66,7 +66,10 @@ object PublisherController : Logging {
         pathParams = [OpenApiParam(name = "publisher-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = []),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+            ),
         ],
         security = [],
         summary = "Get Publisher by id",
@@ -74,8 +77,9 @@ object PublisherController : Logging {
     )
     fun getPublisher(ctx: Context): Unit = Utils.query(description = "Get Publisher") {
         val publisherId = ctx.pathParam("publisher-id")
-        val result = publisherId.toLongOrNull()?.let { Publisher.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Publisher Id")
+        val result = publisherId.toLongOrNull()?.let {
+            Publisher.findById(id = it) ?: throw NotFoundResponse(message = "Publisher not found")
+        } ?: throw BadRequestResponse(message = "Invalid Publisher Id")
         ctx.json(result.toJson(showAll = true))
     }
 
@@ -87,7 +91,10 @@ object PublisherController : Logging {
         pathParams = [OpenApiParam(name = "publisher-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(PublisherInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+            ),
         ],
         security = [],
         summary = "Update Publisher",
@@ -99,10 +106,11 @@ object PublisherController : Logging {
         try {
             input = ctx.bodyAsClass<PublisherInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
-        val result = publisherId.toLongOrNull()?.let { Publisher.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Publisher Id")
+        val result = publisherId.toLongOrNull()?.let {
+            Publisher.findById(id = it) ?: throw NotFoundResponse(message = "Publisher not found")
+        } ?: throw BadRequestResponse(message = "Invalid Publisher Id")
         result.title = input.title
 
         ctx.json(result.toJson(showAll = true))
@@ -124,8 +132,9 @@ object PublisherController : Logging {
     )
     fun deletePublisher(ctx: Context): Unit = Utils.query(description = "Delete Publisher") {
         val publisherId = ctx.pathParam("publisher-id")
-        val result = publisherId.toLongOrNull()?.let { Publisher.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Publisher Id")
+        val result = publisherId.toLongOrNull()?.let {
+            Publisher.findById(id = it) ?: throw NotFoundResponse(message = "Publisher not found")
+        } ?: throw BadRequestResponse(message = "Invalid Publisher Id")
         result.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

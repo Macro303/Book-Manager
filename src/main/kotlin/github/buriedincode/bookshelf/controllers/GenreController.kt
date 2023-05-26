@@ -6,10 +6,7 @@ import github.buriedincode.bookshelf.docs.GenreEntry
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.GenreInput
-import io.javalin.http.BadRequestResponse
-import io.javalin.http.Context
-import io.javalin.http.HttpStatus
-import io.javalin.http.bodyAsClass
+import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
@@ -40,7 +37,10 @@ object GenreController : Logging {
         pathParams = [],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(GenreInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "201",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
         ],
         security = [],
         summary = "Create Genre",
@@ -51,11 +51,11 @@ object GenreController : Logging {
         try {
             input = ctx.bodyAsClass<GenreInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
         val result = Genre.new {
             books = SizedCollection(input.bookIds.map {
-                Book.findById(id = it) ?: throw BadRequestResponse("Invalid Book Id")
+                Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
             })
             title = input.title
         }
@@ -71,7 +71,10 @@ object GenreController : Logging {
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = []),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
         ],
         security = [],
         summary = "Get Genre by id",
@@ -79,8 +82,9 @@ object GenreController : Logging {
     )
     fun getGenre(ctx: Context): Unit = Utils.query(description = "Get Genre") {
         val genreId = ctx.pathParam("genre-id")
-        val result = genreId.toLongOrNull()?.let { Genre.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Genre Id")
+        val result = genreId.toLongOrNull()?.let {
+            Genre.findById(id = it) ?: throw NotFoundResponse(message = "Genre not found")
+        } ?: throw BadRequestResponse(message = "Invalid Genre Id")
         ctx.json(result.toJson(showAll = true))
     }
 
@@ -92,7 +96,10 @@ object GenreController : Logging {
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(GenreInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
         ],
         security = [],
         summary = "Update Genre",
@@ -104,12 +111,13 @@ object GenreController : Logging {
         try {
             input = ctx.bodyAsClass<GenreInput>()
         } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse("Invalid Body: ${upe.message}")
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
-        val result = genreId.toLongOrNull()?.let { Genre.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Genre Id")
+        val result = genreId.toLongOrNull()?.let {
+            Genre.findById(id = it) ?: throw NotFoundResponse(message = "Genre not found")
+        } ?: throw BadRequestResponse(message = "Invalid Genre Id")
         result.books = SizedCollection(input.bookIds.map {
-            Book.findById(id = it) ?: throw BadRequestResponse("Invalid Book Id")
+            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
         })
         result.title = input.title
 
@@ -132,8 +140,9 @@ object GenreController : Logging {
     )
     fun deleteGenre(ctx: Context): Unit = Utils.query(description = "Delete Genre") {
         val genreId = ctx.pathParam("genre-id")
-        val result = genreId.toLongOrNull()?.let { Genre.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Genre Id")
+        val result = genreId.toLongOrNull()?.let {
+            Genre.findById(id = it) ?: throw NotFoundResponse(message = "Genre not found")
+        } ?: throw BadRequestResponse(message = "Invalid Genre Id")
         result.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
