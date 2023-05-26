@@ -28,7 +28,7 @@
                         <h1 class="title is-5 has-text-info-light">Filter Books</h1>
                         <form accept-charset="UTF-8" action="/books" method="GET">
                             @template.components.forms.input(label="Title", name="title")
-                            <div class="buttons is centered">
+                            <div class="buttons is-centered">
                                 <button class="button is-info">
                                     <span class="icon">
                                         <i class="fa-solid fa-filter"></i>

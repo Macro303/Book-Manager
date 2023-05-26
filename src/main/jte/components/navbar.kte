@@ -44,12 +44,6 @@
                         </span>
                         <span>Creators</span>
                     </a>
-                    <a class="navbar-item" href="/formats">
-                        <span class="icon">
-                            <i class="fa-solid fa-note-sticky"></i>
-                        </span>
-                        <span>Formats</span>
-                    </a>
                     <a class="navbar-item" href="/genres">
                         <span class="icon">
                             <i class="fa-solid fa-masks-theater"></i>

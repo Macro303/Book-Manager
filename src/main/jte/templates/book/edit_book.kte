@@ -171,12 +171,12 @@
                 </div>
             </div>
             <div class="buttons is-multiline is-centered">
-                <a class="button is-success" id="save-book-button" onclick="saveBook()" type="button">
+                <button class="button is-success" id="save-book-button" onclick="saveBook()" type="button">
                     <span class="icon">
                         <i class="fa-solid fa-floppy-disk"></i>
                     </span>
                     <span>Save</span>
-                </a>
+                </button>
                 <button class="button is-warning" id="refresh-book-button" onclick="refreshBook()" type="button">
                     <span class="icon">
                         <i class="fa-solid fa-rotate-left"></i>

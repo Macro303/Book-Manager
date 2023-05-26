@@ -1,4 +1,4 @@
-package github.buriedincode.bookshelf.controllers
+package github.buriedincode.bookshelf.routers.api
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import github.buriedincode.bookshelf.Utils
@@ -12,7 +12,7 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 
-object BookController : Logging {
+object BookApiRouter : Logging {
     @OpenApi(
         description = "List all Books",
         methods = [HttpMethod.GET],

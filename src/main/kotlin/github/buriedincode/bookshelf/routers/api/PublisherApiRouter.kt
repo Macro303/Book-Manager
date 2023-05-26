@@ -1,4 +1,4 @@
-package github.buriedincode.bookshelf.controllers
+package github.buriedincode.bookshelf.routers.api
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import github.buriedincode.bookshelf.Utils
@@ -9,7 +9,7 @@ import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 
-object PublisherController : Logging {
+object PublisherApiRouter : Logging {
     @OpenApi(
         description = "List all Publishers",
         methods = [HttpMethod.GET],

@@ -1,13 +1,9 @@
 package github.buriedincode.bookshelf
 
-import github.buriedincode.bookshelf.controllers.*
-import github.buriedincode.bookshelf.models.Book
-import github.buriedincode.bookshelf.models.Genre
-import github.buriedincode.bookshelf.models.Publisher
-import github.buriedincode.bookshelf.models.Series
+import github.buriedincode.bookshelf.routers.api.*
+import github.buriedincode.bookshelf.routers.html.*
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
-import io.javalin.http.NotFoundResponse
 import io.javalin.openapi.OpenApiContact
 import io.javalin.openapi.OpenApiInfo
 import io.javalin.openapi.OpenApiLicense
@@ -19,7 +15,6 @@ import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import org.apache.logging.log4j.kotlin.logger
-import org.jetbrains.exposed.dao.load
 
 private const val VERSION = "0.0.0"
 
@@ -33,6 +28,7 @@ fun main() {
         it.routing.treatMultipleSlashesAsSingleSlash = true
         it.staticFiles.add {
             it.hostedPath = "/static"
+            it.directory = "/static"
         }
         it.plugins.register(OpenApiPlugin(OpenApiConfiguration().apply {
             info = OpenApiInfo().apply {
@@ -62,94 +58,89 @@ fun main() {
     app.routes {
         path("/") {
             get {
-                it.render("index.kte")
+                it.render("templates/index.kte")
             }
             path("books") {
-                get {
-                    Utils.query {
-                        val books = Book.all().toList()
-                        it.render(filePath = "list_books.kte", mapOf("books" to books))
-                    }
-                }
+                get(BookHtmlRouter::listEndpoint)
                 path("{book-id}") {
-                    get {
-                        val bookId = it.pathParam("book-id").toLongOrNull()
-                            ?: throw NotFoundResponse(message = "Book not found")
-                        Utils.query {
-                            val book = Book.findById(id = bookId)
-                                ?.load(Book::genres, Book::publisher, Book::readers, Book::series, Book::wishers)
-                                ?: throw NotFoundResponse(message = "Book not found")
-                            it.render(filePath = "view_book.kte", mapOf("book" to book))
-                        }
-                    }
-                    get("edit") {
-                        val bookId = it.pathParam("book-id").toLongOrNull()
-                            ?: throw NotFoundResponse(message = "Book not found")
-                        Utils.query {
-                            val book = Book.findById(id = bookId)
-                                ?.load(Book::genres, Book::publisher, Book::readers, Book::series, Book::wishers)
-                                ?: throw NotFoundResponse(message = "Book not found")
-                            val genres = Genre.all().toList().filterNot { it in book.genres }
-                            val publishers = Publisher.all().toList().filterNot { it == book.publisher }
-                            val series = Series.all().toList().filterNot { it in book.series.map { it.series } }
-                            it.render(
-                                filePath = "edit_book.kte", mapOf(
-                                    "book" to book,
-                                    "genres" to genres,
-                                    "publishers" to publishers,
-                                    "series" to series
-                                )
-                            )
-                        }
-                    }
+                    get(BookHtmlRouter::viewEndpoint)
+                    get("edit", BookHtmlRouter::editEndpoint)
+                }
+            }
+            path("genres") {
+                get(GenreHtmlRouter::listEndpoint)
+                path("{genre-id}") {
+                    get(GenreHtmlRouter::viewEndpoint)
+                    get("edit", GenreHtmlRouter::editEndpoint)
+                }
+            }
+            path("publishers") {
+                get(PublisherHtmlRouter::listEndpoint)
+                path("{publisher-id}") {
+                    get(PublisherHtmlRouter::viewEndpoint)
+                    get("edit", PublisherHtmlRouter::editEndpoint)
+                }
+            }
+            path("series") {
+                get(SeriesHtmlRouter::listEndpoint)
+                path("{series-id}") {
+                    get(SeriesHtmlRouter::viewEndpoint)
+                    get("edit", SeriesHtmlRouter::editEndpoint)
+                }
+            }
+            path("users") {
+                get(UserHtmlRouter::listEndpoint)
+                path("{user-id}") {
+                    get(UserHtmlRouter::viewEndpoint)
+                    get("edit", UserHtmlRouter::editEndpoint)
                 }
             }
         }
         path("api") {
             path("v${VERSION.split(".")[0]}") {
                 path("books") {
-                    get(BookController::listBooks)
-                    post(BookController::createBook)
+                    get(BookApiRouter::listBooks)
+                    post(BookApiRouter::createBook)
                     path("{book-id}") {
-                        get(BookController::getBook)
-                        put(BookController::updateBook)
-                        delete(BookController::deleteBook)
+                        get(BookApiRouter::getBook)
+                        put(BookApiRouter::updateBook)
+                        delete(BookApiRouter::deleteBook)
                     }
                 }
                 path("genres") {
-                    get(GenreController::listGenres)
-                    post(GenreController::createGenre)
+                    get(GenreApiRouter::listGenres)
+                    post(GenreApiRouter::createGenre)
                     path("{genre-id}") {
-                        get(GenreController::getGenre)
-                        put(GenreController::updateGenre)
-                        delete(GenreController::deleteGenre)
+                        get(GenreApiRouter::getGenre)
+                        put(GenreApiRouter::updateGenre)
+                        delete(GenreApiRouter::deleteGenre)
                     }
                 }
                 path("publishers") {
-                    get(PublisherController::listPublishers)
-                    post(PublisherController::createPublisher)
+                    get(PublisherApiRouter::listPublishers)
+                    post(PublisherApiRouter::createPublisher)
                     path("{publisher-id}") {
-                        get(PublisherController::getPublisher)
-                        put(PublisherController::updatePublisher)
-                        delete(PublisherController::deletePublisher)
+                        get(PublisherApiRouter::getPublisher)
+                        put(PublisherApiRouter::updatePublisher)
+                        delete(PublisherApiRouter::deletePublisher)
                     }
                 }
                 path("series") {
-                    get(SeriesController::listSeries)
-                    post(SeriesController::createSeries)
+                    get(SeriesApiRouter::listSeries)
+                    post(SeriesApiRouter::createSeries)
                     path("{series-id}") {
-                        get(SeriesController::getSeries)
-                        put(SeriesController::updateSeries)
-                        delete(SeriesController::deleteSeries)
+                        get(SeriesApiRouter::getSeries)
+                        put(SeriesApiRouter::updateSeries)
+                        delete(SeriesApiRouter::deleteSeries)
                     }
                 }
                 path("users") {
-                    get(UserController::listUsers)
-                    post(UserController::createUser)
+                    get(UserApiRouter::listUsers)
+                    post(UserApiRouter::createUser)
                     path("{user-id}") {
-                        get(UserController::getUser)
-                        put(UserController::updateUser)
-                        delete(UserController::deleteUser)
+                        get(UserApiRouter::getUser)
+                        put(UserApiRouter::updateUser)
+                        delete(UserApiRouter::deleteUser)
                     }
                 }
             }
