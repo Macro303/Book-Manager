@@ -9,9 +9,14 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.sql.Connection
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.*
+
 
 object Utils : Logging {
     private val HOME_ROOT: String = System.getProperty("user.home")
@@ -58,5 +63,18 @@ object Utils : Logging {
             } catch (ioe: IOException) {
                 logger.error("Unable to create data folder", ioe)
             }
+    }
+
+    fun getUserDateFormatter(date: LocalDate): DateTimeFormatter = DateTimeFormatter.ofPattern("d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy")
+
+    private fun getDayNumberSuffix(day: Int): String {
+        return if (day in 11..13) {
+            "th"
+        } else when (day % 10) {
+            1 -> "st"
+            2 -> "nd"
+            3 -> "rd"
+            else -> "th"
+        }
     }
 }

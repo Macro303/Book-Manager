@@ -1,0 +1,12 @@
+@param label: String
+@param name: String
+@param value: Int? = null
+@param min: Int = 0
+@param max: Int = 1000
+
+<div class="field">
+    <label class="label has-text-info">${label}</label>
+    <div class="control is-expanded">
+        <input class="input" max="${min}" min="${max}" name="${name}" placeholder="${label}" type="number" value="${value ?: 0}">
+    </div>
+</div>

@@ -53,11 +53,13 @@ object UserController : Logging {
             throw BadRequestResponse("Invalid Body: ${upe.message}")
         }
         val result = User.new {
-            read_books = SizedCollection(input.readBookIds.map {
+            imageUrl = input.imageUrl
+            readBooks = SizedCollection(input.readBookIds.map {
                 Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
             })
+            role = input.role
             username = input.username
-            wished_books = SizedCollection(input.wishedBookIds.map {
+            wishedBooks = SizedCollection(input.wishedBookIds.map {
                 Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
             })
         }
@@ -110,11 +112,13 @@ object UserController : Logging {
         }
         val result = userId.toLongOrNull()?.let { User.findById(id = it) }
             ?: throw BadRequestResponse(message = "Invalid User Id")
-        result.read_books = SizedCollection(input.readBookIds.map {
+        result.imageUrl = input.imageUrl
+        result.readBooks = SizedCollection(input.readBookIds.map {
             Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
         })
+        result.role = input.role
         result.username = input.username
-        result.wished_books = SizedCollection(input.wishedBookIds.map {
+        result.wishedBooks = SizedCollection(input.wishedBookIds.map {
             Book.findById(id = it) ?: throw BadRequestResponse(message = "Invalid Book Id")
         })
 

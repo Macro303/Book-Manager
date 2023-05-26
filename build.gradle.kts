@@ -16,6 +16,7 @@ repositories {
 
 dependencies {
     implementation("gg.jte:jte:2.3.2")
+    implementation("gg.jte:jte-kotlin:2.3.2")
     runtimeOnly("org.xerial:sqlite-jdbc:3.42.0.0")
     
     // Javalin

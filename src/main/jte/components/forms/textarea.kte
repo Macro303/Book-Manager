@@ -1,0 +1,10 @@
+@param label: String
+@param name: String
+@param value: String? = null
+
+<div class="field">
+    <label class="label has-text-info" for="${name}">${label}</label>
+    <div class="control is-expanded">
+        <textarea class="textarea has-fixed-size" name="${name}" placeholder="${label}">${value}</textarea>
+    </div>
+</div>

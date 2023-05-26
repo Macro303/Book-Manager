@@ -1,0 +1,28 @@
+a.navbar-link, a.card-footer-item {
+  font-family: "Carrois Gothic SC", sans-serif;
+}
+
+img.profile {
+  height: 128px !important;
+  object-fit: cover;
+}
+
+img.profile-large {
+  height: 256px !important;
+  object-fit: cover;
+}
+
+html, body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body > footer {
+  margin-top: auto;
+}
+
+.greyscale {
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}

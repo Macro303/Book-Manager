@@ -49,14 +49,18 @@ class Book(id: EntityID<Long>) : LongEntity(id) {
             output["genres"] = genres.map { it.toJson() }
             output["publisher"] = publisher?.toJson()
             output["readers"] = readers.map { it.toJson() }
-            output["series"] = series.map {
-                "seriesId" to it.series.id.value
+            output["series"] = series.map { mapOf(
+                "seriesId" to it.series.id.value,
                 "number" to it.number
-            }
+            )}
             output["wishers"] = wishers.map { it.toJson() }
         } else
             output["publisherId"] = publisher?.id?.value
         return output.toSortedMap()
+    }
+
+    override fun toString(): String {
+        return "Book(description=$description, format=$format, genres=$genres, goodreadsId=$goodreadsId, googleBooksId=$googleBooksId, imageUrl=$imageUrl, isCollected=$isCollected, isbn=$isbn, libraryThingId=$libraryThingId, openLibraryId=$openLibraryId, publishDate=$publishDate, publisher=$publisher, readers=$readers, series=$series, subtitle=$subtitle, title='$title', wishers=$wishers)"
     }
 }
 

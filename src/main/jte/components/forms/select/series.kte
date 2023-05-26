@@ -1,0 +1,24 @@
+@import java.util.List
+@import github.buriedincode.bookshelf.models.Series
+@param label: String = "Select Series"
+@param name: String = "series-id"
+@param options: List<Series>
+@param selected: Series? = null
+
+<div class="field">
+    <label class="label has-text-info">${label}</label>
+    <div class="control is-expanded">
+        <div class="select is-fullwidth">
+            <select name="${name}">
+                @if(selected == null)
+                    <option disabled selected value="">Select Series</option>
+                @else
+                    <option selected value="${selected.id.value}">${selected.title}</option>
+                @endif
+                @for(entry in options)
+                    <option value="${entry.id.value}">${entry.title}</option>
+                @endfor
+            </select>
+        </div>
+    </div>
+</div>

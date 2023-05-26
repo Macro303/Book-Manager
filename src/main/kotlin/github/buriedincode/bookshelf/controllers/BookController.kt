@@ -65,8 +65,7 @@ object BookController : Logging {
             libraryThingId = input.libraryThingId
             openLibraryId = input.openLibraryId
             publishDate = input.publishDate
-            publisher = input.publisherId?.let { Publisher.findById(id = it) }
-                ?: throw BadRequestResponse("Invalid Publisher Id")
+            publisher = input.publisherId?.let { Publisher.findById(id = it) ?: throw BadRequestResponse("Invalid Publisher Id") }
             readers = SizedCollection(input.readerIds.map {
                 User.findById(id = it) ?: throw BadRequestResponse(message = "Invalid User Id")
             })
@@ -152,8 +151,7 @@ object BookController : Logging {
         result.libraryThingId = input.libraryThingId
         result.openLibraryId = input.openLibraryId
         result.publishDate = input.publishDate
-        result.publisher = input.publisherId?.let { Publisher.findById(id = it) }
-            ?: throw BadRequestResponse(message = "Invalid Publisher Id")
+        result.publisher = input.publisherId?.let { Publisher.findById(id = it) ?: throw BadRequestResponse("Invalid Publisher Id") }
         result.readers = SizedCollection(input.wisherIds.map {
             User.findById(id = it) ?: throw BadRequestResponse(message = "Invalid User Id")
         })

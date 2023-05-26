@@ -1,0 +1,239 @@
+@import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.Utils.getUserDateFormatter
+@import gg.jte.support.ForSupport
+@param book: Book
+
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Bookshelf</title>
+    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+    <link id="dark-theme" href="/static/css/custom-bulma-dark.css" rel="stylesheet">
+    <link id="light-theme" disabled href="/static/css/custom-bulma-light.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+</head>
+<body class="has-navbar-fixed-top">
+    @template.components.navbar()
+    <main class="section">
+        <div class="container">
+            <header class="block has-text-centered">
+                <h1 class="title is-1">${book.title}</h1>
+                @if(book.subtitle != null)
+                    <h3 class="subtitle is-3">${book.subtitle}</h3>
+                @endif
+            </header>
+            <div class="columns">
+                <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
+                    <figure class="image is-2by3">
+                        @if(book.imageUrl == null)
+                            <img alt="${book.title} cover image" loading="lazy" src="https://via.placeholder.com/1500x1000" />
+                        @else
+                            <img alt="${book.title} cover image" loading="lazy" src="${book.imageUrl}" />
+                        @endif
+                    </figure>
+                </div>
+                <div class="column">
+                    <div class="box">
+                        <div class="block">
+                            <p><strong class="subtitle is-size-5 has-text-info">Description:</strong> ${book.description}</p>
+                        </div>
+                        <div class="block">
+                            <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${book.format.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }}</p>
+                        </div>
+                        <div class="block">
+                            <p><strong class="subtitle is-size-5 has-text-info">Genres:</strong> @for(entry in ForSupport.of(book.genres))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
+                        </div>
+                        <div class="block">
+                            <p><strong class="subtitle is-size-5 has-text-info">Publish Date:</strong> ${book.publishDate?.format(getUserDateFormatter(date=book.publishDate!!))}</p>
+                        </div>
+                        <div class="block">
+                            <p><strong class="subtitle is-size-5 has-text-info">Publisher:</strong> @if(book.publisher != null)<a class="is-family-primary has-text-link" href="/publishers/${book.publisher!!.id.value}">${book.publisher!!.title}</a>@endif</p>
+                        </div>
+                        <div class="block">
+                            <p><strong class="subtitle is-size-5 has-text-info">Series:</strong> @for(entry in ForSupport.of(book.series))<a class="is-family-primary has-text-link" href="/series/${entry.get().series.id.value}">${entry.get().series.title}@if(entry.get().number != null) #${entry.get().number}@endif</a>@if(!entry.isLast), @endif@endfor</p>
+                        </div>
+                        <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
+                        @if(book.isbn != null)
+                            <div class="block">
+                                <p><strong class="subtitle is-size-5 has-text-info">Isbn:</strong> ${book.isbn}</p>
+                            </div>
+                        @endif
+                        @if(book.goodreadsId != null)
+                            <div class="block">
+                                <p><strong class="subtitle is-size-5 has-text-info">Goodreads:</strong> <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/${book.goodreadsId}" rel="noopener noreferrer" target="_blank">${book.goodreadsId}</a></p>
+                            </div>
+                        @endif
+                        @if(book.googleBooksId != null)
+                            <div class="block">
+                                <p><strong class="subtitle is-size-5 has-text-info">Google Books:</strong> <a class="is-family-primary has-text-link" href="https://books.google.com/books?id=${book.googleBooksId}" rel="noopener noreferrer" target="_blank">${book.googleBooksId}</a></p>
+                            </div>
+                        @endif
+                        @if(book.libraryThingId != null)
+                            <div class="block">
+                                <p><strong class="subtitle is-size-5 has-text-info">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/${book.libraryThingId}" rel="noopener noreferrer" target="_blank">${book.libraryThingId}</a></p>
+                            </div>
+                        @endif
+                        @if(book.openLibraryId != null)
+                            <div class="block">
+                                <p><strong class="subtitle is-size-5 has-text-info">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/${book.openLibraryId}" rel="noopener noreferrer" target="_blank">${book.openLibraryId}</a></p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="buttons is-multiline is-centered">
+                @if(book.isbn != null)
+                    <a class="button is-link" href="https://blackwells.co.uk/bookshop/product/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                        <span class="icon">
+                            <i class="fa-solid fa-link"></i>
+                        </span>
+                        <span>Blackwells</span>
+                    </a>
+                    @if(book.goodreadsId == null)
+                        <a class="button is-link" href="https://www.goodreads.com/book/isbn/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                            <span class="icon">
+                                <i class="fa-brands fa-goodreads"></i>
+                            </span>
+                            <span>Goodreads</span>
+                        </a>
+                    @endif
+                    @if(book.googleBooksId == null)
+                        <a class="button is-link" href="https://books.google.com/books?vid=ISBN${book.isbn}" rel="noopener noreferrer" target="_blank">
+                            <span class="icon">
+                                <i class="fa-brands fa-google"></i>
+                            </span>
+                            <span>Google Books</span>
+                        </a>
+                    @endif
+                    @if(book.libraryThingId == null)
+                        <a class="button is-link" href="https://librarything.com/isbn/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                            <span class="icon">
+                                <i class="fa-solid fa-link"></i>
+                            </span>
+                            <span>LibraryThing</span>
+                        </a>
+                    @endif
+                    @if(book.openLibraryId == null)
+                        <a class="button is-link" href="https://openlibrary.org/isbn/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                            <span class="icon">
+                                <i class="fa-solid fa-link"></i>
+                            </span>
+                            <span>OpenLibrary</span>
+                        </a>
+                    @endif
+                @endif
+            </div>
+            <div class="buttons is-multiline is-centered">
+                @if(book.isCollected)
+                    <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
+                        <span class="icon">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </span>
+                        <span>Discard</span>
+                    </button>
+                @else
+                    <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
+                        <span class="icon">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </span>
+                        <span>Collect</span>
+                    </button>
+                @endif
+                <a class="button is-warning" href="/books/${book.id.value}/edit">
+                    <span class="icon">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </span>
+                    <span>Edit</span>
+                </a>
+                <button class="button is-danger" id="delete-book-button" onclick="deleteBook()" type="button">
+                    <span class="icon">
+                        <i class="fa-solid fa-trash"></i>
+                    </span>
+                    <span>Delete</span>
+                </button>
+                @if(book.isCollected)
+                    <%-- if currentUser in book.readers --%>
+                    <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
+                        <span class="icon">
+                            <i class="fa-solid fa-bookmark"></i>
+                        </span>
+                        <span>Unread</span>
+                    </button>
+                    <%-- else --%>
+                    <button class="button is-success" id="read-book-button" onclick="readBook()" type="button">
+                        <span class="icon">
+                            <i class="fa-regular fa-bookmark"></i>
+                        </span>
+                        <span>Read</span>
+                    </button>
+                @else
+                    <%-- if currentUser in book.wishers --%>
+                    <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
+                        <span class="icon">
+                            <i class="fa-solid fa-star"></i>
+                        </span>
+                        <span>Unwish</span>
+                    </button>
+                    <%-- else --%>
+                    <button class="button is-success" id="wish-book-button" onclick="wishBook()" type="button">
+                        <span class="icon">
+                            <i class="fa-regular fa-star"></i>
+                        </span>
+                        <span>Wish</span>
+                    </button>
+                @endif
+            </div>
+            <div class="columns">
+                <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+                    @template.components.settings_box()
+                </div>
+                <div class="column">
+                    <%-- Creators --%>
+                    @if(book.isCollected)
+                        <h3 class="subtitle is-3 has-text-primary-dark">Readers</h3>
+                        <div class="columns is-multiline is-centered">
+                            @if(book.readers.empty())
+                                <div class="column has-text-centered">
+                                    <div class="box">
+                                        <h5 class="title is-5 has-text-danger-light">No Users have read this book.</h5>
+                                    </div>
+                                </div>
+                            @else
+                                @for(entry in book.readers)
+                                    <div class="adjustable-column column has-text-centered">
+                                        @template.components.view_box.user(entry=entry)
+                                    </div>
+                                @endfor
+                            @endif
+                        </div>
+                    @else
+                        <h3 class="subtitle is-3 has-text-primary-dark">Wishers</h3>
+                        <div class="columns is-multiline is-centered">
+                            @if(book.wishers.empty())
+                                <div class="column has-text-centered">
+                                    <div class="box">
+                                        <h5 class="title is-5 has-text-danger-light">No Users have wished for this book.</h5>
+                                    </div>
+                                </div>
+                            @else
+                                @for(entry in book.wishers)
+                                    <div class="adjustable-column column has-text-centered">
+                                        @template.components.view_box.user(entry=entry)
+                                    </div>
+                                @endfor
+                            @endif
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </main>
+    @template.components.footer()
+    <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+    <script src="/static/js/scripts.js" type="text/javascript"></script>
+    <script src="/static/js/settings-box.js" type="text/javascript"></script>
+</body>
+</html>

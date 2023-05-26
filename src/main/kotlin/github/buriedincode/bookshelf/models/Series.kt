@@ -19,10 +19,10 @@ class Series(id: EntityID<Long>) : LongEntity(id) {
             "title" to title
         )
         if (showAll) {
-            output["books"] = books.map {
-                "bookId" to it.book.id.value
+            output["books"] = books.map { mapOf(
+                "bookId" to it.book.id.value,
                 "number" to it.number
-            }
+            )}
         }
         return output.toSortedMap()
     }

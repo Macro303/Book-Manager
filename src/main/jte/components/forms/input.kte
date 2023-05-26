@@ -1,0 +1,10 @@
+@param label: String
+@param name: String
+@param value: String? = null
+
+<div class="field">
+    <label class="label has-text-info">${label}</label>
+    <div class="control is-expanded">
+        <input class="input" name="${name}" placeholder="${label}" type="text" value="${value}">
+    </div>
+</div>
