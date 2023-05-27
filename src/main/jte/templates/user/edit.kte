@@ -1,8 +1,9 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.Genre
-@param genre: Genre
-@param books: List<Book>
+@import github.buriedincode.bookshelf.models.User
+@param user: User
+@param readBooks: List<Book>
+@param wishedBooks: List<Book>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -21,17 +22,19 @@
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">Edit Genre</h1>
+                <h1 class="title is-1">Edit User</h1>
             </header>
             <div class="box">
                 <form id="edit-genre-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = genre.title)
+                    @template.components.forms.input(label = "Image Url", name = "image-url", value = user.imageUrl)
+                    @template.components.forms.input_number(label = "Role", max = user.role.toInt(), name = "role", value = user.role.toInt())
+                    @template.components.forms.input(label = "Username", name = "username", value = user.username)
                 </form>
             </div>
-            <h3 class="subtitle is-3 has-text-primary-dark">Books</h3>
+            <h3 class="subtitle is-3 has-text-primary-dark">Read Books</h3>
             <div class="box">
                 <div class="table-container">
-                    <form id="add-book-form" onsubmit="return false;">
+                    <form id="add-read-book-form" onsubmit="return false;">
                         <table class="table is-fullwidth">
                             <thead>
                                 <tr>
@@ -41,13 +44,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in genre.books)
+                                @for(entry in user.readBooks)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
                                         <td>
                                             <div class="buttons is-centered">
-                                                <button class="button is-danger" id="remove-book-${entry.id.value}-button" onclick="removeBook(${entry.id.value})" type="button">
+                                                <button class="button is-danger" id="remove-read-book-${entry.id.value}-button" onclick="removeReadBook(${entry.id.value})" type="button">
                                                     <span class="icon">
                                                         <i class="fa-solid fa-minus"></i>
                                                     </span>
@@ -58,7 +61,55 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.book(label = "", options = books)</td>
+                                    <td>@template.components.forms.select.book(label = "", options = readBooks)</td>
+                                    <td></td>
+                                    <td>
+                                        <div class="buttons is-centered">
+                                            <button class="button is-success" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </span>
+                                                <span>Add</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <h3 class="subtitle is-3 has-text-primary-dark">Wished Books</h3>
+            <div class="box">
+                <div class="table-container">
+                    <form id="add-wished-book-form" onsubmit="return false;">
+                        <table class="table is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th class="is-size-5 has-text-info">Book Title</th>
+                                    <th class="is-size-5 has-text-info">Book Subtitle</th>
+                                    <th class="is-size-5 has-text-info">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for(entry in user.wishedBooks)
+                                    <tr>
+                                        <td>${entry.title}</td>
+                                        <td>${entry.subtitle}</td>
+                                        <td>
+                                            <div class="buttons is-centered">
+                                                <button class="button is-danger" id="remove-wished-book-${entry.id.value}-button" onclick="removeWishedBook(${entry.id.value})" type="button">
+                                                    <span class="icon">
+                                                        <i class="fa-solid fa-minus"></i>
+                                                    </span>
+                                                    <span>Remove</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endfor
+                                <tr>
+                                    <td>@template.components.forms.select.book(label = "", options = wishedBooks)</td>
                                     <td></td>
                                     <td>
                                         <div class="buttons is-centered">
@@ -77,7 +128,7 @@
                 </div>
             </div>
             <div class="buttons is-multiline is-centered">
-                <button class="button is-success" id="save-genre-button" onclick="saveGenre()" type="button">
+                <button class="button is-success" id="save-user-button" onclick="saveUser()" type="button">
                     <span class="icon">
                         <i class="fa-solid fa-floppy-disk"></i>
                     </span>

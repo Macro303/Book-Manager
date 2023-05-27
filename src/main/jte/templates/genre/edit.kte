@@ -62,7 +62,7 @@
                                     <td></td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" type="button">
+                                            <button class="button is-success" id="add-book-button" onclick="addBook()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -89,5 +89,79 @@
     @template.components.footer()
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function addBook() {
+            const caller = "add-book-button";
+            let form = document.getElementById("add-book-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0/genres/${genre.id.value}/books", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": formData["book-id"],
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function removeBook(bookId) {
+            @raw
+                const caller = `remove-book-${bookId}-button`;
+            @endraw
+
+            addLoading(caller);
+            fetch("/api/v0/genres/${genre.id.value}/books", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": bookId,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function saveGenre() {
+            const caller = "save-genre-button";
+            let form = document.getElementById("edit-genre-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0/genres/${genre.id.value}", {
+                method: "PUT",
+                headers: headers,
+                body: JSON.stringify({
+                    "title": formData["title"],
+                    "bookIds": ${genre.books.map{ it.id.value }.toList().toString()},
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location = "/genres/${genre.id.value}";
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+    </script>
 </body>
 </html>

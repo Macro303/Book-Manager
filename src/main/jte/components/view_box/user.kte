@@ -3,7 +3,7 @@
 
 <a class="box" href="/users/${entry.id.value}">
     <div class="columns is-mobile">
-        <div class="column is-narrow">
+        <div class="column is-one-third">
             <figure class="image is-128x128">
                 @if(entry.imageUrl == null)
                     <img alt="${entry.username} profile image" class="profile is-rounded" loading="lazy" src="/static/img/logo.png" />

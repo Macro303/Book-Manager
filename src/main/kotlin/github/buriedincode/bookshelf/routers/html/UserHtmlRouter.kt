@@ -26,8 +26,8 @@ object UserHtmlRouter {
         val user = User.findById(id = userId)
             ?.load(User::readBooks, User::wishedBooks)
             ?: throw NotFoundResponse(message = "User not found")
-        val readBooks = Book.all().toList().filterNot { it in user.readBooks }
-        val wishedBooks = Book.all().toList().filterNot { it in user.wishedBooks }
+        val readBooks = Book.all().toList().filter { it.isCollected }.filterNot { it in user.readBooks }
+        val wishedBooks = Book.all().toList().filterNot { it.isCollected }.filterNot { it in user.wishedBooks }
         ctx.render(filePath = "templates/user/edit.kte", mapOf(
             "user" to user,
             "readBooks" to readBooks,

@@ -121,6 +121,10 @@ fun main() {
                         get(GenreApiRouter::getGenre)
                         put(GenreApiRouter::updateGenre)
                         delete(GenreApiRouter::deleteGenre)
+                        path("books") {
+                            post(GenreApiRouter::addBook)
+                            delete(GenreApiRouter::removeBook)
+                        }
                     }
                 }
                 path("publishers") {
