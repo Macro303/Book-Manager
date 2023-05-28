@@ -97,7 +97,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0/genres/${genre.id.value}/books", {
+            fetch("/api/v0.0/genres/${genre.id.value}/books", {
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify({
@@ -107,10 +107,11 @@
                 if (!response.ok){
                     return Promise.reject(response);
                 }
+                form.reset();
                 window.location.reload();
             }).catch((response) => response.json().then((msg) => {
                 @raw
-                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
                 @endraw
             })).finally(() => removeLoading(caller));
         }
@@ -120,7 +121,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0/genres/${genre.id.value}/books", {
+            fetch("/api/v0.0/genres/${genre.id.value}/books", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -133,7 +134,7 @@
                 window.location.reload();
             }).catch((response) => response.json().then((msg) => {
                 @raw
-                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
                 @endraw
             })).finally(() => removeLoading(caller));
         }
@@ -144,7 +145,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0/genres/${genre.id.value}", {
+            fetch("/api/v0.0/genres/${genre.id.value}", {
                 method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
@@ -155,10 +156,11 @@
                 if (!response.ok){
                     return Promise.reject(response);
                 }
+                form.reset();
                 window.location = "/genres/${genre.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
-                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
                 @endraw
             })).finally(() => removeLoading(caller));
         }

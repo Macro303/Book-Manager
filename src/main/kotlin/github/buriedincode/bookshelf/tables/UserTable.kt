@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 object UserTable : LongIdTable(name = "users"), Logging {
     val imageUrlCol: Column<String?> = text(name = "image_url").nullable()
     val roleCol: Column<Short> = short(name = "role").default(0)
-    val usernameCol: Column<String> = text(name = "username")
+    val usernameCol: Column<String> = text(name = "username").uniqueIndex()
 
     init {
         Utils.query(description = "Create User Table") {

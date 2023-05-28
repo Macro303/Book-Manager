@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.UserEntry
 import github.buriedincode.bookshelf.models.*
+import github.buriedincode.bookshelf.tables.UserTable
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
@@ -48,6 +49,11 @@ object UserApiRouter : Logging {
         } catch (upe: UnrecognizedPropertyException) {
             throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
+        val exists = User.find {
+            UserTable.usernameCol eq input.username
+        }.firstOrNull()
+        if (exists != null)
+            throw ConflictResponse(message = "User already exists")
         val result = User.new {
             imageUrl = input.imageUrl
             readBooks = SizedCollection(input.readBookIds.map {
@@ -107,6 +113,11 @@ object UserApiRouter : Logging {
         } catch (upe: UnrecognizedPropertyException) {
             throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
+        val exists = User.find {
+            UserTable.usernameCol eq input.username
+        }.firstOrNull()
+        if (exists != null)
+            throw ConflictResponse(message = "User already exists")
         val result = userId.toLongOrNull()?.let {
             User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
         } ?: throw BadRequestResponse(message = "Invalid User Id")

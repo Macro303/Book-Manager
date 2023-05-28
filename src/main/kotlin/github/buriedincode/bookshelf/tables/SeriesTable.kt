@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SchemaUtils
 
 object SeriesTable : LongIdTable(name = "series"), Logging {
-    val titleCol: Column<String> = text(name = "title")
+    val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {
         Utils.query(description = "Create Series Table") {

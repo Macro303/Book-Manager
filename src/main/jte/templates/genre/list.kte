@@ -85,7 +85,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0/genres", {
+            fetch("/api/v0.0/genres", {
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify({
@@ -96,10 +96,11 @@
                 if (!response.ok){
                     return Promise.reject(response);
                 }
+                form.reset();
                 window.location.reload();
             }).catch((response) => response.json().then((msg) => {
                 @raw
-                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
                 @endraw
             })).finally(() => removeLoading(caller));
         }

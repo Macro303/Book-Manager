@@ -5,6 +5,7 @@ import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.PublisherEntry
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.PublisherInput
+import github.buriedincode.bookshelf.tables.PublisherTable
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
@@ -51,6 +52,11 @@ object PublisherApiRouter : Logging {
         } catch (upe: UnrecognizedPropertyException) {
             throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
+        val exists = Publisher.find {
+            PublisherTable.titleCol eq input.title
+        }.firstOrNull()
+        if (exists != null)
+            throw ConflictResponse(message = "Publisher already exists")
         val result = Publisher.new {
             title = input.title
         }
@@ -108,6 +114,11 @@ object PublisherApiRouter : Logging {
         } catch (upe: UnrecognizedPropertyException) {
             throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
+        val exists = Publisher.find {
+            PublisherTable.titleCol eq input.title
+        }.firstOrNull()
+        if (exists != null)
+            throw ConflictResponse(message = "Publisher already exists")
         val result = publisherId.toLongOrNull()?.let {
             Publisher.findById(id = it) ?: throw NotFoundResponse(message = "Publisher not found")
         } ?: throw BadRequestResponse(message = "Invalid Publisher Id")

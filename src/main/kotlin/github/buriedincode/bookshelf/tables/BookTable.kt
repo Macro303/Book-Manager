@@ -29,11 +29,8 @@ object BookTable : LongIdTable(name = "books"), Logging {
         onUpdate = ReferenceOption.CASCADE,
         onDelete = ReferenceOption.CASCADE
     )
-    // Readers
-    // Series
     val subtitleCol: Column<String?> = text(name = "subtitle").nullable()
     val titleCol: Column<String> = text(name = "title")
-    // Wishers
 
     init {
         Utils.query(description = "Create Book Table") {

@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SchemaUtils
 
 object PublisherTable : LongIdTable(name = "publishers"), Logging {
-    val titleCol: Column<String> = text(name = "title")
+    val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {
         Utils.query(description = "Create Publisher Table") {

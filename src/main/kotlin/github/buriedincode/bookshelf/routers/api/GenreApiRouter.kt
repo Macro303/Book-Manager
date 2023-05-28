@@ -7,6 +7,7 @@ import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.GenreInput
 import github.buriedincode.bookshelf.models.IdValue
+import github.buriedincode.bookshelf.tables.GenreTable
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
@@ -54,6 +55,11 @@ object GenreApiRouter : Logging {
         } catch (upe: UnrecognizedPropertyException) {
             throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
+        val exists = Genre.find {
+            GenreTable.titleCol eq input.title
+        }.firstOrNull()
+        if (exists != null)
+            throw ConflictResponse(message = "Genre already exists")
         val result = Genre.new {
             books = SizedCollection(input.bookIds.map {
                 Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
@@ -114,6 +120,11 @@ object GenreApiRouter : Logging {
         } catch (upe: UnrecognizedPropertyException) {
             throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
         }
+        val exists = Genre.find {
+            GenreTable.titleCol eq input.title
+        }.firstOrNull()
+        if (exists != null)
+            throw ConflictResponse(message = "Genre already exists")
         val result = genreId.toLongOrNull()?.let {
             Genre.findById(id = it) ?: throw NotFoundResponse(message = "Genre not found")
         } ?: throw BadRequestResponse(message = "Invalid Genre Id")
@@ -151,7 +162,7 @@ object GenreApiRouter : Logging {
     @OpenApi(
         description = "Add Book to Genre",
         methods = [HttpMethod.POST],
-        operationId = "addBook",
+        operationId = "addBookToGenre",
         path = "/genres/{genre-id}/books",
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
@@ -190,7 +201,7 @@ object GenreApiRouter : Logging {
     @OpenApi(
         description = "Remove Book from Genre",
         methods = [HttpMethod.DELETE],
-        operationId = "removeBook",
+        operationId = "removeBookFromGenre",
         path = "/genres/{genre-id}/books",
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),

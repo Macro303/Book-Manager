@@ -68,7 +68,7 @@
             const caller = "delete-genre-button";
 
             addLoading(caller);
-            fetch("/api/v0/genres/${genre.id.value}", {
+            fetch("/api/v0.0/genres/${genre.id.value}", {
                 method: "DELETE",
                 headers: headers,
             }).then((response) => {
@@ -78,7 +78,7 @@
                 window.location = "/genres";
             }).catch((response) => response.json().then((msg) => {
                 @raw
-                    alert(`${response.status} ${response.statusText}: ${msg.details}`);
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
                 @endraw
             })).finally(() => removeLoading(caller));
         }

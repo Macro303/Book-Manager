@@ -92,5 +92,85 @@
     @template.components.footer()
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function addBook() {
+            const caller = "add-book-button";
+            let form = document.getElementById("add-book-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/series/${series.id.value}/books", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    "bookId": formData["book-id"],
+                    "number": formData["series-number"] || null,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function removeBook(bookId) {
+            @raw
+                const caller = "remove-book-${bookId}-button";
+            @endraw
+            
+            addLoading(caller);
+            fetch("/api/v0.0/series/${series.id.value}/books", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": bookId,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function saveSeries() {
+            const caller = "save-series-button";
+            let form = document.getElementById("edit-series-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/series/${series.id.value}", {
+                method: "PUT",
+                headers: headers,
+                body: JSON.stringify({
+                    "title": formData["title"],
+                    "books": ${series.books.map{ mapOf(
+                        "bookId" to it.id.value,
+                        "number" to it.number,
+                    )}.toList().toString()},
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location = "/series/${series.id.value}";
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+    </script>
 </body>
 </html>

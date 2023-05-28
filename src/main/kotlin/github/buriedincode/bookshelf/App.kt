@@ -20,6 +20,7 @@ import gg.jte.TemplateEngine
 import gg.jte.ContentType
 import io.javalin.rendering.template.JavalinJte
 import java.nio.file.Path
+import io.javalin.http.*
 
 private const val VERSION = "0.0.0"
 
@@ -27,8 +28,9 @@ fun main() {
     val logger = logger("github.buriedincode.bookshelf.App")
     JavalinJte.init(templateEngine = createTemplateEngine())
     val app = Javalin.create {
+        it.http.prefer405over404 = true
         it.requestLogger.http { ctx, ms ->
-            logger.info("${ctx.method()} - ${ctx.path()} - ${ctx.statusCode()} - ${ctx.ip()} => ${ms}ms")
+            logger.info("${ctx.method()} - ${ctx.matchedPath()} - ${ctx.statusCode()} - ${ctx.ip()} => ${ms}ms")
         }
         it.routing.ignoreTrailingSlashes = true
         it.routing.treatMultipleSlashesAsSingleSlash = true
@@ -52,7 +54,7 @@ fun main() {
                 version = VERSION
             }
             servers = arrayOf(OpenApiServer().apply {
-                url = "http://localhost:8003/api/v${VERSION.split(".")[0]}/"
+                url = "http://localhost:8003/api/v${VERSION.split(".")[0]}.${VERSION.split(".")[1]}/"
                 description = "Local DEV Server"
             })
         }))
@@ -104,7 +106,7 @@ fun main() {
             }
         }
         path("api") {
-            path("v${VERSION.split(".")[0]}") {
+            path("v${VERSION.split(".")[0]}.${VERSION.split(".")[1]}") {
                 path("books") {
                     get(BookApiRouter::listBooks)
                     post(BookApiRouter::createBook)
@@ -113,6 +115,7 @@ fun main() {
                         put(BookApiRouter::updateBook)
                         delete(BookApiRouter::deleteBook)
                     }
+                    post("import", BookApiRouter::importBook)
                 }
                 path("genres") {
                     get(GenreApiRouter::listGenres)
@@ -143,6 +146,10 @@ fun main() {
                         get(SeriesApiRouter::getSeries)
                         put(SeriesApiRouter::updateSeries)
                         delete(SeriesApiRouter::deleteSeries)
+                        path("books") {
+                            post(SeriesApiRouter::addBook)
+                            delete(SeriesApiRouter::removeBook)
+                        }
                     }
                 }
                 path("users") {

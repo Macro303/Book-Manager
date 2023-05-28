@@ -206,4 +206,40 @@ object BookApiRouter : Logging {
         result.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
+    
+    @OpenApi(
+        description = "Import Book",
+        methods = [HttpMethod.POST],
+        operationId = "importBook",
+        path = "/books/import",
+        pathParams = [],
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookImport::class)], required = true),
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
+        ],
+        security = [],
+        summary = "Import Book",
+        tags = ["Book"]
+    )
+    fun importBook(ctx: Context): Unit = Utils.query(description = "Import Book") {
+        val input: BookImport
+        try {
+            input = ctx.bodyAsClass<BookImport>()
+        } catch (upe: UnrecognizedPropertyException) {
+            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
+        }
+        if (input.goodreadsId != null)
+            throw NotImplementedResponse(message = "Goodreads import not currently supported.")
+        if (input.googleBooksId != null)
+            throw NotImplementedResponse(message = "Google Books import not currently supported.")
+        if (input.isbn != null)
+            throw NotImplementedResponse(message = "Isbn import not currently supported.")
+        if (input.libraryThingId != null)
+            throw NotImplementedResponse(message = "LibraryThing import not currently supported.")
+        if (input.openLibraryId != null)
+            throw NotImplementedResponse(message = "OpenLibrary import not currently supported.")
+        
+        ctx.status(HttpStatus.NOT_IMPLEMENTED)
+    }
+
 }
