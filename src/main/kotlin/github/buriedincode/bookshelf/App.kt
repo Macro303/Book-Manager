@@ -1,5 +1,8 @@
 package github.buriedincode.bookshelf
 
+import gg.jte.ContentType
+import gg.jte.TemplateEngine
+import gg.jte.resolve.DirectoryCodeResolver
 import github.buriedincode.bookshelf.routers.api.*
 import github.buriedincode.bookshelf.routers.html.*
 import io.javalin.Javalin
@@ -14,13 +17,9 @@ import io.javalin.openapi.plugin.redoc.ReDocConfiguration
 import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
-import org.apache.logging.log4j.kotlin.logger
-import gg.jte.resolve.DirectoryCodeResolver
-import gg.jte.TemplateEngine
-import gg.jte.ContentType
 import io.javalin.rendering.template.JavalinJte
+import org.apache.logging.log4j.kotlin.logger
 import java.nio.file.Path
-import io.javalin.http.*
 
 private const val VERSION = "0.0.0"
 
@@ -114,6 +113,24 @@ fun main() {
                         get(BookApiRouter::getBook)
                         put(BookApiRouter::updateBook)
                         delete(BookApiRouter::deleteBook)
+                        patch("discard", BookApiRouter::discardBook)
+                        patch("collect", BookApiRouter::collectBook)
+                        patch("unread", BookApiRouter::unreadBook)
+                        patch("read", BookApiRouter::readBook)
+                        patch("unwish", BookApiRouter::unwishBook)
+                        patch("wish", BookApiRouter::wishBook)
+                        path("creators") {
+                            patch(BookApiRouter::addCreator)
+                            delete(BookApiRouter::removeCreator)
+                        }
+                        path("genres") {
+                            patch(BookApiRouter::addGenre)
+                            delete(BookApiRouter::removeGenre)
+                        }
+                        path("series") {
+                            patch(BookApiRouter::addSeries)
+                            delete(BookApiRouter::removeSeries)
+                        }
                     }
                     post("import", BookApiRouter::importBook)
                 }
@@ -125,7 +142,7 @@ fun main() {
                         put(GenreApiRouter::updateGenre)
                         delete(GenreApiRouter::deleteGenre)
                         path("books") {
-                            post(GenreApiRouter::addBook)
+                            patch(GenreApiRouter::addBook)
                             delete(GenreApiRouter::removeBook)
                         }
                     }
@@ -147,7 +164,7 @@ fun main() {
                         put(SeriesApiRouter::updateSeries)
                         delete(SeriesApiRouter::deleteSeries)
                         path("books") {
-                            post(SeriesApiRouter::addBook)
+                            patch(SeriesApiRouter::addBook)
                             delete(SeriesApiRouter::removeBook)
                         }
                     }
@@ -159,6 +176,14 @@ fun main() {
                         get(UserApiRouter::getUser)
                         put(UserApiRouter::updateUser)
                         delete(UserApiRouter::deleteUser)
+                        path("read") {
+                            patch(UserApiRouter::addReadBook)
+                            delete(UserApiRouter::removeReadBook)
+                        }
+                        path("wisher") {
+                            patch(UserApiRouter::addWishedBook)
+                            delete(UserApiRouter::removeWishedBook)
+                        }
                     }
                 }
             }

@@ -49,10 +49,12 @@ class Book(id: EntityID<Long>) : LongEntity(id) {
             output["genres"] = genres.map { it.toJson() }
             output["publisher"] = publisher?.toJson()
             output["readers"] = readers.map { it.toJson() }
-            output["series"] = series.map { mapOf(
-                "seriesId" to it.series.id.value,
-                "number" to it.number
-            )}
+            output["series"] = series.map {
+                mapOf(
+                    "seriesId" to it.series.id.value,
+                    "number" to it.number
+                )
+            }
             output["wishers"] = wishers.map { it.toJson() }
         } else
             output["publisherId"] = publisher?.id?.value

@@ -44,7 +44,7 @@
                         <h5 class="title is-5 has-text-info-light">Import Book</h5>
                         <form id="import-book-form" onsubmit="return false;">
                             @template.components.forms.input(label="Isbn", name="isbn")
-                            @template.components.forms.input(label="OpenLibrary Id", "open-library-id")
+                            @template.components.forms.input(label="OpenLibrary Url", "open-library-url")
                             <div class="buttons is-centered">
                                 <button class="button is-success" id="import-book-button" onclick="importBook()" type="button">
                                     <span class="icon">
@@ -87,14 +87,21 @@
             let formData = Object.fromEntries(new FormData(form));
             console.log(formData);
 
+            let open_library_id = null;
+            let open_library_url = formData["open-library-url"];
+            if (open_library_url) {
+                let segments = new URL(open_library_url).pathname.split('/');
+                open_library_id = segments.pop() || segments.pop();
+            }
+
             addLoading(caller);
             fetch("/api/v0.0/books/import", {
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify({
-                    "isbn": formData["isbn"],
+                    "isbn": formData["isbn"] || null,
                     "isCollected": false,
-                    "openLibraryId": formData["open-library-id"],
+                    "openLibraryId": open_library_id || null,
                     "wisherIds": [${user.id.value}]
                 }),
             }).then((response) => {

@@ -101,7 +101,7 @@
 
             addLoading(caller);
             fetch("/api/v0.0/series/${series.id.value}/books", {
-                method: "POST",
+                method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
                     "bookId": formData["book-id"],

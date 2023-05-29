@@ -63,7 +63,7 @@
                                     <td><%--@template.components.forms.select.role(label = "", options = roles)--%></td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" type="button">
+                                            <button class="button is-success" id="add-creator-button" onclick="addCreator()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -108,7 +108,7 @@
                                     <td>@template.components.forms.select.genre(label = "", options = genres)</td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" type="button">
+                                            <button class="button is-success" id="add-genre-button" onclick="addGenre()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -156,7 +156,7 @@
                                     <td>@template.components.forms.input_number(label = "", name = "series-number")</td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" type="button">
+                                            <button class="button is-success" id="add-series-button" onclick="addSeries()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -189,5 +189,151 @@
     @template.components.footer()
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function addCreator() {
+        }
+        function removeCreator() {
+        }
+        function addGenre() {
+            const caller = "add-genre-button";
+            let form = document.getElementById("add-genre-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}/genres", {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": formData["genre-id"],
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function removeGenre(genreId) {
+            @raw
+                const caller = `remove-genre-${genreId}-button`;
+            @endraw
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}/genres", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": genreId,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function addSeries() {
+            const caller = "add-series-button";
+            let form = document.getElementById("add-series-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}/series", {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({
+                    "seriesId": formData["series-id"],
+                    "number": formData["series-number"],
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function removeSeries(seriesId) {
+            @raw
+                const caller = `remove-series-${seriesId}-button`;
+            @endraw
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}/series", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": seriesId,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function saveBook() {
+            const caller = "save-book-button";
+            let form = document.getElementById("edit-book-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    "description": formData["description"] || null,
+                    "format": formData["format"] || "PAPERBACK",
+                    "genreIds": ${book.genres.map { it.id.value }.toList().toString()},
+                    "goodreadsId": formData["goodreads"] || null,
+                    "googleBooksId": formData["google-books"] || null,
+                    "imageUrl": formData["image-url"] || null,
+                    "isCollected": ${book.isCollected},
+                    "isbn": formData["isbn"] || null,
+                    "libraryThingId": formData["library-thing"] || null,
+                    "openLibraryId": formData["open-library"] || null,
+                    "publishDate": formData["publish-date"] || null,
+                    "publisherId": formData["publisher-id"] || null,
+                    "readerIds": ${book.readers.map { it.id.value }.toList().toString()},
+                    "series": ${book.series.map { mapOf("seriesId" to it.series.id.value, "number" to it.number) }.toList().toString()},
+                    "subtitle": formData["subtitle"] || null,
+                    "title": formData["title"],
+                    "wisherIds": ${book.wishers.map { it.id.value }.toList().toString()},
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location = "/books/${book.id.value}";
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function refreshBook() {
+        }
+    </script>
 </body>
 </html>

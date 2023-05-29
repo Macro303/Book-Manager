@@ -25,7 +25,7 @@
                 <h1 class="title is-1">Edit User</h1>
             </header>
             <div class="box">
-                <form id="edit-genre-form" onsubmit="return false;">
+                <form id="edit-user-form" onsubmit="return false;">
                     @template.components.forms.input(label = "Image Url", name = "image-url", value = user.imageUrl)
                     @template.components.forms.input_number(label = "Role", max = user.role.toInt(), name = "role", value = user.role.toInt())
                     @template.components.forms.input(label = "Username", name = "username", value = user.username)
@@ -65,7 +65,7 @@
                                     <td></td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" type="button">
+                                            <button class="button is-success" id="add-read-book-button" onclick="addReadBook()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -113,7 +113,7 @@
                                     <td></td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" type="button">
+                                            <button class="button is-success" id="add-wished-book-button" onclick="addWishedBook()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -140,5 +140,132 @@
     @template.components.footer()
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function addReadBook() {
+            const caller = "add-read-book-button";
+            let form = document.getElementById("add-read-book-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/users/${user.id.value}/read", {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": formData["book-id"],
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function removeReadBook(bookId) {
+            @raw
+                const caller = `remove-read-book-${bookId}-button`;
+            @endraw
+
+            addLoading(caller);
+            fetch("/api/v0.0/users/${user.id.value}/read", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": bookId,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function addWishedBook() {
+            const caller = "add-wished-book-button";
+            let form = document.getElementById("add-wished-book-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/users/${user.id.value}/wished", {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": formData["book-id"],
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function removeWishedBook(bookId) {
+            @raw
+                const caller = `remove-wished-book-${bookId}-button`;
+            @endraw
+
+            addLoading(caller);
+            fetch("/api/v0.0/users/${user.id.value}/wished", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "id": bookId,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function saveUser() {
+            const caller = "save-user-button";
+            let form = document.getElementById("edit-user-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/users/${user.id.value}", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    "imageUrl": formData["image-url"] || null,
+                    "readBookIds": ${user.readBooks.map { it.id.value }.toList().toString()},
+                    "role": formData["role"] || null,
+                    "username": formData["username"],
+                    "wishedBookIds": ${user.wishedBooks.map { it.id.value }.toList().toString()},
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location = "/users/${user.id.value}";
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+    </script>
 </body>
 </html>

@@ -98,7 +98,7 @@
 
             addLoading(caller);
             fetch("/api/v0.0/genres/${genre.id.value}/books", {
-                method: "POST",
+                method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
                     "id": formData["book-id"],
@@ -160,7 +160,7 @@
                 window.location = "/genres/${genre.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
-                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                    alert(`${response.status} ${response.statusText} => ${msg.title || msg.message}`);
                 @endraw
             })).finally(() => removeLoading(caller));
         }

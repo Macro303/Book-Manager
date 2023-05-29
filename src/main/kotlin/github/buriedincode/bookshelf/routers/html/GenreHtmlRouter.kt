@@ -1,8 +1,10 @@
 package github.buriedincode.bookshelf.routers.html
 
 import github.buriedincode.bookshelf.Utils
-import github.buriedincode.bookshelf.models.*
-import io.javalin.http.*
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.Genre
+import io.javalin.http.Context
+import io.javalin.http.NotFoundResponse
 import org.jetbrains.exposed.dao.load
 
 object GenreHtmlRouter {
@@ -27,9 +29,11 @@ object GenreHtmlRouter {
             ?.load(Genre::books)
             ?: throw NotFoundResponse(message = "Genre not found")
         val books = Book.all().toList().filterNot { it in genre.books }
-        ctx.render(filePath = "templates/genre/edit.kte", mapOf(
-            "genre" to genre,
-            "books" to books
-        ))
+        ctx.render(
+            filePath = "templates/genre/edit.kte", mapOf(
+                "genre" to genre,
+                "books" to books
+            )
+        )
     }
 }

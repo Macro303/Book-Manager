@@ -24,9 +24,9 @@
                 <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
                     <figure class="image is-256x256 is-inline-block">
                         @if(user.imageUrl == null)
-                            <img class="profile-large" loading="lazy" src="/static/img/logo.png" />
+                            <img alt="${user.username} profile image" class="profile-large" loading="lazy" src="/static/img/logo.png" />
                         @else
-                            <img class="profile-large" loading="lazy" src="${user.imageUrl}" />
+                            <img alt="${user.username} profile image" class="profile-large" loading="lazy" src="${user.imageUrl}" />
                         @endif
                     </figure>
                 </div>
@@ -94,5 +94,25 @@
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
     <script src="/static/js/settings-box.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function deleteUser() {
+            const caller = "delete-user-button";
+
+            addLoading(caller);
+            fetch("/api/v0.0/users/${user.id.value}", {
+                method: "DELETE",
+                headers: headers,
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location = "/users";
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+    </script>
 </body>
 </html>

@@ -1,13 +1,17 @@
 package github.buriedincode.bookshelf.routers.html
 
 import github.buriedincode.bookshelf.Utils
-import github.buriedincode.bookshelf.models.*
-import io.javalin.http.*
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.Genre
+import github.buriedincode.bookshelf.models.Publisher
+import github.buriedincode.bookshelf.models.Series
+import io.javalin.http.Context
+import io.javalin.http.NotFoundResponse
 import org.jetbrains.exposed.dao.load
 
 object BookHtmlRouter {
     fun listEndpoint(ctx: Context) = Utils.query {
-        val books = Book.all().toList()
+        val books = Book.all().toList().filter { it.isCollected }
         ctx.render(filePath = "templates/book/list.kte", mapOf("books" to books))
     }
 
@@ -29,11 +33,13 @@ object BookHtmlRouter {
         val genres = Genre.all().toList().filterNot { it in book.genres }
         val publishers = Publisher.all().toList().filterNot { it == book.publisher }
         val series = Series.all().toList().filterNot { it in book.series.map { it.series } }
-        ctx.render(filePath = "templates/book/edit.kte", mapOf(
-            "book" to book,
-            "genres" to genres,
-            "publishers" to publishers,
-            "series" to series
-        ))
+        ctx.render(
+            filePath = "templates/book/edit.kte", mapOf(
+                "book" to book,
+                "genres" to genres,
+                "publishers" to publishers,
+                "series" to series
+            )
+        )
     }
 }

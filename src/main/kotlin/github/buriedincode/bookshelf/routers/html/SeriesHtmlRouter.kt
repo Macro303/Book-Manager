@@ -1,8 +1,10 @@
 package github.buriedincode.bookshelf.routers.html
 
 import github.buriedincode.bookshelf.Utils
-import github.buriedincode.bookshelf.models.*
-import io.javalin.http.*
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.Series
+import io.javalin.http.Context
+import io.javalin.http.NotFoundResponse
 import org.jetbrains.exposed.dao.load
 
 object SeriesHtmlRouter {
@@ -27,9 +29,11 @@ object SeriesHtmlRouter {
             ?.load(Series::books)
             ?: throw NotFoundResponse(message = "Series not found")
         val books = Book.all().toList().filterNot { it in series.books.map { it.book } }
-        ctx.render(filePath = "templates/series/edit.kte", mapOf(
-            "series" to series,
-            "books" to books
-        ))
+        ctx.render(
+            filePath = "templates/series/edit.kte", mapOf(
+                "series" to series,
+                "books" to books
+            )
+        )
     }
 }

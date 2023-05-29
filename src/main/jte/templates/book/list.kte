@@ -78,5 +78,41 @@
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
     <script src="/static/js/settings-box.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function importBook() {
+            const caller = "import-book-button";
+            let form = document.getElementById("import-book-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            let open_library_id = null;
+            let open_library_url = formData["open-library-url"];
+            if (open_library_url) {
+                let segments = new URL(open_library_url).pathname.split('/');
+                open_library_id = segments.pop() || segments.pop();
+            }
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/import", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    "isbn": formData["isbn"] || null,
+                    "isCollected": true,
+                    "openLibraryId": open_library_id || null,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+    </script>
 </body>
 </html>

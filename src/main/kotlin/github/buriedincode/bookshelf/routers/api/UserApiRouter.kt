@@ -1,6 +1,6 @@
 package github.buriedincode.bookshelf.routers.api
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.UserEntry
 import github.buriedincode.bookshelf.models.*
@@ -11,6 +11,17 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 
 object UserApiRouter : Logging {
+    private fun Context.getUser(): User {
+        return this.pathParam("user-id").toLongOrNull()?.let {
+            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
+        } ?: throw BadRequestResponse(message = "Invalid User Id")
+    }
+
+    private fun Context.getUserInput(): UserInput = this.bodyValidator<UserInput>()
+        .check({ it.role >= 0 }, error = "Role must be greater than or equal to 0")
+        .check({ it.username.isNotBlank() }, error = "Username must not be empty")
+        .get()
+
     @OpenApi(
         description = "List all Users",
         methods = [HttpMethod.GET],
@@ -18,14 +29,16 @@ object UserApiRouter : Logging {
         path = "/users",
         pathParams = [],
         requestBody = OpenApiRequestBody(content = []),
-        responses = [OpenApiResponse(status = "200", content = [OpenApiContent(Array<UserEntry>::class)])],
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(Array<UserEntry>::class)]),
+        ],
         security = [],
         summary = "List all Users",
         tags = ["User"]
     )
     fun listUsers(ctx: Context): Unit = Utils.query(description = "List Users") {
-        val results = User.all()
-        ctx.json(results.map { it.toJson() })
+        val users = User.all()
+        ctx.json(users.map { it.toJson() })
     }
 
     @OpenApi(
@@ -37,36 +50,36 @@ object UserApiRouter : Logging {
         requestBody = OpenApiRequestBody(content = [OpenApiContent(UserInput::class)], required = true),
         responses = [
             OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         security = [],
         summary = "Create User",
         tags = ["User"]
     )
     fun createUser(ctx: Context): Unit = Utils.query(description = "Create User") {
-        val input: UserInput
-        try {
-            input = ctx.bodyAsClass<UserInput>()
-        } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
-        }
+        val body = ctx.getUserInput()
         val exists = User.find {
-            UserTable.usernameCol eq input.username
+            UserTable.usernameCol eq body.username
         }.firstOrNull()
         if (exists != null)
             throw ConflictResponse(message = "User already exists")
-        val result = User.new {
-            imageUrl = input.imageUrl
-            readBooks = SizedCollection(input.readBookIds.map {
-                Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
+        val user = User.new {
+            imageUrl = body.imageUrl
+            readBooks = SizedCollection(body.readBookIds.map {
+                Book.findById(id = it)
+                    ?: throw NotFoundResponse(message = "Book not found")
             })
-            role = input.role
-            username = input.username
-            wishedBooks = SizedCollection(input.wishedBookIds.map {
-                Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
+            role = body.role
+            username = body.username
+            wishedBooks = SizedCollection(body.wishedBookIds.map {
+                Book.findById(id = it)
+                    ?: throw NotFoundResponse(message = "Book not found")
             })
         }
 
-        ctx.status(HttpStatus.CREATED).json(result.toJson(showAll = true))
+        ctx.status(HttpStatus.CREATED).json(user.toJson(showAll = true))
     }
 
     @OpenApi(
@@ -78,17 +91,16 @@ object UserApiRouter : Logging {
         requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         security = [],
         summary = "Get User by id",
         tags = ["User"]
     )
     fun getUser(ctx: Context): Unit = Utils.query(description = "Get User") {
-        val userId = ctx.pathParam("user-id")
-        val result = userId.toLongOrNull()?.let {
-            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
-        } ?: throw BadRequestResponse(message = "Invalid User Id")
-        ctx.json(result.toJson(showAll = true))
+        val user = ctx.getUser()
+        ctx.json(user.toJson(showAll = true))
     }
 
     @OpenApi(
@@ -100,38 +112,35 @@ object UserApiRouter : Logging {
         requestBody = OpenApiRequestBody(content = [OpenApiContent(UserInput::class)], required = true),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         security = [],
         summary = "Update User",
         tags = ["User"]
     )
     fun updateUser(ctx: Context): Unit = Utils.query(description = "Update User") {
-        val userId = ctx.pathParam("user-id")
-        val input: UserInput
-        try {
-            input = ctx.bodyAsClass<UserInput>()
-        } catch (upe: UnrecognizedPropertyException) {
-            throw BadRequestResponse(message = "Invalid Body: ${upe.message}")
-        }
+        val user = ctx.getUser()
+        val body = ctx.getUserInput()
         val exists = User.find {
-            UserTable.usernameCol eq input.username
+            UserTable.usernameCol eq body.username
         }.firstOrNull()
         if (exists != null)
             throw ConflictResponse(message = "User already exists")
-        val result = userId.toLongOrNull()?.let {
-            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
-        } ?: throw BadRequestResponse(message = "Invalid User Id")
-        result.imageUrl = input.imageUrl
-        result.readBooks = SizedCollection(input.readBookIds.map {
-            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
+        user.imageUrl = body.imageUrl
+        user.readBooks = SizedCollection(body.readBookIds.map {
+            Book.findById(id = it)
+                ?: throw NotFoundResponse(message = "Book not found")
         })
-        result.role = input.role
-        result.username = input.username
-        result.wishedBooks = SizedCollection(input.wishedBookIds.map {
-            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
+        user.role = body.role
+        user.username = body.username
+        user.wishedBooks = SizedCollection(body.wishedBookIds.map {
+            Book.findById(id = it)
+                ?: throw NotFoundResponse(message = "Book not found")
         })
 
-        ctx.json(result.toJson(showAll = true))
+        ctx.json(user.toJson(showAll = true))
     }
 
     @OpenApi(
@@ -142,18 +151,143 @@ object UserApiRouter : Logging {
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = []),
         responses = [
-            OpenApiResponse(status = "204")
+            OpenApiResponse(status = "204"),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         security = [],
         summary = "Delete User",
         tags = ["User"]
     )
     fun deleteUser(ctx: Context): Unit = Utils.query(description = "Delete User") {
-        val userId = ctx.pathParam("user-id")
-        val result = userId.toLongOrNull()?.let {
-            User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
-        } ?: throw BadRequestResponse(message = "Invalid User Id")
-        result.delete()
+        val user = ctx.getUser()
+        user.delete()
         ctx.status(HttpStatus.NO_CONTENT)
+    }
+
+    private fun Context.getIdValue(): IdValue = this.bodyValidator<IdValue>()
+        .check({ it.id > 0 }, error = "Id must be greater than 0")
+        .get()
+
+    @OpenApi(
+        description = "Add Book to User read list",
+        methods = [HttpMethod.PATCH],
+        operationId = "addBookToUserReadList",
+        path = "/user/{user-id}/read",
+        pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
+        ],
+        security = [],
+        summary = "Add Book to User read list",
+        tags = ["User"]
+    )
+    fun addReadBook(ctx: Context): Unit = Utils.query(description = "Add Book to User read list") {
+        val user = ctx.getUser()
+        val body = ctx.getIdValue()
+        val book = Book.findById(id = body.id)
+            ?: throw NotFoundResponse(message = "Book not found")
+        if (book in user.readBooks)
+            throw ConflictResponse(message = "Book already is on User read list")
+        val temp = user.readBooks.toMutableList()
+        temp.add(book)
+        user.readBooks = SizedCollection(temp)
+
+        ctx.json(user.toJson(showAll = true))
+    }
+
+    @OpenApi(
+        description = "Remove Book from User read list",
+        methods = [HttpMethod.DELETE],
+        operationId = "removeBookFromUserReadList",
+        path = "/user/{user-id}/read",
+        pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+        ],
+        security = [],
+        summary = "Remove Book from User read list",
+        tags = ["User"]
+    )
+    fun removeReadBook(ctx: Context): Unit = Utils.query(description = "Remove Book from User read list") {
+        val user = ctx.getUser()
+        val body = ctx.getIdValue()
+        val book = Book.findById(id = body.id)
+            ?: throw NotFoundResponse(message = "Book not found")
+        if (!user.readBooks.contains(book))
+            throw NotFoundResponse(message = "Book isn't linked to User read list")
+        val temp = user.readBooks.toMutableList()
+        temp.remove(book)
+        user.readBooks = SizedCollection(temp)
+
+        ctx.json(user.toJson(showAll = true))
+    }
+
+    @OpenApi(
+        description = "Add Book to User wished list",
+        methods = [HttpMethod.PATCH],
+        operationId = "addBookToUserWishedList",
+        path = "/user/{user-id}/wished",
+        pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
+        ],
+        security = [],
+        summary = "Add Book to User wished list",
+        tags = ["User"]
+    )
+    fun addWishedBook(ctx: Context): Unit = Utils.query(description = "Add Book to User wished list") {
+        val user = ctx.getUser()
+        val body = ctx.getIdValue()
+        val book = Book.findById(id = body.id)
+            ?: throw NotFoundResponse(message = "Book not found")
+        if (book in user.wishedBooks)
+            throw ConflictResponse(message = "Book already is on User wished list")
+        val temp = user.wishedBooks.toMutableList()
+        temp.add(book)
+        user.wishedBooks = SizedCollection(temp)
+
+        ctx.json(user.toJson(showAll = true))
+    }
+
+    @OpenApi(
+        description = "Remove Book from User wished list",
+        methods = [HttpMethod.DELETE],
+        operationId = "removeBookFromUserWishedList",
+        path = "/user/{user-id}/wished",
+        pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+        ],
+        security = [],
+        summary = "Remove Book from User wished list",
+        tags = ["User"]
+    )
+    fun removeWishedBook(ctx: Context): Unit = Utils.query(description = "Remove Book from User wished list") {
+        val user = ctx.getUser()
+        val body = ctx.getIdValue()
+        val book = Book.findById(id = body.id)
+            ?: throw NotFoundResponse(message = "Book not found")
+        if (!user.wishedBooks.contains(book))
+            throw NotFoundResponse(message = "Book isn't linked to User wished list")
+        val temp = user.wishedBooks.toMutableList()
+        temp.remove(book)
+        user.wishedBooks = SizedCollection(temp)
+
+        ctx.json(user.toJson(showAll = true))
     }
 }
