@@ -25,11 +25,13 @@ private const val VERSION = "0.0.0"
 
 fun main() {
     val logger = logger("github.buriedincode.bookshelf.App")
-    JavalinJte.init(templateEngine = createTemplateEngine())
+    val engine = createTemplateEngine()
+    // engine.setTrimControlStructures = true
+    JavalinJte.init(templateEngine = engine)
     val app = Javalin.create {
         it.http.prefer405over404 = true
         it.requestLogger.http { ctx, ms ->
-            logger.info("${ctx.method()} - ${ctx.matchedPath()} - ${ctx.statusCode()} - ${ctx.ip()} => ${ms}ms")
+            logger.info("${ctx.method()} - ${ctx.path()} - ${ctx.statusCode()} - ${ctx.ip()} => ${ms}ms")
         }
         it.routing.ignoreTrailingSlashes = true
         it.routing.treatMultipleSlashesAsSingleSlash = true
@@ -180,7 +182,7 @@ fun main() {
                             patch(UserApiRouter::addReadBook)
                             delete(UserApiRouter::removeReadBook)
                         }
-                        path("wisher") {
+                        path("wished") {
                             patch(UserApiRouter::addWishedBook)
                             delete(UserApiRouter::removeWishedBook)
                         }

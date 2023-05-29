@@ -115,7 +115,7 @@ object PublisherApiRouter : Logging {
         val exists = Publisher.find {
             PublisherTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null && exists != publisher)
             throw ConflictResponse(message = "Publisher already exists")
         publisher.title = body.title
 

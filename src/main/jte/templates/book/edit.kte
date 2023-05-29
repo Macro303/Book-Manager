@@ -299,7 +299,7 @@
 
             addLoading(caller);
             fetch("/api/v0.0/books/${book.id.value}", {
-                method: "POST",
+                method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
                     "description": formData["description"] || null,

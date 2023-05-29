@@ -126,7 +126,7 @@ object UserApiRouter : Logging {
         val exists = User.find {
             UserTable.usernameCol eq body.username
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null && exists != user)
             throw ConflictResponse(message = "User already exists")
         user.imageUrl = body.imageUrl
         user.readBooks = SizedCollection(body.readBookIds.map {

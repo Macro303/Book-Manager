@@ -120,7 +120,7 @@ object GenreApiRouter : Logging {
         val exists = Genre.find {
             GenreTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null && exists != genre)
             throw ConflictResponse(message = "Genre already exists")
         genre.books = SizedCollection(body.bookIds.map {
             Book.findById(id = it)

@@ -1,6 +1,7 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Series
+@import gg.jte.support.ForSupport
 @param series: Series
 @param books: List<Book>
 
@@ -60,12 +61,11 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.book(label = "", options = books)</td>
-                                    <td></td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = books)</td>
                                     <td>@template.components.forms.input_number(label = "", name = "series-number")</td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" type="button">
+                                            <button class="button is-success" id="add-book-button" onclick="addBook()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -121,8 +121,9 @@
         }
         function removeBook(bookId) {
             @raw
-                const caller = "remove-book-${bookId}-button";
+                const caller = `remove-book-${bookId}-button`;
             @endraw
+            console.log(caller);
             
             addLoading(caller);
             fetch("/api/v0.0/series/${series.id.value}/books", {
@@ -154,10 +155,12 @@
                 headers: headers,
                 body: JSON.stringify({
                     "title": formData["title"],
-                    "books": ${series.books.map{ mapOf(
-                        "bookId" to it.id.value,
-                        "number" to it.number,
-                    )}.toList().toString()},
+                    "books": [@for(entry in ForSupport.of(series.books))
+                        {
+                            "bookId": ${entry.get().id.value},
+                            "number": ${entry.get().number}
+                        }@if(!entry.isLast),@endif
+                    @endfor],
                 }),
             }).then((response) => {
                 if (!response.ok){
@@ -172,5 +175,7 @@
             })).finally(() => removeLoading(caller));
         }
     </script>
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </body>
 </html>

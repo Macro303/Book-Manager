@@ -132,7 +132,7 @@ object SeriesApiRouter : Logging {
         val exists = Series.find {
             SeriesTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null && exists != series)
             throw ConflictResponse(message = "Series already exists")
         series.title = body.title
         body.books.forEach {
