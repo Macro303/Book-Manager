@@ -11,6 +11,7 @@ import java.time.LocalDate
 class Book(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<Book>(BookTable), Logging
 
+    val creators by BookCreatorRole referrersOn BookCreatorRoleTable.bookCol
     var description: String? by BookTable.descriptionCol
     var format: Format by BookTable.formatCol
     var genres by Genre via BookGenreTable
@@ -46,6 +47,12 @@ class Book(id: EntityID<Long>) : LongEntity(id) {
             "title" to title
         )
         if (showAll) {
+            output["creators"] = creators.map {
+                mapOf(
+                    "creatorId" to it.creator.id.value,
+                    "roleId" to it.role.id.value,
+                )
+            }
             output["genres"] = genres.map { it.toJson() }
             output["publisher"] = publisher?.toJson()
             output["readers"] = readers.map { it.toJson() }
@@ -63,6 +70,7 @@ class Book(id: EntityID<Long>) : LongEntity(id) {
 }
 
 class BookInput(
+    val creators: List<BookCreatorInput> = ArrayList(),
     val description: String? = null,
     val format: Format = Format.PAPERBACK,
     val genreIds: List<Long> = ArrayList(),
@@ -80,6 +88,11 @@ class BookInput(
     val subtitle: String? = null,
     val title: String,
     val wisherIds: List<Long> = ArrayList()
+)
+
+class BookCreatorInput(
+    val creatorId: Long,
+    val roleId: Long,
 )
 
 class BookSeriesInput(

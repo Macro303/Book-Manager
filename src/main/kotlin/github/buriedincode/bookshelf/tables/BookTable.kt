@@ -12,7 +12,6 @@ import org.jetbrains.exposed.sql.javatime.date
 import java.time.LocalDate
 
 object BookTable : LongIdTable(name = "books"), Logging {
-    // Credits
     val descriptionCol: Column<String?> = text(name = "description").nullable()
     val formatCol: Column<Format> = enumerationByName(name = "format", length = 24, klass = Format::class).default(defaultValue = Format.PAPERBACK)
     val goodreadsCol: Column<String?> = text(name = "goodreads_id").nullable()

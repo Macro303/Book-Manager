@@ -57,7 +57,22 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <%-- Creators --%>
+                                @for(entry in book.creators)
+                                    <tr>
+                                        <td>${entry.creator.name}</td>
+                                        <td>${entry.role.title}</td>
+                                        <td>
+                                            <div class="buttons is-centered">
+                                                <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-role-${entry.role.id.value}-button" onclick="removeGenre(${entry.creator.id.value}, ${entry.role.id.value})" type="button">
+                                                        <span class="icon">
+                                                            <i class="fa-solid fa-minus"></i>
+                                                        </span>
+                                                    <span>Remove</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endfor
                                 <tr>
                                     <td><%--@template.components.forms.select.creator(label = "", options = creators)--%></td>
                                     <td><%--@template.components.forms.select.role(label = "", options = roles)--%></td>
@@ -191,8 +206,54 @@
     <script src="/static/js/scripts.js" type="text/javascript"></script>
     <script type="text/javascript">
         function addCreator() {
+            const caller = "add-creator-button";
+            let form = document.getElementById("add-creator-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}/creators", {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({
+                    "creatorId": formData["creator-id"],
+                    "roleId": formData["role-id"],
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
         }
-        function removeCreator() {
+        function removeCreator(creatorId, roleId) {
+            @raw
+                const caller = `remove-creator-${creatorId}-role-${roleId}-button`;
+            @endraw
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}/creators", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "creatorId": creatorId,
+                    "roleId": roleId,
+                }),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
         }
         function addGenre() {
             const caller = "add-genre-button";
@@ -333,6 +394,22 @@
             })).finally(() => removeLoading(caller));
         }
         function refreshBook() {
+            const caller = "refresh-book-button";
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${book.id.value}/refresh", {
+                method: "PUT",
+                headers: headers,
+            }).then((response) => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                window.location = "/books/${book.id.value}";
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
         }
     </script>
 </body>

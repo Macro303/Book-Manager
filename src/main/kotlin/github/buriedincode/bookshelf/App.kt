@@ -18,6 +18,7 @@ import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.rendering.template.JavalinJte
+import jakarta.annotation.security.RolesAllowed
 import org.apache.logging.log4j.kotlin.logger
 import java.nio.file.Path
 
@@ -90,6 +91,13 @@ fun main() {
                     get("edit", PublisherHtmlRouter::editEndpoint)
                 }
             }
+            path("roles") {
+                get(RoleHtmlRouter::listEndpoint)
+                path("{role-id}") {
+                    get(RoleHtmlRouter::viewEndpoint)
+                    get("edit", RoleHtmlRouter::editEndpoint)
+                }
+            }
             path("series") {
                 get(SeriesHtmlRouter::listEndpoint)
                 path("{series-id}") {
@@ -115,6 +123,7 @@ fun main() {
                         get(BookApiRouter::getBook)
                         put(BookApiRouter::updateBook)
                         delete(BookApiRouter::deleteBook)
+                        put("refresh", BookApiRouter::refreshBook)
                         patch("discard", BookApiRouter::discardBook)
                         patch("collect", BookApiRouter::collectBook)
                         patch("unread", BookApiRouter::unreadBook)
@@ -156,6 +165,15 @@ fun main() {
                         get(PublisherApiRouter::getPublisher)
                         put(PublisherApiRouter::updatePublisher)
                         delete(PublisherApiRouter::deletePublisher)
+                    }
+                }
+                path("roles") {
+                    get(RoleApiRouter::listRoles)
+                    post(RoleApiRouter::createRole)
+                    path("{role-id}") {
+                        get(RoleApiRouter::getRole)
+                        put(RoleApiRouter::updateRole)
+                        delete(RoleApiRouter::deleteRole)
                     }
                 }
                 path("series") {

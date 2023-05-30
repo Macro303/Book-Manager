@@ -17,11 +17,12 @@ class BookEntry(
     val publishDate: LocalDate?,
     val publisherId: Long?,
     val subtitle: String?,
-    val title: String
+    val title: String,
 )
 
 class Book(
     val bookId: Long,
+    val creators: List<CreatorRole>,
     val description: String?,
     val format: Format,
     val genres: List<GenreEntry>,
@@ -38,10 +39,15 @@ class Book(
     val series: List<BookSeries>,
     val subtitle: String?,
     val title: String,
-    val wishers: List<UserEntry>
+    val wishers: List<UserEntry>,
+)
+
+class CreatorRole(
+    val creatorId: Long,
+    val roleId: Long,
 )
 
 class BookSeries(
     val seriesId: Long,
-    val number: Int?
+    val number: Int?,
 )

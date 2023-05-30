@@ -1,6 +1,5 @@
 package github.buriedincode.bookshelf.routers.api
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.GenreEntry
