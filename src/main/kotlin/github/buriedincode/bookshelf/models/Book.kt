@@ -11,7 +11,7 @@ import java.time.LocalDate
 class Book(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<Book>(BookTable), Logging
 
-    val creators by BookCreatorRole referrersOn BookCreatorRoleTable.bookCol
+    val credits by BookCreatorRole referrersOn BookCreatorRoleTable.bookCol
     var description: String? by BookTable.descriptionCol
     var format: Format by BookTable.formatCol
     var genres by Genre via BookGenreTable
@@ -47,7 +47,7 @@ class Book(id: EntityID<Long>) : LongEntity(id) {
             "title" to title
         )
         if (showAll) {
-            output["creators"] = creators.map {
+            output["credits"] = credits.map {
                 mapOf(
                     "creatorId" to it.creator.id.value,
                     "roleId" to it.role.id.value,

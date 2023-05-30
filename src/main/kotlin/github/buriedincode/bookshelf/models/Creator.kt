@@ -10,7 +10,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 class Creator(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<Creator>(CreatorTable), Logging
 
-    val books by BookCreatorRole referrersOn BookCreatorRoleTable.creatorCol
+    val credits by BookCreatorRole referrersOn BookCreatorRoleTable.creatorCol
     var imageUrl: String? by CreatorTable.imageUrlCol
     var name: String by CreatorTable.nameCol
 
@@ -21,7 +21,7 @@ class Creator(id: EntityID<Long>) : LongEntity(id) {
             "name" to name,
         )
         if (showAll) {
-            output["books"] = books.map {
+            output["credits"] = credits.map {
                 mapOf(
                     "bookId" to it.book.id.value,
                     "roleId" to it.role.id.value

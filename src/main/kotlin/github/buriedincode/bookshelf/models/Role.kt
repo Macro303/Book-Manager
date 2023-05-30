@@ -10,7 +10,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 class Role(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<Role>(RoleTable), Logging
 
-    val bookCreators by BookCreatorRole referrersOn BookCreatorRoleTable.roleCol
+    val credits by BookCreatorRole referrersOn BookCreatorRoleTable.roleCol
     var title: String by RoleTable.titleCol
 
     fun toJson(showAll: Boolean = false): Map<String, Any?> {
@@ -19,7 +19,7 @@ class Role(id: EntityID<Long>) : LongEntity(id) {
             "title" to title
         )
         if (showAll)
-            output["bookCreators"] = bookCreators.map {
+            output["credits"] = credits.map {
                 mapOf(
                     "bookId" to it.book.id.value,
                     "creatorId" to it.creator.id.value

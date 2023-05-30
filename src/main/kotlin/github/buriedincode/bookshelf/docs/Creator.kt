@@ -8,7 +8,7 @@ class CreatorEntry(
 
 class Creator(
     val creatorId: Long,
-    val bookRoles: List<BookRole>,
+    val credits: List<BookRole>,
     val name: String,
     val imageUrl: String?
 )

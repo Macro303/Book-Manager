@@ -22,7 +22,7 @@ class BookEntry(
 
 class Book(
     val bookId: Long,
-    val creators: List<CreatorRole>,
+    val credits: List<CreatorRole>,
     val description: String?,
     val format: Format,
     val genres: List<GenreEntry>,
