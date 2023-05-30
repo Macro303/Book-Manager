@@ -4,7 +4,7 @@ import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
 import github.buriedincode.bookshelf.routers.api.*
-import github.buriedincode.bookshelf.routers.HtmlRouting.*
+import github.buriedincode.bookshelf.routers.*
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.openapi.OpenApiContact
