@@ -26,12 +26,9 @@ object PublisherApiRouter : Logging {
         methods = [HttpMethod.GET],
         operationId = "listPublishers",
         path = "/publishers",
-        pathParams = [],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<PublisherEntry>::class)]),
         ],
-        security = [],
         summary = "List all Publishers",
         tags = ["Publisher"]
     )
@@ -45,7 +42,6 @@ object PublisherApiRouter : Logging {
         methods = [HttpMethod.POST],
         operationId = "createPublisher",
         path = "/publishers",
-        pathParams = [],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(PublisherInput::class)], required = true),
         responses = [
             OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
@@ -53,7 +49,6 @@ object PublisherApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Create Publisher",
         tags = ["Publisher"]
     )
@@ -77,13 +72,11 @@ object PublisherApiRouter : Logging {
         operationId = "getPublisher",
         path = "/publishers/{publisher-id}",
         pathParams = [OpenApiParam(name = "publisher-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Get Publisher by id",
         tags = ["Publisher"]
     )
@@ -105,7 +98,6 @@ object PublisherApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Update Publisher",
         tags = ["Publisher"]
     )
@@ -128,13 +120,11 @@ object PublisherApiRouter : Logging {
         operationId = "deletePublisher",
         path = "/publishers/{publisher-id}",
         pathParams = [OpenApiParam(name = "publisher-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "204"),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Delete Publisher",
         tags = ["Publisher"]
     )

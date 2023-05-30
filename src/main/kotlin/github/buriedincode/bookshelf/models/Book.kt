@@ -70,7 +70,7 @@ class Book(id: EntityID<Long>) : LongEntity(id) {
 }
 
 class BookInput(
-    val creators: List<BookCreatorInput> = ArrayList(),
+    val credits: List<CreatorRoleInput> = ArrayList(),
     val description: String? = null,
     val format: Format = Format.PAPERBACK,
     val genreIds: List<Long> = ArrayList(),
@@ -90,7 +90,7 @@ class BookInput(
     val wisherIds: List<Long> = ArrayList()
 )
 
-class BookCreatorInput(
+class CreatorRoleInput(
     val creatorId: Long,
     val roleId: Long,
 )

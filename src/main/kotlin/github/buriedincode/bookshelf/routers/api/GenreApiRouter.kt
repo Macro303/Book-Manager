@@ -26,12 +26,9 @@ object GenreApiRouter : Logging {
         methods = [HttpMethod.GET],
         operationId = "listGenres",
         path = "/genres",
-        pathParams = [],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<GenreEntry>::class)]),
         ],
-        security = [],
         summary = "List all Genres",
         tags = ["Genre"]
     )
@@ -45,7 +42,6 @@ object GenreApiRouter : Logging {
         methods = [HttpMethod.POST],
         operationId = "createGenre",
         path = "/genres",
-        pathParams = [],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(GenreInput::class)], required = true),
         responses = [
             OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
@@ -53,7 +49,6 @@ object GenreApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Create Genre",
         tags = ["Genre"]
     )
@@ -81,13 +76,11 @@ object GenreApiRouter : Logging {
         operationId = "getGenre",
         path = "/genres/{genre-id}",
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Get Genre by id",
         tags = ["Genre"]
     )
@@ -109,7 +102,6 @@ object GenreApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Update Genre",
         tags = ["Genre"]
     )
@@ -136,13 +128,11 @@ object GenreApiRouter : Logging {
         operationId = "deleteGenre",
         path = "/genres/{genre-id}",
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "204"),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Delete Genre",
         tags = ["Genre"]
     )
@@ -169,7 +159,6 @@ object GenreApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Add Book to Genre",
         tags = ["Genre"]
     )
@@ -199,7 +188,6 @@ object GenreApiRouter : Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Remove Book from Genre",
         tags = ["Genre"]
     )

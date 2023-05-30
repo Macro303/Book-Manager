@@ -33,6 +33,12 @@ class Creator(id: EntityID<Long>) : LongEntity(id) {
 }
 
 class CreatorInput(
+    val credits: List<BookRoleInput> = ArrayList(),
     val imageUrl: String? = null,
     val name: String
+)
+
+class BookRoleInput(
+    val bookId: Long,
+    val roleId: Long
 )

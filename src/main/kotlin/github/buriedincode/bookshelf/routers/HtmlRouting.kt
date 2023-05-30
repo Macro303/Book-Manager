@@ -1,26 +1,18 @@
 package github.buriedincode.bookshelf.routers
 
 import github.buriedincode.bookshelf.Utils
-import github.buriedincode.bookshelf.models.Book
-import github.buriedincode.bookshelf.models.Creator
-import github.buriedincode.bookshelf.models.Genre
-import github.buriedincode.bookshelf.models.Publisher
-import github.buriedincode.bookshelf.models.Role
-import github.buriedincode.bookshelf.models.Series
-import github.buriedincode.bookshelf.models.User
-import io.javalin.http.Context
+import github.buriedincode.bookshelf.models.*
 import io.javalin.http.*
-import org.jetbrains.exposed.dao.load
-import org.jetbrains.exposed.dao.LongEntity
-import org.jetbrains.exposed.dao.LongEntityClass
+import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.dao.id.EntityID
+import org.apache.logging.log4j.kotlin.Logging
 
-open class BaseHtmlRouter<T: LongEntity>(protected val entity: LongEntityClass<T>) {
-    protected val folder: String = entity::class.simpleName!!.lowercase()
-    protected val paramName: String = "$folder-id"
-    protected val title: String = folder.replaceFirstChar(Char::uppercaseChar)
+abstract class BaseHtmlRouter<T: LongEntity>(protected val entity: LongEntityClass<T>) {
+    private val name: String = entity::class.simpleName!!.lowercase()
+    protected val paramName: String = "$name-id"
+    protected val title: String = name.replaceFirstChar(Char::uppercaseChar)
     
-    protected fun Context.getResult(): T {
+    protected fun Context.getParamObject(): T {
         return this.pathParam(paramName).toLongOrNull()?.let {
             entity.findById(id = it) ?: throw NotFoundResponse(message = "$title not found")
         } ?: throw BadRequestResponse(message = "Invalid $title Id")
@@ -28,28 +20,28 @@ open class BaseHtmlRouter<T: LongEntity>(protected val entity: LongEntityClass<T
     
     open fun listEndpoint(ctx: Context): Unit = Utils.query {
         val results = entity.all().toList()
-        ctx.render(filePath = "templates/$folder/list.kte", mapOf("results" to results))
+        ctx.render(filePath = "templates/$name/list.kte", mapOf("results" to results))
     }
 
     open fun viewEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
-        ctx.render(filePath = "templates/$folder/view.kte", mapOf("result" to result))
+        val result = ctx.getParamObject()
+        ctx.render(filePath = "templates/$name/view.kte", mapOf("result" to result))
     }
 
     open fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
-        ctx.render(filePath = "templates/$folder/edit.kte", mapOf("result" to result))
+        val result = ctx.getParamObject()
+        ctx.render(filePath = "templates/$name/edit.kte", mapOf("result" to result))
     }
 }
 
-object BookHtmlRouter: BaseHtmlRouter<Book>(entity=Book) {
+object BookHtmlRouter: BaseHtmlRouter<Book>(entity=Book), Logging {
     override fun listEndpoint(ctx: Context): Unit = Utils.query {
         val results = entity.all().toList().filter { it.isCollected }
         ctx.render(filePath = "templates/book/list.kte", mapOf("results" to results))
     }
     
     override fun viewEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val credits = HashMap<Role, List<Creator>>()
         for (entry in result.credits) {
             var temp = credits.getOrDefault(entry.role, ArrayList())
@@ -63,7 +55,7 @@ object BookHtmlRouter: BaseHtmlRouter<Book>(entity=Book) {
     }
     
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val creators = Creator.all().toList()
         val genres = Genre.all().toList().filterNot { it in result.genres }
         val publishers = Publisher.all().toList().filterNot { it == result.publisher }
@@ -84,9 +76,9 @@ object BookHtmlRouter: BaseHtmlRouter<Book>(entity=Book) {
     }
 }
 
-object CreatorHtmlRouter: BaseHtmlRouter<Creator>(entity=Creator) {
+object CreatorHtmlRouter: BaseHtmlRouter<Creator>(entity=Creator), Logging {
     override fun viewEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val credits = HashMap<Role, List<Book>>()
         for (entry in result.credits) {
             var temp = credits.getOrDefault(entry.role, ArrayList())
@@ -100,7 +92,7 @@ object CreatorHtmlRouter: BaseHtmlRouter<Creator>(entity=Creator) {
     }
     
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val books = Book.all().toList()
         val roles = Role.all().toList()
         ctx.render(filePath = "templates/creator/edit.kte", mapOf(
@@ -111,9 +103,9 @@ object CreatorHtmlRouter: BaseHtmlRouter<Creator>(entity=Creator) {
     }
 }
 
-object GenreHtmlRouter: BaseHtmlRouter<Genre>(entity=Genre) {
+object GenreHtmlRouter: BaseHtmlRouter<Genre>(entity=Genre), Logging {
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val books = Book.all().toList().filterNot { it in result.books }
         ctx.render(filePath = "templates/genre/edit.kte", mapOf(
             "result" to result,
@@ -122,11 +114,11 @@ object GenreHtmlRouter: BaseHtmlRouter<Genre>(entity=Genre) {
     }
 }
 
-object PublisherHtmlRouter: BaseHtmlRouter<Publisher>(entity=Publisher)
+object PublisherHtmlRouter: BaseHtmlRouter<Publisher>(entity=Publisher), Logging
 
-object RoleHtmlRouter: BaseHtmlRouter<Role>(entity=Role) {
+object RoleHtmlRouter: BaseHtmlRouter<Role>(entity=Role), Logging {
     override fun viewEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val credits = HashMap<Creator, List<Book>>()
         for (entry in result.credits) {
             var temp = credits.getOrDefault(entry.creator, ArrayList())
@@ -140,7 +132,7 @@ object RoleHtmlRouter: BaseHtmlRouter<Role>(entity=Role) {
     }
     
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val books = Book.all().toList()
         val creators = Creator.all().toList()
         ctx.render(filePath = "templates/role/edit.kte", mapOf(
@@ -151,9 +143,9 @@ object RoleHtmlRouter: BaseHtmlRouter<Role>(entity=Role) {
     }
 }
 
-object SeriesHtmlRouter: BaseHtmlRouter<Series>(entity=Series) {
+object SeriesHtmlRouter: BaseHtmlRouter<Series>(entity=Series), Logging {
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val books = Book.all().toList().filterNot { it in result.books.map { it.book } }
         ctx.render(filePath = "templates/series/edit.kte", mapOf(
             "result" to result,
@@ -162,9 +154,9 @@ object SeriesHtmlRouter: BaseHtmlRouter<Series>(entity=Series) {
     }
 }
 
-object UserHtmlRouter: BaseHtmlRouter<User>(entity=User) {
+object UserHtmlRouter: BaseHtmlRouter<User>(entity=User), Logging {
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val readBooks = Book.all().toList().filter { it.isCollected }.filterNot { it in result.readBooks }
         val wishedBooks = Book.all().toList().filterNot { it.isCollected }.filterNot { it in result.wishedBooks }
         ctx.render(filePath = "templates/user/edit.kte", mapOf(
@@ -175,7 +167,7 @@ object UserHtmlRouter: BaseHtmlRouter<User>(entity=User) {
     }
     
     open fun wishlistEndpoint(ctx: Context): Unit = Utils.query {
-        val result = ctx.getResult()
+        val result = ctx.getParamObject()
         val books = Book.all().toList().filter { !it.isCollected && (it.wishers.empty() || result in it.wishers)}
         ctx.render(filePath = "templates/user/wishlist.kte", mapOf(
             "result" to result,

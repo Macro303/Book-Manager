@@ -125,13 +125,9 @@ fun main() {
         path("api") {
             path("v${VERSION.split(".")[0]}.${VERSION.split(".")[1]}") {
                 path("books") {
-                    get(BookApiRouter::listBooks)
-                    post(BookApiRouter::createBook)
                     post("import", BookApiRouter::importBook)
                     path("{book-id}") {
-                        get(BookApiRouter::getBook)
-                        put(BookApiRouter::updateBook)
-                        delete(BookApiRouter::deleteBook)
+                        crud(BookApiRouter)
                         put("refresh", BookApiRouter::refreshBook)
                         path("wish") {
                             patch(BookApiRouter::wishBook)
@@ -160,12 +156,8 @@ fun main() {
                     }
                 }
                 path("creators") {
-                    get(CreatorApiRouter::listCreators)
-                    post(CreatorApiRouter::createCreator)
                     path("{creator-id}") {
-                        get(CreatorApiRouter::getCreator)
-                        put(CreatorApiRouter::updateCreator)
-                        delete(CreatorApiRouter::deleteCreator)
+                        crud(CreatorApiRouter)
                         path("credits") {
                             patch(CreatorApiRouter::addCredit)
                             delete(CreatorApiRouter::removeCredit)
