@@ -7,8 +7,8 @@ import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
-import io.javalin.http.*
 import io.javalin.apibuilder.*
+import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
@@ -133,7 +133,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query(description = "Get Book") {
-        val book = getResource(resourceId=resourceId)
+        val book = getResource(resourceId = resourceId)
         ctx.json(book.toJson(showAll = true))
     }
 
@@ -154,7 +154,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query(description = "Update Book") {
-        val book = getResource(resourceId=resourceId)
+        val book = getResource(resourceId = resourceId)
         val body = ctx.getBody()
         val exists = Book.find {
             BookTable.titleCol eq body.title
@@ -238,7 +238,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query(description = "Delete Book") {
-        val book = getResource(resourceId=resourceId)
+        val book = getResource(resourceId = resourceId)
         book.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
@@ -294,7 +294,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun refreshBook(ctx: Context): Unit = Utils.query(description = "Refresh Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
 
         ctx.status(HttpStatus.NOT_IMPLEMENTED).json(book.toJson(showAll = true))
     }
@@ -316,7 +316,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun discardBook(ctx: Context): Unit = Utils.query(description = "Discard Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         book.isCollected = false
         book.readers = SizedCollection()
         ctx.json(book.toJson(showAll = true))
@@ -339,7 +339,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun collectBook(ctx: Context): Unit = Utils.query(description = "Collect Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         book.isCollected = true
         book.wishers = SizedCollection()
         ctx.json(book.toJson(showAll = true))
@@ -366,7 +366,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun unreadBook(ctx: Context): Unit = Utils.query(description = "Unread Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         if (!book.isCollected)
             throw BadRequestResponse(message = "Book hasn't been collected to be able to unread")
         val body = ctx.getIdValue()
@@ -398,7 +398,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun readBook(ctx: Context): Unit = Utils.query(description = "Read Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         if (!book.isCollected)
             throw BadRequestResponse(message = "Book hasn't been collected to be able to read")
         val body = ctx.getIdValue()
@@ -430,7 +430,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun unwishBook(ctx: Context): Unit = Utils.query(description = "Unwish Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         if (book.isCollected)
             throw BadRequestResponse(message = "Book has already been collected")
         val body = ctx.getIdValue()
@@ -462,7 +462,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun wishBook(ctx: Context): Unit = Utils.query(description = "Wish Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         if (book.isCollected)
             throw BadRequestResponse(message = "Book has already been collected")
         val body = ctx.getIdValue()
@@ -498,7 +498,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun addCredit(ctx: Context): Unit = Utils.query {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getCreditInput()
         val creator = Creator.findById(id = body.creatorId)
             ?: throw NotFoundResponse(message = "Creator not found")
@@ -536,7 +536,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun removeCredit(ctx: Context): Unit = Utils.query(description = "Remove Creator from Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getCreditInput()
         val creator = Creator.findById(id = body.creatorId)
             ?: throw NotFoundResponse(message = "Creator not found")
@@ -568,7 +568,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun addGenre(ctx: Context): Unit = Utils.query(description = "Add Genre to Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getIdValue()
         val genre = Genre.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Genre not found")
@@ -598,7 +598,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun removeGenre(ctx: Context): Unit = Utils.query(description = "Remove Genre from Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getIdValue()
         val genre = Genre.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Genre not found")
@@ -633,7 +633,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun addSeries(ctx: Context): Unit = Utils.query(description = "Add Series to Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getBookSeriesImport()
         val series = Series.findById(id = body.seriesId)
             ?: throw NotFoundResponse(message = "Series not found")
@@ -668,7 +668,7 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     fun removeSeries(ctx: Context): Unit = Utils.query(description = "Remove Series from Book") {
-        val book = getResource(resourceId=ctx.pathParam("book-id"))
+        val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getIdValue()
         val series = Series.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Series not found")

@@ -3,10 +3,11 @@ package github.buriedincode.bookshelf
 import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
-import github.buriedincode.bookshelf.routers.api.*
 import github.buriedincode.bookshelf.routers.*
+import github.buriedincode.bookshelf.routers.api.*
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
+import io.javalin.http.*
 import io.javalin.openapi.OpenApiContact
 import io.javalin.openapi.OpenApiInfo
 import io.javalin.openapi.OpenApiLicense
@@ -18,10 +19,9 @@ import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.rendering.template.JavalinJte
+import io.javalin.validation.ValidationException
 import org.apache.logging.log4j.kotlin.logger
 import java.nio.file.Path
-import io.javalin.http.*
-import io.javalin.validation.ValidationException
 
 private const val VERSION = "0.0.0"
 
@@ -232,9 +232,15 @@ fun main() {
             }
         }
     }
-    /*app.exception(ValidationException::class.java) { e, ctx ->
-        throw BadRequestResponse(message = "Validation Error", details = e.errors.toMutableMap().associateTo{ it.key to it.value.message })
-    }*/
+    app.exception(ValidationException::class.java) { e, ctx ->
+        val details = HashMap<String, List<String>>()
+        e.errors.forEach { (key, value) ->
+            var entry = details.getOrDefault(key, ArrayList())
+            entry = entry.plus(value.map { it.message })
+            details[key] = entry
+        }
+        throw BadRequestResponse(message = "Validation Error", details = details.mapValues { it.value.joinToString(", ") })
+    }
     app.start(Settings.INSTANCE.websiteHost, Settings.INSTANCE.websitePort)
 }
 

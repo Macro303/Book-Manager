@@ -5,11 +5,10 @@ import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.CreatorEntry
 import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.tables.*
-import io.javalin.http.*
 import io.javalin.apibuilder.*
+import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
-import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 
 object CreatorApiRouter : CrudHandler, Logging {
@@ -84,7 +83,7 @@ object CreatorApiRouter : CrudHandler, Logging {
         tags = ["Creator"]
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
-        val resource = getResource(resourceId=resourceId)
+        val resource = getResource(resourceId = resourceId)
         ctx.json(resource.toJson(showAll = true))
     }
 
@@ -105,7 +104,7 @@ object CreatorApiRouter : CrudHandler, Logging {
         tags = ["Creator"]
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
-        val resource = getResource(resourceId=resourceId)
+        val resource = getResource(resourceId = resourceId)
         val body = ctx.getBody()
         val exists = Creator.find {
             CreatorTable.nameCol eq body.name
@@ -133,16 +132,16 @@ object CreatorApiRouter : CrudHandler, Logging {
         tags = ["Creator"]
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
-        val resource = getResource(resourceId=resourceId)
+        val resource = getResource(resourceId = resourceId)
         resource.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
-    
+
     private fun Context.getCreditBody(): BookRoleInput = this.bodyValidator<BookRoleInput>()
         .get()
-    
+
     fun addCredit(ctx: Context): Unit = Utils.query {
-        val resource = getResource(resourceId=ctx.pathParam("creator-id"))
+        val resource = getResource(resourceId = ctx.pathParam("creator-id"))
         val body = ctx.getCreditBody()
         val book = Book.findById(id = body.bookId)
             ?: throw NotFoundResponse(message = "Book not found")
@@ -162,9 +161,9 @@ object CreatorApiRouter : CrudHandler, Logging {
 
         ctx.json(resource.toJson(showAll = true))
     }
-    
+
     fun removeCredit(ctx: Context): Unit = Utils.query {
-        val resource = getResource(resourceId=ctx.pathParam("creator-id"))
+        val resource = getResource(resourceId = ctx.pathParam("creator-id"))
         val body = ctx.getCreditBody()
         val book = Book.findById(id = body.bookId)
             ?: throw NotFoundResponse(message = "Book not found")
