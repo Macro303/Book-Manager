@@ -3,21 +3,23 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.PublisherEntry
+import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.PublisherInput
 import github.buriedincode.bookshelf.tables.PublisherTable
+import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 
-object PublisherApiRouter : Logging {
-    private fun Context.getPublisher(): Publisher {
-        return this.pathParam("publisher-id").toLongOrNull()?.let {
+object PublisherApiRouter : CrudHandler, Logging {
+    private fun getResource(resourceId: String): Publisher {
+        return resourceId.toLongOrNull()?.let {
             Publisher.findById(id = it) ?: throw NotFoundResponse(message = "Publisher not found")
         } ?: throw BadRequestResponse(message = "Invalid Publisher Id")
     }
 
-    private fun Context.getPublisherInput(): PublisherInput = this.bodyValidator<PublisherInput>()
+    private fun Context.getBody(): PublisherInput = this.bodyValidator<PublisherInput>()
         .check({ it.title.isNotBlank() }, error = "Title must not be empty")
         .get()
 
@@ -32,7 +34,7 @@ object PublisherApiRouter : Logging {
         summary = "List all Publishers",
         tags = ["Publisher"]
     )
-    fun listPublishers(ctx: Context): Unit = Utils.query(description = "List Publishers") {
+    override fun getAll(ctx: Context): Unit = Utils.query {
         val publishers = Publisher.all()
         ctx.json(publishers.map { it.toJson() })
     }
@@ -52,8 +54,8 @@ object PublisherApiRouter : Logging {
         summary = "Create Publisher",
         tags = ["Publisher"]
     )
-    fun createPublisher(ctx: Context): Unit = Utils.query(description = "Create Publisher") {
-        val body = ctx.getPublisherInput()
+    override fun create(ctx: Context): Unit = Utils.query {
+        val body = ctx.getBody()
         val exists = Publisher.find {
             PublisherTable.titleCol eq body.title
         }.firstOrNull()
@@ -80,8 +82,8 @@ object PublisherApiRouter : Logging {
         summary = "Get Publisher by id",
         tags = ["Publisher"]
     )
-    fun getPublisher(ctx: Context): Unit = Utils.query(description = "Get Publisher") {
-        val publisher = ctx.getPublisher()
+    override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
+        val publisher = getResource(resourceId = resourceId)
         ctx.json(publisher.toJson(showAll = true))
     }
 
@@ -101,9 +103,9 @@ object PublisherApiRouter : Logging {
         summary = "Update Publisher",
         tags = ["Publisher"]
     )
-    fun updatePublisher(ctx: Context): Unit = Utils.query(description = "Update Publisher") {
-        val publisher = ctx.getPublisher()
-        val body = ctx.getPublisherInput()
+    override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
+        val publisher = getResource(resourceId = resourceId)
+        val body = ctx.getBody()
         val exists = Publisher.find {
             PublisherTable.titleCol eq body.title
         }.firstOrNull()
@@ -128,8 +130,8 @@ object PublisherApiRouter : Logging {
         summary = "Delete Publisher",
         tags = ["Publisher"]
     )
-    fun deletePublisher(ctx: Context): Unit = Utils.query(description = "Delete Publisher") {
-        val publisher = ctx.getPublisher()
+    override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
+        val publisher = getResource(resourceId = resourceId)
         publisher.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

@@ -30,5 +30,11 @@ class Role(id: EntityID<Long>) : LongEntity(id) {
 }
 
 class RoleInput(
+    val credits: List<BookCreatorInput> = ArrayList(),
     val title: String
+)
+
+class BookCreatorInput(
+    val bookId: Long,
+    val creatorId: Long
 )

@@ -140,6 +140,22 @@ object CreatorApiRouter : CrudHandler, Logging {
     private fun Context.getCreditBody(): BookRoleInput = this.bodyValidator<BookRoleInput>()
         .get()
 
+    @OpenApi(
+        description = "Add Book and Role to Creator",
+        methods = [HttpMethod.PATCH],
+        operationId = "addCreditToCreator",
+        path = "/creators/{creator-id}/credits",
+        pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookRoleInput::class)]),
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
+        ],
+        summary = "Add Book and Role to Creator",
+        tags = ["Creator"]
+    )
     fun addCredit(ctx: Context): Unit = Utils.query {
         val resource = getResource(resourceId = ctx.pathParam("creator-id"))
         val body = ctx.getCreditBody()
@@ -162,6 +178,21 @@ object CreatorApiRouter : CrudHandler, Logging {
         ctx.json(resource.toJson(showAll = true))
     }
 
+    @OpenApi(
+        description = "Remove Book and Role from Creator",
+        methods = [HttpMethod.DELETE],
+        operationId = "removeCreditFromCreator",
+        path = "/creators/{creator-id}/credits",
+        pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookRoleInput::class)]),
+        responses = [
+            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
+            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
+            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
+        ],
+        summary = "Remove Book and Role from Creator",
+        tags = ["Creator"]
+    )
     fun removeCredit(ctx: Context): Unit = Utils.query {
         val resource = getResource(resourceId = ctx.pathParam("creator-id"))
         val body = ctx.getCreditBody()

@@ -5,19 +5,20 @@ import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.UserEntry
 import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.tables.UserTable
+import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 
-object UserApiRouter : Logging {
-    private fun Context.getUser(): User {
-        return this.pathParam("user-id").toLongOrNull()?.let {
+object UserApiRouter : CrudHandler, Logging {
+    private fun getResource(resourceId: String): User {
+        return resourceId.toLongOrNull()?.let {
             User.findById(id = it) ?: throw NotFoundResponse(message = "User not found")
         } ?: throw BadRequestResponse(message = "Invalid User Id")
     }
 
-    private fun Context.getUserInput(): UserInput = this.bodyValidator<UserInput>()
+    private fun Context.getBody(): UserInput = this.bodyValidator<UserInput>()
         .check({ it.role >= 0 }, error = "Role must be greater than or equal to 0")
         .check({ it.username.isNotBlank() }, error = "Username must not be empty")
         .get()
@@ -27,16 +28,13 @@ object UserApiRouter : Logging {
         methods = [HttpMethod.GET],
         operationId = "listUsers",
         path = "/users",
-        pathParams = [],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<UserEntry>::class)]),
         ],
-        security = [],
         summary = "List all Users",
         tags = ["User"]
     )
-    fun listUsers(ctx: Context): Unit = Utils.query(description = "List Users") {
+    override fun getAll(ctx: Context): Unit = Utils.query {
         val users = User.all()
         ctx.json(users.map { it.toJson() })
     }
@@ -46,7 +44,6 @@ object UserApiRouter : Logging {
         methods = [HttpMethod.POST],
         operationId = "createUser",
         path = "/users",
-        pathParams = [],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(UserInput::class)], required = true),
         responses = [
             OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
@@ -54,12 +51,11 @@ object UserApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Create User",
         tags = ["User"]
     )
-    fun createUser(ctx: Context): Unit = Utils.query(description = "Create User") {
-        val body = ctx.getUserInput()
+    override fun create(ctx: Context): Unit = Utils.query {
+        val body = ctx.getBody()
         val exists = User.find {
             UserTable.usernameCol eq body.username
         }.firstOrNull()
@@ -88,18 +84,16 @@ object UserApiRouter : Logging {
         operationId = "getUser",
         path = "/users/{user-id}",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.User::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Get User by id",
         tags = ["User"]
     )
-    fun getUser(ctx: Context): Unit = Utils.query(description = "Get User") {
-        val user = ctx.getUser()
+    override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
+        val user = getResource(resourceId = resourceId)
         ctx.json(user.toJson(showAll = true))
     }
 
@@ -116,13 +110,12 @@ object UserApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Update User",
         tags = ["User"]
     )
-    fun updateUser(ctx: Context): Unit = Utils.query(description = "Update User") {
-        val user = ctx.getUser()
-        val body = ctx.getUserInput()
+    override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
+        val user = getResource(resourceId = resourceId)
+        val body = ctx.getBody()
         val exists = User.find {
             UserTable.usernameCol eq body.username
         }.firstOrNull()
@@ -149,18 +142,16 @@ object UserApiRouter : Logging {
         operationId = "deleteUser",
         path = "/users/{user-id}",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "204"),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Delete User",
         tags = ["User"]
     )
-    fun deleteUser(ctx: Context): Unit = Utils.query(description = "Delete User") {
-        val user = ctx.getUser()
+    override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
+        val user = getResource(resourceId = resourceId)
         user.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
@@ -182,12 +173,11 @@ object UserApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Add Book to User read list",
         tags = ["User"]
     )
-    fun addReadBook(ctx: Context): Unit = Utils.query(description = "Add Book to User read list") {
-        val user = ctx.getUser()
+    fun addReadBook(ctx: Context): Unit = Utils.query {
+        val user = getResource(resourceId = ctx.pathParam("user-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")
@@ -212,12 +202,11 @@ object UserApiRouter : Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Remove Book from User read list",
         tags = ["User"]
     )
-    fun removeReadBook(ctx: Context): Unit = Utils.query(description = "Remove Book from User read list") {
-        val user = ctx.getUser()
+    fun removeReadBook(ctx: Context): Unit = Utils.query {
+        val user = getResource(resourceId = ctx.pathParam("user-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")
@@ -243,12 +232,11 @@ object UserApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Add Book to User wished list",
         tags = ["User"]
     )
-    fun addWishedBook(ctx: Context): Unit = Utils.query(description = "Add Book to User wished list") {
-        val user = ctx.getUser()
+    fun addWishedBook(ctx: Context): Unit = Utils.query {
+        val user = getResource(resourceId = ctx.pathParam("user-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")
@@ -273,12 +261,11 @@ object UserApiRouter : Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Remove Book from User wished list",
         tags = ["User"]
     )
-    fun removeWishedBook(ctx: Context): Unit = Utils.query(description = "Remove Book from User wished list") {
-        val user = ctx.getUser()
+    fun removeWishedBook(ctx: Context): Unit = Utils.query {
+        val user = getResource(resourceId = ctx.pathParam("user-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")

@@ -243,7 +243,7 @@ object BookApiRouter : CrudHandler, Logging {
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    private fun Context.getBookImport(): BookImport = this.bodyValidator<BookImport>()
+    private fun Context.getImportBody(): BookImport = this.bodyValidator<BookImport>()
         .check({ !it.goodreadsId.isNullOrBlank() || !it.googleBooksId.isNullOrBlank() || !it.isbn.isNullOrBlank() || !it.libraryThingId.isNullOrBlank() || !it.openLibraryId.isNullOrBlank() }, error = "At least 1 id to import must be specified")
         .get()
 
@@ -257,12 +257,11 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Import Book",
         tags = ["Book"]
     )
     fun importBook(ctx: Context): Unit = Utils.query(description = "Import Book") {
-        val body = ctx.getBookImport()
+        val body = ctx.getImportBody()
         if (body.goodreadsId != null)
             throw NotImplementedResponse(message = "Goodreads import not currently supported.")
         if (body.googleBooksId != null)
@@ -283,13 +282,11 @@ object BookApiRouter : CrudHandler, Logging {
         operationId = "refreshBook",
         path = "/books/{book-id}/refresh",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Refresh Book",
         tags = ["Book"]
     )
@@ -305,13 +302,11 @@ object BookApiRouter : CrudHandler, Logging {
         operationId = "discardBook",
         path = "/books/{book-id}/discard",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Discard Book",
         tags = ["Book"]
     )
@@ -328,13 +323,11 @@ object BookApiRouter : CrudHandler, Logging {
         operationId = "collectBook",
         path = "/books/{book-id}/collect",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Collect Book",
         tags = ["Book"]
     )
@@ -361,7 +354,6 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Unread Book",
         tags = ["Book"]
     )
@@ -393,7 +385,6 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Read Book",
         tags = ["Book"]
     )
@@ -425,7 +416,6 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Unwish Book",
         tags = ["Book"]
     )
@@ -457,7 +447,6 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Wish Book",
         tags = ["Book"]
     )
@@ -477,7 +466,7 @@ object BookApiRouter : CrudHandler, Logging {
         ctx.json(book.toJson(showAll = true))
     }
 
-    private fun Context.getCreditInput(): CreatorRoleInput = this.bodyValidator<CreatorRoleInput>()
+    private fun Context.getCreditBody(): CreatorRoleInput = this.bodyValidator<CreatorRoleInput>()
         .get()
 
     @OpenApi(
@@ -493,13 +482,12 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Add Creator and Role to Book",
         tags = ["Book"]
     )
     fun addCredit(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
-        val body = ctx.getCreditInput()
+        val body = ctx.getCreditBody()
         val creator = Creator.findById(id = body.creatorId)
             ?: throw NotFoundResponse(message = "Creator not found")
         val role = Role.findById(id = body.roleId)
@@ -531,13 +519,12 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Remove Creator and Role from Book",
         tags = ["Book"]
     )
     fun removeCredit(ctx: Context): Unit = Utils.query(description = "Remove Creator from Book") {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
-        val body = ctx.getCreditInput()
+        val body = ctx.getCreditBody()
         val creator = Creator.findById(id = body.creatorId)
             ?: throw NotFoundResponse(message = "Creator not found")
         val role = Role.findById(id = body.roleId)
@@ -563,7 +550,6 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Add Genre to Book",
         tags = ["Book"]
     )
@@ -593,7 +579,6 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Remove Genre from Book",
         tags = ["Book"]
     )
@@ -611,7 +596,7 @@ object BookApiRouter : CrudHandler, Logging {
         ctx.json(book.toJson(showAll = true))
     }
 
-    private fun Context.getBookSeriesImport(): BookSeriesInput = this.bodyValidator<BookSeriesInput>()
+    private fun Context.getSeriesBody(): BookSeriesInput = this.bodyValidator<BookSeriesInput>()
         .check({ it.seriesId > 0 }, error = "seriesId must be greater than 0")
         .get()
 
@@ -628,13 +613,12 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Add Series to Book",
         tags = ["Book"]
     )
     fun addSeries(ctx: Context): Unit = Utils.query(description = "Add Series to Book") {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
-        val body = ctx.getBookSeriesImport()
+        val body = ctx.getSeriesBody()
         val series = Series.findById(id = body.seriesId)
             ?: throw NotFoundResponse(message = "Series not found")
         val bookSeries = BookSeries.find {
@@ -663,7 +647,6 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Remove Series from Book",
         tags = ["Book"]
     )

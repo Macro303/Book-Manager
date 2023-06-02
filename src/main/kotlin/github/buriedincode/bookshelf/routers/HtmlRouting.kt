@@ -186,7 +186,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
         )
     }
 
-    open fun wishlistEndpoint(ctx: Context): Unit = Utils.query {
+    fun wishlistEndpoint(ctx: Context): Unit = Utils.query {
         val result = ctx.getParamObject()
         val books = Book.all().toList().filter { !it.isCollected && (it.wishers.empty() || result in it.wishers) }
         ctx.render(

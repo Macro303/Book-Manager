@@ -5,19 +5,20 @@ import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.GenreEntry
 import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.tables.GenreTable
+import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 
-object GenreApiRouter : Logging {
-    private fun Context.getGenre(): Genre {
-        return this.pathParam("genre-id").toLongOrNull()?.let {
+object GenreApiRouter : CrudHandler, Logging {
+    private fun getResource(resourceId: String): Genre {
+        return resourceId.toLongOrNull()?.let {
             Genre.findById(id = it) ?: throw NotFoundResponse(message = "Genre not found")
         } ?: throw BadRequestResponse(message = "Invalid Genre Id")
     }
 
-    private fun Context.getGenreInput(): GenreInput = this.bodyValidator<GenreInput>()
+    private fun Context.getBody(): GenreInput = this.bodyValidator<GenreInput>()
         .check({ it.title.isNotBlank() }, error = "Title must not be empty")
         .get()
 
@@ -32,7 +33,7 @@ object GenreApiRouter : Logging {
         summary = "List all Genres",
         tags = ["Genre"]
     )
-    fun listGenres(ctx: Context): Unit = Utils.query(description = "List Genres") {
+    override fun getAll(ctx: Context): Unit = Utils.query {
         val genres = Genre.all()
         ctx.json(genres.map { it.toJson() })
     }
@@ -52,8 +53,8 @@ object GenreApiRouter : Logging {
         summary = "Create Genre",
         tags = ["Genre"]
     )
-    fun createGenre(ctx: Context): Unit = Utils.query(description = "Create Genre") {
-        val body = ctx.getGenreInput()
+    override fun create(ctx: Context): Unit = Utils.query {
+        val body = ctx.getBody()
         val exists = Genre.find {
             GenreTable.titleCol eq body.title
         }.firstOrNull()
@@ -84,8 +85,8 @@ object GenreApiRouter : Logging {
         summary = "Get Genre by id",
         tags = ["Genre"]
     )
-    fun getGenre(ctx: Context): Unit = Utils.query(description = "Get Genre") {
-        val genre = ctx.getGenre()
+    override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
+        val genre = getResource(resourceId = resourceId)
         ctx.json(genre.toJson(showAll = true))
     }
 
@@ -105,9 +106,9 @@ object GenreApiRouter : Logging {
         summary = "Update Genre",
         tags = ["Genre"]
     )
-    fun updateGenre(ctx: Context): Unit = Utils.query(description = "Update Genre") {
-        val genre = ctx.getGenre()
-        val body = ctx.getGenreInput()
+    override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
+        val genre = getResource(resourceId=resourceId)
+        val body = ctx.getBody()
         val exists = Genre.find {
             GenreTable.titleCol eq body.title
         }.firstOrNull()
@@ -136,8 +137,8 @@ object GenreApiRouter : Logging {
         summary = "Delete Genre",
         tags = ["Genre"]
     )
-    fun deleteGenre(ctx: Context): Unit = Utils.query(description = "Delete Genre") {
-        val genre = ctx.getGenre()
+    override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
+        val genre = getResource(resourceId = resourceId)
         genre.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
@@ -162,8 +163,8 @@ object GenreApiRouter : Logging {
         summary = "Add Book to Genre",
         tags = ["Genre"]
     )
-    fun addBook(ctx: Context): Unit = Utils.query(description = "Add Book to Genre") {
-        val genre = ctx.getGenre()
+    fun addBook(ctx: Context): Unit = Utils.query {
+        val genre = getResource(resourceId = ctx.pathParam("genre-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")
@@ -191,8 +192,8 @@ object GenreApiRouter : Logging {
         summary = "Remove Book from Genre",
         tags = ["Genre"]
     )
-    fun removeBook(ctx: Context): Unit = Utils.query(description = "Remove Book from Genre") {
-        val genre = ctx.getGenre()
+    fun removeBook(ctx: Context): Unit = Utils.query {
+        val genre = getResource(resourceId = ctx.pathParam("genre-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")

@@ -165,12 +165,8 @@ fun main() {
                     }
                 }
                 path("genres") {
-                    get(GenreApiRouter::listGenres)
-                    post(GenreApiRouter::createGenre)
                     path("{genre-id}") {
-                        get(GenreApiRouter::getGenre)
-                        put(GenreApiRouter::updateGenre)
-                        delete(GenreApiRouter::deleteGenre)
+                        crud(GenreApiRouter)
                         path("books") {
                             patch(GenreApiRouter::addBook)
                             delete(GenreApiRouter::removeBook)
@@ -178,34 +174,22 @@ fun main() {
                     }
                 }
                 path("publishers") {
-                    get(PublisherApiRouter::listPublishers)
-                    post(PublisherApiRouter::createPublisher)
                     path("{publisher-id}") {
-                        get(PublisherApiRouter::getPublisher)
-                        put(PublisherApiRouter::updatePublisher)
-                        delete(PublisherApiRouter::deletePublisher)
+                        crud(PublisherApiRouter)
                     }
                 }
                 path("roles") {
-                    get(RoleApiRouter::listRoles)
-                    post(RoleApiRouter::createRole)
                     path("{role-id}") {
-                        get(RoleApiRouter::getRole)
-                        put(RoleApiRouter::updateRole)
-                        delete(RoleApiRouter::deleteRole)
-                    }
-                    path("credits") {
-                        patch(GenreApiRouter::addCredit)
-                        delete(GenreApiRouter::removeCredit)
+                        crud(RoleApiRouter)
+                        path("credits") {
+                            patch(RoleApiRouter::addCredit)
+                            delete(RoleApiRouter::removeCredit)
+                        }
                     }
                 }
                 path("series") {
-                    get(SeriesApiRouter::listSeries)
-                    post(SeriesApiRouter::createSeries)
                     path("{series-id}") {
-                        get(SeriesApiRouter::getSeries)
-                        put(SeriesApiRouter::updateSeries)
-                        delete(SeriesApiRouter::deleteSeries)
+                        crud(SeriesApiRouter)
                         path("books") {
                             patch(SeriesApiRouter::addBook)
                             delete(SeriesApiRouter::removeBook)
@@ -213,12 +197,8 @@ fun main() {
                     }
                 }
                 path("users") {
-                    get(UserApiRouter::listUsers)
-                    post(UserApiRouter::createUser)
                     path("{user-id}") {
-                        get(UserApiRouter::getUser)
-                        put(UserApiRouter::updateUser)
-                        delete(UserApiRouter::deleteUser)
+                        crud(UserApiRouter)
                         path("read") {
                             patch(UserApiRouter::addReadBook)
                             delete(UserApiRouter::removeReadBook)
@@ -232,7 +212,7 @@ fun main() {
             }
         }
     }
-    app.exception(ValidationException::class.java) { e, ctx ->
+    app.exception(ValidationException::class.java) { e, _ ->
         val details = HashMap<String, List<String>>()
         e.errors.forEach { (key, value) ->
             var entry = details.getOrDefault(key, ArrayList())

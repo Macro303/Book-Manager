@@ -6,19 +6,20 @@ import github.buriedincode.bookshelf.docs.SeriesEntry
 import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.SeriesTable
+import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
 
-object SeriesApiRouter : Logging {
-    private fun Context.getSeries(): Series {
-        return this.pathParam("series-id").toLongOrNull()?.let {
+object SeriesApiRouter : CrudHandler, Logging {
+    private fun getResource(resourceId: String): Series {
+        return resourceId.toLongOrNull()?.let {
             Series.findById(id = it) ?: throw NotFoundResponse(message = "Series not found")
         } ?: throw BadRequestResponse(message = "Invalid Series Id")
     }
 
-    private fun Context.getSeriesInput(): SeriesInput = this.bodyValidator<SeriesInput>()
+    private fun Context.getBody(): SeriesInput = this.bodyValidator<SeriesInput>()
         .check({ it.title.isNotBlank() }, error = "Title must not be empty")
         .check({ it.books.all { it.bookId > 0 } }, error = "bookId must be greater than 0")
         .get()
@@ -28,16 +29,13 @@ object SeriesApiRouter : Logging {
         methods = [HttpMethod.GET],
         operationId = "listSeries",
         path = "/series",
-        pathParams = [],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<SeriesEntry>::class)]),
         ],
-        security = [],
         summary = "List all Series",
         tags = ["Series"]
     )
-    fun listSeries(ctx: Context): Unit = Utils.query(description = "List Series") {
+    override fun getAll(ctx: Context): Unit = Utils.query {
         val series = Series.all()
         ctx.json(series.map { it.toJson() })
     }
@@ -47,7 +45,6 @@ object SeriesApiRouter : Logging {
         methods = [HttpMethod.POST],
         operationId = "createSeries",
         path = "/series",
-        pathParams = [],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(SeriesInput::class)], required = true),
         responses = [
             OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
@@ -55,12 +52,11 @@ object SeriesApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Create Series",
         tags = ["Series"]
     )
-    fun createSeries(ctx: Context): Unit = Utils.query(description = "Create Series") {
-        val body = ctx.getSeriesInput()
+    override fun create(ctx: Context): Unit = Utils.query {
+        val body = ctx.getBody()
         val exists = Series.find {
             SeriesTable.titleCol eq body.title
         }.firstOrNull()
@@ -72,17 +68,11 @@ object SeriesApiRouter : Logging {
         body.books.forEach {
             val book = Book.findById(id = it.bookId)
                 ?: throw NotFoundResponse(message = "Book not found")
-            val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
-            }.firstOrNull()
-            if (bookSeries == null)
-                BookSeries.new {
-                    this.book = book
-                    this.series = series
-                    number = if (it.number == 0) null else it.number
-                }
-            else
-                bookSeries.number = if (it.number == 0) null else it.number
+            BookSeries.new {
+                this.book = book
+                this.series = series
+                number = if (it.number == 0) null else it.number
+            }
         }
 
         ctx.status(HttpStatus.CREATED).json(series.toJson(showAll = true))
@@ -94,18 +84,16 @@ object SeriesApiRouter : Logging {
         operationId = "getSeries",
         path = "/series/{series-id}",
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Get Series by id",
         tags = ["Series"]
     )
-    fun getSeries(ctx: Context): Unit = Utils.query(description = "Get Series") {
-        val series = ctx.getSeries()
+    override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
+        val series = getResource(resourceId = resourceId)
         ctx.json(series.toJson(showAll = true))
     }
 
@@ -122,13 +110,12 @@ object SeriesApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Update Series",
         tags = ["Series"]
     )
-    fun updateSeries(ctx: Context): Unit = Utils.query(description = "Update Series") {
-        val series = ctx.getSeries()
-        val body = ctx.getSeriesInput()
+    override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
+        val series = getResource(resourceId = resourceId)
+        val body = ctx.getBody()
         val exists = Series.find {
             SeriesTable.titleCol eq body.title
         }.firstOrNull()
@@ -160,23 +147,21 @@ object SeriesApiRouter : Logging {
         operationId = "deleteSeries",
         path = "/series/{series-id}",
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = []),
         responses = [
             OpenApiResponse(status = "204"),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Delete Series",
         tags = ["Series"]
     )
-    fun deleteSeries(ctx: Context): Unit = Utils.query(description = "Delete Series") {
-        val series = ctx.getSeries()
+    override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
+        val series = getResource(resourceId = resourceId)
         series.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    private fun Context.getSeriesBookInput(): SeriesBookInput = this.bodyValidator<SeriesBookInput>()
+    private fun Context.getBookBody(): SeriesBookInput = this.bodyValidator<SeriesBookInput>()
         .check({ it.bookId > 0 }, error = "bookId must be greater than 0")
         .get()
 
@@ -197,13 +182,12 @@ object SeriesApiRouter : Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Add Book to Series",
         tags = ["Series"]
     )
-    fun addBook(ctx: Context): Unit = Utils.query(description = "Add Book to Series") {
-        val series = ctx.getSeries()
-        val body = ctx.getSeriesBookInput()
+    fun addBook(ctx: Context): Unit = Utils.query {
+        val series = getResource(resourceId = ctx.pathParam("series-id"))
+        val body = ctx.getBookBody()
         val book = Book.findById(id = body.bookId)
             ?: throw NotFoundResponse(message = "Book not found")
         val bookSeries = BookSeries.find {
@@ -232,12 +216,11 @@ object SeriesApiRouter : Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
-        security = [],
         summary = "Remove Book from Series",
         tags = ["Series"]
     )
-    fun removeBook(ctx: Context): Unit = Utils.query(description = "Remove Book from Series") {
-        val series = ctx.getSeries()
+    fun removeBook(ctx: Context): Unit = Utils.query {
+        val series = getResource(resourceId = ctx.pathParam("series-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")
