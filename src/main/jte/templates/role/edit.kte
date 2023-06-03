@@ -55,7 +55,7 @@
                 method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
-                    "credits": ${role.credits.map { mapOf("bookId" to it.book.id.value, "creatorId" to it.creator.id.value) }.toList().toString()},
+                    "credits": ${result.credits.map { mapOf("bookId" to it.book.id.value, "creatorId" to it.creator.id.value) }.toList().toString()},
                     "title": formData["title"]
                 }),
             }).then((response) => {
