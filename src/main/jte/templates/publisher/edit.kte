@@ -1,5 +1,5 @@
 @import github.buriedincode.bookshelf.models.Publisher
-@param publisher: Publisher
+@param result: Publisher
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -22,7 +22,7 @@
             </header>
             <div class="box">
                 <form id="edit-publisher-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = publisher.title)
+                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
                 </form>
             </div>
             <div class="buttons is-multiline is-centered">
@@ -46,7 +46,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/publishers/${publisher.id.value}", {
+            fetch("/api/v0.0/publishers/${result.id.value}", {
                 method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
@@ -57,7 +57,7 @@
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/publishers/${publisher.id.value}";
+                window.location = "/publishers/${result.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

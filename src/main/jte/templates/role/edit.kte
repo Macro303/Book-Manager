@@ -1,5 +1,10 @@
-@import github.buriedincode.bookshelf.models.Publisher
-@param publisher: Publisher
+@import java.util.List
+@import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.Creator
+@import github.buriedincode.bookshelf.models.Role
+@param result: Role
+@param books: List<Book>
+@param creators: List<Creator>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -18,15 +23,15 @@
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">Edit Publisher</h1>
+                <h1 class="title is-1">Edit Role</h1>
             </header>
             <div class="box">
-                <form id="edit-publisher-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = publisher.title)
+                <form id="edit-role-form" onsubmit="return false;">
+                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
                 </form>
             </div>
             <div class="buttons is-multiline is-centered">
-                <button class="button is-success" id="save-publisher-button" onclick="savePublisher()" type="button">
+                <button class="button is-success" id="save-role-button" onclick="saveRole()" type="button">
                     <span class="icon">
                         <i class="fa-solid fa-floppy-disk"></i>
                     </span>
@@ -39,17 +44,18 @@
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
     <script type="text/javascript">
-        function savePublisher() {
-            const caller = "save-publisher-button";
-            let form = document.getElementById("edit-publisher-form");
+        function saveRole() {
+            const caller = "save-role-button";
+            let form = document.getElementById("edit-role-form");
             let formData = Object.fromEntries(new FormData(form));
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/publishers/${publisher.id.value}", {
+            fetch("/api/v0.0/roles/${result.id.value}", {
                 method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
+                    "credits": ${role.credits.map { mapOf("bookId" to it.book.id.value, "creatorId" to it.creator.id.value) }.toList().toString()},
                     "title": formData["title"]
                 }),
             }).then((response) => {
@@ -57,7 +63,7 @@
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/publishers/${publisher.id.value}";
+                window.location = "/roles/${result.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

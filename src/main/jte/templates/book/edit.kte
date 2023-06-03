@@ -1,11 +1,15 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Genre
 @import github.buriedincode.bookshelf.models.Publisher
+@import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
-@param book: Book
+@param result: Book
+@param creators: List<Creator>
 @param genres: List<Genre>
 @param publishers: List<Publisher>
+@param roles: List<Role>
 @param series: List<Series>
 
 <!DOCTYPE html>
@@ -29,41 +33,41 @@
             </header>
             <div class="box">
                 <form id="edit-book-form" onsubmit="return false;">
-                    @template.components.forms.textarea(label = "Description", name = "Description", value = book.description)
-                    @template.components.forms.select.format(label = "Format", selected = book.format)
-                    @template.components.forms.input(label = "Image Url", name = "image-url", value = book.imageUrl)
-                    @template.components.forms.input(label = "Publish Date", name = "publish-date", value = book.publishDate?.toString())
-                    @template.components.forms.select.publisher(label = "Publisher", options = publishers, selected = book.publisher)
-                    @template.components.forms.input(label = "Subtitle", name = "subtitle", value = book.subtitle)
-                    @template.components.forms.input(label = "Title", name = "title", value = book.title)
+                    @template.components.forms.textarea(label = "Description", name = "Description", value = result.description)
+                    @template.components.forms.select.format(label = "Format", selected = result.format)
+                    @template.components.forms.input(label = "Image Url", name = "image-url", value = result.imageUrl)
+                    @template.components.forms.input(label = "Publish Date", name = "publish-date", value = result.publishDate?.toString())
+                    @template.components.forms.select.publisher(label = "Publisher", options = publishers, selected = result.publisher)
+                    @template.components.forms.input(label = "Subtitle", name = "subtitle", value = result.subtitle)
+                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
                     <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
-                    @template.components.forms.input(label = "Goodreads", name = "goodreads", value = book.goodreadsId)
-                    @template.components.forms.input(label = "Google Books", name = "google-books", value = book.googleBooksId)
-                    @template.components.forms.input(label = "Isbn", name = "isbn", value = book.isbn)
-                    @template.components.forms.input(label = "LibraryThing", name = "library-thing", value = book.libraryThingId)
-                    @template.components.forms.input(label = "OpenLibrary", name = "open-library", value = book.openLibraryId)
+                    @template.components.forms.input(label = "Goodreads", name = "goodreads", value = result.goodreadsId)
+                    @template.components.forms.input(label = "Google Books", name = "google-books", value = result.googleBooksId)
+                    @template.components.forms.input(label = "Isbn", name = "isbn", value = result.isbn)
+                    @template.components.forms.input(label = "LibraryThing", name = "library-thing", value = result.libraryThingId)
+                    @template.components.forms.input(label = "OpenLibrary", name = "open-library", value = result.openLibraryId)
                 </form>
             </div>
-            <h3 class="subtitle is-3 has-text-primary-dark">Creators</h3>
+            <h3 class="subtitle is-3 has-text-primary-dark">Credits</h3>
             <div class="box">
                 <div class="table-container">
-                    <form id="add-creator-form" onsubmit="return false;">
+                    <form id="add-credit-form" onsubmit="return false;">
                         <table class="table is-fullwidth">
                             <thead>
                                 <tr>
-                                    <th class="is-size-5 has-text-info">Creator Name</th>
+                                    <th class="is-size-5 has-text-info">Creator</th>
                                     <th class="is-size-5 has-text-info">Role</th>
                                     <th class="is-size-5 has-text-info">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in book.creators)
+                                @for(entry in result.credits)
                                     <tr>
                                         <td>${entry.creator.name}</td>
                                         <td>${entry.role.title}</td>
                                         <td>
                                             <div class="buttons is-centered">
-                                                <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-role-${entry.role.id.value}-button" onclick="removeGenre(${entry.creator.id.value}, ${entry.role.id.value})" type="button">
+                                                <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-role-${entry.role.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.role.id.value})" type="button">
                                                         <span class="icon">
                                                             <i class="fa-solid fa-minus"></i>
                                                         </span>
@@ -74,11 +78,11 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td><%--@template.components.forms.select.creator(label = "", options = creators)--%></td>
-                                    <td><%--@template.components.forms.select.role(label = "", options = roles)--%></td>
+                                    <td>@template.components.forms.select.creator(label = "", options = creators)</td>
+                                    <td>@template.components.forms.select.role(label = "", options = roles)</td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-success" id="add-creator-button" onclick="addCreator()" type="button">
+                                            <button class="button is-success" id="add-credit-button" onclick="addCredit()" type="button">
                                                 <span class="icon">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </span>
@@ -104,7 +108,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in book.genres)
+                                @for(entry in result.genres)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>
@@ -150,7 +154,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                                @for(entry in book.series)
+                                @for(entry in result.series)
                                     <tr>
                                         <td>${entry.series.title}</td>
                                         <td>${entry.number}</td>
@@ -205,14 +209,14 @@
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
     <script type="text/javascript">
-        function addCreator() {
-            const caller = "add-creator-button";
-            let form = document.getElementById("add-creator-form");
+        function addCredit() {
+            const caller = "add-credit-button";
+            let form = document.getElementById("add-credit-form");
             let formData = Object.fromEntries(new FormData(form));
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/creators", {
+            fetch("/api/v0.0/books/${result.id.value}/credits", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -231,13 +235,13 @@
                 @endraw
             })).finally(() => removeLoading(caller));
         }
-        function removeCreator(creatorId, roleId) {
+        function removeCredit(creatorId, roleId) {
             @raw
                 const caller = `remove-creator-${creatorId}-role-${roleId}-button`;
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/creators", {
+            fetch("/api/v0.0/books/${result.id.value}/credits", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -262,7 +266,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/genres", {
+            fetch("/api/v0.0/books/${result.id.value}/genres", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -286,7 +290,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/genres", {
+            fetch("/api/v0.0/books/${result.id.value}/genres", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -310,7 +314,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/series", {
+            fetch("/api/v0.0/books/${result.id.value}/series", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -335,7 +339,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/series", {
+            fetch("/api/v0.0/books/${result.id.value}/series", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -359,34 +363,35 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}", {
+            fetch("/api/v0.0/books/${result.id.value}", {
                 method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
+                    "credits": ${result.credits.map { mapOf("creatorId" to it.creator.id.value, "roleId" to it.role.id.value) }.toList().toString()},
                     "description": formData["description"] || null,
                     "format": formData["format"] || "PAPERBACK",
-                    "genreIds": ${book.genres.map { it.id.value }.toList().toString()},
+                    "genreIds": ${result.genres.map { it.id.value }.toList().toString()},
                     "goodreadsId": formData["goodreads"] || null,
                     "googleBooksId": formData["google-books"] || null,
                     "imageUrl": formData["image-url"] || null,
-                    "isCollected": ${book.isCollected},
+                    "isCollected": ${result.isCollected},
                     "isbn": formData["isbn"] || null,
                     "libraryThingId": formData["library-thing"] || null,
                     "openLibraryId": formData["open-library"] || null,
                     "publishDate": formData["publish-date"] || null,
                     "publisherId": formData["publisher-id"] || null,
-                    "readerIds": ${book.readers.map { it.id.value }.toList().toString()},
-                    "series": ${book.series.map { mapOf("seriesId" to it.series.id.value, "number" to it.number) }.toList().toString()},
+                    "readerIds": ${result.readers.map { it.id.value }.toList().toString()},
+                    "series": ${result.series.map { mapOf("seriesId" to it.series.id.value, "number" to it.number) }.toList().toString()},
                     "subtitle": formData["subtitle"] || null,
                     "title": formData["title"],
-                    "wisherIds": ${book.wishers.map { it.id.value }.toList().toString()},
+                    "wisherIds": ${result.wishers.map { it.id.value }.toList().toString()},
                 }),
             }).then((response) => {
                 if (!response.ok){
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/books/${book.id.value}";
+                window.location = "/books/${result.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);
@@ -397,14 +402,14 @@
             const caller = "refresh-book-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/refresh", {
+            fetch("/api/v0.0/books/${result.id.value}/refresh", {
                 method: "PUT",
                 headers: headers,
             }).then((response) => {
                 if (!response.ok) {
                     return Promise.reject(response);
                 }
-                window.location = "/books/${book.id.value}";
+                window.location = "/books/${result.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

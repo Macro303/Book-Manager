@@ -2,7 +2,7 @@
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Series
 @import gg.jte.support.ForSupport
-@param series: Series
+@param result: Series
 @param books: List<Book>
 
 <!DOCTYPE html>
@@ -26,7 +26,7 @@
             </header>
             <div class="box">
                 <form id="edit-series-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = series.title)
+                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
                 </form>
             </div>
             <h3 class="subtitle is-3 has-text-primary-dark">Books</h3>
@@ -43,7 +43,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in series.books)
+                                @for(entry in result.books)
                                     <tr>
                                         <td>${entry.book.title}</td>
                                         <td>${entry.book.subtitle}</td>
@@ -100,7 +100,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/series/${series.id.value}/books", {
+            fetch("/api/v0.0/series/${result.id.value}/books", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -126,7 +126,7 @@
             console.log(caller);
             
             addLoading(caller);
-            fetch("/api/v0.0/series/${series.id.value}/books", {
+            fetch("/api/v0.0/series/${result.id.value}/books", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -150,12 +150,12 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/series/${series.id.value}", {
+            fetch("/api/v0.0/series/${result.id.value}", {
                 method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
                     "title": formData["title"],
-                    "books": [@for(entry in ForSupport.of(series.books))
+                    "books": [@for(entry in ForSupport.of(result.books))
                         {
                             "bookId": ${entry.get().id.value},
                             "number": ${entry.get().number}
@@ -167,7 +167,7 @@
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/series/${series.id.value}";
+                window.location = "/series/${result.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

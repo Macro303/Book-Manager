@@ -1,7 +1,12 @@
+@import java.util.List
+@import java.util.Map
 @import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.Creator
+@import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.Utils.getUserDateFormatter
 @import gg.jte.support.ForSupport
-@param book: Book
+@param result: Book
+@param credits: Map<Role, List<Creator>>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -20,104 +25,104 @@
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">${book.title}</h1>
-                @if(book.subtitle != null)
-                    <h3 class="subtitle is-3">${book.subtitle}</h3>
+                <h1 class="title is-1">${result.title}</h1>
+                @if(result.subtitle != null)
+                    <h3 class="subtitle is-3">${result.subtitle}</h3>
                 @endif
             </header>
             <div class="columns">
                 <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
                     <figure class="image is-2by3">
-                        @if(book.imageUrl == null)
-                            <img alt="${book.title} cover image" loading="lazy" src="https://via.placeholder.com/1500x1000" />
+                        @if(result.imageUrl == null)
+                            <img alt="${result.title} cover image" loading="lazy" src="https://via.placeholder.com/1500x1000" />
                         @else
-                            <img alt="${book.title} cover image" loading="lazy" src="${book.imageUrl}" />
+                            <img alt="${result.title} cover image" loading="lazy" src="${result.imageUrl}" />
                         @endif
                     </figure>
                 </div>
                 <div class="column">
                     <div class="box">
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Description:</strong> ${book.description}</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Description:</strong> ${result.description}</p>
                         </div>
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${book.format.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }}</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${result.format.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }}</p>
                         </div>
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Genres:</strong> @for(entry in ForSupport.of(book.genres))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Genres:</strong> @for(entry in ForSupport.of(result.genres))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
                         </div>
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Publish Date:</strong> ${book.publishDate?.format(getUserDateFormatter(date=book.publishDate!!))}</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Publish Date:</strong> ${result.publishDate?.format(getUserDateFormatter(date=result.publishDate!!))}</p>
                         </div>
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Publisher:</strong> @if(book.publisher != null)<a class="is-family-primary has-text-link" href="/publishers/${book.publisher!!.id.value}">${book.publisher!!.title}</a>@endif</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Publisher:</strong> @if(result.publisher != null)<a class="is-family-primary has-text-link" href="/publishers/${result.publisher!!.id.value}">${result.publisher!!.title}</a>@endif</p>
                         </div>
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Series:</strong> @for(entry in ForSupport.of(book.series))<a class="is-family-primary has-text-link" href="/series/${entry.get().series.id.value}">${entry.get().series.title}@if(entry.get().number != null) #${entry.get().number}@endif</a>@if(!entry.isLast), @endif@endfor</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Series:</strong> @for(entry in ForSupport.of(result.series))<a class="is-family-primary has-text-link" href="/series/${entry.get().series.id.value}">${entry.get().series.title}@if(entry.get().number != null) #${entry.get().number}@endif</a>@if(!entry.isLast), @endif@endfor</p>
                         </div>
                         <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
-                        @if(book.isbn != null)
+                        @if(result.isbn != null)
                             <div class="block">
-                                <p><strong class="subtitle is-size-5 has-text-info">Isbn:</strong> ${book.isbn}</p>
+                                <p><strong class="subtitle is-size-5 has-text-info">Isbn:</strong> ${result.isbn}</p>
                             </div>
                         @endif
-                        @if(book.goodreadsId != null)
+                        @if(result.goodreadsId != null)
                             <div class="block">
-                                <p><strong class="subtitle is-size-5 has-text-info">Goodreads:</strong> <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/${book.goodreadsId}" rel="noopener noreferrer" target="_blank">${book.goodreadsId}</a></p>
+                                <p><strong class="subtitle is-size-5 has-text-info">Goodreads:</strong> <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/${result.goodreadsId}" rel="noopener noreferrer" target="_blank">${result.goodreadsId}</a></p>
                             </div>
                         @endif
-                        @if(book.googleBooksId != null)
+                        @if(result.googleBooksId != null)
                             <div class="block">
-                                <p><strong class="subtitle is-size-5 has-text-info">Google Books:</strong> <a class="is-family-primary has-text-link" href="https://books.google.com/books?id=${book.googleBooksId}" rel="noopener noreferrer" target="_blank">${book.googleBooksId}</a></p>
+                                <p><strong class="subtitle is-size-5 has-text-info">Google Books:</strong> <a class="is-family-primary has-text-link" href="https://books.google.com/books?id=${result.googleBooksId}" rel="noopener noreferrer" target="_blank">${result.googleBooksId}</a></p>
                             </div>
                         @endif
-                        @if(book.libraryThingId != null)
+                        @if(result.libraryThingId != null)
                             <div class="block">
-                                <p><strong class="subtitle is-size-5 has-text-info">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/${book.libraryThingId}" rel="noopener noreferrer" target="_blank">${book.libraryThingId}</a></p>
+                                <p><strong class="subtitle is-size-5 has-text-info">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/${result.libraryThingId}" rel="noopener noreferrer" target="_blank">${result.libraryThingId}</a></p>
                             </div>
                         @endif
-                        @if(book.openLibraryId != null)
+                        @if(result.openLibraryId != null)
                             <div class="block">
-                                <p><strong class="subtitle is-size-5 has-text-info">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/${book.openLibraryId}" rel="noopener noreferrer" target="_blank">${book.openLibraryId}</a></p>
+                                <p><strong class="subtitle is-size-5 has-text-info">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/${result.openLibraryId}" rel="noopener noreferrer" target="_blank">${result.openLibraryId}</a></p>
                             </div>
                         @endif
                     </div>
                 </div>
             </div>
             <div class="buttons is-multiline is-centered">
-                @if(book.isbn != null)
-                    <a class="button is-link" href="https://blackwells.co.uk/bookshop/product/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                @if(result.isbn != null)
+                    <a class="button is-link" href="https://blackwells.co.uk/bookshop/product/${result.isbn}" rel="noopener noreferrer" target="_blank">
                         <span class="icon">
                             <i class="fa-solid fa-link"></i>
                         </span>
                         <span>Blackwells</span>
                     </a>
-                    @if(book.goodreadsId == null)
-                        <a class="button is-link" href="https://www.goodreads.com/book/isbn/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                    @if(result.goodreadsId == null)
+                        <a class="button is-link" href="https://www.goodreads.com/book/isbn/${result.isbn}" rel="noopener noreferrer" target="_blank">
                             <span class="icon">
                                 <i class="fa-brands fa-goodreads"></i>
                             </span>
                             <span>Goodreads</span>
                         </a>
                     @endif
-                    @if(book.googleBooksId == null)
-                        <a class="button is-link" href="https://books.google.com/books?vid=ISBN${book.isbn}" rel="noopener noreferrer" target="_blank">
+                    @if(result.googleBooksId == null)
+                        <a class="button is-link" href="https://books.google.com/books?vid=ISBN${result.isbn}" rel="noopener noreferrer" target="_blank">
                             <span class="icon">
                                 <i class="fa-brands fa-google"></i>
                             </span>
                             <span>Google Books</span>
                         </a>
                     @endif
-                    @if(book.libraryThingId == null)
-                        <a class="button is-link" href="https://librarything.com/isbn/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                    @if(result.libraryThingId == null)
+                        <a class="button is-link" href="https://librarything.com/isbn/${result.isbn}" rel="noopener noreferrer" target="_blank">
                             <span class="icon">
                                 <i class="fa-solid fa-link"></i>
                             </span>
                             <span>LibraryThing</span>
                         </a>
                     @endif
-                    @if(book.openLibraryId == null)
-                        <a class="button is-link" href="https://openlibrary.org/isbn/${book.isbn}" rel="noopener noreferrer" target="_blank">
+                    @if(result.openLibraryId == null)
+                        <a class="button is-link" href="https://openlibrary.org/isbn/${result.isbn}" rel="noopener noreferrer" target="_blank">
                             <span class="icon">
                                 <i class="fa-solid fa-link"></i>
                             </span>
@@ -127,7 +132,7 @@
                 @endif
             </div>
             <div class="buttons is-multiline is-centered">
-                @if(book.isCollected)
+                @if(result.isCollected)
                     <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
                         <span class="icon">
                             <i class="fa-solid fa-rotate-left"></i>
@@ -142,7 +147,7 @@
                         <span>Collect</span>
                     </button>
                 @endif
-                <a class="button is-warning" href="/books/${book.id.value}/edit">
+                <a class="button is-warning" href="/books/${result.id.value}/edit">
                     <span class="icon">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </span>
@@ -154,8 +159,8 @@
                     </span>
                     <span>Delete</span>
                 </button>
-                @if(book.isCollected)
-                    <%-- if currentUser in book.readers --%>
+                @if(result.isCollected)
+                    <%-- if currentUser in result.readers --%>
                     <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
                         <span class="icon">
                             <i class="fa-solid fa-bookmark"></i>
@@ -170,7 +175,7 @@
                         <span>Read</span>
                     </button>
                 @else
-                    <%-- if currentUser in book.wishers --%>
+                    <%-- if currentUser in result.wishers --%>
                     <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
                         <span class="icon">
                             <i class="fa-solid fa-star"></i>
@@ -191,18 +196,33 @@
                     @template.components.settings_box()
                 </div>
                 <div class="column">
-                    <%-- Creators --%>
-                    @if(book.isCollected)
+                    @if(credits.isEmpty)
+                        <div class="box">
+                            <h5 class="title is-5 has-text-danger-light">No Book Creator Roles</h5>
+                        </div>
+                    @else
+                        @for(role in credits.keySet())
+                            <h3 class="subtitle is-3 has-text-primary-dark">${role.title}</h3>
+                            <div class="columns is-multiline is-centered">
+                                @for(creator in credits.get(role))
+                                    <div class="adjustable-column column has-text-centered">
+                                        @template.components.view_box.creator(entry = creator)
+                                    </div>
+                                @endfor
+                            </div>
+                        @endfor
+                    @endif
+                    @if(result.isCollected)
                         <h3 class="subtitle is-3 has-text-primary-dark">Readers</h3>
                         <div class="columns is-multiline is-centered">
-                            @if(book.readers.empty())
+                            @if(result.readers.empty())
                                 <div class="column has-text-centered">
                                     <div class="box">
                                         <h5 class="title is-5 has-text-danger-light">No Users have read this book.</h5>
                                     </div>
                                 </div>
                             @else
-                                @for(entry in book.readers)
+                                @for(entry in result.readers)
                                     <div class="adjustable-column column has-text-centered">
                                         @template.components.view_box.user(entry=entry)
                                     </div>
@@ -212,14 +232,14 @@
                     @else
                         <h3 class="subtitle is-3 has-text-primary-dark">Wishers</h3>
                         <div class="columns is-multiline is-centered">
-                            @if(book.wishers.empty())
+                            @if(result.wishers.empty())
                                 <div class="column has-text-centered">
                                     <div class="box">
                                         <h5 class="title is-5 has-text-danger-light">No Users have wished for this book.</h5>
                                     </div>
                                 </div>
                             @else
-                                @for(entry in book.wishers)
+                                @for(entry in result.wishers)
                                     <div class="adjustable-column column has-text-centered">
                                         @template.components.view_box.user(entry=entry)
                                     </div>
@@ -236,47 +256,11 @@
     <script src="/static/js/scripts.js" type="text/javascript"></script>
     <script src="/static/js/settings-box.js" type="text/javascript"></script>
     <script type="text/javascript">
-        function discardBook() {
-            const caller = "discard-book-button";
-
-            addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/discard", {
-                method: "PATCH",
-                headers: headers,
-            }).then((response) => {
-                if (!response.ok){
-                    return Promise.reject(response);
-                }
-                window.location.reload();
-            }).catch((response) => response.json().then((msg) => {
-                @raw
-                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
-                @endraw
-            })).finally(() => removeLoading(caller));
-        }
-        function collectBook() {
-            const caller = "collect-book-button";
-
-            addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/collect", {
-                method: "PATCH",
-                headers: headers,
-            }).then((response) => {
-                if (!response.ok){
-                    return Promise.reject(response);
-                }
-                window.location.reload();
-            }).catch((response) => response.json().then((msg) => {
-                @raw
-                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
-                @endraw
-            })).finally(() => removeLoading(caller));
-        }
         function deleteBook() {
             const caller = "delete-book-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}", {
+            fetch("/api/v0.0/books/${result.id.value}", {
                 method: "DELETE",
                 headers: headers,
             }).then((response) => {
@@ -290,14 +274,31 @@
                 @endraw
             })).finally(() => removeLoading(caller));
         }
-        function unreadBook() {
-            const caller = "unread-book-button";
+        function collectBook() {
+            const caller = "collect-book-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/unread", {
+            fetch("/api/v0.0/books/${result.id.value}/collect", {
                 method: "PATCH",
                 headers: headers,
-                body: JSON.stringify({}),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function discardBook() {
+            const caller = "discard-book-button";
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${result.id.value}/collect", {
+                method: "DELETE",
+                headers: headers,
             }).then((response) => {
                 if (!response.ok){
                     return Promise.reject(response);
@@ -313,7 +314,45 @@
             const caller = "read-book-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/read", {
+            fetch("/api/v0.0/books/${result.id.value}/read", {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({}),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function unreadBook() {
+            const caller = "unread-book-button";
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${result.id.value}/read", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({}),
+            }).then((response) => {
+                if (!response.ok){
+                    return Promise.reject(response);
+                }
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function wishBook() {
+            const caller = "wish-book-button";
+
+            addLoading(caller);
+            fetch("/api/v0.0/books/${result.id.value}/wish", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({}),
@@ -332,27 +371,8 @@
             const caller = "unwish-book-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/unwish", {
-                method: "PATCH",
-                headers: headers,
-                body: JSON.stringify({}),
-            }).then((response) => {
-                if (!response.ok){
-                    return Promise.reject(response);
-                }
-                window.location.reload();
-            }).catch((response) => response.json().then((msg) => {
-                @raw
-                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
-                @endraw
-            })).finally(() => removeLoading(caller));
-        }
-        function wishBook() {
-            const caller = "wish-book-button";
-
-            addLoading(caller);
-            fetch("/api/v0.0/books/${book.id.value}/wish", {
-                method: "PATCH",
+            fetch("/api/v0.0/books/${result.id.value}/wish", {
+                method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({}),
             }).then((response) => {

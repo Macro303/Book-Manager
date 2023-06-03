@@ -10,9 +10,11 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 
 abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityClass<T>) {
-    private val name: String = entity::class.simpleName!!.lowercase()
+    private val name: String = entity::class.java.declaringClass.simpleName!!.lowercase()
     protected val paramName: String = "$name-id"
     protected val title: String = name.replaceFirstChar(Char::uppercaseChar)
+    
+    companion object: Logging
 
     protected fun Context.getParamObject(): T {
         return this.pathParam(paramName).toLongOrNull()?.let {

@@ -1,0 +1,24 @@
+@import java.util.List
+@import github.buriedincode.bookshelf.models.Creator
+@param label: String = "Select Creator"
+@param name: String = "creator-id"
+@param options: List<Creator>
+@param selected: Creator? = null
+
+<div class="field">
+    <label class="label has-text-info">${label}</label>
+    <div class="control is-expanded">
+        <div class="select is-fullwidth">
+            <select name="${name}">
+                @if(selected == null)
+                    <option disabled selected value="">Select Creator</option>
+                @else
+                    <option selected value="${selected.id.value}">${selected.name}</option>
+                @endif
+                @for(entry in options)
+                    <option value="${entry.id.value}">${entry.name}</option>
+                @endfor
+            </select>
+        </div>
+    </div>
+</div>

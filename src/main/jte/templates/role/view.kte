@@ -3,8 +3,8 @@
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
-@param role: Role
-@param creators: Map<Creator, List<Book>>
+@param result: Role
+@param credits: Map<Creator, List<Book>>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -23,10 +23,10 @@
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">${role.title}</h1>
+                <h1 class="title is-1">${result.title}</h1>
             </header>
             <div class="buttons is-multiline is-centered">
-                <a class="button is-warning" href="/roles/${role.id.value}/edit">
+                <a class="button is-warning" href="/roles/${result.id.value}/edit">
                     <span class="icon">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </span>
@@ -44,15 +44,15 @@
                     @template.components.settings_box()
                 </div>
                 <div class="column">
-                    @if(creators.isEmpty)
+                    @if(credits.isEmpty)
                         <div class="box">
                             <h5 class="title is-5 has-text-danger-light">No Books have a Creator with this Role.</h5>
                         </div>
                     @else
-                        @for(entry in creators.keySet())
-                            <h3 class="subtitle is-3 has-text-primary-dark">${entry.name}</h3>
+                        @for(creator in credits.keySet())
+                            <h3 class="subtitle is-3 has-text-primary-dark">${creator.name}</h3>
                             <div class="columns is-multiline is-centered">
-                                @for(book in creators.get(entry))
+                                @for(book in credits.get(creator))
                                     <div class="adjustable-column column has-text-centered">
                                         @template.components.view_box.book(entry = book)
                                     </div>
@@ -73,7 +73,7 @@
             const caller = "delete-role-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/roles/${role.id.value}", {
+            fetch("/api/v0.0/roles/${result.id.value}", {
                 method: "DELETE",
                 headers: headers,
             }).then((response) => {

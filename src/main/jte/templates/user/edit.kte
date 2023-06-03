@@ -1,7 +1,7 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.User
-@param user: User
+@param result: User
 @param readBooks: List<Book>
 @param wishedBooks: List<Book>
 
@@ -26,9 +26,9 @@
             </header>
             <div class="box">
                 <form id="edit-user-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Image Url", name = "image-url", value = user.imageUrl)
-                    @template.components.forms.input_number(label = "Role", max = user.role.toInt(), name = "role", value = user.role.toInt())
-                    @template.components.forms.input(label = "Username", name = "username", value = user.username)
+                    @template.components.forms.input(label = "Image Url", name = "image-url", value = result.imageUrl)
+                    @template.components.forms.input_number(label = "Role", max = result.role.toInt(), name = "role", value = result.role.toInt())
+                    @template.components.forms.input(label = "Username", name = "username", value = result.username)
                 </form>
             </div>
             <h3 class="subtitle is-3 has-text-primary-dark">Read Books</h3>
@@ -44,7 +44,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in user.readBooks)
+                                @for(entry in result.readBooks)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -92,7 +92,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in user.wishedBooks)
+                                @for(entry in result.wishedBooks)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -148,7 +148,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${user.id.value}/read", {
+            fetch("/api/v0.0/users/${result.id.value}/read", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -172,7 +172,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${user.id.value}/read", {
+            fetch("/api/v0.0/users/${result.id.value}/read", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -196,7 +196,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${user.id.value}/wished", {
+            fetch("/api/v0.0/users/${result.id.value}/wished", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -220,7 +220,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${user.id.value}/wished", {
+            fetch("/api/v0.0/users/${result.id.value}/wished", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -244,22 +244,22 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${user.id.value}", {
+            fetch("/api/v0.0/users/${result.id.value}", {
                 method: "PUT",
                 headers: headers,
                 body: JSON.stringify({
                     "imageUrl": formData["image-url"] || null,
-                    "readBookIds": ${user.readBooks.map { it.id.value }.toList().toString()},
+                    "readBookIds": ${result.readBooks.map { it.id.value }.toList().toString()},
                     "role": formData["role"] || null,
                     "username": formData["username"],
-                    "wishedBookIds": ${user.wishedBooks.map { it.id.value }.toList().toString()},
+                    "wishedBookIds": ${result.wishedBooks.map { it.id.value }.toList().toString()},
                 }),
             }).then((response) => {
                 if (!response.ok){
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/users/${user.id.value}";
+                window.location = "/users/${result.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);
