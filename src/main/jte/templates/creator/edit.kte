@@ -2,6 +2,7 @@
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
+@import gg.jte.support.ForSupport
 @param result: Creator
 @param books: List<Book>
 @param roles: List<Role>
@@ -52,11 +53,16 @@
 
             addLoading(caller);
             fetch("/api/v0.0/creators/${result.id.value}", {
-                method: "PUT",
+                method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
-                    "credits": ${result.credits.map{ mapOf("bookId" to it.book.id.value, "roleId" to it.role.id.value) }.toList().toString()},
-                    "name": formData["name"]
+                    "credits": [@for(entry in ForSupport.of(result.credits))
+                        {
+                            "bookId": ${entry.get().book.id.value},
+                            "roleId": ${entry.get().role.id.value},
+                        }@if(!entry.isLast),@endif
+                    @endfor],
+                    "name": formData["name"],
                 }),
             }).then((response) => {
                 if (!response.ok){

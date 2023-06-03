@@ -364,7 +364,7 @@
 
             addLoading(caller);
             fetch("/api/v0.0/books/${result.id.value}", {
-                method: "PUT",
+                method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
                     "credits": ${result.credits.map { mapOf("creatorId" to it.creator.id.value, "roleId" to it.role.id.value) }.toList().toString()},

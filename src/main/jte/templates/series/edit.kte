@@ -151,16 +151,16 @@
 
             addLoading(caller);
             fetch("/api/v0.0/series/${result.id.value}", {
-                method: "PUT",
+                method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
-                    "title": formData["title"],
                     "books": [@for(entry in ForSupport.of(result.books))
                         {
                             "bookId": ${entry.get().id.value},
                             "number": ${entry.get().number}
                         }@if(!entry.isLast),@endif
                     @endfor],
+                    "title": formData["title"],
                 }),
             }).then((response) => {
                 if (!response.ok){
@@ -175,7 +175,5 @@
             })).finally(() => removeLoading(caller));
         }
     </script>
-    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
 </body>
 </html>

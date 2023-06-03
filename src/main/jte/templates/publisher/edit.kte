@@ -47,7 +47,7 @@
 
             addLoading(caller);
             fetch("/api/v0.0/publishers/${result.id.value}", {
-                method: "PUT",
+                method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
                     "title": formData["title"]
