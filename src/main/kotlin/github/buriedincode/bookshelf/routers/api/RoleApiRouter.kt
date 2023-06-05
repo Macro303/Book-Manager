@@ -90,7 +90,7 @@ object RoleApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Update Role",
-        methods = [HttpMethod.PUT],
+        methods = [HttpMethod.PATCH],
         operationId = "updateRole",
         path = "/roles/{role-id}",
         pathParams = [OpenApiParam(name = "role-id", type = Long::class, required = true)],

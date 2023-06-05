@@ -99,7 +99,7 @@ object SeriesApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Update Series",
-        methods = [HttpMethod.PUT],
+        methods = [HttpMethod.PATCH],
         operationId = "updateSeries",
         path = "/series/{series-id}",
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],

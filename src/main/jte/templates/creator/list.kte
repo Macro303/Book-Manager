@@ -1,6 +1,8 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Creator
-@param results: List<Creator>
+@import github.buriedincode.bookshelf.models.User
+@param resources: List<Creator>
+@param session: User
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -15,7 +17,7 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
@@ -55,14 +57,14 @@
                 </div>
                 <div class="column">
                     <div class="columns is-multiline is-centered">
-                        @if(results.isEmpty())
+                        @if(resources.isEmpty())
                             <div class="column has-text-centered">
                                 <div class="box">
                                     <h5 class="title is-5 has-text-danger-light">No Creators found.</h5>
                                 </div>
                             </div>
                         @else
-                            @for(entry in results)
+                            @for(entry in resources)
                                 <div class="adjustable-column column has-text-centered">
                                     @template.components.view_box.creator(entry=entry)
                                 </div>

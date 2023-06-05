@@ -89,7 +89,7 @@ object PublisherApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Update Publisher",
-        methods = [HttpMethod.PUT],
+        methods = [HttpMethod.PATCH],
         operationId = "updatePublisher",
         path = "/publishers/{publisher-id}",
         pathParams = [OpenApiParam(name = "publisher-id", type = Long::class, required = true)],

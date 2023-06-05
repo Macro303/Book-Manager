@@ -1,8 +1,10 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Series
+@import github.buriedincode.bookshelf.models.User
 @import gg.jte.support.ForSupport
-@param result: Series
+@param resource: Series
+@param session: User
 @param books: List<Book>
 
 <!DOCTYPE html>
@@ -18,7 +20,7 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
@@ -26,7 +28,7 @@
             </header>
             <div class="box">
                 <form id="edit-series-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
+                    @template.components.forms.input(label = "Title", name = "title", value = resource.title)
                 </form>
             </div>
             <h3 class="subtitle is-3 has-text-primary-dark">Books</h3>
@@ -43,7 +45,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in result.books)
+                                @for(entry in resource.books)
                                     <tr>
                                         <td>${entry.book.title}</td>
                                         <td>${entry.book.subtitle}</td>
@@ -100,7 +102,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/series/${result.id.value}/books", {
+            fetch("/api/v0.0/series/${resource.id.value}/books", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -126,7 +128,7 @@
             console.log(caller);
             
             addLoading(caller);
-            fetch("/api/v0.0/series/${result.id.value}/books", {
+            fetch("/api/v0.0/series/${resource.id.value}/books", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -150,14 +152,14 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/series/${result.id.value}", {
+            fetch("/api/v0.0/series/${resource.id.value}", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
-                    "books": [@for(entry in ForSupport.of(result.books))
+                    "books": [@for(entry in ForSupport.of(resource.books))
                         {
                             "bookId": ${entry.get().id.value},
-                            "number": ${entry.get().number}
+                            "number": ${entry.get().number ?: 0}
                         }@if(!entry.isLast),@endif
                     @endfor],
                     "title": formData["title"],
@@ -167,7 +169,7 @@
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/series/${result.id.value}";
+                window.location = "/series/${resource.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

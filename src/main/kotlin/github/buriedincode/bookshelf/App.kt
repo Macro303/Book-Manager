@@ -3,6 +3,7 @@ package github.buriedincode.bookshelf
 import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
+import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.routers.*
 import github.buriedincode.bookshelf.routers.api.*
 import io.javalin.Javalin
@@ -68,8 +69,15 @@ fun main() {
     }
     app.routes {
         path("/") {
-            get {
-                it.render("templates/index.kte")
+            get { ctx ->
+                Utils.query {
+                    val cookie = ctx.cookie("session-id")?.toLongOrNull() ?: -1L
+                    val session = User.findById(id = cookie)
+                    if (session == null)
+                        ctx.render("templates/index.kte")
+                    else
+                        ctx.redirect("/users/${session.id.value}")
+                }
             }
             path("books") {
                 get(BookHtmlRouter::listEndpoint)

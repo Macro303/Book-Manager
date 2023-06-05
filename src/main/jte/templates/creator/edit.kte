@@ -2,8 +2,10 @@
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
+@import github.buriedincode.bookshelf.models.User
 @import gg.jte.support.ForSupport
-@param result: Creator
+@param resource: Creator
+@param session: User
 @param books: List<Book>
 @param roles: List<Role>
 
@@ -20,7 +22,7 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
@@ -28,7 +30,7 @@
             </header>
             <div class="box">
                 <form id="edit-creator-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Name", name = "name", value = result.name)
+                    @template.components.forms.input(label = "Name", name = "name", value = resource.name)
                 </form>
             </div>
             <div class="buttons is-multiline is-centered">
@@ -52,11 +54,11 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/creators/${result.id.value}", {
+            fetch("/api/v0.0/creators/${resource.id.value}", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
-                    "credits": [@for(entry in ForSupport.of(result.credits))
+                    "credits": [@for(entry in ForSupport.of(resource.credits))
                         {
                             "bookId": ${entry.get().book.id.value},
                             "roleId": ${entry.get().role.id.value},
@@ -69,7 +71,7 @@
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/creators/${result.id.value}";
+                window.location = "/creators/${resource.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

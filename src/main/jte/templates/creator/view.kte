@@ -3,7 +3,9 @@
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
-@param result: Creator
+@import github.buriedincode.bookshelf.models.User
+@param resource: Creator
+@param session: User
 @param credits: Map<Role, List<Book>>
 
 <!DOCTYPE html>
@@ -19,14 +21,14 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">${result.name}</h1>
+                <h1 class="title is-1">${resource.name}</h1>
             </header>
             <div class="buttons is-multiline is-centered">
-                <a class="button is-warning" href="/creators/${result.id.value}/edit">
+                <a class="button is-warning" href="/creators/${resource.id.value}/edit">
                     <span class="icon">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </span>
@@ -73,7 +75,7 @@
             const caller = "delete-creator-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/creators/${result.id.value}", {
+            fetch("/api/v0.0/creators/${resource.id.value}", {
                 method: "DELETE",
                 headers: headers,
             }).then((response) => {

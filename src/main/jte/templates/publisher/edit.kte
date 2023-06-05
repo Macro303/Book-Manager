@@ -1,5 +1,7 @@
 @import github.buriedincode.bookshelf.models.Publisher
-@param result: Publisher
+@import github.buriedincode.bookshelf.models.User
+@param resource: Publisher
+@param session: User
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -14,7 +16,7 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
@@ -22,7 +24,7 @@
             </header>
             <div class="box">
                 <form id="edit-publisher-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
+                    @template.components.forms.input(label = "Title", name = "title", value = resource.title)
                 </form>
             </div>
             <div class="buttons is-multiline is-centered">
@@ -46,7 +48,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/publishers/${result.id.value}", {
+            fetch("/api/v0.0/publishers/${resource.id.value}", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -57,7 +59,7 @@
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/publishers/${result.id.value}";
+                window.location = "/publishers/${resource.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

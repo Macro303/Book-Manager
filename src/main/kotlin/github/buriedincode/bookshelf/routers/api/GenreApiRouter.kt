@@ -92,7 +92,7 @@ object GenreApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Update Genre",
-        methods = [HttpMethod.PUT],
+        methods = [HttpMethod.PATCH],
         operationId = "updateGenre",
         path = "/genres/{genre-id}",
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],

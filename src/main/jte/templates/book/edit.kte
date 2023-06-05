@@ -5,7 +5,10 @@
 @import github.buriedincode.bookshelf.models.Publisher
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
-@param result: Book
+@import github.buriedincode.bookshelf.models.User
+@import gg.jte.support.ForSupport
+@param resource: Book
+@param session: User
 @param creators: List<Creator>
 @param genres: List<Genre>
 @param publishers: List<Publisher>
@@ -25,7 +28,7 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
@@ -33,19 +36,19 @@
             </header>
             <div class="box">
                 <form id="edit-book-form" onsubmit="return false;">
-                    @template.components.forms.textarea(label = "Description", name = "Description", value = result.description)
-                    @template.components.forms.select.format(label = "Format", selected = result.format)
-                    @template.components.forms.input(label = "Image Url", name = "image-url", value = result.imageUrl)
-                    @template.components.forms.input(label = "Publish Date", name = "publish-date", value = result.publishDate?.toString())
-                    @template.components.forms.select.publisher(label = "Publisher", options = publishers, selected = result.publisher)
-                    @template.components.forms.input(label = "Subtitle", name = "subtitle", value = result.subtitle)
-                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
+                    @template.components.forms.textarea(label = "Description", name = "Description", value = resource.description)
+                    @template.components.forms.select.format(label = "Format", selected = resource.format)
+                    @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl)
+                    @template.components.forms.input(label = "Publish Date", name = "publish-date", value = resource.publishDate?.toString())
+                    @template.components.forms.select.publisher(label = "Publisher", options = publishers, selected = resource.publisher)
+                    @template.components.forms.input(label = "Subtitle", name = "subtitle", value = resource.subtitle)
+                    @template.components.forms.input(label = "Title", name = "title", value = resource.title)
                     <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
-                    @template.components.forms.input(label = "Goodreads", name = "goodreads", value = result.goodreadsId)
-                    @template.components.forms.input(label = "Google Books", name = "google-books", value = result.googleBooksId)
-                    @template.components.forms.input(label = "Isbn", name = "isbn", value = result.isbn)
-                    @template.components.forms.input(label = "LibraryThing", name = "library-thing", value = result.libraryThingId)
-                    @template.components.forms.input(label = "OpenLibrary", name = "open-library", value = result.openLibraryId)
+                    @template.components.forms.input(label = "Goodreads", name = "goodreads", value = resource.goodreadsId)
+                    @template.components.forms.input(label = "Google Books", name = "google-books", value = resource.googleBooksId)
+                    @template.components.forms.input(label = "Isbn", name = "isbn", value = resource.isbn)
+                    @template.components.forms.input(label = "LibraryThing", name = "library-thing", value = resource.libraryThingId)
+                    @template.components.forms.input(label = "OpenLibrary", name = "open-library", value = resource.openLibraryId)
                 </form>
             </div>
             <h3 class="subtitle is-3 has-text-primary-dark">Credits</h3>
@@ -61,7 +64,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in result.credits)
+                                @for(entry in resource.credits)
                                     <tr>
                                         <td>${entry.creator.name}</td>
                                         <td>${entry.role.title}</td>
@@ -108,7 +111,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in result.genres)
+                                @for(entry in resource.genres)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>
@@ -154,7 +157,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                                @for(entry in result.series)
+                                @for(entry in resource.series)
                                     <tr>
                                         <td>${entry.series.title}</td>
                                         <td>${entry.number}</td>
@@ -216,7 +219,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}/credits", {
+            fetch("/api/v0.0/books/${resource.id.value}/credits", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -241,7 +244,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}/credits", {
+            fetch("/api/v0.0/books/${resource.id.value}/credits", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -266,7 +269,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}/genres", {
+            fetch("/api/v0.0/books/${resource.id.value}/genres", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -290,7 +293,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}/genres", {
+            fetch("/api/v0.0/books/${resource.id.value}/genres", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -314,12 +317,12 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}/series", {
+            fetch("/api/v0.0/books/${resource.id.value}/series", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
                     "seriesId": formData["series-id"],
-                    "number": formData["series-number"],
+                    "number": formData["series-number"] || null,
                 }),
             }).then((response) => {
                 if (!response.ok){
@@ -339,7 +342,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}/series", {
+            fetch("/api/v0.0/books/${resource.id.value}/series", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -363,35 +366,45 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}", {
+            fetch("/api/v0.0/books/${resource.id.value}", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
-                    "credits": ${result.credits.map { mapOf("creatorId" to it.creator.id.value, "roleId" to it.role.id.value) }.toList().toString()},
+                    "credits": [@for(entry in ForSupport.of(resource.credits))
+                        {
+                            "creatorId": ${entry.get().creator.id.value},
+                            "roleId": ${entry.get().role.id.value},
+                        }@if(!entry.isLast),@endif
+                    @endfor],
                     "description": formData["description"] || null,
                     "format": formData["format"] || "PAPERBACK",
-                    "genreIds": ${result.genres.map { it.id.value }.toList().toString()},
+                    "genreIds": ${resource.genres.map { it.id.value }.toList().toString()},
                     "goodreadsId": formData["goodreads"] || null,
                     "googleBooksId": formData["google-books"] || null,
                     "imageUrl": formData["image-url"] || null,
-                    "isCollected": ${result.isCollected},
+                    "isCollected": ${resource.isCollected},
                     "isbn": formData["isbn"] || null,
                     "libraryThingId": formData["library-thing"] || null,
                     "openLibraryId": formData["open-library"] || null,
                     "publishDate": formData["publish-date"] || null,
                     "publisherId": formData["publisher-id"] || null,
-                    "readerIds": ${result.readers.map { it.id.value }.toList().toString()},
-                    "series": ${result.series.map { mapOf("seriesId" to it.series.id.value, "number" to it.number) }.toList().toString()},
+                    "readerIds": ${resource.readers.map { it.id.value }.toList().toString()},
+                    "series": [@for(entry in ForSupport.of(resource.series))
+                        {
+                            "seriesId": ${entry.get().id.value},
+                            "number": ${entry.get().number ?: 0}
+                        }@if(!entry.isLast),@endif
+                    @endfor],
                     "subtitle": formData["subtitle"] || null,
                     "title": formData["title"],
-                    "wisherIds": ${result.wishers.map { it.id.value }.toList().toString()},
+                    "wisherIds": ${resource.wishers.map { it.id.value }.toList().toString()},
                 }),
             }).then((response) => {
                 if (!response.ok){
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/books/${result.id.value}";
+                window.location = "/books/${resource.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);
@@ -402,14 +415,14 @@
             const caller = "refresh-book-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/books/${result.id.value}/refresh", {
+            fetch("/api/v0.0/books/${resource.id.value}/refresh", {
                 method: "PUT",
                 headers: headers,
             }).then((response) => {
                 if (!response.ok) {
                     return Promise.reject(response);
                 }
-                window.location = "/books/${result.id.value}";
+                window.location = "/books/${resource.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

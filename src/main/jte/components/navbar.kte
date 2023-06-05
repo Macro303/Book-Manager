@@ -1,6 +1,9 @@
+@import github.buriedincode.bookshelf.models.User
+@param session: User
+
 <nav aria-label="main navigation" class="navbar is-fixed-top is-primary" role="navigation">
     <div class="navbar-brand">
-        <a class="navbar-item">
+        <a class="navbar-item" href="/users/${session.id.value}">
             <img src="/static/img/logo.png" width="32" height="32">
             Bookshelf
         </a>
@@ -15,13 +18,13 @@
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">Home</a>
                 <div class="navbar-dropdown">
-                    <a class="navbar-item">
+                    <a class="navbar-item" href="/users/${session.id.value}">
                         <span class="icon">
                             <i class="fa-solid fa-user"></i>
                         </span>
                         <span>My Profile</span>
                     </a>
-                    <a class="navbar-item">
+                    <a class="navbar-item" href="/users/${session.id.value}/wishlist">
                         <span class="icon">
                             <i class="fa-solid fa-star"></i>
                         </span>

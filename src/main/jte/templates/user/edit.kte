@@ -1,7 +1,8 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.User
-@param result: User
+@param resource: User
+@param session: User
 @param readBooks: List<Book>
 @param wishedBooks: List<Book>
 
@@ -18,7 +19,7 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
@@ -26,9 +27,9 @@
             </header>
             <div class="box">
                 <form id="edit-user-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Image Url", name = "image-url", value = result.imageUrl)
-                    @template.components.forms.input_number(label = "Role", max = result.role.toInt(), name = "role", value = result.role.toInt())
-                    @template.components.forms.input(label = "Username", name = "username", value = result.username)
+                    @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl)
+                    @template.components.forms.input_number(label = "Rank", max = resource.role.toInt(), name = "role", value = resource.role.toInt())
+                    @template.components.forms.input(label = "Username", name = "username", value = resource.username)
                 </form>
             </div>
             <h3 class="subtitle is-3 has-text-primary-dark">Read Books</h3>
@@ -44,7 +45,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in result.readBooks)
+                                @for(entry in resource.readBooks)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -61,8 +62,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.book(label = "", options = readBooks)</td>
-                                    <td></td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = readBooks)</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-read-book-button" onclick="addReadBook()" type="button">
@@ -92,7 +92,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in result.wishedBooks)
+                                @for(entry in resource.wishedBooks)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -109,8 +109,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.book(label = "", options = wishedBooks)</td>
-                                    <td></td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = wishedBooks)</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-wished-book-button" onclick="addWishedBook()" type="button">
@@ -148,7 +147,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${result.id.value}/read", {
+            fetch("/api/v0.0/users/${resource.id.value}/read", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -172,7 +171,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${result.id.value}/read", {
+            fetch("/api/v0.0/users/${resource.id.value}/read", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -196,7 +195,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${result.id.value}/wished", {
+            fetch("/api/v0.0/users/${resource.id.value}/wished", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -220,7 +219,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${result.id.value}/wished", {
+            fetch("/api/v0.0/users/${resource.id.value}/wished", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -244,22 +243,22 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/users/${result.id.value}", {
+            fetch("/api/v0.0/users/${resource.id.value}", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
                     "imageUrl": formData["image-url"] || null,
-                    "readBookIds": ${result.readBooks.map { it.id.value }.toList().toString()},
+                    "readBookIds": ${resource.readBooks.map { it.id.value }.toList().toString()},
                     "role": formData["role"] || null,
                     "username": formData["username"],
-                    "wishedBookIds": ${result.wishedBooks.map { it.id.value }.toList().toString()},
+                    "wishedBookIds": ${resource.wishedBooks.map { it.id.value }.toList().toString()},
                 }),
             }).then((response) => {
                 if (!response.ok){
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/users/${result.id.value}";
+                window.location = "/users/${resource.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

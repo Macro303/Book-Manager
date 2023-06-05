@@ -89,7 +89,7 @@ object CreatorApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Update Creator",
-        methods = [HttpMethod.PUT],
+        methods = [HttpMethod.PATCH],
         operationId = "updateCreator",
         path = "/creators/{creator-id}",
         pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],

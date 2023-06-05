@@ -1,5 +1,7 @@
 @import github.buriedincode.bookshelf.models.Publisher
-@param result: Publisher
+@import github.buriedincode.bookshelf.models.User
+@param resource: Publisher
+@param session: User
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -14,14 +16,14 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">${result.title}</h1>
+                <h1 class="title is-1">${resource.title}</h1>
             </header>
             <div class="buttons is-multiline is-centered">
-                <a class="button is-warning" href="/publishers/${result.id.value}/edit">
+                <a class="button is-warning" href="/publishers/${resource.id.value}/edit">
                     <span class="icon">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </span>
@@ -41,14 +43,14 @@
                 <div class="column">
                     <h3 class="subtitle is-3 has-text-primary-dark">Books</h3>
                     <div class="columns is-multiline is-centered">
-                        @if(result.books.empty())
+                        @if(resource.books.empty())
                             <div class="column has-text-centered">
                                 <div class="box">
                                     <h5 class="title is-5 has-text-danger-light">No Books have this publisher.</h5>
                                 </div>
                             </div>
                         @else
-                            @for(entry in result.books)
+                            @for(entry in resource.books)
                                 <div class="adjustable-column column has-text-centered">
                                     @template.components.view_box.book(entry = entry)
                                 </div>
@@ -68,7 +70,7 @@
             const caller = "delete-publisher-button";
 
             addLoading(caller);
-            fetch("/api/v0.0/publishers/${result.id.value}", {
+            fetch("/api/v0.0/publishers/${resource.id.value}", {
                 method: "DELETE",
                 headers: headers,
             }).then((response) => {

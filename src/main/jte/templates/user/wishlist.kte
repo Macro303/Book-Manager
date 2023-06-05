@@ -1,7 +1,8 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.User
-@param result: User
+@param resource: User
+@param session: User
 @param books: List<Book>
 
 <!DOCTYPE html>
@@ -17,18 +18,18 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
-                <h1 class="title is-1">${result.username}'s Wishlist</h1>
+                <h1 class="title is-1">${resource.username}'s Wishlist</h1>
             </header>
             <div class="columns">
                 <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
                     @template.components.settings_box()
                     <div class="box">
                         <h1 class="title is-5 has-text-info-light">Filter Books</h1>
-                        <form accept-charset="UTF-8" action="/users/${result.id.value}/wishlist" method="GET">
+                        <form accept-charset="UTF-8" action="/users/${resource.id.value}/wishlist" method="GET">
                             @template.components.forms.input(label="Title", name="title")
                             <div class="buttons is-centered">
                                 <button class="button is-info">
@@ -102,7 +103,7 @@
                     "isbn": formData["isbn"] || null,
                     "isCollected": false,
                     "openLibraryId": open_library_id || null,
-                    "wisherIds": [${result.id.value}]
+                    "wisherIds": [${resource.id.value}]
                 }),
             }).then((response) => {
                 if (!response.ok){

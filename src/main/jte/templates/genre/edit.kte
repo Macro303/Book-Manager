@@ -1,7 +1,9 @@
 @import java.util.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Genre
-@param result: Genre
+@import github.buriedincode.bookshelf.models.User
+@param resource: Genre
+@param session: User
 @param books: List<Book>
 
 <!DOCTYPE html>
@@ -17,7 +19,7 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar()
+    @template.components.navbar(session = session)
     <main class="section">
         <div class="container">
             <header class="block has-text-centered">
@@ -25,7 +27,7 @@
             </header>
             <div class="box">
                 <form id="edit-genre-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = result.title)
+                    @template.components.forms.input(label = "Title", name = "title", value = resource.title)
                 </form>
             </div>
             <h3 class="subtitle is-3 has-text-primary-dark">Books</h3>
@@ -41,7 +43,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in result.books)
+                                @for(entry in resource.books)
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -58,8 +60,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.book(label = "", options = books)</td>
-                                    <td></td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = books)</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-book-button" onclick="addBook()" type="button">
@@ -97,7 +98,7 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/genres/${result.id.value}/books", {
+            fetch("/api/v0.0/genres/${resource.id.value}/books", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
@@ -121,7 +122,7 @@
             @endraw
 
             addLoading(caller);
-            fetch("/api/v0.0/genres/${result.id.value}/books", {
+            fetch("/api/v0.0/genres/${resource.id.value}/books", {
                 method: "DELETE",
                 headers: headers,
                 body: JSON.stringify({
@@ -145,19 +146,19 @@
             console.log(formData);
 
             addLoading(caller);
-            fetch("/api/v0.0/genres/${result.id.value}", {
+            fetch("/api/v0.0/genres/${resource.id.value}", {
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
                     "title": formData["title"],
-                    "bookIds": ${result.books.map{ it.id.value }.toList().toString()},
+                    "bookIds": ${resource.books.map{ it.id.value }.toList().toString()},
                 }),
             }).then((response) => {
                 if (!response.ok){
                     return Promise.reject(response);
                 }
                 form.reset();
-                window.location = "/genres/${result.id.value}";
+                window.location = "/genres/${resource.id.value}";
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title || msg.message}`);

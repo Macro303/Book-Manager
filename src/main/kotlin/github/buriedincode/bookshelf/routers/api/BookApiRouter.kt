@@ -139,7 +139,7 @@ object BookApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Update Book",
-        methods = [HttpMethod.PUT],
+        methods = [HttpMethod.PATCH],
         operationId = "updateBook",
         path = "/books/{book-id}",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
@@ -298,9 +298,9 @@ object BookApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Discard Book",
-        methods = [HttpMethod.PATCH],
+        methods = [HttpMethod.DELETE],
         operationId = "discardBook",
-        path = "/books/{book-id}/discard",
+        path = "/books/{book-id}/collect",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
@@ -344,9 +344,9 @@ object BookApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Unread Book",
-        methods = [HttpMethod.PATCH],
+        methods = [HttpMethod.DELETE],
         operationId = "unreadBook",
-        path = "/books/{book-id}/unread",
+        path = "/books/{book-id}/read",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
         responses = [
@@ -406,9 +406,9 @@ object BookApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Unwish Book",
-        methods = [HttpMethod.PATCH],
+        methods = [HttpMethod.DELETE],
         operationId = "unwishBook",
-        path = "/books/{book-id}/unwish",
+        path = "/books/{book-id}/wish",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
         responses = [

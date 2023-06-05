@@ -99,7 +99,7 @@ object UserApiRouter : CrudHandler, Logging {
 
     @OpenApi(
         description = "Update User",
-        methods = [HttpMethod.PUT],
+        methods = [HttpMethod.PATCH],
         operationId = "updateUser",
         path = "/users/{user-id}",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
@@ -164,7 +164,7 @@ object UserApiRouter : CrudHandler, Logging {
         description = "Add Book to User read list",
         methods = [HttpMethod.PATCH],
         operationId = "addBookToUserReadList",
-        path = "/user/{user-id}/read",
+        path = "/users/{user-id}/read",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
         responses = [
@@ -194,7 +194,7 @@ object UserApiRouter : CrudHandler, Logging {
         description = "Remove Book from User read list",
         methods = [HttpMethod.DELETE],
         operationId = "removeBookFromUserReadList",
-        path = "/user/{user-id}/read",
+        path = "/users/{user-id}/read",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
         responses = [
@@ -223,7 +223,7 @@ object UserApiRouter : CrudHandler, Logging {
         description = "Add Book to User wished list",
         methods = [HttpMethod.PATCH],
         operationId = "addBookToUserWishedList",
-        path = "/user/{user-id}/wished",
+        path = "/users/{user-id}/wished",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
         responses = [
@@ -253,7 +253,7 @@ object UserApiRouter : CrudHandler, Logging {
         description = "Remove Book from User wished list",
         methods = [HttpMethod.DELETE],
         operationId = "removeBookFromUserWishedList",
-        path = "/user/{user-id}/wished",
+        path = "/users/{user-id}/wished",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
         responses = [
