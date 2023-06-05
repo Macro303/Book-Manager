@@ -28,6 +28,9 @@ object UserApiRouter : CrudHandler, Logging {
         methods = [HttpMethod.GET],
         operationId = "listUsers",
         path = "/users",
+        queryParams = [
+            OpenApiParam(name = "username", type = String::class),
+        ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<UserEntry>::class)]),
         ],
@@ -35,7 +38,11 @@ object UserApiRouter : CrudHandler, Logging {
         tags = ["User"]
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
-        val users = User.all()
+        var users = User.all().toList()
+        val username = ctx.queryParam("username")
+        if (username != null) {
+            users = users.filter { it.username in username || username in it.username }
+        }
         ctx.json(users.map { it.toJson() })
     }
 

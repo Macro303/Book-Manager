@@ -51,25 +51,25 @@
             console.log(formData);
 
             addLoading(caller);
-            @raw
-                fetch(`/api/v0.0/users?username="${formData['username']}"`, {
-            @endraw
+            fetch("/api/v0.0/users?" + new URLSearchParams({
+                username: formData["username"]
+            }), {
                 method: "GET",
                 headers: headers,
             }).then((response) => {
-                if (response.ok) {
-                    return response.json();
+                if (!response.ok){
+                    return Promise.reject(response);
                 }
-                return Promise.reject(response);
-            }).then((data) => {
-                if (data.length === 1) {
-                    @raw
-                        document.cookie = `session-id=${data[0].userId};path=/;max-age=${60*60*24*30};SameSite=Strict`;
-                        window.location = `/users/${data[0].userId}`;
-                    @endraw
-                } else {
-                    alert(`404 Not Found: ["User not found."]`);
-                }
+                response.json().then((data) => {
+                    if (data.length === 1) {
+                        @raw
+                            document.cookie = `session-id=${data[0].userId};path=/;max-age=${60*60*24*30};SameSite=Strict`;
+                            window.location = `/users/${data[0].userId}`;
+                        @endraw
+                    } else {
+                        alert(`404 Not Found: ["User not found."]`);
+                    }
+                });
             }).catch((response) => response.json().then((msg) => {
                 @raw
                     alert(`${response.status} ${response.statusText} => ${msg.title}`);

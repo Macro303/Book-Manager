@@ -27,6 +27,16 @@ function getCookie(cname) {
   return "";
 }
 
+function addLoading(caller){
+  let element = document.getElementById(caller);
+  element.classList.add("is-loading");
+}
+
+function removeLoading(caller){
+  let element = document.getElementById(caller);
+  element.classList.remove("is-loading");
+}
+
 function setTheme(){
   let darkCss = document.getElementById("dark-theme");
   let lightCss = document.getElementById("light-theme");
@@ -40,16 +50,6 @@ function setTheme(){
   }
 }
 
-function addLoading(caller){
-  let element = document.getElementById(caller);
-  element.classList.add("is-loading");
-}
-
-function removeLoading(caller){
-  let element = document.getElementById(caller);
-  element.classList.remove("is-loading");
-}
-
 function changeTheme(){
   let currentTheme = getCookie("theme");
   let newTheme = "dark";
@@ -58,6 +58,15 @@ function changeTheme(){
 
   document.cookie = `theme=${newTheme};path=/;max-age=${60*60*24*30};SameSite=Strict`;
   setTheme();
+}
+
+function signOut() {
+    const caller = "sign-out-button";
+    addLoading(caller);
+    
+    document.cookie = "session-id=0;path=/;max-age=0";
+    window.location = "/";
+    removeLoading(caller);
 }
 
 function updateReadText() {
