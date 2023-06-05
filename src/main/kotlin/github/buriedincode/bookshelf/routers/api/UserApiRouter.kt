@@ -40,9 +40,8 @@ object UserApiRouter : CrudHandler, Logging {
     override fun getAll(ctx: Context): Unit = Utils.query {
         var users = User.all().toList()
         val username = ctx.queryParam("username")
-        if (username != null) {
-            users = users.filter { it.username in username || username in it.username }
-        }
+        if (username != null)
+            users = users.filter { it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true) }
         ctx.json(users.map { it.toJson() })
     }
 

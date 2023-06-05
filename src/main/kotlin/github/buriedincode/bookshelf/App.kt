@@ -34,7 +34,7 @@ fun main() {
     val app = Javalin.create {
         it.http.prefer405over404 = true
         it.requestLogger.http { ctx, ms ->
-            logger.info("${ctx.method()} - ${ctx.path()} - ${ctx.statusCode()} - ${ctx.ip()} => ${ms}ms")
+            logger.info("${ctx.statusCode()} ${ctx.method()} - ${ctx.path()} => ${ms}ms")
         }
         it.routing.ignoreTrailingSlashes = true
         it.routing.treatMultipleSlashesAsSingleSlash = true

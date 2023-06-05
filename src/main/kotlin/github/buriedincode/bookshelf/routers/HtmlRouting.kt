@@ -27,15 +27,7 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
         return User.findById(id = cookie)
     }
 
-    open fun listEndpoint(ctx: Context): Unit = Utils.query {
-        val session = ctx.getSession()
-        if (session == null)
-            ctx.redirect("/")
-        else {
-            val resources = entity.all().toList()
-            ctx.render(filePath = "templates/$name/list.kte", mapOf("resources" to resources, "session" to session))
-        }
-    }
+    abstract fun listEndpoint(ctx: Context): Unit
 
     open fun viewEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
@@ -64,8 +56,22 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
         if (session == null)
             ctx.redirect("/")
         else {
-            val resources = entity.all().toList().filter { it.isCollected }
-            ctx.render(filePath = "templates/book/list.kte", mapOf("resources" to resources, "session" to session))
+            var resources = Book.all().toList().filter { it.isCollected }
+            val title = ctx.queryParam("title")
+            if (title != null)
+                resources = resources.filter {
+                    (it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)) ||
+                    (it.subtitle?.let {
+                        it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                    } ?: false)
+                }
+            ctx.render(filePath = "templates/creator/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "title" to title
+                ),
+            ))
         }
     }
 
@@ -122,6 +128,25 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
 }
 
 object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
+    override fun listEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            var resources = Creator.all().toList()
+            val name = ctx.queryParam("name")
+            if (name != null)
+                resources = resources.filter { it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true) }
+            ctx.render(filePath = "templates/creator/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "name" to name
+                ),
+            ))
+        }
+    }
+    
     override fun viewEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
         if (session == null)
@@ -165,6 +190,25 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
 }
 
 object GenreHtmlRouter : BaseHtmlRouter<Genre>(entity = Genre), Logging {
+    override fun listEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            var resources = Genre.all().toList()
+            val title = ctx.queryParam("title")
+            if (title != null)
+                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            ctx.render(filePath = "templates/genre/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "title" to title
+                ),
+            ))
+        }
+    }
+    
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
         if (session == null)
@@ -183,9 +227,47 @@ object GenreHtmlRouter : BaseHtmlRouter<Genre>(entity = Genre), Logging {
     }
 }
 
-object PublisherHtmlRouter : BaseHtmlRouter<Publisher>(entity = Publisher), Logging
+object PublisherHtmlRouter : BaseHtmlRouter<Publisher>(entity = Publisher), Logging {
+    override fun listEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            var resources = Publisher.all().toList()
+            val title = ctx.queryParam("title")
+            if (title != null)
+                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            ctx.render(filePath = "templates/publisher/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "title" to title
+                ),
+            ))
+        }
+    }
+}
 
 object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
+    override fun listEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            var resources = Role.all().toList()
+            val title = ctx.queryParam("title")
+            if (title != null)
+                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            ctx.render(filePath = "templates/role/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "title" to title
+                ),
+            ))
+        }
+    }
+    
     override fun viewEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
         if (session == null)
@@ -229,6 +311,25 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
 }
 
 object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series), Logging {
+    override fun listEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            var resources = Series.all().toList()
+            val title = ctx.queryParam("title")
+            if (title != null)
+                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            ctx.render(filePath = "templates/series/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "title" to title
+                ),
+            ))
+        }
+    }
+    
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
         if (session == null)
@@ -248,6 +349,25 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series), Logging {
 }
 
 object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
+    override fun listEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            var resources = User.all().toList()
+            val username = ctx.queryParam("username")
+            if (username != null)
+                resources = resources.filter { it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true) }
+            ctx.render(filePath = "templates/user/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "username" to username
+                ),
+            ))
+        }
+    }
+    
     override fun viewEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
         if (session == null)

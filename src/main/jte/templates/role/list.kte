@@ -1,8 +1,10 @@
 @import java.util.List
+@import java.util.Map
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.User
 @param resources: List<Role>
 @param session: User
+@param selected: Map<String, String>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -29,7 +31,7 @@
                     <div class="box">
                         <h1 class="title is-5 has-text-info-light">Filter Roles</h1>
                         <form accept-charset="UTF-8" action="/roles" method="GET">
-                            @template.components.forms.input(label="Title", name="title")
+                            @template.components.forms.input(label="Title", name="title", value=selected["title"])
                             <div class="buttons is-centered">
                                 <button class="button is-info">
                                     <span class="icon">
