@@ -7,6 +7,7 @@ import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
+import github.buriedincode.bookshelf.services.models.*
 import io.javalin.apibuilder.*
 import io.javalin.http.*
 import io.javalin.openapi.*
@@ -266,14 +267,54 @@ object BookApiRouter : CrudHandler, Logging {
             throw NotImplementedResponse(message = "Goodreads import not currently supported.")
         if (body.googleBooksId != null)
             throw NotImplementedResponse(message = "Google Books import not currently supported.")
-        if (body.isbn != null)
-            throw NotImplementedResponse(message = "Isbn import not currently supported.")
         if (body.libraryThingId != null)
             throw NotImplementedResponse(message = "LibraryThing import not currently supported.")
-        if (body.openLibraryId != null)
-            throw NotImplementedResponse(message = "OpenLibrary import not currently supported.")
 
-        ctx.status(HttpStatus.NOT_IMPLEMENTED)
+        val edition, work = if (body.openLibraryId != null)
+            OpenLibrary.getBook(editionId = body.openLibraryId)
+        else if (body.isbn != null)
+            OpenLibrary.lookupBook(isbn = body.isbn)
+        else
+            throw NotImplementedResponse(message = "Invalid import id.")
+        val exists = if (edition.isbn == null)
+            Book.find {
+                (BookTable.titleCol eq edition.title) or (BookTable.openLibraryCol eq edition.editionId)
+            }.firstOrNull()
+        else
+            Book.find {
+                (BookTable.titleCol eq edition.title) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
+            }.firstOrNull()
+        if (exists != null)
+            throw ConflictResponse(message = "This Book already exists in the database.")
+        val book = Book.new {
+            description = edition.description ?: work.description
+            format = Format.PAPERBACK // TODO
+            genres = SizedCollection(edition.genres.map {
+                Genre.find {
+                    GenreTable.titleCol eq it
+                }.firstOrNull() ?: Genre.new {
+                    title = it
+                }
+            })
+            goodreadsId = edition.identifiers.goodreads.firstOrNull()
+            googleBooksId = edition.identifiers.google.firstOrNull()
+            imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
+            isbn = edition.isbn
+            libraryThingId = edition.identifiers.librarything.firstOrNull()
+            openLibraryId = edition.editionId
+            publishDate = edition.publishDate
+            edition.publishers.firstOrNull()?.let {
+                publisher = Publisher.find {
+                    PublisherTable.titleCol eq it
+                }.firstOrNull() ?: Publisher.new {
+                    title = it
+                }
+            }
+            subtitle = edition.subtitle
+            title = edition.title
+        }
+
+        ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
     }
 
     @OpenApi(

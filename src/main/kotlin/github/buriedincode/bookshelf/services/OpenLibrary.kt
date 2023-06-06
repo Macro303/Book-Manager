@@ -67,40 +67,13 @@ object OpenLibrary: Logging {
         return null
     }
     
-    fun lookupBook(isbn: String): Book {
+    fun lookupBook(isbn: String): Pair<Edition, Work> {
         val edition = sendRequest(uri = encodeURI(endpoint = "/isbn/$isbn.json"), clazz = Edition::class.java)
             ?: throw InternalServerErrorResponse(message = "Unable to find edition with isbn: $isbn")
         val workId = edition.works.first().key.split("/").last()
         val work = sendRequest(uri = encodeURI(endpoint = "/work/$workId.json"), clazz = Work::class.java)
             ?: throw InternalServerErrorResponse(message = "Unable to find work with id: $workId")
-        val book = Book.new {
-            description = edition.description ?: work.description
-            format = Format.PAPERBACK // TODO
-            genres = SizedCollection(edition.genres.map {
-                Genre.find {
-                    GenreTable.titleCol eq it
-                }.firstOrNull() ?: Genre.new {
-                    title = it
-                }
-            })
-            goodreadsId = edition.identifiers.goodreads.firstOrNull()
-            googleBooksId = edition.identifiers.google.firstOrNull()
-            imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
-            this.isbn = isbn
-            libraryThingId = edition.identifiers.librarything.firstOrNull()
-            openLibraryId = edition.editionId
-            publishDate = edition.publishDate
-            edition.publishers.firstOrNull()?.let {
-                publisher = Publisher.find {
-                    PublisherTable.titleCol eq it
-                }.firstOrNull() ?: Publisher.new {
-                    title = it
-                }
-            }
-            subtitle = edition.subtitle
-            title = edition.title
-        }
-        return book
+        return edition to work
     }
     
     fun getBook(editionId: String): Book {

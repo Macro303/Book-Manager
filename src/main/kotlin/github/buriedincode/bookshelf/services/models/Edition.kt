@@ -21,6 +21,10 @@ data class Edition(
     val format: String? = null,
     val genres: List<String> = ArrayList(),
     val identifiers: Identifiers = Identifiers(),
+    @JsonProperty("isbn_10")
+    val isbn10: List<String> = ArrayList(),
+    @JsonProperty("isbn_13")
+    val isbn13: List<String> = ArrayList(),
     val key: String,
     @JsonProperty("publish_date")
     val publishDate: LocalDate? = null,
@@ -31,4 +35,6 @@ data class Edition(
 ) {
     val editionId: String
         get() = key.split("/").last()
+    val isbn: String?
+        get() = isbn13.firstOrNull() ?: isbn10.firstOrNull()
 }
