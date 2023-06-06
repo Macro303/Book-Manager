@@ -3,6 +3,7 @@ package github.buriedincode.bookshelf
 import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
+import github.buriedincode.bookshelf.Utils.VERSION
 import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.routers.*
 import github.buriedincode.bookshelf.routers.api.*
@@ -23,8 +24,6 @@ import io.javalin.rendering.template.JavalinJte
 import io.javalin.validation.ValidationException
 import org.apache.logging.log4j.kotlin.logger
 import java.nio.file.Path
-
-private const val VERSION = "0.0.0"
 
 fun main() {
     val logger = logger("github.buriedincode.bookshelf.App")

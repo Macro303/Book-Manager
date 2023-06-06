@@ -9,22 +9,16 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.sql.Connection
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.net.http.HttpClient
-import com.fasterxml.jackson.databind.ObjectMapper
+
 
 object Utils : Logging {
     private val HOME_ROOT: String = System.getProperty("user.home")
-    private val ClIENT: HttpClient = HttpClient.newBuilder()
-        .followRedirects(HttpClient.Redirect.ALWAYS)
-        .connectTimeout(Duration.ofSeconds(5))
-        .build();
-    private val MAPPER: ObjectMapper = ObjectMapper()
 
+    internal const val VERSION = "0.0.0"
     internal val CACHE_ROOT = Paths.get(HOME_ROOT, ".cache", "bookshelf")
     internal val CONFIG_ROOT = Paths.get(HOME_ROOT, ".config", "bookshelf")
     internal val DATA_ROOT = Paths.get(HOME_ROOT, ".local", "share", "bookshelf")
@@ -80,24 +74,5 @@ object Utils : Logging {
             3 -> "rd"
             else -> "th"
         }
-    }
-    
-    internal fun performJsonRequest(url: String, clazz: Class): String? {
-        try {
-            val request = HttpRequest.newBuilder()
-                .uri(uri)
-                .setHeader("Accept", "application/json")
-                .setHeader("User-Agent", "Bookshelf-v${VERSION}/Java-v${System.getProperty("java.version")}")
-                .GET()
-                .build()
-            val response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                return MAPPER.readValue(response.body(), clazz);
-            }
-            logger.error(response.body());
-        } catch (exc: (IOException | InterruptedException)) {
-            logger.error("Unable to make request to: ${uri.getPath()}", exc);
-        }
-        return null;
     }
 }
