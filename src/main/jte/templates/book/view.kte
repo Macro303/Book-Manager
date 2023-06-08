@@ -1,6 +1,7 @@
-@import java.util.List
-@import java.util.Map
+@import kotlin.collections.List
+@import kotlin.collections.Map
 @import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.BookSeries
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.User
@@ -51,7 +52,7 @@
                             <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${resource.format.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }}</p>
                         </div>
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Genres:</strong> @for(entry in ForSupport.of(resource.genres))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Genres:</strong> @for(entry in ForSupport.of(resource.genres.sorted()))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
                         </div>
                         <div class="block">
                             <p><strong class="subtitle is-size-5 has-text-info">Publish Date:</strong> ${resource.publishDate?.format(getUserDateFormatter(date=resource.publishDate!!))}</p>
@@ -60,7 +61,7 @@
                             <p><strong class="subtitle is-size-5 has-text-info">Publisher:</strong> @if(resource.publisher != null)<a class="is-family-primary has-text-link" href="/publishers/${resource.publisher!!.id.value}">${resource.publisher!!.title}</a>@endif</p>
                         </div>
                         <div class="block">
-                            <p><strong class="subtitle is-size-5 has-text-info">Series:</strong> @for(entry in ForSupport.of(resource.series))<a class="is-family-primary has-text-link" href="/series/${entry.get().series.id.value}">${entry.get().series.title}@if(entry.get().number != null) #${entry.get().number}@endif</a>@if(!entry.isLast), @endif@endfor</p>
+                            <p><strong class="subtitle is-size-5 has-text-info">Series:</strong> @for(entry in ForSupport.of(resource.series.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.series })))<a class="is-family-primary has-text-link" href="/series/${entry.get().series.id.value}">${entry.get().series.title}@if(entry.get().number != null) #${entry.get().number}@endif</a>@if(!entry.isLast), @endif@endfor</p>
                         </div>
                         <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
                         @if(resource.isbn != null)
@@ -200,15 +201,15 @@
                     @template.components.settings_box()
                 </div>
                 <div class="column">
-                    @if(credits.isEmpty)
+                    @if(credits.isEmpty())
                         <div class="box has-text-centered">
                             <h5 class="title is-5 has-text-danger-light">No Book Creator Roles</h5>
                         </div>
                     @else
-                        @for(role in credits.keySet())
+                        @for(role in credits.keys.sorted())
                             <h3 class="subtitle is-3 has-text-primary-dark">${role.title}</h3>
                             <div class="columns is-multiline is-centered">
-                                @for(creator in credits.get(role))
+                                @for(creator in credits[role]!!.sorted())
                                     <div class="adjustable-column column has-text-centered">
                                         @template.components.view_box.creator(entry = creator)
                                     </div>
@@ -226,7 +227,7 @@
                                     </div>
                                 </div>
                             @else
-                                @for(entry in resource.readers)
+                                @for(entry in resource.readers.sorted())
                                     <div class="adjustable-column column has-text-centered">
                                         @template.components.view_box.user(entry=entry)
                                     </div>
@@ -243,7 +244,7 @@
                                     </div>
                                 </div>
                             @else
-                                @for(entry in resource.wishers)
+                                @for(entry in resource.wishers.sorted())
                                     <div class="adjustable-column column has-text-centered">
                                         @template.components.view_box.user(entry=entry)
                                     </div>

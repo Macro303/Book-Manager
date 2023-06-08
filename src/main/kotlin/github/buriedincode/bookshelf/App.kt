@@ -24,6 +24,23 @@ import io.javalin.rendering.template.JavalinJte
 import io.javalin.validation.ValidationException
 import org.apache.logging.log4j.kotlin.logger
 import java.nio.file.Path
+import java.time.Duration
+
+fun toHumanReadable(milliseconds: Float): String {
+    val duration = Duration.ofMillis(milliseconds.toLong())
+    val minutes = duration.toMinutes()
+    if (minutes > 0) {
+        val seconds = duration.minusMinutes(minutes).toSeconds()
+        val millis = duration.minusMinutes(minutes).minusSeconds(seconds)
+        return "${minutes}min ${seconds}sec ${millis}ms"
+    }
+    val seconds = duration.toSeconds()
+    if (seconds > 0) {
+        val millis = duration.minusSeconds(seconds).toMillis()
+        return "${seconds}sec ${millis}ms"
+    }
+    return "${duration.toMillis()}ms"
+}
 
 fun main() {
     val logger = logger("github.buriedincode.bookshelf.App")
@@ -33,7 +50,13 @@ fun main() {
     val app = Javalin.create {
         it.http.prefer405over404 = true
         it.requestLogger.http { ctx, ms ->
-            logger.info("${ctx.statusCode()} ${ctx.method()} - ${ctx.path()} => ${ms}ms")
+            when {
+                ctx.statusCode() < 100 -> logger.error("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+                ctx.statusCode() in (100 until 300) -> logger.info("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+                ctx.statusCode() in (300 until 400) -> logger.debug("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+                ctx.statusCode() in (400 until 500) -> logger.warn("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+                ctx.statusCode() >= 500 -> logger.error("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+            }
         }
         it.routing.ignoreTrailingSlashes = true
         it.routing.treatMultipleSlashesAsSingleSlash = true

@@ -1,5 +1,5 @@
-@import java.util.List
-@import java.util.Map
+@import kotlin.collections.List
+@import kotlin.collections.Map
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @param resources: List<Series>
@@ -66,7 +66,7 @@
                                 </div>
                             </div>
                         @else
-                            @for(entry in resources)
+                            @for(entry in resources.sorted())
                                 <div class="adjustable-column column has-text-centered">
                                     @template.components.view_box.series(entry=entry)
                                 </div>

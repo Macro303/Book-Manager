@@ -37,7 +37,7 @@ object RoleApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         val roles = Role.all()
-        ctx.json(roles.map { it.toJson() })
+        ctx.json(roles.sorted().map { it.toJson() })
     }
 
     @OpenApi(

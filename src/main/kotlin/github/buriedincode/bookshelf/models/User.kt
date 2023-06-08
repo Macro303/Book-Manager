@@ -8,8 +8,10 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class User(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<User>(UserTable), Logging
+class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
+    companion object : LongEntityClass<User>(UserTable), Logging {
+        val comparator = compareBy(User::username)
+    }
 
     var imageUrl: String? by UserTable.imageUrlCol
     var readBooks by Book via ReadTable
@@ -25,14 +27,16 @@ class User(id: EntityID<Long>) : LongEntity(id) {
             "username" to username
         )
         if (showAll) {
-            output["read"] = readBooks.map { it.toJson() }
-            output["wished"] = wishedBooks.map { it.toJson() }
+            output["read"] = readBooks.sorted().map { it.toJson() }
+            output["wished"] = wishedBooks.sorted().map { it.toJson() }
         }
         return output.toSortedMap()
     }
+
+    override fun compareTo(other: User): Int = comparator.compare(this, other)
 }
 
-class UserInput(
+data class UserInput(
     val imageUrl: String? = null,
     val readBookIds: List<Long> = ArrayList(),
     val role: Short = 0,

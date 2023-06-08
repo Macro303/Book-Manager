@@ -1,4 +1,4 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Creator
 @param label: String = "Select Creator"
 @param name: String = "creator-id"

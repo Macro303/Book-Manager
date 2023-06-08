@@ -1,4 +1,4 @@
-@import java.util.Map
+@import kotlin.collections.Map
 @import github.buriedincode.bookshelf.models.User
 @import gg.jte.support.ForSupport
 @param resource: User
@@ -38,13 +38,13 @@
                     <div class="box"> 
                         <h4 class="subtitle is-4 has-text-centered has-text-info-light">Stats</h4> 
                         <div class="block"> 
-                            <p><strong class="subtitle is-size-5 has-text-info">Wishlist:</strong> ${stats.get("wishlist")}@if(stats.get("shared") > 0) + ${stats.get("shared")}@endif</p> 
+                            <p><strong class="subtitle is-size-5 has-text-info">Wishlist:</strong> ${stats["wishlist"]}@if(stats["shared"]!! > 0) + ${stats["shared"]}@endif</p>
                         </div> 
                         <div class="block"> 
-                            <p><strong class="subtitle is-size-5 has-text-info">Unread:</strong> ${stats.get("unread")}</p> 
+                            <p><strong class="subtitle is-size-5 has-text-info">Unread:</strong> ${stats["unread"]}</p>
                         </div> 
                         <div class="block"> 
-                            <p><strong class="subtitle is-size-5 has-text-info">Read:</strong> ${stats.get("read")}</p> 
+                            <p><strong class="subtitle is-size-5 has-text-info">Read:</strong> ${stats["read"]}</p>
                         </div> 
                     </div>
                 </div>
@@ -83,8 +83,8 @@
                                 </div>
                             </div>
                         @else
-                            @for(entry in ForSupport.of(resource.readBooks))
-                                @if(entry.getIndex() >= 5)
+                            @for(entry in ForSupport.of(resource.readBooks.sorted()))
+                                @if(entry.index >= 5)
                                     !{break}
                                 @endif
                                 <div class="adjustable-column column has-text-centered">

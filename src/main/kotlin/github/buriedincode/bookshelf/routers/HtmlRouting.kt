@@ -10,7 +10,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 
 abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityClass<T>) {
-    private val name: String = entity::class.java.declaringClass.simpleName!!.lowercase()
+    private val name: String = entity::class.java.declaringClass.simpleName.lowercase()
     protected val paramName: String = "$name-id"
     protected val title: String = name.replaceFirstChar(Char::uppercaseChar)
     
@@ -27,7 +27,7 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
         return User.findById(id = cookie)
     }
 
-    abstract fun listEndpoint(ctx: Context): Unit
+    abstract fun listEndpoint(ctx: Context)
 
     open fun viewEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
@@ -65,7 +65,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
                         it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
                     } ?: false)
                 }
-            ctx.render(filePath = "templates/creator/list.kte", mapOf(
+            ctx.render(filePath = "templates/book/list.kte", mapOf(
                 "resources" to resources,
                 "session" to session,
                 "selected" to mapOf(
@@ -163,7 +163,7 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
                 filePath = "templates/creator/view.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
-                    "credits" to credits
+                    "credits" to credits,
                 )
             )
         }
@@ -182,7 +182,7 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
                     "resource" to resource,
                     "session" to session,
                     "books" to books,
-                    "roles" to roles
+                    "roles" to roles,
                 )
             )
         }
@@ -220,7 +220,7 @@ object GenreHtmlRouter : BaseHtmlRouter<Genre>(entity = Genre), Logging {
                 filePath = "templates/genre/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
-                    "books" to books
+                    "books" to books,
                 )
             )
         }
@@ -284,7 +284,7 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
                 filePath = "templates/role/view.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
-                    "credits" to credits
+                    "credits" to credits,
                 )
             )
         }
@@ -303,7 +303,7 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
                     "resource" to resource,
                     "session" to session,
                     "books" to books,
-                    "creators" to creators
+                    "creators" to creators,
                 )
             )
         }
@@ -341,7 +341,7 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series), Logging {
                 filePath = "templates/series/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
-                    "books" to books
+                    "books" to books,
                 )
             )
         }
@@ -376,9 +376,9 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
             val resource = getResource(resourceId = ctx.pathParam(paramName))
             val readListSize = resource.readBooks.count()
             val stats = mapOf(
-                "wishlist" to Book.all().filter { !it.isCollected && resource in it.wishers }.count(),
-                "shared" to Book.all().filter { !it.isCollected && it.wishers.empty() }.count(),
-                "unread" to Book.all().filter { it.isCollected }.count() - readListSize,
+                "wishlist" to Book.all().count { !it.isCollected && resource in it.wishers },
+                "shared" to Book.all().count { !it.isCollected && it.wishers.empty() },
+                "unread" to Book.all().count { it.isCollected } - readListSize,
                 "read" to readListSize
             )
             ctx.render(filePath = "templates/user/view.kte", mapOf("resource" to resource, "session" to session, "stats" to stats))

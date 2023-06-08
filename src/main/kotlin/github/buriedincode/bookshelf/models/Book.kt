@@ -8,8 +8,13 @@ import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import java.time.LocalDate
 
-class Book(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<Book>(BookTable), Logging
+class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
+    companion object : LongEntityClass<Book>(BookTable), Logging {
+        val comparator = compareBy<Book> { it.series.firstOrNull()?.series }
+            .thenBy(nullsFirst()) { it.series.firstOrNull()?.number }
+            .thenBy(Book::title)
+            .thenBy(nullsFirst(), Book::subtitle)
+    }
 
     val credits by BookCreatorRole referrersOn BookCreatorRoleTable.bookCol
     var description: String? by BookTable.descriptionCol
@@ -40,36 +45,38 @@ class Book(id: EntityID<Long>) : LongEntity(id) {
             "imageUrl" to imageUrl,
             "isbn" to isbn,
             "isCollected" to isCollected,
-            "librayThingId" to libraryThingId,
+            "libraryThingId" to libraryThingId,
             "openLibraryId" to openLibraryId,
             "publishDate" to publishDate?.format(DATE_FORMATTER),
             "subtitle" to subtitle,
             "title" to title
         )
         if (showAll) {
-            output["credits"] = credits.map {
+            output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.role }).map {
                 mapOf(
                     "creatorId" to it.creator.id.value,
                     "roleId" to it.role.id.value,
                 )
             }
-            output["genres"] = genres.map { it.toJson() }
+            output["genres"] = genres.sorted().map { it.toJson() }
             output["publisher"] = publisher?.toJson()
-            output["readers"] = readers.map { it.toJson() }
-            output["series"] = series.map {
+            output["readers"] = readers.sorted().map { it.toJson() }
+            output["series"] = series.sortedWith(compareBy<BookSeries> { it.series }.thenBy(nullsLast()) { it.number }).map {
                 mapOf(
                     "seriesId" to it.series.id.value,
                     "number" to it.number
                 )
             }
-            output["wishers"] = wishers.map { it.toJson() }
+            output["wishers"] = wishers.sorted().map { it.toJson() }
         } else
             output["publisherId"] = publisher?.id?.value
         return output.toSortedMap()
     }
+
+    override fun compareTo(other: Book): Int = comparator.compare(this, other)
 }
 
-class BookInput(
+data class BookInput(
     val credits: List<CreatorRoleInput> = ArrayList(),
     val description: String? = null,
     val format: Format = Format.PAPERBACK,
@@ -90,17 +97,17 @@ class BookInput(
     val wisherIds: List<Long> = ArrayList()
 )
 
-class CreatorRoleInput(
+data class CreatorRoleInput(
     val creatorId: Long,
     val roleId: Long,
 )
 
-class BookSeriesInput(
+data class BookSeriesInput(
     val seriesId: Long,
     val number: Int? = null
 )
 
-class BookImport(
+data class BookImport(
     val goodreadsId: String? = null,
     val googleBooksId: String? = null,
     val isCollected: Boolean = false,

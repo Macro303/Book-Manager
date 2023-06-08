@@ -1,4 +1,4 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Genre
 @import github.buriedincode.bookshelf.models.User
@@ -43,7 +43,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in resource.books)
+                                @for(entry in resource.books.sorted())
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -60,7 +60,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td colspan="2">@template.components.forms.select.book(label = "", options = books)</td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-book-button" onclick="addBook()" type="button">

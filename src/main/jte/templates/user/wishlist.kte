@@ -1,4 +1,4 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.User
 @param resource: User
@@ -66,7 +66,7 @@
                                 </div>
                             </div>
                         @else
-                            @for(entry in books)
+                            @for(entry in books.sorted())
                                 <div class="adjustable-column column has-text-centered">
                                     @template.components.view_box.book(entry=entry)
                                 </div>

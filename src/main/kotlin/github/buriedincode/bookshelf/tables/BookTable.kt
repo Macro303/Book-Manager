@@ -18,9 +18,9 @@ object BookTable : LongIdTable(name = "books"), Logging {
     val googleBooksCol: Column<String?> = text(name = "google_books_id").nullable()
     val imageUrlCol: Column<String?> = text(name = "image_url").nullable()
     val isCollectedCol: Column<Boolean> = bool(name = "is_collected").default(defaultValue = false)
-    val isbnCol: Column<String?> = text(name = "isbn").nullable()
+    val isbnCol: Column<String?> = text(name = "isbn").nullable().uniqueIndex()
     val libraryThingCol: Column<String?> = text(name = "library_thing_id").nullable()
-    val openLibraryCol: Column<String?> = text(name = "open_library_id").nullable()
+    val openLibraryCol: Column<String?> = text(name = "open_library_id").nullable().uniqueIndex()
     val publishDateCol: Column<LocalDate?> = date(name = "publish_date").nullable()
     val publisherCol: Column<EntityID<Long>?> = optReference(
         name = "publisher_id",
@@ -33,6 +33,7 @@ object BookTable : LongIdTable(name = "books"), Logging {
 
     init {
         Utils.query(description = "Create Book Table") {
+            uniqueIndex(titleCol, subtitleCol)
             SchemaUtils.create(this)
         }
     }

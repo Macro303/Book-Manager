@@ -7,8 +7,10 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class Publisher(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<Publisher>(PublisherTable), Logging
+class Publisher(id: EntityID<Long>) : LongEntity(id), Comparable<Publisher> {
+    companion object : LongEntityClass<Publisher>(PublisherTable), Logging {
+        val comparator = compareBy(Publisher::title)
+    }
 
     var title: String by PublisherTable.titleCol
 
@@ -20,11 +22,13 @@ class Publisher(id: EntityID<Long>) : LongEntity(id) {
             "title" to title
         )
         if (showAll)
-            output["books"] = books.map { it.toJson() }
+            output["books"] = books.sorted().map { it.toJson() }
         return output.toSortedMap()
     }
+
+    override fun compareTo(other: Publisher): Int = comparator.compare(this, other)
 }
 
-class PublisherInput(
+data class PublisherInput(
     val title: String
 )

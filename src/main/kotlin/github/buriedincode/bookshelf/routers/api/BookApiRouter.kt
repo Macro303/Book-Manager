@@ -4,16 +4,16 @@ import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.BookEntry
 import github.buriedincode.bookshelf.models.*
-import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
-import github.buriedincode.bookshelf.tables.BookSeriesTable
-import github.buriedincode.bookshelf.tables.BookTable
-import github.buriedincode.bookshelf.services.models.*
+import github.buriedincode.bookshelf.services.OpenLibrary
+import github.buriedincode.bookshelf.services.openlibrary.*
+import github.buriedincode.bookshelf.tables.*
 import io.javalin.apibuilder.*
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.or
 
 object BookApiRouter : CrudHandler, Logging {
     private fun getResource(resourceId: String): Book {
@@ -40,7 +40,7 @@ object BookApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query(description = "List Books") {
         val books = Book.all()
-        ctx.json(books.map { it.toJson() })
+        ctx.json(books.sorted().map { it.toJson() })
     }
 
     @OpenApi(
@@ -61,7 +61,7 @@ object BookApiRouter : CrudHandler, Logging {
     override fun create(ctx: Context): Unit = Utils.query(description = "Create Book") {
         val body = ctx.getBody()
         val exists = Book.find {
-            BookTable.titleCol eq body.title
+            (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
         }.firstOrNull()
         if (exists != null)
             throw ConflictResponse(message = "Book already exists")
@@ -158,7 +158,7 @@ object BookApiRouter : CrudHandler, Logging {
         val book = getResource(resourceId = resourceId)
         val body = ctx.getBody()
         val exists = Book.find {
-            BookTable.titleCol eq body.title
+            (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
         }.firstOrNull()
         if (exists != null && exists != book)
             throw ConflictResponse(message = "Book already exists")
@@ -263,29 +263,30 @@ object BookApiRouter : CrudHandler, Logging {
     )
     fun importBook(ctx: Context): Unit = Utils.query(description = "Import Book") {
         val body = ctx.getImportBody()
-        if (body.goodreadsId != null)
-            throw NotImplementedResponse(message = "Goodreads import not currently supported.")
-        if (body.googleBooksId != null)
-            throw NotImplementedResponse(message = "Google Books import not currently supported.")
-        if (body.libraryThingId != null)
-            throw NotImplementedResponse(message = "LibraryThing import not currently supported.")
 
-        val edition, work = if (body.openLibraryId != null)
-            OpenLibrary.getBook(editionId = body.openLibraryId)
-        else if (body.isbn != null)
-            OpenLibrary.lookupBook(isbn = body.isbn)
-        else
-            throw NotImplementedResponse(message = "Invalid import id.")
+        val edition: Edition
+        val work: Work
+        if (body.openLibraryId != null) {
+            val temp = OpenLibrary.getBook(editionId = body.openLibraryId)
+            edition = temp.first
+            work = temp.second
+        } else if (body.isbn != null) {
+            val temp = OpenLibrary.lookupBook(isbn = body.isbn)
+            edition = temp.first
+            work = temp.second
+        } else
+            throw NotImplementedResponse(message = "Only import via OpenLibrary edition id or Isbn currently supported.")
         val exists = if (edition.isbn == null)
             Book.find {
-                (BookTable.titleCol eq edition.title) or (BookTable.openLibraryCol eq edition.editionId)
+                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId)
             }.firstOrNull()
         else
             Book.find {
-                (BookTable.titleCol eq edition.title) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
+                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
             }.firstOrNull()
         if (exists != null)
             throw ConflictResponse(message = "This Book already exists in the database.")
+
         val book = Book.new {
             description = edition.description ?: work.description
             format = Format.PAPERBACK // TODO
@@ -300,6 +301,7 @@ object BookApiRouter : CrudHandler, Logging {
             googleBooksId = edition.identifiers.google.firstOrNull()
             imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
             isbn = edition.isbn
+            isCollected = body.isCollected
             libraryThingId = edition.identifiers.librarything.firstOrNull()
             openLibraryId = edition.editionId
             publishDate = edition.publishDate
@@ -312,8 +314,45 @@ object BookApiRouter : CrudHandler, Logging {
             }
             subtitle = edition.subtitle
             title = edition.title
+            wishers = SizedCollection(body.wisherIds.map {
+                User.findById(id = it)
+                    ?: throw NotFoundResponse(message = "User not found")
+            })
         }
-
+        work.authors.map {
+            OpenLibrary.getAuthor(authorId = it.authorId)
+        }.map {
+            Creator.find {
+                CreatorTable.nameCol eq it
+            }.firstOrNull() ?: Creator.new {
+                name = it
+            }
+        }.forEach {
+            BookCreatorRole.new {
+                this.book = book
+                creator = it
+                role = Role.find {
+                    RoleTable.titleCol eq "Author"
+                }.firstOrNull() ?: Role.new {
+                    title = "Author"
+                }
+            }
+        }
+        edition.contributors.forEach {
+            BookCreatorRole.new {
+                this.book = book
+                creator = Creator.find {
+                    CreatorTable.nameCol eq it.name
+                }.firstOrNull() ?: Creator.new {
+                    name = it.name
+                }
+                role = Role.find {
+                    RoleTable.titleCol eq it.role
+                }.firstOrNull() ?: Role.new {
+                    title = it.role
+                }
+            }
+        }
         ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
     }
 
@@ -334,7 +373,97 @@ object BookApiRouter : CrudHandler, Logging {
     fun refreshBook(ctx: Context): Unit = Utils.query(description = "Refresh Book") {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
 
-        ctx.status(HttpStatus.NOT_IMPLEMENTED).json(book.toJson(showAll = true))
+        val edition: Edition
+        val work: Work
+        if (book.openLibraryId != null) {
+            val temp = OpenLibrary.getBook(editionId = book.openLibraryId!!)
+            edition = temp.first
+            work = temp.second
+        } else if (book.isbn != null) {
+            val temp = OpenLibrary.lookupBook(isbn = book.isbn!!)
+            edition = temp.first
+            work = temp.second
+        } else
+            throw NotImplementedResponse(message = "Only refresh via OpenLibrary edition id or Isbn currently supported.")
+        val exists = if (edition.isbn == null)
+            Book.find {
+                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId)
+            }.firstOrNull()
+        else
+            Book.find {
+                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
+            }.firstOrNull()
+        if (exists != null && exists != book)
+            throw ConflictResponse(message = "This Book already exists in the database.")
+
+        book.description = edition.description ?: work.description
+        // book.format = Format.PAPERBACK
+        book.genres = SizedCollection(edition.genres.map {
+            Genre.find {
+                GenreTable.titleCol eq it
+            }.firstOrNull() ?: Genre.new {
+                title = it
+            }
+        })
+        book.goodreadsId = edition.identifiers.goodreads.firstOrNull()
+        book.googleBooksId = edition.identifiers.google.firstOrNull()
+        book.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
+        book.isbn = edition.isbn
+        book.libraryThingId = edition.identifiers.librarything.firstOrNull()
+        book.openLibraryId = edition.editionId
+        book.publishDate = edition.publishDate
+        edition.publishers.firstOrNull()?.let {
+            book.publisher = Publisher.find {
+                PublisherTable.titleCol eq it
+            }.firstOrNull() ?: Publisher.new {
+                title = it
+            }
+        }
+        book.subtitle = edition.subtitle
+        book.title = edition.title
+        work.authors.map {
+            OpenLibrary.getAuthor(authorId = it.authorId)
+        }.map {
+            Creator.find {
+                CreatorTable.nameCol eq it
+            }.firstOrNull() ?: Creator.new {
+                name = it
+            }
+        }.forEach {
+            val role = Role.find {
+                RoleTable.titleCol eq "Author"
+            }.firstOrNull() ?: Role.new {
+                title = "Author"
+            }
+            BookCreatorRole.find {
+                (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq it.id) and (BookCreatorRoleTable.roleCol eq role.id)
+            }.firstOrNull() ?: BookCreatorRole.new {
+                this.book = book
+                creator = it
+                this.role = role
+            }
+        }
+        edition.contributors.forEach {
+            val creator = Creator.find {
+                CreatorTable.nameCol eq it.name
+            }.firstOrNull() ?: Creator.new {
+                name = it.name
+            }
+            val role = Role.find {
+                RoleTable.titleCol eq it.role
+            }.firstOrNull() ?: Role.new {
+                title = it.role
+            }
+            BookCreatorRole.find {
+                (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq creator.id) and (BookCreatorRoleTable.roleCol eq role.id)
+            }.firstOrNull() ?: BookCreatorRole.new {
+                this.book = book
+                this.creator = creator
+                this.role = role
+            }
+        }
+
+        ctx.json(book.toJson(showAll = true))
     }
 
     @OpenApi(

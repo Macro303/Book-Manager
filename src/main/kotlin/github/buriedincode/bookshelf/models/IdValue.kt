@@ -1,5 +1,9 @@
 package github.buriedincode.bookshelf.models
 
-class IdValue(
+data class IdValue(
     val id: Long
-)
+) {
+    override fun toString(): String {
+        return "IdValue(id=$id)"
+    }
+}

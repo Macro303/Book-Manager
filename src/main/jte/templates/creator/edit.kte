@@ -1,4 +1,4 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role

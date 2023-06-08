@@ -1,4 +1,4 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Genre
 @param label: String = "Select Genre"
 @param name: String = "genre-id"

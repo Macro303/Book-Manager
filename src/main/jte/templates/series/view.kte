@@ -1,3 +1,4 @@
+@import github.buriedincode.bookshelf.models.BookSeries
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @param resource: Series
@@ -50,7 +51,7 @@
                                 </div>
                             </div>
                         @else
-                            @for(entry in resource.books)
+                            @for(entry in resource.books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }))
                                 <div class="adjustable-column column has-text-centered">
                                     @template.components.view_box.book(entry = entry.book, seriesNumber = entry.number)
                                 </div>

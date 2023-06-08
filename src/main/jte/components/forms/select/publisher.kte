@@ -1,4 +1,4 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Publisher
 @param label: String = "Select Publisher"
 @param name: String = "publisher-id"

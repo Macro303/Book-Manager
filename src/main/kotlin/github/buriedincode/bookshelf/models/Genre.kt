@@ -7,8 +7,10 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class Genre(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<Genre>(GenreTable), Logging
+class Genre(id: EntityID<Long>) : LongEntity(id), Comparable<Genre> {
+    companion object : LongEntityClass<Genre>(GenreTable), Logging {
+        val comparator = compareBy(Genre::title)
+    }
 
     var books by Book via BookGenreTable
     var title: String by GenreTable.titleCol
@@ -19,12 +21,14 @@ class Genre(id: EntityID<Long>) : LongEntity(id) {
             "title" to title
         )
         if (showAll)
-            output["books"] = books.map { it.toJson() }
+            output["books"] = books.sorted().map { it.toJson() }
         return output.toSortedMap()
     }
+
+    override fun compareTo(other: Genre): Int = comparator.compare(this, other)
 }
 
-class GenreInput(
+data class GenreInput(
     val bookIds: List<Long> = ArrayList(),
     val title: String
 )

@@ -35,7 +35,7 @@ object CreatorApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         val creators = Creator.all()
-        ctx.json(creators.map { it.toJson() })
+        ctx.json(creators.sorted().map { it.toJson() })
     }
 
     @OpenApi(

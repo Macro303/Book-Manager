@@ -36,7 +36,7 @@ object PublisherApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         val publishers = Publisher.all()
-        ctx.json(publishers.map { it.toJson() })
+        ctx.json(publishers.sorted().map { it.toJson() })
     }
 
     @OpenApi(

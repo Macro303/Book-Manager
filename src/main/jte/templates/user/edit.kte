@@ -1,4 +1,4 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.User
 @param resource: User
@@ -45,7 +45,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in resource.readBooks)
+                                @for(entry in resource.readBooks.sorted())
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -62,7 +62,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td colspan="2">@template.components.forms.select.book(label = "", options = readBooks)</td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = readBooks.sorted())</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-read-book-button" onclick="addReadBook()" type="button">
@@ -92,7 +92,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in resource.wishedBooks)
+                                @for(entry in resource.wishedBooks.sorted())
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>${entry.subtitle}</td>
@@ -109,7 +109,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td colspan="2">@template.components.forms.select.book(label = "", options = wishedBooks)</td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = wishedBooks.sorted())</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-wished-book-button" onclick="addWishedBook()" type="button">

@@ -1,5 +1,7 @@
-@import java.util.List
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.BookCreatorRole
+@import github.buriedincode.bookshelf.models.BookSeries
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Genre
 @import github.buriedincode.bookshelf.models.Publisher
@@ -64,7 +66,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in resource.credits)
+                                @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.role }))
                                     <tr>
                                         <td>${entry.creator.name}</td>
                                         <td>${entry.role.title}</td>
@@ -81,8 +83,8 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.creator(label = "", options = creators)</td>
-                                    <td>@template.components.forms.select.role(label = "", options = roles)</td>
+                                    <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
+                                    <td>@template.components.forms.select.role(label = "", options = roles.sorted())</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-credit-button" onclick="addCredit()" type="button">
@@ -111,7 +113,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in resource.genres)
+                                @for(entry in resource.genres.sorted())
                                     <tr>
                                         <td>${entry.title}</td>
                                         <td>
@@ -127,7 +129,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.genre(label = "", options = genres)</td>
+                                    <td>@template.components.forms.select.genre(label = "", options = genres.sorted())</td>
                                     <td>
                                         <div class="buttons is-centered">
                                             <button class="button is-success" id="add-genre-button" onclick="addGenre()" type="button">
@@ -157,7 +159,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                                @for(entry in resource.series)
+                                @for(entry in resource.series.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.series }))
                                     <tr>
                                         <td>${entry.series.title}</td>
                                         <td>${entry.number}</td>
@@ -174,7 +176,7 @@
                                     </tr>
                                 @endfor
                                 <tr>
-                                    <td>@template.components.forms.select.series(label = "", options = series)</td>
+                                    <td>@template.components.forms.select.series(label = "", options = series.sorted())</td>
                                     <td>@template.components.forms.input_number(label = "", name = "series-number")</td>
                                     <td>
                                         <div class="buttons is-centered">
@@ -391,7 +393,7 @@
                     "readerIds": ${resource.readers.map { it.id.value }.toList().toString()},
                     "series": [@for(entry in ForSupport.of(resource.series))
                         {
-                            "seriesId": ${entry.get().id.value},
+                            "seriesId": ${entry.get().series.id.value},
                             "number": ${entry.get().number ?: 0}
                         }@if(!entry.isLast),@endif
                     @endfor],

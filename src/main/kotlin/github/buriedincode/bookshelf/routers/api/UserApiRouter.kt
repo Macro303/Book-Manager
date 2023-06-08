@@ -42,7 +42,7 @@ object UserApiRouter : CrudHandler, Logging {
         val username = ctx.queryParam("username")
         if (username != null)
             users = users.filter { it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true) }
-        ctx.json(users.map { it.toJson() })
+        ctx.json(users.sorted().map { it.toJson() })
     }
 
     @OpenApi(

@@ -37,7 +37,7 @@ object SeriesApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         val series = Series.all()
-        ctx.json(series.map { it.toJson() })
+        ctx.json(series.sorted().map { it.toJson() })
     }
 
     @OpenApi(

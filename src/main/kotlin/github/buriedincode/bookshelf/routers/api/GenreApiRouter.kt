@@ -35,7 +35,7 @@ object GenreApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         val genres = Genre.all()
-        ctx.json(genres.map { it.toJson() })
+        ctx.json(genres.sorted().map { it.toJson() })
     }
 
     @OpenApi(

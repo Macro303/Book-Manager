@@ -50,7 +50,7 @@
                                 </div>
                             </div>
                         @else
-                            @for(entry in resource.books)
+                            @for(entry in resource.books.sorted())
                                 <div class="adjustable-column column has-text-centered">
                                     @template.components.view_box.book(entry = entry)
                                 </div>

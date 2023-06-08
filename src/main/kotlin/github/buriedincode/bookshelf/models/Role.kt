@@ -7,8 +7,10 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class Role(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<Role>(RoleTable), Logging
+class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
+    companion object : LongEntityClass<Role>(RoleTable), Logging {
+        val comparator = compareBy(Role::title)
+    }
 
     val credits by BookCreatorRole referrersOn BookCreatorRoleTable.roleCol
     var title: String by RoleTable.titleCol
@@ -19,7 +21,7 @@ class Role(id: EntityID<Long>) : LongEntity(id) {
             "title" to title
         )
         if (showAll)
-            output["credits"] = credits.map {
+            output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.book }.thenBy { it.creator }).map {
                 mapOf(
                     "bookId" to it.book.id.value,
                     "creatorId" to it.creator.id.value
@@ -27,14 +29,16 @@ class Role(id: EntityID<Long>) : LongEntity(id) {
             }
         return output.toSortedMap()
     }
+
+    override fun compareTo(other: Role): Int = comparator.compare(this, other)
 }
 
-class RoleInput(
+data class RoleInput(
     val credits: List<BookCreatorInput> = ArrayList(),
     val title: String
 )
 
-class BookCreatorInput(
+data class BookCreatorInput(
     val bookId: Long,
     val creatorId: Long
 )
