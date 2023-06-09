@@ -60,19 +60,19 @@
                         <table class="table is-fullwidth">
                             <thead>
                                 <tr>
-                                    <th class="is-size-5 has-text-info">Creator</th>
                                     <th class="is-size-5 has-text-info">Role</th>
+                                    <th class="is-size-5 has-text-info">Creator</th>
                                     <th class="is-size-5 has-text-info">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.role }))
+                                @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.role }.thenBy { it.creator }))
                                     <tr>
-                                        <td>${entry.creator.name}</td>
                                         <td>${entry.role.title}</td>
+                                        <td>${entry.creator.name}</td>
                                         <td>
                                             <div class="buttons is-centered">
-                                                <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-role-${entry.role.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.role.id.value})" type="button">
+                                                <button class="button is-danger" id="remove-role-${entry.role.id.value}-creator-${entry.creator.id.value}-button" onclick="removeCredit(${entry.role.id.value}, ${entry.creator.id.value})" type="button">
                                                         <span class="icon">
                                                             <i class="fa-solid fa-minus"></i>
                                                         </span>
@@ -240,9 +240,9 @@
                 @endraw
             })).finally(() => removeLoading(caller));
         }
-        function removeCredit(creatorId, roleId) {
+        function removeCredit(roleId, creatorId) {
             @raw
-                const caller = `remove-creator-${creatorId}-role-${roleId}-button`;
+                const caller = `remove-role-${roleId}-creator-${creatorId}-button`;
             @endraw
 
             addLoading(caller);

@@ -1,5 +1,6 @@
 @import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.BookCreatorRole
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.User
@@ -31,7 +32,58 @@
             <div class="box">
                 <form id="edit-creator-form" onsubmit="return false;">
                     @template.components.forms.input(label = "Name", name = "name", value = resource.name)
+                    @template.components.forms.input(label = "Image Url", name = "image-url", value=resource.imageUrl)
                 </form>
+            </div>
+            <h3 class="subtitle is-3 has-text-primary-dark">Credits</h3>
+            <div class="box">
+                <div class="table-container">
+                    <form id="add-credit-form" onsubmit="return false;">
+                        <table class="table is-fullwidth">
+                            <thead>
+                            <tr>
+                                <th class="is-size-5 has-text-info">Role</th>
+                                <th class="is-size-5 has-text-info">Book Title</th>
+                                <th class="is-size-5 has-text-info">Book Subtitle</th>
+                                <th class="is-size-5 has-text-info">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.role }.thenBy { it.book }))
+                                <tr>
+                                    <td>${entry.role.title}</td>
+                                    <td>${entry.book.title}</td>
+                                    <td>${entry.book.subtitle}</td>
+                                    <td>
+                                        <div class="buttons is-centered">
+                                            <button class="button is-danger" id="remove-role-${entry.role.id.value}-book-${entry.book.id.value}-button" onclick="removeCredit(${entry.role.id.value}, ${entry.book.id.value})" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </span>
+                                                <span>Remove</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                            <tr>
+                                <td>@template.components.forms.select.role(label = "", options = roles.sorted())</td>
+                                <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
+                                <td>
+                                    <div class="buttons is-centered">
+                                        <button class="button is-success" id="add-book-button" onclick="addCredit()" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </span>
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
             <div class="buttons is-multiline is-centered">
                 <button class="button is-success" id="save-creator-button" onclick="saveCreator()" type="button">
@@ -47,6 +99,57 @@
     <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
     <script src="/static/js/scripts.js" type="text/javascript"></script>
     <script type="text/javascript">
+        function addCredit() {
+            const caller = "add-credit-button";
+            let form = document.getElementById("add-credit-form");
+            let formData = Object.fromEntries(new FormData(form));
+            console.log(formData);
+
+            addLoading(caller);
+            fetch("/api/v0.0/creators/${resource.id.value}/credits", {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({
+                    "bookId": formData["book-id"],
+                    "roleId": formData["role-id"],
+                }),
+            }).then((response) => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
+        function removeCredit(roleId, bookId) {
+            @raw
+                const caller = `remove-role-${roleId}-book-${bookId}-button`;
+            @endraw
+
+            addLoading(caller);
+            fetch("/api/v0.0/creators/${resource.id.value}/credits", {
+                method: "DELETE",
+                headers: headers,
+                body: JSON.stringify({
+                    "bookId": bookId,
+                    "roleId": roleId,
+                }),
+            }).then((response) => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                form.reset();
+                window.location.reload();
+            }).catch((response) => response.json().then((msg) => {
+                @raw
+                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
+                @endraw
+            })).finally(() => removeLoading(caller));
+        }
         function saveCreator() {
             const caller = "save-creator-button";
             let form = document.getElementById("edit-creator-form");
@@ -64,10 +167,11 @@
                             "roleId": ${entry.get().role.id.value},
                         }@if(!entry.isLast),@endif
                     @endfor],
+                    "imageUrl": formData["image-url"] || null,
                     "name": formData["name"],
                 }),
             }).then((response) => {
-                if (!response.ok){
+                if (!response.ok) {
                     return Promise.reject(response);
                 }
                 form.reset();
