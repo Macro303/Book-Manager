@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.8.21"
     kotlin("kapt") version "1.8.21"
     application
-    id("com.github.ben-manes.versions") version "0.46.0"
+    id("com.github.ben-manes.versions") version "0.47.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.18"
     id("gg.jte.gradle") version "2.3.2"
 }
@@ -21,10 +21,10 @@ dependencies {
     runtimeOnly("org.xerial:sqlite-jdbc:3.42.0.0")
     
     // Javalin
-    val javalin_version = "5.5.0"
+    val javalin_version = "5.6.0"
     implementation("io.javalin:javalin:$javalin_version")
     implementation("io.javalin:javalin-rendering:$javalin_version")
-    val javalin_docs_version = "5.5.0-1"
+    val javalin_docs_version = "5.6.0"
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalin_docs_version")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalin_docs_version")
     implementation("io.javalin.community.openapi:javalin-redoc-plugin:$javalin_docs_version")

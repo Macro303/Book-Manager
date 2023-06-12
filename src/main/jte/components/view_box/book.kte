@@ -1,4 +1,5 @@
 @import github.buriedincode.bookshelf.models.Book
+@import java.time.LocalDate
 @param entry: Book
 @param seriesNumber: Int? = null
 
@@ -6,10 +7,18 @@
     <div class="columns is-mobile">
         <div class="column is-one-third">
             <figure class="image is-2by3">
-                @if(entry.imageUrl == null)
-                    <img alt="${entry.title} cover image" loading="lazy" src="https://via.placeholder.com/750x500" />
+                @if(entry.publishDate?.isBefore(LocalDate.now()) == true)
+                    @if(entry.imageUrl == null)
+                        <img alt="${entry.title} cover image" loading="lazy" src="https://via.placeholder.com/750x500" />
+                    @else
+                        <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl}" />
+                    @endif
                 @else
-                    <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl}" />
+                    @if(entry.imageUrl == null)
+                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="https://via.placeholder.com/750x500" />
+                    @else
+                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageUrl}" />
+                    @endif
                 @endif
             </figure>
         </div>
