@@ -1,59 +1,46 @@
 package github.buriedincode.bookshelf
 
+import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.source.properties.toProperties
+import com.uchuhimo.konf.source.toml
+import com.uchuhimo.konf.source.toml.toToml
+import com.uchuhimo.konf.source.yaml
+import com.uchuhimo.konf.source.yaml.toYaml
 import org.apache.logging.log4j.kotlin.Logging
-import java.io.IOException
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
+import kotlin.io.path.exists
 
-class Settings private constructor(
-    var databaseName: String = "bookshelf-java.sqlite",
-    var websiteHost: String = "127.0.0.1",
-    var websitePort: Int = 8003,
-    var websiteDevelopment: Boolean = true
-) {
-    fun save(): Settings {
-        try {
-            Files.newOutputStream(FILEPATH).use { stream ->
-                val properties = Properties()
-                properties.setProperty("database.name", databaseName)
-                properties.setProperty("website.host", websiteHost)
-                properties.setProperty("website.port", websitePort.toString())
-                properties.setProperty("website.development", websiteDevelopment.toString())
-                properties.store(stream, null)
-            }
-        } catch (ioe: IOException) {
-            logger.error("Unable to save settings file", ioe)
-        }
-        return this
+enum class Environment {
+    DEV,
+    PROD
+}
+
+object Settings: ConfigSpec(prefix = ""), Logging {
+    private val PROPERTIES_PATH: Path = Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.properties")
+    private val YAML_PATH: Path = Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.yaml")
+
+    val env by optional(default = Environment.DEV)
+    object Database: ConfigSpec(), Logging {
+        val name by optional(default = "bookshelf.sqlite")
+    }
+    object Website: ConfigSpec(), Logging {
+        val host by optional(default = "127.0.0.1")
+        val port by optional(default = 25711)
     }
 
-    companion object : Logging {
-        private val FILEPATH: Path = Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.properties")
-        val INSTANCE: Settings by lazy {
-            load()
-        }
+    fun loadSettings(): Config = Config{
+        addSpec(Settings)
+    }.from.properties.file(file = PROPERTIES_PATH.toFile(), optional = true)
+        .from.yaml.file(file = YAML_PATH.toFile(), optional = true)
+        .from.systemProperties()
 
-        private fun load(): Settings {
-            val settings = Settings()
-            if (!Files.exists(FILEPATH)) {
-                settings.save()
-            }
-            try {
-                Files.newInputStream(FILEPATH).use { stream ->
-                    val properties = Properties()
-                    properties.load(stream)
-                    settings.databaseName = properties.getProperty("database.name")
-                    settings.websiteHost = properties.getProperty("website.host")
-                    settings.websitePort = properties.getProperty("website.port").toInt()
-                    settings.websiteDevelopment = properties.getProperty("website.development").toBoolean()
-                    return settings.save()
-                }
-            } catch (ioe: IOException) {
-                logger.error("Unable to load settings file", ioe)
-            }
-            return settings
-        }
+    fun saveSettings(config: Config = loadSettings()) {
+        if(YAML_PATH.exists())
+            config.toYaml.toFile(file = YAML_PATH.toFile())
+        else
+            config.toProperties.toFile(PROPERTIES_PATH.toFile())
     }
 }

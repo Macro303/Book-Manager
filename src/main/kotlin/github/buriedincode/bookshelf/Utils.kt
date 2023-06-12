@@ -26,7 +26,7 @@ object Utils : Logging {
     val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    private val database: Database = Database.connect(url = "jdbc:sqlite:${DATA_ROOT}/${Settings.INSTANCE.databaseName}", driver = "org.sqlite.JDBC")
+    private val database: Database = Database.connect(url = "jdbc:sqlite:${DATA_ROOT}/${Settings.loadSettings()[Settings.Database.name]}", driver = "org.sqlite.JDBC")
 
     internal fun <T> query(description: String = "", block: () -> T): T {
         val startTime = LocalDateTime.now()

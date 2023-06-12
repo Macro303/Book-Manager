@@ -44,6 +44,9 @@ fun toHumanReadable(milliseconds: Float): String {
 
 fun main() {
     val logger = logger("github.buriedincode.bookshelf.App")
+    val settings = Settings.loadSettings()
+    logger.info(settings.toString())
+    Settings.saveSettings(settings)
     val engine = createTemplateEngine()
     // engine.setTrimControlStructures = true
     JavalinJte.init(templateEngine = engine)
@@ -80,7 +83,7 @@ fun main() {
                 version = VERSION
             }
             servers = arrayOf(OpenApiServer().apply {
-                url = "http://localhost:8003/api/v${VERSION.split(".")[0]}.${VERSION.split(".")[1]}/"
+                url = "http://${settings[Settings.Website.host]}:${settings[Settings.Website.port]}/api/v${VERSION.split(".")[0]}.${VERSION.split(".")[1]}/"
                 description = "Local DEV Server"
             })
         }))
@@ -251,11 +254,11 @@ fun main() {
         }
         throw BadRequestResponse(message = "Validation Error", details = details.mapValues { it.value.joinToString(", ") })
     }
-    app.start(Settings.INSTANCE.websiteHost, Settings.INSTANCE.websitePort)
+    app.start(settings[Settings.Website.host], settings[Settings.Website.port])
 }
 
 private fun createTemplateEngine(): TemplateEngine {
-    return if (Settings.INSTANCE.websiteDevelopment) {
+    return if (Settings.loadSettings()[Settings.env] == Environment.DEV) {
         val codeResolver = DirectoryCodeResolver(Path.of("src", "main", "jte"))
         TemplateEngine.create(codeResolver, ContentType.Html)
     } else {

@@ -16,19 +16,26 @@ repositories {
 }
 
 dependencies {
-    implementation("gg.jte:jte:2.3.2")
-    implementation("gg.jte:jte-kotlin:2.3.2")
     runtimeOnly("org.xerial:sqlite-jdbc:3.42.0.0")
+
+    // Konf
+    val konf_version = "1.1.2"
+    implementation("com.uchuhimo:konf-core:$konf_version")
+    implementation("com.uchuhimo:konf-yaml:$konf_version")
     
     // Javalin
     val javalin_version = "5.6.0"
     implementation("io.javalin:javalin:$javalin_version")
     implementation("io.javalin:javalin-rendering:$javalin_version")
-    val javalin_docs_version = "5.6.0"
-    implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalin_docs_version")
-    implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalin_docs_version")
-    implementation("io.javalin.community.openapi:javalin-redoc-plugin:$javalin_docs_version")
-    kapt("io.javalin.community.openapi:openapi-annotation-processor:$javalin_docs_version")
+    implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalin_version")
+    implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalin_version")
+    implementation("io.javalin.community.openapi:javalin-redoc-plugin:$javalin_version")
+    kapt("io.javalin.community.openapi:openapi-annotation-processor:$javalin_version")
+
+    // Jte
+    val jte_version = "2.3.2"
+    implementation("gg.jte:jte:$jte_version")
+    implementation("gg.jte:jte-kotlin:$jte_version")
 
     // Exposed
     val exposed_version = "0.41.1"
