@@ -9,7 +9,7 @@ import github.buriedincode.bookshelf.routers.*
 import github.buriedincode.bookshelf.routers.api.*
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
-import io.javalin.http.*
+import io.javalin.http.BadRequestResponse
 import io.javalin.openapi.OpenApiContact
 import io.javalin.openapi.OpenApiInfo
 import io.javalin.openapi.OpenApiLicense
