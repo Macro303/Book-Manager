@@ -1,7 +1,8 @@
 @import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.Series
 @import java.time.LocalDate
 @param entry: Book
-@param seriesNumber: Int? = null
+@param series: Pair<Series, Int?>? = null
 
 <a class="box" href="/books/${entry.id.value}">
     <div class="columns is-mobile">
@@ -29,8 +30,12 @@
                 <h5 class="title is-5 has-text-info-light">${entry.title}</h5>
                 <h6 class="subtitle is-6 has-text-info">${entry.subtitle}</h6>
             @endif
-            @if(seriesNumber != null)
-                <p>#${seriesNumber}</p>
+            @if(series != null)
+                @if(series.second != null)
+                    <p>${series.first.title} #${series.second}</p>
+                @else
+                    <p>${series.first.title}</p>
+                @endif
             @endif
         </div>
     </div>

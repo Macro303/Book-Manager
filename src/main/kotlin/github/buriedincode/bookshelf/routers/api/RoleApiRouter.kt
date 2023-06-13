@@ -133,6 +133,9 @@ object RoleApiRouter : CrudHandler, Logging {
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query(description = "Delete Role") {
         val role = getResource(resourceId = resourceId)
+        role.credits.forEach {
+            it.delete()
+        }
         role.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

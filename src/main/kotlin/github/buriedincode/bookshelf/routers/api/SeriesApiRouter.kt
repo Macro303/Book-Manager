@@ -157,6 +157,9 @@ object SeriesApiRouter : CrudHandler, Logging {
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val series = getResource(resourceId = resourceId)
+        series.books.forEach {
+            it.delete()
+        }
         series.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

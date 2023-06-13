@@ -133,6 +133,9 @@ object CreatorApiRouter : CrudHandler, Logging {
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val resource = getResource(resourceId = resourceId)
+        resource.credits.forEach {
+            it.delete()
+        }
         resource.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

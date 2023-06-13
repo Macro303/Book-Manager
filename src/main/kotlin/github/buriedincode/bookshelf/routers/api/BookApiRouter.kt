@@ -240,6 +240,12 @@ object BookApiRouter : CrudHandler, Logging {
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query(description = "Delete Book") {
         val book = getResource(resourceId = resourceId)
+        book.credits.forEach {
+            it.delete()
+        }
+        book.series.forEach {
+            it.delete()
+        }
         book.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }

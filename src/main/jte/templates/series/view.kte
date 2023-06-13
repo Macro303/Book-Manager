@@ -53,7 +53,7 @@
                         @else
                             @for(entry in resource.books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }))
                                 <div class="adjustable-column column has-text-centered">
-                                    @template.components.view_box.book(entry = entry.book, seriesNumber = entry.number)
+                                    @template.components.view_box.book(entry = entry.book, series = Pair(entry.series, entry.number))
                                 </div>
                             @endfor
                         @endif
