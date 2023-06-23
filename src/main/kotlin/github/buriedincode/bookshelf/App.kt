@@ -54,9 +54,9 @@ fun main() {
         it.http.prefer405over404 = true
         it.requestLogger.http { ctx, ms ->
             when {
-                ctx.statusCode() < 100 -> logger.error("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+                ctx.statusCode() < 100 -> logger.warn("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
                 ctx.statusCode() in (100 until 300) -> logger.info("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
-                ctx.statusCode() in (300 until 400) -> logger.debug("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+                ctx.statusCode() in (300 until 400) -> logger.info("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
                 ctx.statusCode() in (400 until 500) -> logger.warn("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
                 ctx.statusCode() >= 500 -> logger.error("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
             }
