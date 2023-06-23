@@ -24,7 +24,7 @@ dependencies {
     implementation("com.uchuhimo:konf-yaml:$konf_version")
     
     // Javalin
-    val javalin_version = "5.6.0"
+    val javalin_version = "5.6.1"
     implementation("io.javalin:javalin:$javalin_version")
     implementation("io.javalin:javalin-rendering:$javalin_version")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalin_version")
@@ -33,7 +33,7 @@ dependencies {
     kapt("io.javalin.community.openapi:openapi-annotation-processor:$javalin_version")
 
     // Jte
-    val jte_version = "2.3.2"
+    val jte_version = "3.0.0"
     implementation("gg.jte:jte:$jte_version")
     implementation("gg.jte:jte-kotlin:$jte_version")
 
