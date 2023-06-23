@@ -150,8 +150,8 @@
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
-                    "title": formData["title"],
                     "bookIds": ${resource.books.map{ it.id.value }.toList().toString()},
+                    "title": formData["title"].trim(),
                 }),
             }).then((response) => {
                 if (!response.ok){

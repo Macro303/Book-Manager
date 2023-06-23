@@ -23,18 +23,22 @@
                 <h1 class="title is-1">${resource.title}</h1>
             </header>
             <div class="buttons is-multiline is-centered">
-                <a class="button is-warning" href="/publishers/${resource.id.value}/edit">
-                    <span class="icon">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </span>
-                    <span>Edit</span>
-                </a>
-                <button class="button is-danger" id="delete-publisher-button" onclick="deletePublisher()" type="button">
-                    <span class="icon">
-                        <i class="fa-solid fa-trash"></i>
-                    </span>
-                    <span>Delete</span>
-                </button>
+                @if(session.role >= 2)
+                    <a class="button is-warning" href="/publishers/${resource.id.value}/edit">
+                        <span class="icon">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </span>
+                        <span>Edit</span>
+                    </a>
+                @endif
+                @if(session.role >= 3)
+                    <button class="button is-danger" id="delete-publisher-button" onclick="deletePublisher()" type="button">
+                        <span class="icon">
+                            <i class="fa-solid fa-trash"></i>
+                        </span>
+                        <span>Delete</span>
+                    </button>
+                @endif
             </div>
             <div class="columns">
                 <div class="column is-one-quarter-tablet is-one-fifth-fullhd">

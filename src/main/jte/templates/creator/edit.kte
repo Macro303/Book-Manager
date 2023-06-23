@@ -167,8 +167,8 @@
                             "roleId": ${entry.get().role.id.value},
                         }@if(!entry.isLast),@endif
                     @endfor],
-                    "imageUrl": formData["image-url"] || null,
-                    "name": formData["name"],
+                    "imageUrl": formData["image-url"].trim() || null,
+                    "name": formData["name"].trim(),
                 }),
             }).then((response) => {
                 if (!response.ok) {

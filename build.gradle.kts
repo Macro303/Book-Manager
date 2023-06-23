@@ -6,9 +6,8 @@ plugins {
     id("gg.jte.gradle") version "3.0.0"
 }
 
-val projectVersion by extra(project.property("project.version"))
+val projectVersion: String by project
 println("v${projectVersion}")
-
 
 group = "github.buriedincode"
 version = projectVersion

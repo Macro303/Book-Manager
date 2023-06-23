@@ -10,14 +10,14 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 
 abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityClass<T>) {
-    private val name: String = entity::class.java.declaringClass.simpleName.lowercase()
+    protected val name: String = entity::class.java.declaringClass.simpleName.lowercase()
     protected val paramName: String = "$name-id"
     protected val title: String = name.replaceFirstChar(Char::uppercaseChar)
     
     companion object: Logging
 
-    protected fun getResource(resourceId: String): T {
-        return resourceId.toLongOrNull()?.let {
+    protected fun Context.getResource(): T {
+        return this.pathParam(paramName).toLongOrNull()?.let {
             entity.findById(id = it) ?: throw NotFoundResponse(message = "$title not found")
         } ?: throw BadRequestResponse(message = "Invalid $title Id")
     }
@@ -28,26 +28,8 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
     }
 
     abstract fun listEndpoint(ctx: Context)
-
-    open fun viewEndpoint(ctx: Context): Unit = Utils.query {
-        val session = ctx.getSession()
-        if (session == null)
-            ctx.redirect("/")
-        else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
-            ctx.render(filePath = "templates/$name/view.kte", mapOf("resource" to resource, "session" to session))
-       }
-    }
-
-    open fun editEndpoint(ctx: Context): Unit = Utils.query {
-        val session = ctx.getSession()
-        if (session == null)
-            ctx.redirect("/")
-        else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
-            ctx.render(filePath = "templates/$name/edit.kte", mapOf("resource" to resource, "session" to session))
-        }
-    }
+    abstract fun viewEndpoint(ctx: Context)
+    abstract fun editEndpoint(ctx: Context)
 }
 
 object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
@@ -65,7 +47,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
                         it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
                     } ?: false)
                 }
-            ctx.render(filePath = "templates/book/list.kte", mapOf(
+            ctx.render(filePath = "templates/$name/list.kte", mapOf(
                 "resources" to resources,
                 "session" to session,
                 "selected" to mapOf(
@@ -80,7 +62,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
         if (session == null)
             ctx.redirect("/")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
             val credits = HashMap<Role, List<Creator>>()
             for (entry in resource.credits) {
                 var temp = credits.getOrDefault(entry.role, ArrayList())
@@ -88,7 +70,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
                 credits[entry.role] = temp
             }
             ctx.render(
-                filePath = "templates/book/view.kte", mapOf(
+                filePath = "templates/$name/view.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "credits" to credits
@@ -101,8 +83,10 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
         val session = ctx.getSession()
         if (session == null)
             ctx.redirect("/")
+        else if (session.role < 2)
+            ctx.redirect("/books/${ctx.pathParam(paramName)}")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
             val creators = Creator.all().toList()
             val genres = Genre.all().toList().filterNot { it in resource.genres }
             val publishers = Publisher.all().toList().filterNot { it == resource.publisher }
@@ -111,7 +95,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
             val series = Series.all().toList().filterNot { it in resource.series.map { it.series } }
             val wishers = User.all().toList().filterNot { it in resource.wishers }
             ctx.render(
-                filePath = "templates/book/edit.kte", mapOf(
+                filePath = "templates/$name/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "creators" to creators,
@@ -134,14 +118,14 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
             ctx.redirect("/")
         else {
             var resources = Creator.all().toList()
-            val name = ctx.queryParam("name")
-            if (name != null)
-                resources = resources.filter { it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true) }
-            ctx.render(filePath = "templates/creator/list.kte", mapOf(
+            val nameQuery = ctx.queryParam("name")
+            if (nameQuery != null)
+                resources = resources.filter { it.name.contains(nameQuery, ignoreCase = true) || nameQuery.contains(it.name, ignoreCase = true) }
+            ctx.render(filePath = "templates/$name/list.kte", mapOf(
                 "resources" to resources,
                 "session" to session,
                 "selected" to mapOf(
-                    "name" to name
+                    "name" to nameQuery
                 ),
             ))
         }
@@ -152,7 +136,7 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
         if (session == null)
             ctx.redirect("/")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
             val credits = HashMap<Role, List<Book>>()
             for (entry in resource.credits) {
                 var temp = credits.getOrDefault(entry.role, ArrayList())
@@ -160,7 +144,7 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
                 credits[entry.role] = temp
             }
             ctx.render(
-                filePath = "templates/creator/view.kte", mapOf(
+                filePath = "templates/$name/view.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "credits" to credits,
@@ -173,12 +157,14 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator), Logging {
         val session = ctx.getSession()
         if (session == null)
             ctx.redirect("/")
+        else if (session.role < 2)
+            ctx.redirect("/creators/${ctx.pathParam(paramName)}")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
             val books = Book.all().toList()
             val roles = Role.all().toList()
             ctx.render(
-                filePath = "templates/creator/edit.kte", mapOf(
+                filePath = "templates/$name/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "books" to books,
@@ -199,7 +185,7 @@ object GenreHtmlRouter : BaseHtmlRouter<Genre>(entity = Genre), Logging {
             val title = ctx.queryParam("title")
             if (title != null)
                 resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
-            ctx.render(filePath = "templates/genre/list.kte", mapOf(
+            ctx.render(filePath = "templates/$name/list.kte", mapOf(
                 "resources" to resources,
                 "session" to session,
                 "selected" to mapOf(
@@ -209,15 +195,27 @@ object GenreHtmlRouter : BaseHtmlRouter<Genre>(entity = Genre), Logging {
         }
     }
     
-    override fun editEndpoint(ctx: Context): Unit = Utils.query {
+    override fun viewEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
         if (session == null)
             ctx.redirect("/")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
+            ctx.render(filePath = "templates/$name/view.kte", mapOf("resource" to resource, "session" to session))
+       }
+    }
+    
+    override fun editEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else if (session.role < 2)
+            ctx.redirect("/genres/${ctx.pathParam(paramName)}")
+        else {
+            val resource = ctx.getResource()
             val books = Book.all().toList().filterNot { it in resource.books }
             ctx.render(
-                filePath = "templates/genre/edit.kte", mapOf(
+                filePath = "templates/$name/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "books" to books,
@@ -237,28 +235,7 @@ object PublisherHtmlRouter : BaseHtmlRouter<Publisher>(entity = Publisher), Logg
             val title = ctx.queryParam("title")
             if (title != null)
                 resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
-            ctx.render(filePath = "templates/publisher/list.kte", mapOf(
-                "resources" to resources,
-                "session" to session,
-                "selected" to mapOf(
-                    "title" to title
-                ),
-            ))
-        }
-    }
-}
-
-object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
-    override fun listEndpoint(ctx: Context): Unit = Utils.query {
-        val session = ctx.getSession()
-        if (session == null)
-            ctx.redirect("/")
-        else {
-            var resources = Role.all().toList()
-            val title = ctx.queryParam("title")
-            if (title != null)
-                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
-            ctx.render(filePath = "templates/role/list.kte", mapOf(
+            ctx.render(filePath = "templates/$name/list.kte", mapOf(
                 "resources" to resources,
                 "session" to session,
                 "selected" to mapOf(
@@ -273,7 +250,50 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
         if (session == null)
             ctx.redirect("/")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
+            ctx.render(filePath = "templates/$name/view.kte", mapOf("resource" to resource, "session" to session))
+       }
+    }
+    
+    override fun editEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else if (session.role < 2)
+            ctx.redirect("/publishers/${ctx.pathParam(paramName)}")
+        else {
+            val resource = ctx.getResource()
+            ctx.render(filePath = "templates/$name/edit.kte", mapOf("resource" to resource, "session" to session))
+        }
+    }
+}
+
+object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
+    override fun listEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            var resources = Role.all().toList()
+            val title = ctx.queryParam("title")
+            if (title != null)
+                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            ctx.render(filePath = "templates/$name/list.kte", mapOf(
+                "resources" to resources,
+                "session" to session,
+                "selected" to mapOf(
+                    "title" to title
+                ),
+            ))
+        }
+    }
+    
+    override fun viewEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else {
+            val resource = ctx.getResource()
             val credits = HashMap<Creator, List<Book>>()
             for (entry in resource.credits) {
                 var temp = credits.getOrDefault(entry.creator, ArrayList())
@@ -281,7 +301,7 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
                 credits[entry.creator] = temp
             }
             ctx.render(
-                filePath = "templates/role/view.kte", mapOf(
+                filePath = "templates/$name/view.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "credits" to credits,
@@ -294,12 +314,14 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
         val session = ctx.getSession()
         if (session == null)
             ctx.redirect("/")
+        else if (session.role < 2)
+            ctx.redirect("/roles/${ctx.pathParam(paramName)}")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
             val books = Book.all().toList()
             val creators = Creator.all().toList()
             ctx.render(
-                filePath = "templates/role/edit.kte", mapOf(
+                filePath = "templates/$name/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "books" to books,
@@ -320,7 +342,7 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series), Logging {
             val title = ctx.queryParam("title")
             if (title != null)
                 resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
-            ctx.render(filePath = "templates/series/list.kte", mapOf(
+            ctx.render(filePath = "templates/$name/list.kte", mapOf(
                 "resources" to resources,
                 "session" to session,
                 "selected" to mapOf(
@@ -330,15 +352,27 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series), Logging {
         }
     }
     
-    override fun editEndpoint(ctx: Context): Unit = Utils.query {
+    override fun viewEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
         if (session == null)
             ctx.redirect("/")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
+            ctx.render(filePath = "templates/$name/view.kte", mapOf("resource" to resource, "session" to session))
+       }
+    }
+    
+    override fun editEndpoint(ctx: Context): Unit = Utils.query {
+        val session = ctx.getSession()
+        if (session == null)
+            ctx.redirect("/")
+        else if (session.role < 2)
+            ctx.redirect("/series/${ctx.pathParam(paramName)}")
+        else {
+            val resource = ctx.getResource()
             val books = Book.all().toList().filterNot { it in resource.books.map { it.book } }
             ctx.render(
-                filePath = "templates/series/edit.kte", mapOf(
+                filePath = "templates/$name/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "books" to books,
@@ -358,7 +392,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
             val username = ctx.queryParam("username")
             if (username != null)
                 resources = resources.filter { it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true) }
-            ctx.render(filePath = "templates/user/list.kte", mapOf(
+            ctx.render(filePath = "templates/$name/list.kte", mapOf(
                 "resources" to resources,
                 "session" to session,
                 "selected" to mapOf(
@@ -373,7 +407,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
         if (session == null)
             ctx.redirect("/")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
             val readListSize = resource.readBooks.count()
             val stats = mapOf(
                 "wishlist" to Book.all().count { !it.isCollected && resource in it.wishers },
@@ -381,20 +415,22 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
                 "unread" to Book.all().count { it.isCollected } - readListSize,
                 "read" to readListSize
             )
-            ctx.render(filePath = "templates/user/view.kte", mapOf("resource" to resource, "session" to session, "stats" to stats))
+            ctx.render(filePath = "templates/$name/view.kte", mapOf("resource" to resource, "session" to session, "stats" to stats))
        }
     }
     
     override fun editEndpoint(ctx: Context): Unit = Utils.query {
         val session = ctx.getSession()
+        val resource = ctx.getResource()
         if (session == null)
             ctx.redirect("/")
+        else if (session != resource && (session.role < 2 || session.role < resource.role))
+            ctx.redirect("/users/${ctx.pathParam(paramName)}")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
             val readBooks = Book.all().toList().filter { it.isCollected }.filterNot { it in resource.readBooks }
             val wishedBooks = Book.all().toList().filterNot { it.isCollected }.filterNot { it in resource.wishedBooks }
             ctx.render(
-                filePath = "templates/user/edit.kte", mapOf(
+                filePath = "templates/$name/edit.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "readBooks" to readBooks,
@@ -409,10 +445,10 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
         if (session == null)
             ctx.redirect("/")
         else {
-            val resource = getResource(resourceId = ctx.pathParam(paramName))
+            val resource = ctx.getResource()
             val books = Book.all().toList().filter { !it.isCollected && (it.wishers.empty() || resource in it.wishers) }
             ctx.render(
-                filePath = "templates/user/wishlist.kte", mapOf(
+                filePath = "templates/$name/wishlist.kte", mapOf(
                     "resource" to resource,
                     "session" to session,
                     "books" to books,

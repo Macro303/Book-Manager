@@ -12,6 +12,7 @@ import github.buriedincode.bookshelf.services.openlibrary.Edition
 import github.buriedincode.bookshelf.services.openlibrary.Work
 import io.javalin.http.InternalServerErrorResponse
 import org.apache.logging.log4j.kotlin.Logging
+import org.apache.logging.log4j.Level
 import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
@@ -66,6 +67,15 @@ object OpenLibrary : Logging {
                 .GET()
                 .build()
             val response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString())
+            var level = Level.ERROR
+            when {
+                response.statusCode() < 100 -> level = Level.WARN
+                response.statusCode() < 200 -> level = Level.INFO
+                response.statusCode() < 300 -> level = Level.INFO
+                response.statusCode() < 400 -> level = Level.WARN
+                response.statusCode() < 500 -> level = Level.ERROR
+            }
+            logger.log(level, "GET: ${response.statusCode()} - ${uri}")
             if (response.statusCode() == 200) {
                 return MAPPER.readValue(response.body(), clazz)
             }

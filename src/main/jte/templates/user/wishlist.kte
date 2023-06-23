@@ -41,21 +41,23 @@
                             </div>
                         </form>
                     </div>
-                    <div class="box">
-                        <h5 class="title is-5 has-text-info-light">Import Book</h5>
-                        <form id="import-book-form" onsubmit="return false;">
-                            @template.components.forms.input(label="Isbn", name="isbn")
-                            @template.components.forms.input(label="OpenLibrary Url", "open-library-url")
-                            <div class="buttons is-centered">
-                                <button class="button is-success" id="import-book-button" onclick="importBook()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-add"></i>
-                                    </span>
-                                    <span>Import</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    @if(session == resource || (session.role >= 1 && session.role >= resource.role))
+                        <div class="box">
+                            <h5 class="title is-5 has-text-info-light">Import Book</h5>
+                            <form id="import-book-form" onsubmit="return false;">
+                                @template.components.forms.input(label="Isbn", name="isbn")
+                                @template.components.forms.input(label="OpenLibrary Url", "open-library-url")
+                                <div class="buttons is-centered">
+                                    <button class="button is-success" id="import-book-button" onclick="importBook()" type="button">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-add"></i>
+                                        </span>
+                                        <span>Import</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
                 </div>
                 <div class="column">
                     <div class="columns is-multiline is-centered">
@@ -98,9 +100,9 @@
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify({
-                    "isbn": formData["isbn"] || null,
+                    "isbn": formData["isbn"].trim() || null,
                     "isCollected": false,
-                    "openLibraryId": open_library_id || null,
+                    "openLibraryId": open_library_id.trim() || null,
                     "wisherIds": [${resource.id.value}]
                 }),
             }).then((response) => {

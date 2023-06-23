@@ -42,20 +42,22 @@
                             </div>
                         </form>
                     </div>
-                    <div class="box">
-                        <h5 class="title is-5 has-text-info-light">Create Series</h5>
-                        <form id="create-series-form" onsubmit="return false;">
-                            @template.components.forms.input(label="Title", name="title")
-                            <div class="buttons is-centered">
-                                <button class="button is-success" id="create-series-button" onclick="createSeries()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-add"></i>
-                                    </span>
-                                    <span>Create</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    @if(session.role >= 1)
+                        <div class="box">
+                            <h5 class="title is-5 has-text-info-light">Create Series</h5>
+                            <form id="create-series-form" onsubmit="return false;">
+                                @template.components.forms.input(label="Title", name="title")
+                                <div class="buttons is-centered">
+                                    <button class="button is-success" id="create-series-button" onclick="createSeries()" type="button">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-add"></i>
+                                        </span>
+                                        <span>Create</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
                 </div>
                 <div class="column">
                     <div class="columns is-multiline is-centered">
@@ -91,7 +93,7 @@
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify({
-                    "title": formData["title"]
+                    "title": formData["title"].trim(),
                 }),
             }).then((response) => {
                 if (!response.ok){

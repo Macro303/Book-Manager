@@ -163,7 +163,7 @@
                             "number": ${entry.get().number ?: 0}
                         }@if(!entry.isLast),@endif
                     @endfor],
-                    "title": formData["title"],
+                    "title": formData["title"].trim(),
                 }),
             }).then((response) => {
                 if (!response.ok){

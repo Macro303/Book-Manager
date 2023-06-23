@@ -135,33 +135,39 @@
                 @endif
             </div>
             <div class="buttons is-multiline is-centered">
-                @if(resource.isCollected)
-                    <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
+                @if(session.role >= 1)
+                    @if(resource.isCollected)
+                        <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
+                            <span class="icon">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </span>
+                            <span>Discard</span>
+                        </button>
+                    @else
+                        <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
+                            <span class="icon">
+                                <i class="fa-solid fa-box-archive"></i>
+                            </span>
+                            <span>Collect</span>
+                        </button>
+                    @endif
+                @endif
+                @if(session.role >= 2)
+                    <a class="button is-warning" href="/books/${resource.id.value}/edit">
                         <span class="icon">
-                            <i class="fa-solid fa-rotate-left"></i>
+                            <i class="fa-solid fa-pen-to-square"></i>
                         </span>
-                        <span>Discard</span>
-                    </button>
-                @else
-                    <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
+                        <span>Edit</span>
+                    </a>
+                @endif
+                @if(session.role >= 3)
+                    <button class="button is-danger" id="delete-book-button" onclick="deleteBook()" type="button">
                         <span class="icon">
-                            <i class="fa-solid fa-box-archive"></i>
+                            <i class="fa-solid fa-trash"></i>
                         </span>
-                        <span>Collect</span>
+                        <span>Delete</span>
                     </button>
                 @endif
-                <a class="button is-warning" href="/books/${resource.id.value}/edit">
-                    <span class="icon">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </span>
-                    <span>Edit</span>
-                </a>
-                <button class="button is-danger" id="delete-book-button" onclick="deleteBook()" type="button">
-                    <span class="icon">
-                        <i class="fa-solid fa-trash"></i>
-                    </span>
-                    <span>Delete</span>
-                </button>
                 @if(resource.isCollected)
                     @if(session in resource.readers)
                         <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">

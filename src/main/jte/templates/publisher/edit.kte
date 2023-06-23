@@ -52,7 +52,7 @@
                 method: "PATCH",
                 headers: headers,
                 body: JSON.stringify({
-                    "title": formData["title"]
+                    "title": formData["title"].trim(),
                 }),
             }).then((response) => {
                 if (!response.ok){

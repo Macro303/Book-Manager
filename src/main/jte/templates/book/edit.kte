@@ -378,17 +378,17 @@
                             "roleId": ${entry.get().role.id.value},
                         }@if(!entry.isLast),@endif
                     @endfor],
-                    "description": formData["description"] || null,
+                    "description": formData["description"].trim() || null,
                     "format": formData["format"] || "PAPERBACK",
                     "genreIds": ${resource.genres.map { it.id.value }.toList().toString()},
-                    "goodreadsId": formData["goodreads"] || null,
-                    "googleBooksId": formData["google-books"] || null,
-                    "imageUrl": formData["image-url"] || null,
+                    "goodreadsId": formData["goodreads"].trim() || null,
+                    "googleBooksId": formData["google-books"].trim() || null,
+                    "imageUrl": formData["image-url"].trim() || null,
                     "isCollected": ${resource.isCollected},
-                    "isbn": formData["isbn"] || null,
-                    "libraryThingId": formData["library-thing"] || null,
-                    "openLibraryId": formData["open-library"] || null,
-                    "publishDate": formData["publish-date"] || null,
+                    "isbn": formData["isbn"].trim() || null,
+                    "libraryThingId": formData["library-thing"].trim() || null,
+                    "openLibraryId": formData["open-library"].trim() || null,
+                    "publishDate": formData["publish-date"].trim() || null,
                     "publisherId": formData["publisher-id"] || null,
                     "readerIds": ${resource.readers.map { it.id.value }.toList().toString()},
                     "series": [@for(entry in ForSupport.of(resource.series))
@@ -397,8 +397,8 @@
                             "number": ${entry.get().number ?: 0}
                         }@if(!entry.isLast),@endif
                     @endfor],
-                    "subtitle": formData["subtitle"] || null,
-                    "title": formData["title"],
+                    "subtitle": formData["subtitle"].trim() || null,
+                    "title": formData["title"].trim(),
                     "wisherIds": ${resource.wishers.map { it.id.value }.toList().toString()},
                 }),
             }).then((response) => {

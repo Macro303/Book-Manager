@@ -166,7 +166,7 @@
                             "creatorId": ${entry.get().creator.id.value},
                         }@if(!entry.isLast),@endif
                     @endfor],
-                    "title": formData["title"]
+                    "title": formData["title"].trim(),
                 }),
             }).then((response) => {
                 if (!response.ok){

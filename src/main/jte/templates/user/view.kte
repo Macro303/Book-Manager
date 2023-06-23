@@ -50,18 +50,22 @@
                 </div>
             </div>
             <div class="buttons is-multiline is-centered">
-                <a class="button is-warning" href="/users/${resource.id.value}/edit">
-                    <span class="icon">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </span>
-                    <span>Edit</span>
-                </a>
-                <button class="button is-danger" id="delete-user-button" onclick="deleteUser()" type="button">
-                    <span class="icon">
-                        <i class="fa-solid fa-trash"></i>
-                    </span>
-                    <span>Delete</span>
-                </button>
+                @if(session == resource || (session.role >= 2 && session.role > resource.role))
+                    <a class="button is-warning" href="/users/${resource.id.value}/edit">
+                        <span class="icon">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </span>
+                        <span>Edit</span>
+                    </a>
+                @endif
+                @if(session == resource || (session.role >= 3 && session.role >= resource.role))
+                    <button class="button is-danger" id="delete-user-button" onclick="deleteUser()" type="button">
+                        <span class="icon">
+                            <i class="fa-solid fa-trash"></i>
+                        </span>
+                        <span>Delete</span>
+                    </button>
+                @endif
                 <a class="button is-info" href="/users/${resource.id.value}/wishlist">
                     <span class="icon">
                         <i class="fa-solid fa-star"></i>
