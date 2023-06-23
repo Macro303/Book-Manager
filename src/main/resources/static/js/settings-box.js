@@ -19,7 +19,7 @@ function adjustColumns(columnCount = null){
   let elements = document.getElementsByClassName("adjustable-column");
   for(let x=0; x < elements.length; x++){
     let columnElement = elements[x];
-    columnElement.className = "adjustable-column column has-text-centered"
+    columnElement.className = "adjustable-column column"
     if (columnCount == 5){
         columnElement.classList.add("is-one-fifth");
     }else {

@@ -40,45 +40,45 @@
                     <form id="add-credit-form" onsubmit="return false;">
                         <table class="table is-fullwidth">
                             <thead>
-                            <tr>
-                                <th class="is-size-5 has-text-info">Creator</th>
-                                <th class="is-size-5 has-text-info">Book Title</th>
-                                <th class="is-size-5 has-text-info">Book Subtitle</th>
-                                <th class="is-size-5 has-text-info">Action</th>
-                            </tr>
+                                <tr>
+                                    <th class="is-size-5 has-text-info">Creator</th>
+                                    <th class="is-size-5 has-text-info">Book Title</th>
+                                    <th class="is-size-5 has-text-info">Book Subtitle</th>
+                                    <th class="is-size-5 has-text-info">Action</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.book }))
+                                @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.book }))
+                                    <tr>
+                                        <td>${entry.creator.name}</td>
+                                        <td>${entry.book.title}</td>
+                                        <td>${entry.book.subtitle}</td>
+                                        <td>
+                                            <div class="buttons is-centered">
+                                                <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-book-${entry.book.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.book.id.value})" type="button">
+                                                    <span class="icon">
+                                                        <i class="fa-solid fa-minus"></i>
+                                                    </span>
+                                                    <span>Remove</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endfor
                                 <tr>
-                                    <td>${entry.creator.name}</td>
-                                    <td>${entry.book.title}</td>
-                                    <td>${entry.book.subtitle}</td>
+                                    <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
+                                    <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
                                     <td>
                                         <div class="buttons is-centered">
-                                            <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-book-${entry.book.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.book.id.value})" type="button">
+                                            <button class="button is-success" id="add-book-button" onclick="addCredit()" type="button">
                                                 <span class="icon">
-                                                    <i class="fa-solid fa-minus"></i>
+                                                    <i class="fa-solid fa-plus"></i>
                                                 </span>
-                                                <span>Remove</span>
+                                                <span>Add</span>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-                            @endfor
-                            <tr>
-                                <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
-                                <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
-                                <td>
-                                    <div class="buttons is-centered">
-                                        <button class="button is-success" id="add-book-button" onclick="addCredit()" type="button">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-plus"></i>
-                                            </span>
-                                            <span>Add</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
                             </tbody>
                         </table>
                     </form>

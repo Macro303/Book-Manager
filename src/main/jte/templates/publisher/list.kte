@@ -59,19 +59,17 @@
                 </div>
                 <div class="column">
                     <div class="columns is-multiline is-centered">
-                        @if(resources.isEmpty())
-                            <div class="column has-text-centered">
-                                <div class="box">
+                        @for(entry in resources.sorted())
+                            <div class="adjustable-column column">
+                                @template.components.view_box.publisher(entry=entry)
+                            </div>
+                        @else
+                            <div class="column">
+                                <div class="box has-text-centered">
                                     <h5 class="title is-5 has-text-danger-light">No Publishers found.</h5>
                                 </div>
                             </div>
-                        @else
-                            @for(entry in resources.sorted())
-                                <div class="adjustable-column column has-text-centered">
-                                    @template.components.view_box.publisher(entry=entry)
-                                </div>
-                            @endfor
-                        @endif
+                        @endfor
                     </div>
                 </div>
             </div>

@@ -1,7 +1,7 @@
 @import github.buriedincode.bookshelf.models.Genre
 @param entry: Genre
 
-<a class="box" href="/genres/${entry.id.value}">
+<a class="box has-text-centered" href="/genres/${entry.id.value}">
     <div class="block">
         <h5 class="title is-5 has-text-info-light">${entry.title}</h5>
     </div>

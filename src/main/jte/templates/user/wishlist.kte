@@ -59,19 +59,17 @@
                 </div>
                 <div class="column">
                     <div class="columns is-multiline is-centered">
-                        @if(books.isEmpty())
-                            <div class="column has-text-centered">
-                                <div class="box">
+                        @for(entry in books.sorted())
+                            <div class="adjustable-column column">
+                                @template.components.view_box.book(entry=entry)
+                            </div>
+                        @else
+                            <div class="column">
+                                <div class="box has-text-centered">
                                     <h5 class="title is-5 has-text-danger-light">No Books found.</h5>
                                 </div>
                             </div>
-                        @else
-                            @for(entry in books.sorted())
-                                <div class="adjustable-column column has-text-centered">
-                                    @template.components.view_box.book(entry=entry)
-                                </div>
-                            @endfor
-                        @endif
+                        @endfor
                     </div>
                 </div>
             </div>

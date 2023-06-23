@@ -4,7 +4,7 @@
 @param entry: Book
 @param series: Pair<Series, Int?>? = null
 
-<a class="box" href="/books/${entry.id.value}">
+<a class="box has-text-centered" href="/books/${entry.id.value}">
     <div class="columns is-mobile">
         <div class="column is-one-third">
             <figure class="image is-2by3">

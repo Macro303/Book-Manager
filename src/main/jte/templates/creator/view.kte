@@ -27,6 +27,17 @@
             <header class="block has-text-centered">
                 <h1 class="title is-1">${resource.name}</h1>
             </header>
+            <div class="columns">
+                <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
+                    <figure class="image is-256x256 is-inline-block">
+                        @if(resource.imageUrl == null)
+                            <img alt="${resource.name} profile image" class="profile-large" loading="lazy" src="/static/img/logo.png" />
+                        @else
+                            <img alt="${resource.name} profile image" class="profile-large" loading="lazy" src="${resource.imageUrl}" />
+                        @endif
+                    </figure>
+                </div>
+            </div>
             <div class="buttons is-multiline is-centered">
                 <a class="button is-warning" href="/creators/${resource.id.value}/edit">
                     <span class="icon">
@@ -47,15 +58,15 @@
                 </div>
                 <div class="column">
                     @if(credits.isEmpty())
-                        <div class="box">
-                            <h5 class="title is-5 has-text-danger-light">No Books have a Role with this Creator.</h5>
+                        <div class="box has-text-centered">
+                            <h5 class="title is-5 has-text-danger-light">No Credits found.</h5>
                         </div>
                     @else
                         @for(role in credits.keys.sorted())
                             <h3 class="subtitle is-3 has-text-primary-dark">${role.title}</h3>
                             <div class="columns is-multiline is-centered">
                                 @for(book in credits[role]!!.sorted())
-                                    <div class="adjustable-column column has-text-centered">
+                                    <div class="adjustable-column column">
                                         @template.components.view_box.book(entry = book)
                                     </div>
                                 @endfor

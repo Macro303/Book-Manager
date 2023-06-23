@@ -34,7 +34,7 @@
                 @endif
             </header>
             <div class="columns">
-                <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
+                <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
                     <figure class="image is-2by3">
                         @if(resource.imageUrl == null)
                             <img alt="${resource.title} cover image" loading="lazy" src="https://via.placeholder.com/1500x1000" />
@@ -203,14 +203,14 @@
                 <div class="column">
                     @if(credits.isEmpty())
                         <div class="box has-text-centered">
-                            <h5 class="title is-5 has-text-danger-light">No Book Creator Roles</h5>
+                            <h5 class="title is-5 has-text-danger-light">No Credits found.</h5>
                         </div>
                     @else
                         @for(role in credits.keys.sorted())
                             <h3 class="subtitle is-3 has-text-primary-dark">${role.title}</h3>
                             <div class="columns is-multiline is-centered">
                                 @for(creator in credits[role]!!.sorted())
-                                    <div class="adjustable-column column has-text-centered">
+                                    <div class="adjustable-column column">
                                         @template.components.view_box.creator(entry = creator)
                                     </div>
                                 @endfor
@@ -220,36 +220,32 @@
                     @if(resource.isCollected)
                         <h3 class="subtitle is-3 has-text-primary-dark">Readers</h3>
                         <div class="columns is-multiline is-centered">
-                            @if(resource.readers.empty())
-                                <div class="column has-text-centered">
-                                    <div class="box">
-                                        <h5 class="title is-5 has-text-danger-light">No Users have read this book.</h5>
-                                    </div>
+                            @for(entry in resource.readers.sorted())
+                                <div class="adjustable-column column">
+                                    @template.components.view_box.user(entry=entry)
                                 </div>
                             @else
-                                @for(entry in resource.readers.sorted())
-                                    <div class="adjustable-column column has-text-centered">
-                                        @template.components.view_box.user(entry=entry)
+                                <div class="column">
+                                    <div class="box has-text-centered">
+                                        <h5 class="title is-5 has-text-danger-light">No Readers found.</h5>
                                     </div>
-                                @endfor
-                            @endif
+                                </div>
+                            @endfor
                         </div>
                     @else
                         <h3 class="subtitle is-3 has-text-primary-dark">Wishers</h3>
                         <div class="columns is-multiline is-centered">
-                            @if(resource.wishers.empty())
-                                <div class="column has-text-centered">
-                                    <div class="box">
-                                        <h5 class="title is-5 has-text-danger-light">No Users have wished for this book.</h5>
-                                    </div>
+                            @for(entry in resource.wishers.sorted())
+                                <div class="adjustable-column column">
+                                    @template.components.view_box.user(entry=entry)
                                 </div>
                             @else
-                                @for(entry in resource.wishers.sorted())
-                                    <div class="adjustable-column column has-text-centered">
-                                        @template.components.view_box.user(entry=entry)
+                                <div class="column">
+                                    <div class="box has-text-centered">
+                                        <h5 class="title is-5 has-text-danger-light">No Wishers found.</h5>
                                     </div>
-                                @endfor
-                            @endif
+                                </div>
+                            @endfor
                         </div>
                     @endif
                 </div>

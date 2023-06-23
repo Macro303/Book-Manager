@@ -1,7 +1,7 @@
 @import github.buriedincode.bookshelf.models.Creator
 @param entry: Creator
 
-<a class="box" href="/creators/${entry.id.value}">
+<a class="box has-text-centered" href="/creators/${entry.id.value}">
     <div class="columns is-mobile">
         <div class="column is-one-third">
             <figure class="image is-128x128">

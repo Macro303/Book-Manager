@@ -77,9 +77,9 @@
                     <h3 class="subtitle is-3 has-text-primary-dark">Last Read Books</h3>
                     <div class="columns is-multiline is-centered">
                         @if(resource.readBooks.empty())
-                            <div class="column has-text-centered">
-                                <div class="box">
-                                    <h5 class="title is-5 has-text-danger-light">No Books have been read by this user.</h5>
+                            <div class="column">
+                                <div class="box has-text-centered">
+                                    <h5 class="title is-5 has-text-danger-light">No Books found.</h5>
                                 </div>
                             </div>
                         @else
@@ -87,7 +87,7 @@
                                 @if(entry.index >= 5)
                                     !{break}
                                 @endif
-                                <div class="adjustable-column column has-text-centered">
+                                <div class="adjustable-column column">
                                     @template.components.view_box.book(entry = entry.get())
                                 </div>
                             @endfor
