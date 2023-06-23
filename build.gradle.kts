@@ -3,8 +3,7 @@ plugins {
     kotlin("kapt") version "1.8.21"
     application
     id("com.github.ben-manes.versions") version "0.47.0"
-    id("se.patrikerdes.use-latest-versions") version "0.2.18"
-    id("gg.jte.gradle") version "2.3.2"
+    id("gg.jte.gradle") version "3.0.0"
 }
 
 group = "github.buriedincode"
@@ -24,8 +23,8 @@ dependencies {
     implementation("com.uchuhimo:konf-yaml:$konf_version")
     
     // Javalin
-    val javalin_version = "5.6.1"
-    implementation("io.javalin:javalin:$javalin_version")
+    val javalin_version = "5.6.0"
+    implementation("io.javalin:javalin:5.6.1")
     implementation("io.javalin:javalin-rendering:$javalin_version")
     implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalin_version")
     implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalin_version")
