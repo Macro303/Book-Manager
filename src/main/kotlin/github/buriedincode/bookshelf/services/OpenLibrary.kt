@@ -67,13 +67,12 @@ object OpenLibrary : Logging {
                 .GET()
                 .build()
             val response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString())
-            var level = Level.ERROR
-            when {
-                response.statusCode() < 100 -> level = Level.WARN
-                response.statusCode() < 200 -> level = Level.INFO
-                response.statusCode() < 300 -> level = Level.INFO
-                response.statusCode() < 400 -> level = Level.WARN
-                response.statusCode() < 500 -> level = Level.ERROR
+            val level = when {
+                response.statusCode() in (100 until 200) -> Level.WARN
+                response.statusCode() in (200 until 300) -> Level.INFO
+                response.statusCode() in (300 until 400) -> Level.INFO
+                response.statusCode() in (400 until 500) -> Level.WARN
+                else -> Level.ERROR
             }
             logger.log(level, "GET: ${response.statusCode()} - ${uri}")
             if (response.statusCode() == 200) {

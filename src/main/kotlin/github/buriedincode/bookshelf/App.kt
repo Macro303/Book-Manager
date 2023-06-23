@@ -23,6 +23,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.rendering.template.JavalinJte
 import io.javalin.validation.ValidationException
 import org.apache.logging.log4j.kotlin.logger
+import org.apache.logging.log4j.Level
 import java.nio.file.Path
 import java.time.Duration
 
@@ -53,13 +54,14 @@ fun main() {
     val app = Javalin.create {
         it.http.prefer405over404 = true
         it.requestLogger.http { ctx, ms ->
-            when {
-                ctx.statusCode() < 100 -> logger.warn("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
-                ctx.statusCode() in (100 until 300) -> logger.info("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
-                ctx.statusCode() in (300 until 400) -> logger.info("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
-                ctx.statusCode() in (400 until 500) -> logger.warn("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
-                ctx.statusCode() >= 500 -> logger.error("${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+            val level = when {
+                ctx.statusCode() in (100 until 200) -> Level.WARN
+                ctx.statusCode() in (200 until 300) -> Level.INFO
+                ctx.statusCode() in (300 until 400) -> Level.INFO
+                ctx.statusCode() in (400 until 500) -> Level.WARN
+                else -> Level.ERROR
             }
+            logger.log(level, "${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
         }
         it.routing.ignoreTrailingSlashes = true
         it.routing.treatMultipleSlashesAsSingleSlash = true
