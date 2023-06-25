@@ -90,7 +90,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
             val creators = Creator.all().toList()
             val genres = Genre.all().toList().filterNot { it in resource.genres }
             val publishers = Publisher.all().toList().filterNot { it == resource.publisher }
-            val readers = User.all().toList().filterNot { it in resource.readers }
+            val readers = User.all().toList().filterNot { it in resource.readers.map { it.user } }
             val roles = Role.all().toList()
             val series = Series.all().toList().filterNot { it in resource.series.map { it.series } }
             val wishers = User.all().toList().filterNot { it in resource.wishers }
@@ -427,7 +427,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
         else if (session != resource && (session.role < 2 || session.role < resource.role))
             ctx.redirect("/users/${ctx.pathParam(paramName)}")
         else {
-            val readBooks = Book.all().toList().filter { it.isCollected }.filterNot { it in resource.readBooks }
+            val readBooks = Book.all().toList().filter { it.isCollected }.filterNot { it in resource.readBooks.map { it.book } }
             val wishedBooks = Book.all().toList().filterNot { it.isCollected }.filterNot { it in resource.wishedBooks }
             ctx.render(
                 filePath = "templates/$name/edit.kte", mapOf(

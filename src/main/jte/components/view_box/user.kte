@@ -1,5 +1,6 @@
 @import github.buriedincode.bookshelf.models.User
 @param entry: User
+@param date: LocalDate? = null
 
 <a class="box has-text-centered" href="/users/${entry.id.value}">
     <div class="columns is-mobile">
@@ -13,7 +14,10 @@
             </figure>
         </div>
         <div class="column content">
-            <h5 class="title is-5 has-text-info-light">${entry.username}</h5>
+            <h5 class="title is-5 has-text-info-light is-spaced">${entry.username}</h5>
+            @if(date != null)
+                <p>${date.format(getUserDateFormatter(date=date))}</p>
+            @endif
         </div>
     </div>
 </a>

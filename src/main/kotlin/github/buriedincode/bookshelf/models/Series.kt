@@ -21,7 +21,7 @@ class Series(id: EntityID<Long>) : LongEntity(id), Comparable<Series> {
             "title" to title
         )
         if (showAll) {
-            output["books"] = books.sortedWith(compareBy<BookSeries> { it.book }.thenBy(nullsLast()) { it.number }).map {
+            output["books"] = books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }).map {
                 mapOf(
                     "bookId" to it.book.id.value,
                     "number" to it.number

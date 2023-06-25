@@ -11,7 +11,7 @@ import java.time.LocalDate
 class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
     companion object : LongEntityClass<Book>(BookTable), Logging {
         val comparator = compareBy<Book> { it.series.firstOrNull()?.series }
-            .thenBy(nullsFirst()) { it.series.firstOrNull()?.number }
+            .thenBy { it.series.firstOrNull()?.number ?: Int.MAX_VALUE }
             .thenBy(Book::title)
             .thenBy(nullsFirst(), Book::subtitle)
     }
@@ -29,7 +29,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
     var openLibraryId: String? by BookTable.openLibraryCol
     var publishDate: LocalDate? by BookTable.publishDateCol
     var publisher: Publisher? by Publisher optionalReferencedOn BookTable.publisherCol
-    var readers by User via ReadTable
+    val readers by ReadBook referrersOn ReadBookTable.bookCol
     val series by BookSeries referrersOn BookSeriesTable.bookCol
     var subtitle: String? by BookTable.subtitleCol
     var title: String by BookTable.titleCol
@@ -60,8 +60,13 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             }
             output["genres"] = genres.sorted().map { it.toJson() }
             output["publisher"] = publisher?.toJson()
-            output["readers"] = readers.sorted().map { it.toJson() }
-            output["series"] = series.sortedWith(compareBy<BookSeries> { it.series }.thenBy(nullsLast()) { it.number }).map {
+            output["readers"] = readers.sortedWith(compareBy<ReadBook> { it.user }.thenBy{ it.date }).map {
+                mapOf(
+                    "date" to it.date.format(DATE_FORMATTER),
+                    "userId" to it.user.id.value,
+                )
+            }
+            output["series"] = series.sortedWith(compareBy<BookSeries> { it.series }.thenBy{ it.number ?: Int.MAX_VALUE }).map {
                 mapOf(
                     "seriesId" to it.series.id.value,
                     "number" to it.number
@@ -77,7 +82,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
 }
 
 data class BookInput(
-    val credits: List<CreatorRoleInput> = ArrayList(),
+    val credits: List<BookCreditInput> = ArrayList(),
     val description: String? = null,
     val format: Format = Format.PAPERBACK,
     val genreIds: List<Long> = ArrayList(),
@@ -90,16 +95,21 @@ data class BookInput(
     val openLibraryId: String? = null,
     val publishDate: LocalDate? = null,
     val publisherId: Long? = null,
-    val readerIds: List<Long> = ArrayList(),
+    val readers: List<BookReaderInput> = ArrayList(),
     val series: List<BookSeriesInput> = ArrayList(),
     val subtitle: String? = null,
     val title: String,
     val wisherIds: List<Long> = ArrayList()
 )
 
-data class CreatorRoleInput(
+data class BookCreditInput(
     val creatorId: Long,
     val roleId: Long,
+)
+
+data class BookReaderInput(
+    val userId: Long,
+    val readDate: LocalDate = LocalDate.now()
 )
 
 data class BookSeriesInput(

@@ -84,15 +84,11 @@ object BookApiRouter : CrudHandler, Logging {
                 Publisher.findById(id = it)
                     ?: throw NotFoundResponse(message = "Publisher not found")
             }
-            readers = SizedCollection(body.readerIds.map {
-                User.findById(id = it)
-                    ?: throw NotFoundResponse(message = "User not found")
-            })
             subtitle = body.subtitle
             title = body.title
             wishers = SizedCollection(body.wisherIds.map {
                 User.findById(id = it)
-                    ?: throw NotFoundResponse(message = "User not found")
+                    ?: throw NotFoundResponse(message = "Wisher not found")
             })
         }
         body.credits.forEach {
@@ -104,6 +100,15 @@ object BookApiRouter : CrudHandler, Logging {
                 this.book = book
                 this.creator = creator
                 this.role = role
+            }
+        }
+        body.readers.forEach {
+            val user = User.findById(id = it.userId)
+                ?: throw NotFoundResponse(message = "Reader not found")
+            ReadBook.new {
+                this.book = book
+                this.user = user
+                date = LocalDate.now()
             }
         }
         body.series.forEach {
@@ -180,10 +185,6 @@ object BookApiRouter : CrudHandler, Logging {
             Publisher.findById(id = it)
                 ?: throw NotFoundResponse(message = "Publisher not found")
         }
-        book.readers = SizedCollection(body.wisherIds.map {
-            User.findById(id = it)
-                ?: throw NotFoundResponse(message = "User not found")
-        })
         book.subtitle = body.subtitle
         book.title = body.title
         book.wishers = SizedCollection(body.wisherIds.map {
@@ -204,6 +205,21 @@ object BookApiRouter : CrudHandler, Logging {
                     this.creator = creator
                     this.role = role
                 }
+        }
+        body.readers.forEach {
+            val user = User.findById(id = it.userId)
+                ?: throw NotFoundResponse(message = "Reader not found")
+            val readBook = ReadBoom.find {
+                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+            }.firstOrNull()
+            if (readBook == null)
+                ReadBook.new {
+                    this.book = book
+                    this.user = user
+                    date = LocalDate.now()
+                }
+            else
+                readBook.date = LocalDate.now()
         }
         body.series.forEach {
             val series = Series.findById(id = it.seriesId)
@@ -241,6 +257,9 @@ object BookApiRouter : CrudHandler, Logging {
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query(description = "Delete Book") {
         val book = getResource(resourceId = resourceId)
         book.credits.forEach {
+            it.delete()
+        }
+        book.readers.forEach {
             it.delete()
         }
         book.series.forEach {
@@ -540,11 +559,10 @@ object BookApiRouter : CrudHandler, Logging {
         val body = ctx.getIdValue()
         val user = User.findById(id = body.id)
             ?: throw NotFoundResponse(message = "User not found")
-        if (!book.readers.contains(user))
-            throw BadRequestResponse(message = "Book hasn't been read by User")
-        val temp = book.readers.toMutableList()
-        temp.remove(user)
-        book.readers = SizedCollection(temp)
+        val exists = ReadBook.find {
+            (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+        }.firstOrNull() ?: throw BadRequestResponse(message = "Book has not been read by this User.")
+        exists.delete()
 
         ctx.json(book.toJson(showAll = true))
     }
@@ -571,11 +589,16 @@ object BookApiRouter : CrudHandler, Logging {
         val body = ctx.getIdValue()
         val user = User.findById(id = body.id)
             ?: throw NotFoundResponse(message = "User not found")
-        if (user in book.readers)
+        val exists = ReadBook.find {
+            (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+        }.firstOrNull()
+        if (exists != null)
             throw BadRequestResponse(message = "Book has already been read by User")
-        val temp = book.readers.toMutableList()
-        temp.add(user)
-        book.readers = SizedCollection(temp)
+        ReadBook.new {
+            this.book = book
+            this.user = user
+            date = LocalDate.now()
+        }
 
         ctx.json(book.toJson(showAll = true))
     }

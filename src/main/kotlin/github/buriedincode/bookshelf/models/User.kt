@@ -1,8 +1,7 @@
 package github.buriedincode.bookshelf.models
 
-import github.buriedincode.bookshelf.tables.ReadTable
-import github.buriedincode.bookshelf.tables.UserTable
-import github.buriedincode.bookshelf.tables.WishedTable
+import github.buriedincode.bookshelf.tables.*
+import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -14,7 +13,7 @@ class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
     }
 
     var imageUrl: String? by UserTable.imageUrlCol
-    var readBooks by Book via ReadTable
+    val readBooks by ReadBook referrersOn ReadBookTable.userCol
     var role: Short by UserTable.roleCol
     var username: String by UserTable.usernameCol
     var wishedBooks by Book via WishedTable
@@ -27,7 +26,12 @@ class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
             "username" to username
         )
         if (showAll) {
-            output["read"] = readBooks.sorted().map { it.toJson() }
+            output["read"] = readBooks.sortedWith(compareBy<ReadBook> { it.date }.thenBy{ it.book }).map {
+                mapOf(
+                    "bookId" to it.book.id.value,
+                    "date" to it.date.format(DATE_FORMATTER)
+                )
+            }
             output["wished"] = wishedBooks.sorted().map { it.toJson() }
         }
         return output.toSortedMap()
@@ -38,8 +42,13 @@ class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
 
 data class UserInput(
     val imageUrl: String? = null,
-    val readBookIds: List<Long> = ArrayList(),
+    val readBooks: List<UserReadInput> = ArrayList(),
     val role: Short = 0,
     val username: String,
     val wishedBookIds: List<Long> = ArrayList()
+)
+
+data class UserReadInput(
+    val bookId: Long,
+    val readDate: LocalDate = LocalDate.now()
 )

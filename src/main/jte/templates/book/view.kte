@@ -226,9 +226,9 @@
                     @if(resource.isCollected)
                         <h3 class="subtitle is-3 has-text-primary-dark">Readers</h3>
                         <div class="columns is-multiline is-centered">
-                            @for(entry in resource.readers.sorted())
+                            @for(entry in resource.readers.sortedWith(compareBy<ReadBook> { it.user }.thenBy{ it.date }))
                                 <div class="adjustable-column column">
-                                    @template.components.view_box.user(entry=entry)
+                                    @template.components.view_box.user(entry=entry.user)
                                 </div>
                             @else
                                 <div class="column">
