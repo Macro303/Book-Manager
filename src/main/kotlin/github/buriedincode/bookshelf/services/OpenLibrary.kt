@@ -86,9 +86,9 @@ object OpenLibrary : Logging {
         return edition to work
     }
 
-    fun getAuthor(authorId: String): String {
+    fun getAuthor(authorId: String): Author {
         val author = sendRequest(uri = encodeURI(endpoint = "/author/$authorId.json"), clazz = Author::class.java)
             ?: throw InternalServerErrorResponse(message = "Unable to find author with id: $authorId")
-        return author.name
+        return author
     }
 }

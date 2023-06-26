@@ -344,11 +344,15 @@ object BookApiRouter : CrudHandler, Logging {
         work.authors.map {
             OpenLibrary.getAuthor(authorId = it.authorId)
         }.map {
-            Creator.find {
-                CreatorTable.nameCol eq it
+            val creator = Creator.find {
+                CreatorTable.nameCol eq it.name
             }.firstOrNull() ?: Creator.new {
-                name = it
+                name = it.name
             }
+            it.photos.firstOrNull()?.let {
+                creator.imageUrl = "https://covers.openlibrary.org/a/id/${it}-L.jpg"
+            }
+            creator
         }.forEach {
             BookCreatorRole.new {
                 this.book = book
@@ -446,11 +450,15 @@ object BookApiRouter : CrudHandler, Logging {
         work.authors.map {
             OpenLibrary.getAuthor(authorId = it.authorId)
         }.map {
-            Creator.find {
-                CreatorTable.nameCol eq it
+            val creator = Creator.find {
+                CreatorTable.nameCol eq it.name
             }.firstOrNull() ?: Creator.new {
-                name = it
+                name = it.name
             }
+            it.photos.firstOrNull()?.let {
+                creator.imageUrl = "https://covers.openlibrary.org/a/id/${it}-L.jpg"
+            }
+            creator
         }.forEach {
             val role = Role.find {
                 RoleTable.titleCol eq "Author"
