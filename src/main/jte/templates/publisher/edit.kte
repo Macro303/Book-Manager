@@ -16,56 +16,55 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
-    @template.components.navbar(session = session)
-    <main class="section">
-        <div class="container">
-            <header class="block has-text-centered">
-                <h1 class="title is-1">Edit Publisher</h1>
-            </header>
-            <div class="box">
-                <form id="edit-publisher-form" onsubmit="return false;">
-                    @template.components.forms.input(label = "Title", name = "title", value = resource.title)
-                </form>
-            </div>
-            <div class="buttons is-multiline is-centered">
-                <button class="button is-success" id="save-publisher-button" onclick="savePublisher()" type="button">
-                    <span class="icon">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                    </span>
-                    <span>Save</span>
-                </button>
-            </div>
+@template.components.navbar(session = session)
+<main class="section">
+    <div class="container">
+        <header class="block has-text-centered">
+            <h1 class="title is-1">Edit Publisher</h1>
+        </header>
+        <div class="box">
+            <form id="edit-publisher-form" onsubmit="return false;">
+                @template.components.forms.input(label = "Title", name = "title", value = resource.title)
+            </form>
         </div>
-    </main>
-    @template.components.footer()
-    <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
-    <script src="/static/js/scripts.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        function savePublisher() {
-            const caller = "save-publisher-button";
-            let form = document.getElementById("edit-publisher-form");
-            let formData = Object.fromEntries(new FormData(form));
-            console.log(formData);
+        <div class="buttons is-multiline is-centered">
+            <button class="button is-success" id="save-publisher-button" onclick="savePublisher()" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </span>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
+</main>
+@template.components.footer()
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+<script src="/static/js/scripts.js" type="text/javascript"></script>
+<script type="text/javascript">
+    function savePublisher() {
+        const caller = "save-publisher-button";
+        let form = document.getElementById("edit-publisher-form");
+        let formData = Object.fromEntries(new FormData(form));
+        console.log(formData);
 
-            addLoading(caller);
-            fetch("/api/v0.0/publishers/${resource.id.value}", {
-                method: "PATCH",
-                headers: headers,
-                body: JSON.stringify({
-                    "title": formData["title"].trim(),
-                }),
-            }).then((response) => {
-                if (!response.ok){
-                    return Promise.reject(response);
-                }
-                form.reset();
-                window.location = "/publishers/${resource.id.value}";
-            }).catch((response) => response.json().then((msg) => {
-                @raw
-                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
-                @endraw
-            })).finally(() => removeLoading(caller));
-        }
-    </script>
+        addLoading(caller);
+        fetch("/api/v0.0/publishers/${resource.id.value}", {
+            method: "PATCH",
+            headers: headers,
+            body: JSON.stringify({
+                "title": formData["title"].trim(),
+            }),
+        }).then((response) => {
+            if (!response.ok)
+                return Promise.reject(response);
+            form.reset();
+            window.location = "/publishers/${resource.id.value}";
+        }).catch((response) => response.json().then((msg) => {
+            @raw
+                alert(`${response.status} ${response.statusText} => ${msg.title}`);
+            @endraw
+        })).finally(() => removeLoading(caller));
+    }
+</script>
 </body>
 </html>

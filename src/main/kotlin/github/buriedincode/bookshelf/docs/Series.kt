@@ -12,6 +12,6 @@ class Series(
 )
 
 class SeriesBook(
-    val bookId: Long,
+    val book: BookEntry,
     val number: Int?
 )

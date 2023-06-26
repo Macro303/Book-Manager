@@ -7,11 +7,11 @@ class RoleEntry(
 
 class Role(
     val roleId: Long,
-    val credits: List<BookCreator>,
+    val credits: List<RoleCredit>,
     val title: String,
 )
 
-class BookCreator(
+class RoleCredit(
     val book: BookEntry,
     val creator: CreatorEntry
 )

@@ -14,6 +14,7 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
+import java.time.LocalDate
 
 object BookApiRouter : CrudHandler, Logging {
     private fun getResource(resourceId: String): Book {
@@ -108,7 +109,6 @@ object BookApiRouter : CrudHandler, Logging {
             ReadBook.new {
                 this.book = book
                 this.user = user
-                date = LocalDate.now()
             }
         }
         body.series.forEach {
@@ -209,17 +209,14 @@ object BookApiRouter : CrudHandler, Logging {
         body.readers.forEach {
             val user = User.findById(id = it.userId)
                 ?: throw NotFoundResponse(message = "Reader not found")
-            val readBook = ReadBoom.find {
+            val readBook = ReadBook.find {
                 (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
             }.firstOrNull()
             if (readBook == null)
                 ReadBook.new {
                     this.book = book
                     this.user = user
-                    date = LocalDate.now()
                 }
-            else
-                readBook.date = LocalDate.now()
         }
         body.series.forEach {
             val series = Series.findById(id = it.seriesId)
@@ -508,7 +505,9 @@ object BookApiRouter : CrudHandler, Logging {
     fun discardBook(ctx: Context): Unit = Utils.query(description = "Discard Book") {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
         book.isCollected = false
-        book.readers = SizedCollection()
+        book.readers.forEach {
+            it.delete()
+        }
         ctx.json(book.toJson(showAll = true))
     }
 
@@ -597,7 +596,7 @@ object BookApiRouter : CrudHandler, Logging {
         ReadBook.new {
             this.book = book
             this.user = user
-            date = LocalDate.now()
+            readDate = LocalDate.now()
         }
 
         ctx.json(book.toJson(showAll = true))
@@ -665,7 +664,7 @@ object BookApiRouter : CrudHandler, Logging {
         ctx.json(book.toJson(showAll = true))
     }
 
-    private fun Context.getCreditBody(): CreatorRoleInput = this.bodyValidator<CreatorRoleInput>()
+    private fun Context.getCreditBody(): BookCreditInput = this.bodyValidator<BookCreditInput>()
         .get()
 
     @OpenApi(
@@ -674,7 +673,7 @@ object BookApiRouter : CrudHandler, Logging {
         operationId = "addCreditToBook",
         path = "/books/{book-id}/credits",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorRoleInput::class)]),
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookCreditInput::class)]),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
@@ -712,7 +711,7 @@ object BookApiRouter : CrudHandler, Logging {
         operationId = "removeCreditFromBook",
         path = "/books/{book-id}/credits",
         pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorRoleInput::class)]),
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookCreditInput::class)]),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),

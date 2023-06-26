@@ -1,18 +1,13 @@
 package github.buriedincode.bookshelf.services
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinFeature
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import github.buriedincode.bookshelf.Utils.JSON_MAPPER
 import github.buriedincode.bookshelf.Utils.VERSION
 import github.buriedincode.bookshelf.services.openlibrary.Author
 import github.buriedincode.bookshelf.services.openlibrary.Edition
 import github.buriedincode.bookshelf.services.openlibrary.Work
 import io.javalin.http.InternalServerErrorResponse
-import org.apache.logging.log4j.kotlin.Logging
 import org.apache.logging.log4j.Level
+import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
@@ -29,20 +24,6 @@ object OpenLibrary : Logging {
     private val CLIENT: HttpClient = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .connectTimeout(Duration.ofSeconds(5))
-        .build();
-    private val MAPPER: ObjectMapper = JsonMapper.builder()
-        .addModule(JavaTimeModule())
-        .addModule(
-            KotlinModule.Builder()
-                .withReflectionCacheSize(512)
-                .configure(KotlinFeature.NullToEmptyCollection, true)
-                .configure(KotlinFeature.NullToEmptyMap, true)
-                .configure(KotlinFeature.NullIsSameAsDefault, true)
-                .configure(KotlinFeature.SingletonSupport, false)
-                .configure(KotlinFeature.StrictNullChecks, true)
-                .build()
-        )
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .build()
 
     private fun encodeURI(endpoint: String, params: MutableMap<String, String> = HashMap()): URI {
@@ -74,9 +55,9 @@ object OpenLibrary : Logging {
                 response.statusCode() in (400 until 500) -> Level.WARN
                 else -> Level.ERROR
             }
-            logger.log(level, "GET: ${response.statusCode()} - ${uri}")
+            logger.log(level, "GET: ${response.statusCode()} - $uri")
             if (response.statusCode() == 200) {
-                return MAPPER.readValue(response.body(), clazz)
+                return JSON_MAPPER.readValue(response.body(), clazz)
             }
             logger.error(response.body())
         } catch (exc: IOException) {

@@ -12,5 +12,5 @@ class ReadBook(id: EntityID<Long>) : LongEntity(id) {
 
     var book: Book by Book referencedOn ReadBookTable.bookCol
     var user: User by User referencedOn ReadBookTable.userCol
-    var date: LocalDate by ReadBookTable.dateCol
+    var readDate: LocalDate? by ReadBookTable.readDateCol
 }

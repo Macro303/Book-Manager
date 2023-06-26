@@ -6,9 +6,9 @@
         <div class="column is-one-third">
             <figure class="image is-128x128">
                 @if(entry.imageUrl == null)
-                    <img alt="${entry.name} profile image" class="profile is-rounded" loading="lazy" src="/static/img/logo.png" />
+                    <img alt="${entry.name} profile image" class="profile is-rounded" loading="lazy" src="/static/img/logo.png"/>
                 @else
-                    <img alt="${entry.name} profile image" class="profile is-rounded" loading="lazy" src="${entry.imageUrl}" />
+                    <img alt="${entry.name} profile image" class="profile is-rounded" loading="lazy" src="${entry.imageUrl}"/>
                 @endif
             </figure>
         </div>

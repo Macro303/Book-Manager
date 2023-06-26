@@ -1,5 +1,10 @@
 package github.buriedincode.bookshelf
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinFeature
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
@@ -27,6 +32,20 @@ object Utils : Logging {
     val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     private val database: Database = Database.connect(url = "jdbc:sqlite:${DATA_ROOT}/${Settings.loadSettings()[Settings.Database.name]}", driver = "org.sqlite.JDBC")
+
+    internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
+        .addModule(JavaTimeModule())
+        .addModule(
+            KotlinModule.Builder()
+                .withReflectionCacheSize(512)
+                .configure(KotlinFeature.NullToEmptyCollection, true)
+                .configure(KotlinFeature.NullToEmptyMap, true)
+                .configure(KotlinFeature.NullIsSameAsDefault, true)
+                .configure(KotlinFeature.SingletonSupport, false)
+                .configure(KotlinFeature.StrictNullChecks, true)
+                .build()
+        )
+        .build()
 
     internal fun <T> query(description: String = "", block: () -> T): T {
         val startTime = LocalDateTime.now()

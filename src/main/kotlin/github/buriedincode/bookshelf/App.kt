@@ -22,8 +22,8 @@ import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.rendering.template.JavalinJte
 import io.javalin.validation.ValidationException
-import org.apache.logging.log4j.kotlin.logger
 import org.apache.logging.log4j.Level
+import org.apache.logging.log4j.kotlin.logger
 import java.nio.file.Path
 import java.time.Duration
 

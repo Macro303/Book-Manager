@@ -10,7 +10,6 @@ import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 
 object RoleApiRouter : CrudHandler, Logging {
@@ -140,7 +139,7 @@ object RoleApiRouter : CrudHandler, Logging {
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    private fun Context.getCreditBody(): BookCreatorInput = this.bodyValidator<BookCreatorInput>()
+    private fun Context.getCreditBody(): RoleCreditInput = this.bodyValidator<RoleCreditInput>()
         .get()
 
     @OpenApi(
@@ -149,7 +148,7 @@ object RoleApiRouter : CrudHandler, Logging {
         operationId = "addCreditToRole",
         path = "/roles/{role-id}/credits",
         pathParams = [OpenApiParam(name = "role-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookCreatorInput::class)]),
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(RoleCreditInput::class)]),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Role::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
@@ -187,7 +186,7 @@ object RoleApiRouter : CrudHandler, Logging {
         operationId = "removeCreditFromRole",
         path = "/roles/{role-id}/credits",
         pathParams = [OpenApiParam(name = "role-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookCreatorInput::class)]),
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(RoleCreditInput::class)]),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Role::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),

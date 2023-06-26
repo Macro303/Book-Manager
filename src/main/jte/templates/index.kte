@@ -11,71 +11,70 @@
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body>
-    <main class="section">
-        <div class="container">
-            <header class="block has-text-centered">
-                <figure class="image is-128x128 is-inline-block">
-                    <img class="profile" loading="lazy" src="/static/img/logo.png"/>
-                </figure>
-                <h1 class="title is-1">Bookshelf</h1>
-            </header>
-            <section class="section">
-                <div class="columns is-centered">
-                    <div class="column is-one-quarter">
-                        <div class="box">
-                            <form id="sign-in-form" onsubmit="return false;">
-                                @template.components.forms.input(label="Username", name="username")
-                                <div class="buttons is-centered">
-                                    <button class="button is-primary" id="sign-in-button" type="button" onclick="signIn()">
+<main class="section">
+    <div class="container">
+        <header class="block has-text-centered">
+            <figure class="image is-128x128 is-inline-block">
+                <img class="profile" loading="lazy" src="/static/img/logo.png" alt="Bookshelf Logo"/>
+            </figure>
+            <h1 class="title is-1">Bookshelf</h1>
+        </header>
+        <section class="section">
+            <div class="columns is-centered">
+                <div class="column is-one-quarter">
+                    <div class="box">
+                        <form id="sign-in-form" onsubmit="return false;">
+                            @template.components.forms.input(label="Username", name="username")
+                            <div class="buttons is-centered">
+                                <button class="button is-primary" id="sign-in-button" type="button" onclick="signIn()">
                                         <span class="icon">
                                             <i class="fa-solid fa-right-to-bracket"></i>
                                         </span>
-                                        <span>Sign In</span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                                    <span>Sign In</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </section>
-        </div>
-    </main>
-    @template.components.footer()
-    <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
-    <script src="/static/js/scripts.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        function signIn() {
-            const caller = "sign-in-button";
-            let form = document.getElementById("sign-in-form");
-            let formData = Object.fromEntries(new FormData(form));
-            console.log(formData);
+            </div>
+        </section>
+    </div>
+</main>
+@template.components.footer()
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+<script src="/static/js/scripts.js" type="text/javascript"></script>
+<script type="text/javascript">
+    function signIn() {
+        const caller = "sign-in-button";
+        let form = document.getElementById("sign-in-form");
+        let formData = Object.fromEntries(new FormData(form));
+        console.log(formData);
 
-            addLoading(caller);
-            fetch("/api/v0.0/users?" + new URLSearchParams({
-                username: formData["username"]
-            }), {
-                method: "GET",
-                headers: headers,
-            }).then((response) => {
-                if (!response.ok){
-                    return Promise.reject(response);
-                }
-                response.json().then((data) => {
-                    if (data.length === 1) {
-                        @raw
-                            document.cookie = `session-id=${data[0].userId};path=/;max-age=${60*60*24*30};SameSite=Strict`;
-                            window.location = `/users/${data[0].userId}`;
-                        @endraw
-                    } else {
-                        alert(`404 Not Found: ["User not found."]`);
-                    }
-                });
-            }).catch((response) => response.json().then((msg) => {
-                @raw
-                    alert(`${response.status} ${response.statusText} => ${msg.title}`);
-                @endraw
-            })).finally(() => removeLoading(caller));
-        }
-    </script>
+        addLoading(caller);
+        fetch("/api/v0.0/users?" + new URLSearchParams({
+            username: formData["username"]
+        }), {
+            method: "GET",
+            headers: headers,
+        }).then((response) => {
+            if (!response.ok)
+                return Promise.reject(response);
+
+            response.json().then((data) => {
+                if (data.length === 1) {
+                    @raw
+                        document.cookie = `session-id=${data[0].userId};path=/;max-age=${60*60*24*30};SameSite=Strict`;
+                        window.location = `/users/${data[0].userId}`;
+                    @endraw
+                } else
+                    alert('404 Not Found: ["User not found."]');
+            });
+        }).catch((response) => response.json().then((msg) => {
+            @raw
+                alert(`${response.status} ${response.statusText} => ${msg.title}`);
+            @endraw
+        })).finally(() => removeLoading(caller));
+    }
+</script>
 </body>
 </html>

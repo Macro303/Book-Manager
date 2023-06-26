@@ -54,22 +54,22 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
         if (showAll) {
             output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.role }).map {
                 mapOf(
-                    "creatorId" to it.creator.id.value,
-                    "roleId" to it.role.id.value,
+                    "creator" to it.creator.toJson(),
+                    "role" to it.role.toJson(),
                 )
             }
             output["genres"] = genres.sorted().map { it.toJson() }
             output["publisher"] = publisher?.toJson()
-            output["readers"] = readers.sortedWith(compareBy<ReadBook> { it.user }.thenBy{ it.date }).map {
+            output["readers"] = readers.sortedWith(compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) }).map {
                 mapOf(
-                    "date" to it.date.format(DATE_FORMATTER),
-                    "userId" to it.user.id.value,
+                    "readDate" to it.readDate?.format(DATE_FORMATTER),
+                    "user" to it.user.toJson(),
                 )
             }
-            output["series"] = series.sortedWith(compareBy<BookSeries> { it.series }.thenBy{ it.number ?: Int.MAX_VALUE }).map {
+            output["series"] = series.sortedWith(compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE }).map {
                 mapOf(
-                    "seriesId" to it.series.id.value,
-                    "number" to it.number
+                    "number" to it.number,
+                    "series" to it.series.toJson(),
                 )
             }
             output["wishers"] = wishers.sorted().map { it.toJson() }
@@ -109,7 +109,7 @@ data class BookCreditInput(
 
 data class BookReaderInput(
     val userId: Long,
-    val readDate: LocalDate = LocalDate.now()
+    val readDate: LocalDate? = LocalDate.now()
 )
 
 data class BookSeriesInput(

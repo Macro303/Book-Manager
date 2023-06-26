@@ -25,8 +25,8 @@ class Creator(id: EntityID<Long>) : LongEntity(id), Comparable<Creator> {
         if (showAll) {
             output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.book }.thenBy { it.role }).map {
                 mapOf(
-                    "bookId" to it.book.id.value,
-                    "roleId" to it.role.id.value
+                    "book" to it.book.toJson(),
+                    "role" to it.role.toJson()
                 )
             }
         }
@@ -37,12 +37,12 @@ class Creator(id: EntityID<Long>) : LongEntity(id), Comparable<Creator> {
 }
 
 data class CreatorInput(
-    val credits: List<BookRoleInput> = ArrayList(),
+    val credits: List<CreatorCreditInput> = ArrayList(),
     val imageUrl: String? = null,
     val name: String
 )
 
-data class BookRoleInput(
+data class CreatorCreditInput(
     val bookId: Long,
     val roleId: Long
 )

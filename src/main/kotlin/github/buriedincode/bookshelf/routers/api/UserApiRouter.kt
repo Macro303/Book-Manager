@@ -4,12 +4,15 @@ import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.UserEntry
 import github.buriedincode.bookshelf.models.*
+import github.buriedincode.bookshelf.tables.ReadBookTable
 import github.buriedincode.bookshelf.tables.UserTable
 import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.*
 import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
+import org.jetbrains.exposed.sql.and
+import java.time.LocalDate
 
 object UserApiRouter : CrudHandler, Logging {
     private fun getResource(resourceId: String): User {
@@ -82,7 +85,6 @@ object UserApiRouter : CrudHandler, Logging {
             ReadBook.new {
                 this.book = book
                 this.user = user
-                date = LocalDate.now()
             }
         }
 
@@ -136,17 +138,14 @@ object UserApiRouter : CrudHandler, Logging {
         body.readBooks.forEach {
             val book = Book.findById(id = it.bookId)
                 ?: throw NotFoundResponse(message = "Book not found")
-            val readBook = ReadBoom.find {
+            val readBook = ReadBook.find {
                 (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
             }.firstOrNull()
             if (readBook == null)
                 ReadBook.new {
                     this.book = book
                     this.user = user
-                    date = LocalDate.now()
                 }
-            else
-                readBook.date = LocalDate.now()
         }
         user.role = body.role
         user.username = body.username
@@ -174,6 +173,9 @@ object UserApiRouter : CrudHandler, Logging {
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val user = getResource(resourceId = resourceId)
+        user.readBooks.forEach {
+            it.delete()
+        }
         user.delete()
         ctx.status(HttpStatus.NO_CONTENT)
     }
@@ -211,7 +213,6 @@ object UserApiRouter : CrudHandler, Logging {
         ReadBook.new {
             this.book = book
             this.user = user
-            date = LocalDate.now()
         }
 
         ctx.json(user.toJson(showAll = true))

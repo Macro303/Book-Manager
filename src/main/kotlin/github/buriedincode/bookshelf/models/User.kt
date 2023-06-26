@@ -1,11 +1,12 @@
 package github.buriedincode.bookshelf.models
 
-import github.buriedincode.bookshelf.tables.*
 import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+import github.buriedincode.bookshelf.tables.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import java.time.LocalDate
 
 class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
     companion object : LongEntityClass<User>(UserTable), Logging {
@@ -26,10 +27,10 @@ class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
             "username" to username
         )
         if (showAll) {
-            output["read"] = readBooks.sortedWith(compareBy<ReadBook> { it.date }.thenBy{ it.book }).map {
+            output["read"] = readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.thenBy { it.book }).map {
                 mapOf(
-                    "bookId" to it.book.id.value,
-                    "date" to it.date.format(DATE_FORMATTER)
+                    "book" to it.book.toJson(),
+                    "readDate" to it.readDate?.format(DATE_FORMATTER)
                 )
             }
             output["wished"] = wishedBooks.sorted().map { it.toJson() }
@@ -50,5 +51,5 @@ data class UserInput(
 
 data class UserReadInput(
     val bookId: Long,
-    val readDate: LocalDate = LocalDate.now()
+    val readDate: LocalDate? = LocalDate.now()
 )

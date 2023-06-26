@@ -107,7 +107,7 @@ object GenreApiRouter : CrudHandler, Logging {
         tags = ["Genre"]
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
-        val genre = getResource(resourceId=resourceId)
+        val genre = getResource(resourceId = resourceId)
         val body = ctx.getBody()
         val exists = Genre.find {
             GenreTable.titleCol eq body.title

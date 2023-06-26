@@ -22,7 +22,7 @@ class BookEntry(
 
 class Book(
     val bookId: Long,
-    val credits: List<CreatorRole>,
+    val credits: List<BookCredit>,
     val description: String?,
     val format: Format,
     val genres: List<GenreEntry>,
@@ -35,19 +35,24 @@ class Book(
     val openLibraryId: String?,
     val publishDate: LocalDate?,
     val publisher: PublisherEntry,
-    val readers: List<UserEntry>,
+    val readers: List<Reader>,
     val series: List<BookSeries>,
     val subtitle: String?,
     val title: String,
     val wishers: List<UserEntry>,
 )
 
-class CreatorRole(
-    val creatorId: Long,
-    val roleId: Long,
+class BookCredit(
+    val creator: CreatorEntry,
+    val role: RoleEntry,
+)
+
+class Reader(
+    val readDate: LocalDate,
+    val user: UserEntry,
 )
 
 class BookSeries(
-    val seriesId: Long,
     val number: Int?,
+    val series: SeriesEntry,
 )

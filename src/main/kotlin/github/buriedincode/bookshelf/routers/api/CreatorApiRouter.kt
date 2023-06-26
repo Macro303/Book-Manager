@@ -140,7 +140,7 @@ object CreatorApiRouter : CrudHandler, Logging {
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    private fun Context.getCreditBody(): BookRoleInput = this.bodyValidator<BookRoleInput>()
+    private fun Context.getCreditBody(): CreatorCreditInput = this.bodyValidator<CreatorCreditInput>()
         .get()
 
     @OpenApi(
@@ -149,7 +149,7 @@ object CreatorApiRouter : CrudHandler, Logging {
         operationId = "addCreditToCreator",
         path = "/creators/{creator-id}/credits",
         pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookRoleInput::class)]),
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorCreditInput::class)]),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
@@ -187,7 +187,7 @@ object CreatorApiRouter : CrudHandler, Logging {
         operationId = "removeCreditFromCreator",
         path = "/creators/{creator-id}/credits",
         pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookRoleInput::class)]),
+        requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorCreditInput::class)]),
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),

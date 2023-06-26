@@ -23,8 +23,8 @@ class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
         if (showAll)
             output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.book }.thenBy { it.creator }).map {
                 mapOf(
-                    "bookId" to it.book.id.value,
-                    "creatorId" to it.creator.id.value
+                    "book" to it.book.toJson(),
+                    "creator" to it.creator.toJson()
                 )
             }
         return output.toSortedMap()
@@ -34,11 +34,11 @@ class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
 }
 
 data class RoleInput(
-    val credits: List<BookCreatorInput> = ArrayList(),
+    val credits: List<RoleCreditInput> = ArrayList(),
     val title: String
 )
 
-data class BookCreatorInput(
+data class RoleCreditInput(
     val bookId: Long,
     val creatorId: Long
 )

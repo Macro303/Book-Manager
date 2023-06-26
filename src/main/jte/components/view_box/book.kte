@@ -1,8 +1,10 @@
+@import java.time.LocalDate
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Series
-@import java.time.LocalDate
+@import github.buriedincode.bookshelf.Utils.getUserDateFormatter
 @param entry: Book
 @param series: Pair<Series, Int?>? = null
+@param readDate: LocalDate? = null
 
 <a class="box has-text-centered" href="/books/${entry.id.value}">
     <div class="columns is-mobile">
@@ -10,15 +12,15 @@
             <figure class="image is-2by3">
                 @if(entry.publishDate?.isBefore(LocalDate.now()) == true)
                     @if(entry.imageUrl == null)
-                        <img alt="${entry.title} cover image" loading="lazy" src="https://via.placeholder.com/750x500" />
+                        <img alt="${entry.title} cover image" loading="lazy" src="https://via.placeholder.com/750x500"/>
                     @else
-                        <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl}" />
+                        <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl}"/>
                     @endif
                 @else
                     @if(entry.imageUrl == null)
-                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="https://via.placeholder.com/750x500" />
+                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="https://via.placeholder.com/750x500"/>
                     @else
-                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageUrl}" />
+                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageUrl}"/>
                     @endif
                 @endif
             </figure>
@@ -36,6 +38,9 @@
                 @else
                     <p>${series.first.title}</p>
                 @endif
+            @endif
+            @if(readDate != null)
+                <p>${readDate.format(getUserDateFormatter(date=readDate))}</p>
             @endif
         </div>
     </div>

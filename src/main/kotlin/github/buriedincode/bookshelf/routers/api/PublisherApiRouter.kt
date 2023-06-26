@@ -3,7 +3,6 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.PublisherEntry
-import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.PublisherInput
 import github.buriedincode.bookshelf.tables.PublisherTable
