@@ -7,7 +7,12 @@ plugins {
 }
 
 val projectVersion: String by project
-println("v${projectVersion}")
+println("Bookshelf v${projectVersion}")
+val javaVersion: String = System.getProperty("java.version")
+val jvmVersion: String = System.getProperty("java.vm.version")
+val javaVendor: String = System.getProperty("java.vendor")
+val osArch: String = System.getProperty("os.arch")
+println("Java: ${javaVersion}, JVM: $jvmVersion (${javaVendor}), Arch: $osArch")
 
 group = "github.buriedincode"
 version = projectVersion
