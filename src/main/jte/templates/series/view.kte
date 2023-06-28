@@ -1,6 +1,4 @@
-@import github.buriedincode.bookshelf.models.BookSeries
-@import github.buriedincode.bookshelf.models.Series
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @param resource: Series
 @param session: User
 
@@ -73,9 +71,9 @@
         const caller = "delete-series-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/series/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/series/${resource.id.value}", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);

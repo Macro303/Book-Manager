@@ -1,14 +1,6 @@
-@import kotlin.collections.List
 @import java.time.LocalDate
-@import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.BookCreatorRole
-@import github.buriedincode.bookshelf.models.BookSeries
-@import github.buriedincode.bookshelf.models.Creator
-@import github.buriedincode.bookshelf.models.Genre
-@import github.buriedincode.bookshelf.models.Publisher
-@import github.buriedincode.bookshelf.models.Role
-@import github.buriedincode.bookshelf.models.Series
-@import github.buriedincode.bookshelf.models.User
+@import kotlin.collections.List
+@import github.buriedincode.bookshelf.models.*
 @import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 @import gg.jte.support.ForSupport
 @param resource: Book
@@ -223,9 +215,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/credits", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/credits", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "creatorId": formData["creator-id"],
                 "roleId": formData["role-id"],
@@ -247,9 +239,9 @@
         @endraw
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/credits", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/credits", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "creatorId": creatorId,
                 "roleId": roleId,
@@ -271,9 +263,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/genres", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/genres", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": formData["genre-id"],
             }),
@@ -294,9 +286,9 @@
         @endraw
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/genres", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/genres", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": genreId,
             }),
@@ -317,9 +309,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/series", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/series", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "seriesId": formData["series-id"],
                 "number": formData["series-number"] || null,
@@ -341,9 +333,9 @@
         @endraw
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/series", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/series", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": seriesId,
             }),
@@ -364,9 +356,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "credits": [@for(entry in ForSupport.of(resource.credits))
                     {
@@ -421,9 +413,9 @@
         const caller = "refresh-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/refresh", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/refresh", {
             method: "PUT",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);

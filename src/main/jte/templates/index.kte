@@ -51,15 +51,14 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/users?" + new URLSearchParams({
+        fetch(BASE_ENDPOINT + "/users?" + new URLSearchParams({
             username: formData["username"]
         }), {
             method: "GET",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);
-
             response.json().then((data) => {
                 if (data.length === 1) {
                     @raw

@@ -1,7 +1,6 @@
-@import kotlin.collections.Map
 @import java.time.LocalDate
-@import github.buriedincode.bookshelf.models.ReadBook
-@import github.buriedincode.bookshelf.models.User
+@import kotlin.collections.Map
+@import github.buriedincode.bookshelf.models.*
 @import gg.jte.support.ForSupport
 @param resource: User
 @param session: User
@@ -112,9 +111,9 @@
         const caller = "delete-user-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/users/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/users/${resource.id.value}", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);

@@ -1,13 +1,9 @@
+@import java.time.LocalDate
 @import kotlin.collections.List
 @import kotlin.collections.Map
-@import java.time.LocalDate
-@import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.BookSeries
-@import github.buriedincode.bookshelf.models.Creator
-@import github.buriedincode.bookshelf.models.ReadBook
-@import github.buriedincode.bookshelf.models.Role
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @import github.buriedincode.bookshelf.Utils.getUserDateFormatter
+@import github.buriedincode.bookshelf.Utils.displayName
 @import gg.jte.support.ForSupport
 @param resource: Book
 @param session: User
@@ -51,7 +47,7 @@
                         <p><strong class="subtitle is-size-5 has-text-info">Description:</strong> ${resource.description}</p>
                     </div>
                     <div class="block">
-                        <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${resource.format.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }}</p>
+                        <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${resource.format.displayName()}</p>
                     </div>
                     <div class="block">
                         <p><strong class="subtitle is-size-5 has-text-info">Genres:</strong> @for(entry in ForSupport.of(resource.genres.sorted()))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
@@ -269,9 +265,9 @@
         const caller = "delete-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);
@@ -286,9 +282,9 @@
         const caller = "collect-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/collect", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/collect", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);
@@ -303,9 +299,9 @@
         const caller = "discard-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/collect", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/collect", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);
@@ -320,9 +316,9 @@
         const caller = "read-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/read", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/read", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": ${session.id.value},
             }),
@@ -340,9 +336,9 @@
         const caller = "unread-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/read", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/read", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": ${session.id.value},
             }),
@@ -360,9 +356,9 @@
         const caller = "wish-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/wish", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/wish", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": ${session.id.value},
             }),
@@ -380,9 +376,9 @@
         const caller = "unwish-book-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/books/${resource.id.value}/wish", {
+        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/wish", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": ${session.id.value},
             }),

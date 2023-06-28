@@ -1,9 +1,5 @@
 @import kotlin.collections.List
-@import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.BookCreatorRole
-@import github.buriedincode.bookshelf.models.Creator
-@import github.buriedincode.bookshelf.models.Role
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @import gg.jte.support.ForSupport
 @param resource: Role
 @param session: User
@@ -105,9 +101,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/roles/${resource.id.value}/credits", {
+        fetch(BASE_ENDPOINT + "/roles/${resource.id.value}/credits", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "bookId": formData["book-id"],
                 "creatorId": formData["creator-id"],
@@ -129,9 +125,9 @@
         @endraw
 
         addLoading(caller);
-        fetch("/api/v0.0/roles/${resource.id.value}/credits", {
+        fetch(BASE_ENDPOINT + "/roles/${resource.id.value}/credits", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "bookId": bookId,
                 "creatorId": creatorId,
@@ -154,9 +150,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/roles/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/roles/${resource.id.value}", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "credits": [@for(entry in ForSupport.of(resource.credits))
                     {

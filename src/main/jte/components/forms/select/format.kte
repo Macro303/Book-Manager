@@ -1,19 +1,24 @@
 @import github.buriedincode.bookshelf.models.Format
+@import github.buriedincode.bookshelf.Utils.displayName
 @param label: String = "Select Format"
 @param name: String = "format"
-@param selected: Format
+@param selected: Format? = null
 
 <div class="field">
     <label class="label has-text-info">${label}</label>
     <div class="control is-expanded">
         <div class="select is-fullwidth">
             <select name="${name}">
+                @if(selected == null)
+                    <option disabled selected value="">Select Format</option>
+                @else
+                    <option selected value="${selected.name}">${selected.displayName()}</option>
+                @endif
                 @for(entry in Format.values())
-                    @if(selected == entry)
-                        <option selected value="${entry.name}">${entry.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }}</option>
-                    @else
-                        <option value="${entry.name}">${entry.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }}</option>
+                    @if(entry == selected)
+                        !{continue}
                     @endif
+                    <option value="${entry.name}">${entry.displayName()}</option>
                 @endfor
             </select>
         </div>

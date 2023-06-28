@@ -1,9 +1,9 @@
 @import kotlin.collections.List
-@import github.buriedincode.bookshelf.models.Series
-@param label: String = "Select Series"
-@param name: String = "series-id"
-@param options: List<Series>
-@param selected: Series? = null
+@import github.buriedincode.bookshelf.models.User
+@param label: String = "Select User"
+@param name: String = "user-id"
+@param options: List<User>
+@param selected: User? = null
 
 <div class="field">
     <label class="label has-text-info">${label}</label>
@@ -11,15 +11,15 @@
         <div class="select is-fullwidth">
             <select name="${name}">
                 @if(selected == null)
-                    <option disabled selected value="">Select Series</option>
+                    <option disabled selected value="">Select User</option>
                 @else
-                    <option selected value="${selected.id.value}">${selected.title}</option>
+                    <option selected value="${selected.id.value}">${selected.username}</option>
                 @endif
                 @for(entry in options)
                     @if(entry == selected)
                         !{continue}
                     @endif
-                    <option value="${entry.id.value}">${entry.title}</option>
+                    <option value="${entry.id.value}">${entry.username}</option>
                 @endfor
             </select>
         </div>

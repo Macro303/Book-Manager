@@ -1,7 +1,6 @@
 @import kotlin.collections.List
 @import kotlin.collections.Map
-@import github.buriedincode.bookshelf.models.Publisher
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @param resources: List<Publisher>
 @param session: User
 @param selected: Map<String, String>
@@ -89,9 +88,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/publishers", {
+        fetch(BASE_ENDPOINT + "/publishers", {
             method: "POST",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "title": formData["title"].trim(),
             }),

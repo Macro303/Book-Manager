@@ -94,4 +94,7 @@ object Utils : Logging {
             else -> "th"
         }
     }
+    
+    inline fun <reified T: Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
+    inline fun <reified T: Enum<T>> T.displayName(): String = this.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }
 }

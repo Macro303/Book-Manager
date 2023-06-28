@@ -1,9 +1,6 @@
 @import kotlin.collections.List
 @import kotlin.collections.Map
-@import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.Creator
-@import github.buriedincode.bookshelf.models.Role
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @param resource: Creator
 @param session: User
 @param credits: Map<Role, List<Book>>
@@ -90,9 +87,9 @@
         const caller = "delete-creator-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/creators/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/creators/${resource.id.value}", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);

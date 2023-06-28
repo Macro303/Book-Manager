@@ -1,6 +1,7 @@
 package github.buriedincode.bookshelf.routers
 
 import github.buriedincode.bookshelf.Utils
+import github.buriedincode.bookshelf.Utils.asEnumOrNull
 import github.buriedincode.bookshelf.models.*
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
@@ -39,6 +40,39 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
             ctx.redirect("/")
         else {
             var resources = Book.all().toList().filter { it.isCollected }
+            val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+                Creator.findById(id = it)
+            }
+            if (creator != null)
+                resources = resources.filter {
+                    creator in it.credits.map { it.creator }
+                }
+            val format: Format? = ctx.queryParam("format")?.asEnumOrNull<Format>()
+            if (format != null)
+                resources = resources.filter {
+                    it.format == format
+                }
+            val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let {
+                Genre.findById(id = it)
+            }
+            if (genre != null)
+                resources = resources.filter {
+                    genre in it.genres
+                }
+            val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+                Publisher.findById(id = it)
+            }
+            if (publisher != null)
+                resources = resources.filter {
+                    it.publisher == publisher
+                }
+            val series = ctx.queryParam("series-id")?.toLongOrNull()?.let {
+                Series.findById(id = it)
+            }
+            if (series != null)
+                resources = resources.filter {
+                    series in it.series.map { it.series }
+                }
             val title = ctx.queryParam("title")
             if (title != null)
                 resources = resources.filter {
@@ -51,9 +85,16 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
                 filePath = "templates/$name/list.kte", mapOf(
                     "resources" to resources,
                     "session" to session,
-                    "selected" to mapOf(
-                        "title" to title
-                    ),
+                    "creators" to Creator.all().toList(),
+                    "selectedCreator" to creator,
+                    "selectedFormat" to format,
+                    "genres" to Genre.all().toList(),
+                    "selectedGenre" to genre,
+                    "publishers" to Publisher.all().toList(),
+                    "selectedPublisher" to publisher,
+                    "series" to Series.all().toList(),
+                    "selectedSeries" to series,
+                    "selectedTitle" to title,
                 )
             )
         }

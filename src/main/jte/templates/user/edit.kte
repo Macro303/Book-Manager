@@ -1,8 +1,6 @@
-@import kotlin.collections.List
 @import java.time.LocalDate
-@import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.ReadBook
-@import github.buriedincode.bookshelf.models.User
+@import kotlin.collections.List
+@import github.buriedincode.bookshelf.models.*
 @import github.buriedincode.bookshelf.Utils.getUserDateFormatter
 @import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 @import gg.jte.support.ForSupport
@@ -155,9 +153,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/users/${resource.id.value}/read", {
+        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/read", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": formData["book-id"],
             }),
@@ -178,9 +176,9 @@
         @endraw
 
         addLoading(caller);
-        fetch("/api/v0.0/users/${resource.id.value}/read", {
+        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/read", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": bookId,
             }),
@@ -201,9 +199,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/users/${resource.id.value}/wished", {
+        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/wished", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": formData["book-id"],
             }),
@@ -224,9 +222,9 @@
         @endraw
 
         addLoading(caller);
-        fetch("/api/v0.0/users/${resource.id.value}/wished", {
+        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/wished", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "id": bookId,
             }),
@@ -247,9 +245,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/users/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/users/${resource.id.value}", {
             method: "PATCH",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "imageUrl": formData["image-url"].trim() || null,
                 "readBooks": [@for(entry in ForSupport.of(resource.readBooks))

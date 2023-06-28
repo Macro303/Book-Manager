@@ -1,7 +1,6 @@
 @import kotlin.collections.List
 @import kotlin.collections.Map
-@import github.buriedincode.bookshelf.models.Genre
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @param resources: List<Genre>
 @param session: User
 @param selected: Map<String, String>
@@ -89,9 +88,9 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch("/api/v0.0/genres", {
+        fetch(BASE_ENDPOINT + "/genres", {
             method: "POST",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "title": formData["title"].trim(),
             }),

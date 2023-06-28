@@ -1,7 +1,8 @@
-const headers = {
+const HEADERS = {
     "Accept": "application/json; charset=UTF-8",
     "Content-Type": "application/json; charset=UTF-8",
 };
+const BASE_ENDPOINT = "/api/v0.0"
 
 function ready(fn) {
     if (document.readyState !== 'loading') {
@@ -67,13 +68,8 @@ function signOut() {
     removeLoading(caller);
 }
 
-function updateReadText() {
-    let readCheckbox = document.getElementById("read-checkbox");
-    let readLabel = document.getElementById("read-label");
-    if (readCheckbox.checked)
-        readLabel.childNodes[2].nodeValue = " Showing Unread";
-    else
-        readLabel.childNodes[2].nodeValue = " Showing Read";
+function resetForm(page) {
+    window.location = page;
 }
 
 ready(setTheme());

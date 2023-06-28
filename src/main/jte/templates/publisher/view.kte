@@ -1,5 +1,4 @@
-@import github.buriedincode.bookshelf.models.Publisher
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @param resource: Publisher
 @param session: User
 
@@ -72,9 +71,9 @@
         const caller = "delete-publisher-button";
 
         addLoading(caller);
-        fetch("/api/v0.0/publishers/${resource.id.value}", {
+        fetch(BASE_ENDPOINT + "/publishers/${resource.id.value}", {
             method: "DELETE",
-            headers: headers,
+            headers: HEADERS,
         }).then((response) => {
             if (!response.ok)
                 return Promise.reject(response);

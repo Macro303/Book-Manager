@@ -1,6 +1,5 @@
 @import kotlin.collections.List
-@import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.*
 @param resource: User
 @param session: User
 @param books: List<Book>
@@ -96,9 +95,9 @@
         }
 
         addLoading(caller);
-        fetch("/api/v0.0/books/import", {
+        fetch(BASE_ENDPOINT + "/books/import", {
             method: "POST",
-            headers: headers,
+            headers: HEADERS,
             body: JSON.stringify({
                 "isbn": formData["isbn"].trim() || null,
                 "isCollected": false,

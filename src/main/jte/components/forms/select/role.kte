@@ -16,6 +16,9 @@
                     <option selected value="${selected.id.value}">${selected.title}</option>
                 @endif
                 @for(entry in options)
+                    @if(entry == selected)
+                        !{continue}
+                    @endif
                     <option value="${entry.id.value}">${entry.title}</option>
                 @endfor
             </select>

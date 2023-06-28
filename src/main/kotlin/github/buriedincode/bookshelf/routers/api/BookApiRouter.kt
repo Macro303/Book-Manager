@@ -41,6 +41,47 @@ object BookApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query(description = "List Books") {
         val books = Book.all()
+        val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+                Creator.findById(id = it)
+            }
+            if (creator != null)
+                books = books.filter {
+                    creator in it.credits.map { it.creator }
+                }
+            val format: Format? = ctx.queryParam("format")?.asEnumOrNull<Format>()
+            if (format != null)
+                books = books.filter {
+                    it.format == format
+                }
+            val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let {
+                Genre.findById(id = it)
+            }
+            if (genre != null)
+                books = books.filter {
+                    genre in it.genres
+                }
+            val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+                Publisher.findById(id = it)
+            }
+            if (publisher != null)
+                books = books.filter {
+                    it.publisher == publisher
+                }
+            val series = ctx.queryParam("series-id")?.toLongOrNull()?.let {
+                Series.findById(id = it)
+            }
+            if (series != null)
+                books = books.filter {
+                    series in it.series.map { it.series }
+                }
+            val title = ctx.queryParam("title")
+            if (title != null)
+                books = books.filter {
+                    (it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)) ||
+                            (it.subtitle?.let {
+                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                            } ?: false)
+                }
         ctx.json(books.sorted().map { it.toJson() })
     }
 
