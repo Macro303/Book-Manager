@@ -1,6 +1,6 @@
 @import github.buriedincode.bookshelf.models.Format
 @param label: String = "Select Format"
-@param name: String = "format-id"
+@param name: String = "format"
 @param selected: Format
 
 <div class="field">

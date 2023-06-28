@@ -103,7 +103,7 @@
             body: JSON.stringify({
                 "isbn": formData["isbn"].trim() || null,
                 "isCollected": true,
-                "openLibraryId": open_library_id.trim() || null,
+                "openLibraryId": open_library_id,
             }),
         }).then((response) => {
             if (!response.ok)

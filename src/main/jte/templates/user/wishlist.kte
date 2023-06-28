@@ -102,7 +102,7 @@
             body: JSON.stringify({
                 "isbn": formData["isbn"].trim() || null,
                 "isCollected": false,
-                "openLibraryId": open_library_id.trim() || null,
+                "openLibraryId": open_library_id,
                 "wisherIds": [${resource.id.value}]
             }),
         }).then((response) => {

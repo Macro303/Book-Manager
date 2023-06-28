@@ -58,7 +58,7 @@
                                 <td>${entry.book.subtitle}</td>
                                 <td>
                                     <div class="buttons is-centered">
-                                        <button class="button is-danger" id="remove-read-book-${entry.id.value}-button" onclick="removeReadBook(${entry.id.value})" type="button">
+                                        <button class="button is-danger" id="remove-read-book-${entry.book.id.value}-button" onclick="removeReadBook(${entry.book.id.value})" type="button">
                                             <span class="icon">
                                                 <i class="fa-solid fa-minus"></i>
                                             </span>

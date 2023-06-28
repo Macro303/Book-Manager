@@ -44,7 +44,7 @@
                 @template.components.forms.select.format(label = "Format", selected = resource.format)
                 @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl)
                 @template.components.forms.input(label = "Publish Date", name = "publish-date", value = resource.publishDate?.toString())
-                @template.components.forms.select.publisher(label = "Publisher", options = publishers, selected = resource.publisher)
+                @template.components.forms.select.publisher(label = "Publisher", options = publishers.sorted(), selected = resource.publisher)
                 @template.components.forms.input(label = "Subtitle", name = "subtitle", value = resource.subtitle)
                 @template.components.forms.input(label = "Title", name = "title", value = resource.title)
                 <h4 class="subtitle is-4 has-text-centered has-text-info-light">Identifiers</h4>
@@ -85,8 +85,8 @@
                             </tr>
                         @endfor
                         <tr>
-                            <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
                             <td>@template.components.forms.select.role(label = "", options = roles.sorted())</td>
+                            <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
                             <td>
                                 <div class="buttons is-centered">
                                     <button class="button is-success" id="add-credit-button" onclick="addCredit()" type="button">
@@ -388,7 +388,11 @@
                 "publisherId": formData["publisher-id"] || null,
                 "readers": [@for(entry in ForSupport.of(resource.readers))
                     {
-                        "readDate": "${entry.get().readDate?.format(DATE_FORMATTER) ?: "null"}",
+                        @if(entry.get().readDate != null)
+                            "readDate": "${entry.get().readDate!!.format(DATE_FORMATTER)}",
+                        @else
+                            "readDate": null,
+                        @endif
                         "userId": ${entry.get().user.id.value},
                     }@if(!entry.isLast),@endif
                 @endfor],
