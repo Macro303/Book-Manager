@@ -215,7 +215,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/credits", {
+        fetch("/api/books/${resource.id.value}/credits", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -239,7 +239,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/credits", {
+        fetch("/api/books/${resource.id.value}/credits", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -263,7 +263,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/genres", {
+        fetch("/api/books/${resource.id.value}/genres", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -286,7 +286,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/genres", {
+        fetch("/api/books/${resource.id.value}/genres", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -309,7 +309,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/series", {
+        fetch("/api/books/${resource.id.value}/series", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -333,7 +333,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/series", {
+        fetch("/api/books/${resource.id.value}/series", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -356,7 +356,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}", {
+        fetch("/api/books/${resource.id.value}", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -413,7 +413,7 @@
         const caller = "refresh-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/refresh", {
+        fetch("/api/books/${resource.id.value}/refresh", {
             method: "PUT",
             headers: HEADERS,
         }).then((response) => {

@@ -88,7 +88,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/series", {
+        fetch("/api/series", {
             method: "POST",
             headers: HEADERS,
             body: JSON.stringify({

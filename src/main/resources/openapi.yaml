@@ -1,0 +1,3781 @@
+openapi: "3.0.3"
+info:
+  title: "Bookshelf API"
+  description: "Lots and lots of well described and documented API."
+  contact:
+    name: "Jonah Jackson"
+    url: "https://github.com/Buried-In-Code/Bookshelf"
+    email: "BuriedInCode@tuta.io"
+  license:
+    name: "MIT License"
+    identifier: "MIT"
+  version: "0.0.0"
+servers:
+  - url: "http://10.1.5.7:25710/api"
+    description: "Prod Server"
+  - url: "http://127.0.0.1:25710/api"
+    description: "Dev Server"
+security: []
+paths:
+  "/books":
+    get:
+      tags:
+        - "Book"
+      summary: "List all Books"
+      operationId: "listBooks"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                type: "array"
+                items:
+                  "$ref": "#/components/schemas/BookEntry"
+    post:
+      tags:
+        - "Book"
+      summary: "Create Book"
+      operationId: "createBook"
+      parameters: []
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/BookInput"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Conflict"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}":
+    get:
+      tags:
+        - "Book"
+      summary: "Get Book by Id"
+      operationId: "getBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+        - "Book"
+      summary: "Update Book"
+      operationId: "updateBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/BookInput"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Conflict"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - "Book"
+      summary: "Delete Book"
+      operationId: "deleteBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "204":
+          description: "No Content"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/import":
+    post:
+      tags:
+        - "Book"
+      summary: "Import Book"
+      operationId: "importBook"
+      parameters: []
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/BookImport"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}/refresh":
+    put:
+      tags:
+        - "Book"
+      summary: "Refresh Book"
+      operationId: "refreshBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}/wish":
+    patch:
+      tags:
+        - "Book"
+      summary: "Wish Book"
+      operationId: "wishBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IdValue"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - "Book"
+      summary: "Unwish Book"
+      operationId: "unwishBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IdValue"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}/collect":
+    patch:
+      tags:
+        - "Book"
+      summary: "Collect Book"
+      operationId: "collectBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - "Book"
+      summary: "Discard Book"
+      operationId: "discardBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}/read":
+    patch:
+      tags:
+        - "Book"
+      summary: "Read Book"
+      operationId: "readBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IdValue"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - "Book"
+      summary: "Unread Book"
+      operationId: "unreadBook"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IdValue"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}/credits":
+    post:
+      tags:
+        - "Book"
+      summary: "Add Credit to Book"
+      operationId: "addBookCredit"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/BookCreditInput"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Conflict"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - "Book"
+      summary: "Remove Credit from Book"
+      operationId: "removeBookCredit"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/BookCreditInput"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}/genres":
+    post:
+      tags:
+        - "Book"
+      summary: "Add Genre to Book"
+      operationId: "addBookGenre"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IdValue"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Conflict"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - "Book"
+      summary: "Remove Genre from Book"
+      operationId: "removeBookGenre"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IdValue"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/books/{book-id}/series":
+    post:
+      tags:
+        - "Book"
+      summary: "Add Series to Book"
+      operationId: "addBookSeries"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/BookSeriesInput"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Conflict"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - "Book"
+      summary: "Remove Series from Book"
+      operationId: "removeBookSeries"
+      parameters:
+        - in: "path"
+          name: "book-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IdValue"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Book"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/creators":
+    get:
+      tags:
+        - "Creator"
+      summary: "List all Creators"
+      operationId: "listCreators"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                type: "array"
+                items:
+                  "$ref": "#/components/schemas/CreatorEntry"
+    post:
+      tags:
+        - "Creator"
+      summary: "Create Creator"
+      operationId: "createCreator"
+      parameters: []
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/CreatorInput"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Creator"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Not Found"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Conflict"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/creators/{creator-id}":
+    get:
+      tags:
+        - "Creator"
+      summary: "Get Creator by Id"
+      operationId: "getCreator"
+      parameters:
+        - in: "path"
+          name: "creator-id"
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Creator"
+        "400":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Bad Request"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    put: {}
+    delete: {}
+components:
+  schemas:
+    ErrorResponse:
+      type: "object"
+      additionalProperties: false
+      properties:
+        title:
+          type: "string"
+        status:
+          type: "integer"
+          format: "int32"
+        type:
+          type: "string"
+        details:
+          type: "object"
+          additionalProperties:
+            type: "string"
+      required:
+        - title
+        - status
+        - type
+    BookEntry:
+      type: "object"
+      additionalProperties: false
+      properties:
+        bookId:
+          type: "integer"
+          format: "int64"
+        description:
+          type: "string"
+        format:
+          "$ref": "#/components/schemas/Format"
+        goodreadsId:
+          type: "string"
+        googleBooksId:
+          type: "string"
+        imageUrl:
+          type: "string"
+        isbn:
+          type: "string"
+        isCollected:
+          type: "boolean"
+        libraryThingId:
+          type: "string"
+        openLibraryId:
+          type: "string"
+        publishDate:
+          type: "string"
+          format: "date"
+        publisherId:
+          type: "integer"
+          format: "int64"
+        subtitle:
+          type: "string"
+        title:
+          type: "string"
+      required:
+        - bookId
+        - format
+        - isCollected
+        - publisherId
+        - title
+    Format:
+      type: "string"
+      enum:
+        - BOX_SET
+        - GRAPHIC_NOVEL
+        - HARDBACK
+        - MANGA
+        - PAPERBACK
+        - TRADEPAPERBACK
+    BookInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        credits:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/BookCreditInput"
+        description:
+          type: "string"
+        format:
+          "$ref": "#/components/schemas/Format"
+        genreIds:
+          type: "array"
+          items:
+            type: "integer"
+            format: "int64"
+        goodreadsId:
+          type: "string"
+        googleBooksId:
+          type: "string"
+        imageUrl:
+          type: "string"
+        isbn:
+          type: "string"
+        isCollected:
+          type: "boolean"
+        libraryThingId:
+          type: "string"
+        openLibraryId:
+          type: "string"
+        publishDate:
+          type: "string"
+          format: "date"
+        publisherId:
+          type: "integer"
+          format: "int64"
+        readers:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/BookReaderInput"
+        series:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/BookSeriesInput"
+        subtitle:
+          type: "string"
+        title:
+          type: "string"
+        wisherIds:
+          type: "array"
+          items:
+            type: "integer"
+            format: "int64"
+      required:
+        - title
+    BookCreditInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        creatorId:
+          type: "integer"
+          format: "int64"
+        roleId:
+          type: "integer"
+          format: "int64"
+      required:
+        - creatorId
+        - roleId
+    BookReaderInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        readDate:
+          type: "string"
+          format: "date"
+        userId:
+          type: "integer"
+          format: "int64"
+      required:
+        - userId
+    BookSeriesInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        number:
+          type: "integer"
+          format: "int32"
+        seriesId:
+          type: "integer"
+          format: "int64"
+      required:
+        - seriesId
+    Book:
+      type: "object"
+      additionalProperties: false
+      properties:
+        bookId:
+          type: "integer"
+          format: "int64"
+        credits:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/BookCredit"
+        description:
+          type: "string"
+        format:
+          "$ref": "#/components/schemas/Format"
+        genres:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/GenreEntry"
+        goodreadsId:
+          type: "string"
+        googleBooksId:
+          type: "string"
+        imageUrl:
+          type: "string"
+        isbn:
+          type: "string"
+        isCollected:
+          type: "boolean"
+        libraryThingId:
+          type: "string"
+        openLibraryId:
+          type: "string"
+        publishDate:
+          type: "string"
+          format: "date"
+        publisher:
+          "$ref": "#/components/schemas/PublisherEntry"
+        readers:
+          type: "array"
+          items:
+            "$ref": "Reader"
+        series:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/BookSeries"
+        subtitle:
+          type: "string"
+        title:
+          type: "string"
+        wishers:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/UserEntry"
+      required:
+        - credits
+        - format
+        - genres
+        - isCollected
+        - readers
+        - series
+        - title
+        - wishers
+    BookCredit:
+      type: "object"
+      additionalProperties: false
+      properties:
+        creator:
+          "$ref": "#/components/schema/CreatorEntry"
+        role:
+          "$ref": "#/components/schema/RoleEntry"
+      required:
+        - creator
+        - role
+    BookSeries:
+      type: "object"
+      additionalProperties: false
+      properties:
+        number:
+          type: "integer"
+          format: "int32"
+        series:
+          "$ref": "#/components/schema/SeriesEntry"
+      required:
+        - series
+    Reader:
+      type: "object"
+      additionalProperties: false
+      properties:
+        readDate:
+          type: "string"
+          format: "date"
+        user:
+          "$ref": "#/components/schema/UserEntry"
+      required:
+        - user
+    CreatorEntry:
+      type: "object"
+      additionalProperties: false
+      properties: {}
+    GenreEntry:
+      type: "object"
+      additionalProperties: false
+      properties: {}
+    PublisherEntry:
+      type: "object"
+      additionalProperties: false
+      properties: {}
+    RoleEntry:
+      type: "object"
+      additionalProperties: false
+      properties: {}
+    UserEntry:
+      type: "object"
+      additionalProperties: false
+      properties: {}
+
+  {
+  "paths" : {
+    "/creators/{creator-id}" : {
+      "patch" : {
+        "tags" : [ "Creator" ],
+        "summary" : "Update Creator",
+        "description" : "Update Creator",
+        "operationId" : "updateCreator",
+        "parameters" : [ {
+          "name" : "creator-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreatorInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Creator"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Creator" ],
+        "summary" : "Delete Creator",
+        "description" : "Delete Creator",
+        "operationId" : "deleteCreator",
+        "parameters" : [ {
+          "name" : "creator-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/creators/{creator-id}/credits" : {
+      "patch" : {
+        "tags" : [ "Creator" ],
+        "summary" : "Add Book and Role to Creator",
+        "description" : "Add Book and Role to Creator",
+        "operationId" : "addCreditToCreator",
+        "parameters" : [ {
+          "name" : "creator-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreatorCreditInput"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Creator"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Creator" ],
+        "summary" : "Remove Book and Role from Creator",
+        "description" : "Remove Book and Role from Creator",
+        "operationId" : "removeCreditFromCreator",
+        "parameters" : [ {
+          "name" : "creator-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreatorCreditInput"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Creator"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/genres" : {
+      "get" : {
+        "tags" : [ "Genre" ],
+        "summary" : "List all Genres",
+        "description" : "List all Genres",
+        "operationId" : "listGenres",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GenreEntry"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "post" : {
+        "tags" : [ "Genre" ],
+        "summary" : "Create Genre",
+        "description" : "Create Genre",
+        "operationId" : "createGenre",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GenreInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Genre"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/genres/{genre-id}" : {
+      "get" : {
+        "tags" : [ "Genre" ],
+        "summary" : "Get Genre by id",
+        "description" : "Get Genre by id",
+        "operationId" : "getGenre",
+        "parameters" : [ {
+          "name" : "genre-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Genre"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "patch" : {
+        "tags" : [ "Genre" ],
+        "summary" : "Update Genre",
+        "description" : "Update Genre",
+        "operationId" : "updateGenre",
+        "parameters" : [ {
+          "name" : "genre-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GenreInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Genre"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Genre" ],
+        "summary" : "Delete Genre",
+        "description" : "Delete Genre",
+        "operationId" : "deleteGenre",
+        "parameters" : [ {
+          "name" : "genre-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/genres/{genre-id}/books" : {
+      "patch" : {
+        "tags" : [ "Genre" ],
+        "summary" : "Add Book to Genre",
+        "description" : "Add Book to Genre",
+        "operationId" : "addBookToGenre",
+        "parameters" : [ {
+          "name" : "genre-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdValue"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Genre"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Genre" ],
+        "summary" : "Remove Book from Genre",
+        "description" : "Remove Book from Genre",
+        "operationId" : "removeBookFromGenre",
+        "parameters" : [ {
+          "name" : "genre-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdValue"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Genre"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/publishers" : {
+      "get" : {
+        "tags" : [ "Publisher" ],
+        "summary" : "List all Publishers",
+        "description" : "List all Publishers",
+        "operationId" : "listPublishers",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PublisherEntry"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "post" : {
+        "tags" : [ "Publisher" ],
+        "summary" : "Create Publisher",
+        "description" : "Create Publisher",
+        "operationId" : "createPublisher",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PublisherInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Publisher"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/publishers/{publisher-id}" : {
+      "get" : {
+        "tags" : [ "Publisher" ],
+        "summary" : "Get Publisher by id",
+        "description" : "Get Publisher by id",
+        "operationId" : "getPublisher",
+        "parameters" : [ {
+          "name" : "publisher-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Publisher"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "patch" : {
+        "tags" : [ "Publisher" ],
+        "summary" : "Update Publisher",
+        "description" : "Update Publisher",
+        "operationId" : "updatePublisher",
+        "parameters" : [ {
+          "name" : "publisher-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PublisherInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Publisher"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Publisher" ],
+        "summary" : "Delete Publisher",
+        "description" : "Delete Publisher",
+        "operationId" : "deletePublisher",
+        "parameters" : [ {
+          "name" : "publisher-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/roles" : {
+      "get" : {
+        "tags" : [ "Role" ],
+        "summary" : "List all Roles",
+        "description" : "List all Roles",
+        "operationId" : "listRoles",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RoleEntry"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "post" : {
+        "tags" : [ "Role" ],
+        "summary" : "Create Role",
+        "description" : "Create Role",
+        "operationId" : "createRole",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RoleInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/roles/{role-id}" : {
+      "get" : {
+        "tags" : [ "Role" ],
+        "summary" : "Get Role by id",
+        "description" : "Get Role by id",
+        "operationId" : "getRole",
+        "parameters" : [ {
+          "name" : "role-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "patch" : {
+        "tags" : [ "Role" ],
+        "summary" : "Update Role",
+        "description" : "Update Role",
+        "operationId" : "updateRole",
+        "parameters" : [ {
+          "name" : "role-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RoleInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Role" ],
+        "summary" : "Delete Role",
+        "description" : "Delete Role",
+        "operationId" : "deleteRole",
+        "parameters" : [ {
+          "name" : "role-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/roles/{role-id}/credits" : {
+      "patch" : {
+        "tags" : [ "Role" ],
+        "summary" : "Add Book and Creator to Role",
+        "description" : "Add Book and Creator to Role",
+        "operationId" : "addCreditToRole",
+        "parameters" : [ {
+          "name" : "role-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RoleCreditInput"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Role" ],
+        "summary" : "Remove Book and Creator from Role",
+        "description" : "Remove Book and Creator from Role",
+        "operationId" : "removeCreditFromRole",
+        "parameters" : [ {
+          "name" : "role-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RoleCreditInput"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/series" : {
+      "get" : {
+        "tags" : [ "Series" ],
+        "summary" : "List all Series",
+        "description" : "List all Series",
+        "operationId" : "listSeries",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SeriesEntry"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "post" : {
+        "tags" : [ "Series" ],
+        "summary" : "Create Series",
+        "description" : "Create Series",
+        "operationId" : "createSeries",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SeriesInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Series"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/series/{series-id}" : {
+      "get" : {
+        "tags" : [ "Series" ],
+        "summary" : "Get Series by id",
+        "description" : "Get Series by id",
+        "operationId" : "getSeries",
+        "parameters" : [ {
+          "name" : "series-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Series"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "patch" : {
+        "tags" : [ "Series" ],
+        "summary" : "Update Series",
+        "description" : "Update Series",
+        "operationId" : "updateSeries",
+        "parameters" : [ {
+          "name" : "series-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SeriesInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Series"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Series" ],
+        "summary" : "Delete Series",
+        "description" : "Delete Series",
+        "operationId" : "deleteSeries",
+        "parameters" : [ {
+          "name" : "series-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/series/{series-id}/books" : {
+      "patch" : {
+        "tags" : [ "Series" ],
+        "summary" : "Add Book to Series",
+        "description" : "Add Book to Series",
+        "operationId" : "addBookToSeries",
+        "parameters" : [ {
+          "name" : "series-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SeriesBookInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Series"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "Series" ],
+        "summary" : "Remove Book from Series",
+        "description" : "Remove Book from Series",
+        "operationId" : "removeBookFromSeries",
+        "parameters" : [ {
+          "name" : "series-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdValue"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Series"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/users" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "List all Users",
+        "description" : "List all Users",
+        "operationId" : "listUsers",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "query",
+          "required" : false,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserEntry"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Create User",
+        "description" : "Create User",
+        "operationId" : "createUser",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/users/{user-id}" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get User by id",
+        "description" : "Get User by id",
+        "operationId" : "getUser",
+        "parameters" : [ {
+          "name" : "user-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "patch" : {
+        "tags" : [ "User" ],
+        "summary" : "Update User",
+        "description" : "Update User",
+        "operationId" : "updateUser",
+        "parameters" : [ {
+          "name" : "user-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "User" ],
+        "summary" : "Delete User",
+        "description" : "Delete User",
+        "operationId" : "deleteUser",
+        "parameters" : [ {
+          "name" : "user-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/users/{user-id}/read" : {
+      "patch" : {
+        "tags" : [ "User" ],
+        "summary" : "Add Book to User read list",
+        "description" : "Add Book to User read list",
+        "operationId" : "addBookToUserReadList",
+        "parameters" : [ {
+          "name" : "user-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdValue"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "User" ],
+        "summary" : "Remove Book from User read list",
+        "description" : "Remove Book from User read list",
+        "operationId" : "removeBookFromUserReadList",
+        "parameters" : [ {
+          "name" : "user-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdValue"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    },
+    "/users/{user-id}/wished" : {
+      "patch" : {
+        "tags" : [ "User" ],
+        "summary" : "Add Book to User wished list",
+        "description" : "Add Book to User wished list",
+        "operationId" : "addBookToUserWishedList",
+        "parameters" : [ {
+          "name" : "user-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdValue"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      },
+      "delete" : {
+        "tags" : [ "User" ],
+        "summary" : "Remove Book from User wished list",
+        "description" : "Remove Book from User wished list",
+        "operationId" : "removeBookFromUserWishedList",
+        "parameters" : [ {
+          "name" : "user-id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "allowEmptyValue" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdValue"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false,
+        "security" : [ ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Creator" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "creatorId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "credits" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CreatorCredit"
+            }
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "imageUrl" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "creatorId", "credits", "name" ]
+      },
+      "CreatorCredit" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "book" : {
+            "$ref" : "#/components/schemas/BookEntry"
+          },
+          "role" : {
+            "$ref" : "#/components/schemas/RoleEntry"
+          }
+        },
+        "required" : [ "book", "role" ]
+      },
+      "CreatorEntry" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "creatorId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "imageUrl" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "creatorId", "name" ]
+      },
+      "Genre" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "genreId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "books" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BookEntry"
+            }
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "genreId", "books", "title" ]
+      },
+      "GenreEntry" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "genreId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "genreId", "title" ]
+      },
+      "Publisher" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "publisherId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "books" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BookEntry"
+            }
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "publisherId", "books", "title" ]
+      },
+      "PublisherEntry" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "publisherId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "publisherId", "title" ]
+      },
+      "ReadBook" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "book" : {
+            "$ref" : "#/components/schemas/BookEntry"
+          },
+          "readDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "book", "readDate" ]
+      },
+      "Role" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "roleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "credits" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RoleCredit"
+            }
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "roleId", "credits", "title" ]
+      },
+      "RoleCredit" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "book" : {
+            "$ref" : "#/components/schemas/BookEntry"
+          },
+          "creator" : {
+            "$ref" : "#/components/schemas/CreatorEntry"
+          }
+        },
+        "required" : [ "book", "creator" ]
+      },
+      "RoleEntry" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "roleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "roleId", "title" ]
+      },
+      "Series" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "seriesId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "books" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SeriesBook"
+            }
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "seriesId", "books", "title" ]
+      },
+      "SeriesBook" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "book" : {
+            "$ref" : "#/components/schemas/BookEntry"
+          },
+          "number" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "book" ]
+      },
+      "SeriesEntry" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "seriesId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "seriesId", "title" ]
+      },
+      "User" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "userId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "imageUrl" : {
+            "type" : "string"
+          },
+          "readBooks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ReadBook"
+            }
+          },
+          "role" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "username" : {
+            "type" : "string"
+          },
+          "wishedBooks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BookEntry"
+            }
+          }
+        },
+        "required" : [ "userId", "readBooks", "role", "username", "wishedBooks" ]
+      },
+      "UserEntry" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "userId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "imageUrl" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "username" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "userId", "role", "username" ]
+      },
+      "BookImport" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "goodreadsId" : {
+            "type" : "string"
+          },
+          "googleBooksId" : {
+            "type" : "string"
+          },
+          "collected" : {
+            "type" : "boolean"
+          },
+          "isbn" : {
+            "type" : "string"
+          },
+          "libraryThingId" : {
+            "type" : "string"
+          },
+          "openLibraryId" : {
+            "type" : "string"
+          },
+          "wisherIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "required" : [ "collected", "wisherIds" ]
+      },
+      "CreatorCreditInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "bookId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "roleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "bookId", "roleId" ]
+      },
+      "CreatorInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "credits" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CreatorCreditInput"
+            }
+          },
+          "imageUrl" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "credits", "name" ]
+      },
+      "GenreInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "bookIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "bookIds", "title" ]
+      },
+      "IdValue" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "id" ]
+      },
+      "PublisherInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "title" ]
+      },
+      "RoleCreditInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "bookId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "creatorId" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "bookId", "creatorId" ]
+      },
+      "RoleInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "credits" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RoleCreditInput"
+            }
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "credits", "title" ]
+      },
+      "SeriesBookInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "bookId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "number" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "bookId" ]
+      },
+      "SeriesInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "books" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SeriesBookInput"
+            }
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "books", "title" ]
+      },
+      "UserInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "imageUrl" : {
+            "type" : "string"
+          },
+          "readBooks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserReadInput"
+            }
+          },
+          "role" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "username" : {
+            "type" : "string"
+          },
+          "wishedBookIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "required" : [ "readBooks", "role", "username", "wishedBookIds" ]
+      },
+      "UserReadInput" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "bookId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "readDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "bookId" ]
+      }
+    },
+  }
+}

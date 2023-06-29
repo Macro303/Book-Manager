@@ -96,7 +96,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/genres/${resource.id.value}/books", {
+        fetch("/api/genres/${resource.id.value}/books", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -119,7 +119,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/genres/${resource.id.value}/books", {
+        fetch("/api/genres/${resource.id.value}/books", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -142,7 +142,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/genres/${resource.id.value}", {
+        fetch("/api/genres/${resource.id.value}", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({

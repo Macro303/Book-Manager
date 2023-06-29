@@ -85,7 +85,7 @@ fun main() {
                 version = VERSION
             }
             servers = arrayOf(OpenApiServer().apply {
-                url = "http://${settings[Settings.Website.host]}:${settings[Settings.Website.port]}/api/v${VERSION.split(".")[0]}.${VERSION.split(".")[1]}/"
+                url = "http://${settings[Settings.Website.host]}:${settings[Settings.Website.port]}/api/"
                 description = "Local DEV Server"
             })
         }))
@@ -158,90 +158,88 @@ fun main() {
             }
         }
         path("api") {
-            path("v${VERSION.split(".")[0]}.${VERSION.split(".")[1]}") {
-                path("books") {
-                    post("import", BookApiRouter::importBook)
-                    path("{book-id}") {
-                        crud(BookApiRouter)
-                        put("refresh", BookApiRouter::refreshBook)
-                        path("wish") {
-                            patch(BookApiRouter::wishBook)
-                            delete(BookApiRouter::unwishBook)
-                        }
-                        path("collect") {
-                            patch(BookApiRouter::collectBook)
-                            delete(BookApiRouter::discardBook)
-                        }
-                        path("read") {
-                            patch(BookApiRouter::readBook)
-                            delete(BookApiRouter::unreadBook)
-                        }
-                        path("credits") {
-                            patch(BookApiRouter::addCredit)
-                            delete(BookApiRouter::removeCredit)
-                        }
-                        path("genres") {
-                            patch(BookApiRouter::addGenre)
-                            delete(BookApiRouter::removeGenre)
-                        }
-                        path("series") {
-                            patch(BookApiRouter::addSeries)
-                            delete(BookApiRouter::removeSeries)
-                        }
+            path("books") {
+                post("import", BookApiRouter::importBook)
+                path("{book-id}") {
+                    crud(BookApiRouter)
+                    put("refresh", BookApiRouter::refreshBook)
+                    path("wish") {
+                        patch(BookApiRouter::wishBook)
+                        delete(BookApiRouter::unwishBook)
+                    }
+                    path("collect") {
+                        patch(BookApiRouter::collectBook)
+                        delete(BookApiRouter::discardBook)
+                    }
+                    path("read") {
+                        patch(BookApiRouter::readBook)
+                        delete(BookApiRouter::unreadBook)
+                    }
+                    path("credits") {
+                        patch(BookApiRouter::addCredit)
+                        delete(BookApiRouter::removeCredit)
+                    }
+                    path("genres") {
+                        patch(BookApiRouter::addGenre)
+                        delete(BookApiRouter::removeGenre)
+                    }
+                    path("series") {
+                        patch(BookApiRouter::addSeries)
+                        delete(BookApiRouter::removeSeries)
                     }
                 }
-                path("creators") {
-                    path("{creator-id}") {
-                        crud(CreatorApiRouter)
-                        path("credits") {
-                            patch(CreatorApiRouter::addCredit)
-                            delete(CreatorApiRouter::removeCredit)
-                        }
+            }
+            path("creators") {
+                path("{creator-id}") {
+                    crud(CreatorApiRouter)
+                    path("credits") {
+                        patch(CreatorApiRouter::addCredit)
+                        delete(CreatorApiRouter::removeCredit)
                     }
                 }
-                path("genres") {
-                    path("{genre-id}") {
-                        crud(GenreApiRouter)
-                        path("books") {
-                            patch(GenreApiRouter::addBook)
-                            delete(GenreApiRouter::removeBook)
-                        }
+            }
+            path("genres") {
+                path("{genre-id}") {
+                    crud(GenreApiRouter)
+                    path("books") {
+                        patch(GenreApiRouter::addBook)
+                        delete(GenreApiRouter::removeBook)
                     }
                 }
-                path("publishers") {
-                    path("{publisher-id}") {
-                        crud(PublisherApiRouter)
+            }
+            path("publishers") {
+                path("{publisher-id}") {
+                    crud(PublisherApiRouter)
+                }
+            }
+            path("roles") {
+                path("{role-id}") {
+                    crud(RoleApiRouter)
+                    path("credits") {
+                        patch(RoleApiRouter::addCredit)
+                        delete(RoleApiRouter::removeCredit)
                     }
                 }
-                path("roles") {
-                    path("{role-id}") {
-                        crud(RoleApiRouter)
-                        path("credits") {
-                            patch(RoleApiRouter::addCredit)
-                            delete(RoleApiRouter::removeCredit)
-                        }
+            }
+            path("series") {
+                path("{series-id}") {
+                    crud(SeriesApiRouter)
+                    path("books") {
+                        patch(SeriesApiRouter::addBook)
+                        delete(SeriesApiRouter::removeBook)
                     }
                 }
-                path("series") {
-                    path("{series-id}") {
-                        crud(SeriesApiRouter)
-                        path("books") {
-                            patch(SeriesApiRouter::addBook)
-                            delete(SeriesApiRouter::removeBook)
-                        }
+            }
+            path("users") {
+                path("{user-id}") {
+                    crud(UserApiRouter)
+                    path("read") {
+                        patch(UserApiRouter::addReadBook)
+                        delete(UserApiRouter::removeReadBook)
                     }
-                }
-                path("users") {
-                    path("{user-id}") {
-                        crud(UserApiRouter)
-                        path("read") {
-                            patch(UserApiRouter::addReadBook)
-                            delete(UserApiRouter::removeReadBook)
-                        }
-                        path("wished") {
-                            patch(UserApiRouter::addWishedBook)
-                            delete(UserApiRouter::removeWishedBook)
-                        }
+                    path("wished") {
+                        patch(UserApiRouter::addWishedBook)
+                        delete(UserApiRouter::removeWishedBook)
                     }
                 }
             }

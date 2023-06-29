@@ -71,7 +71,7 @@
         const caller = "delete-publisher-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/publishers/${resource.id.value}", {
+        fetch("/api/publishers/${resource.id.value}", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {

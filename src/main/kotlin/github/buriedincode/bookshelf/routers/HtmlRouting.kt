@@ -76,10 +76,9 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
             val title = ctx.queryParam("title")
             if (title != null)
                 resources = resources.filter {
-                    (it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)) ||
-                            (it.subtitle?.let {
-                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                            } ?: false)
+                    (it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)) || (it.subtitle?.let {
+                        it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                    } ?: false)
                 }
             ctx.render(
                 filePath = "templates/$name/list.kte", mapOf(

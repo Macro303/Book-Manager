@@ -71,7 +71,7 @@
         const caller = "delete-genre-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/genres/${resource.id.value}", {
+        fetch("/api/genres/${resource.id.value}", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {

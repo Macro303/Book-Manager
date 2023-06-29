@@ -23,8 +23,8 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
     var goodreadsId: String? by BookTable.goodreadsCol
     var googleBooksId: String? by BookTable.googleBooksCol
     var imageUrl: String? by BookTable.imageUrlCol
-    var isCollected: Boolean by BookTable.isCollectedCol
     var isbn: String? by BookTable.isbnCol
+    var isCollected: Boolean by BookTable.isCollectedCol
     var libraryThingId: String? by BookTable.libraryThingCol
     var openLibraryId: String? by BookTable.openLibraryCol
     var publishDate: LocalDate? by BookTable.publishDateCol

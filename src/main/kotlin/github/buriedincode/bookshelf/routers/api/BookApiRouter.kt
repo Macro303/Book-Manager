@@ -2,6 +2,7 @@ package github.buriedincode.bookshelf.routers.api
 
 import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
+import github.buriedincode.bookshelf.Utils.asEnumOrNull
 import github.buriedincode.bookshelf.docs.BookEntry
 import github.buriedincode.bookshelf.models.*
 import github.buriedincode.bookshelf.services.OpenLibrary
@@ -40,48 +41,47 @@ object BookApiRouter : CrudHandler, Logging {
         tags = ["Book"]
     )
     override fun getAll(ctx: Context): Unit = Utils.query(description = "List Books") {
-        val books = Book.all()
+        var books = Book.all().toList()
         val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let {
-                Creator.findById(id = it)
+            Creator.findById(id = it)
+        }
+        if (creator != null)
+            books = books.filter {
+                creator in it.credits.map { it.creator }
             }
-            if (creator != null)
-                books = books.filter {
-                    creator in it.credits.map { it.creator }
-                }
-            val format: Format? = ctx.queryParam("format")?.asEnumOrNull<Format>()
-            if (format != null)
-                books = books.filter {
-                    it.format == format
-                }
-            val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let {
-                Genre.findById(id = it)
+        val format: Format? = ctx.queryParam("format")?.asEnumOrNull<Format>()
+        if (format != null)
+            books = books.filter {
+                it.format == format
             }
-            if (genre != null)
-                books = books.filter {
-                    genre in it.genres
-                }
-            val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
-                Publisher.findById(id = it)
+        val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let {
+            Genre.findById(id = it)
+        }
+        if (genre != null)
+            books = books.filter {
+                genre in it.genres
             }
-            if (publisher != null)
-                books = books.filter {
-                    it.publisher == publisher
-                }
-            val series = ctx.queryParam("series-id")?.toLongOrNull()?.let {
-                Series.findById(id = it)
+        val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+            Publisher.findById(id = it)
+        }
+        if (publisher != null)
+            books = books.filter {
+                it.publisher == publisher
             }
-            if (series != null)
-                books = books.filter {
-                    series in it.series.map { it.series }
-                }
-            val title = ctx.queryParam("title")
-            if (title != null)
-                books = books.filter {
-                    (it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)) ||
-                            (it.subtitle?.let {
-                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                            } ?: false)
-                }
+        val series = ctx.queryParam("series-id")?.toLongOrNull()?.let {
+            Series.findById(id = it)
+        }
+        if (series != null)
+            books = books.filter {
+                series in it.series.map { it.series }
+            }
+        val title = ctx.queryParam("title")
+        if (title != null)
+            books = books.filter {
+                (it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)) || (it.subtitle?.let {
+                    it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                } ?: false)
+            }
         ctx.json(books.sorted().map { it.toJson() })
     }
 

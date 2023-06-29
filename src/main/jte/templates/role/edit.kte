@@ -101,7 +101,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/roles/${resource.id.value}/credits", {
+        fetch("/api/roles/${resource.id.value}/credits", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -125,7 +125,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/roles/${resource.id.value}/credits", {
+        fetch("/api/roles/${resource.id.value}/credits", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -150,7 +150,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/roles/${resource.id.value}", {
+        fetch("/api/roles/${resource.id.value}", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({

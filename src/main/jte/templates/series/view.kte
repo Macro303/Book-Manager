@@ -71,7 +71,7 @@
         const caller = "delete-series-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/series/${resource.id.value}", {
+        fetch("/api/series/${resource.id.value}", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {

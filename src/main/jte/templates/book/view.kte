@@ -3,7 +3,7 @@
 @import kotlin.collections.Map
 @import github.buriedincode.bookshelf.models.*
 @import github.buriedincode.bookshelf.Utils.getUserDateFormatter
-@import github.buriedincode.bookshelf.Utils.displayName
+@import github.buriedincode.bookshelf.Utils.titleCase
 @import gg.jte.support.ForSupport
 @param resource: Book
 @param session: User
@@ -47,7 +47,7 @@
                         <p><strong class="subtitle is-size-5 has-text-info">Description:</strong> ${resource.description}</p>
                     </div>
                     <div class="block">
-                        <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${resource.format.displayName()}</p>
+                        <p><strong class="subtitle is-size-5 has-text-info">Format:</strong> ${resource.format.titleCase()}</p>
                     </div>
                     <div class="block">
                         <p><strong class="subtitle is-size-5 has-text-info">Genres:</strong> @for(entry in ForSupport.of(resource.genres.sorted()))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
@@ -265,7 +265,7 @@
         const caller = "delete-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}", {
+        fetch("/api/books/${resource.id.value}", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {
@@ -282,7 +282,7 @@
         const caller = "collect-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/collect", {
+        fetch("/api/books/${resource.id.value}/collect", {
             method: "PATCH",
             headers: HEADERS,
         }).then((response) => {
@@ -299,7 +299,7 @@
         const caller = "discard-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/collect", {
+        fetch("/api/books/${resource.id.value}/collect", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {
@@ -316,7 +316,7 @@
         const caller = "read-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/read", {
+        fetch("/api/books/${resource.id.value}/read", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -336,7 +336,7 @@
         const caller = "unread-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/read", {
+        fetch("/api/books/${resource.id.value}/read", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -356,7 +356,7 @@
         const caller = "wish-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/wish", {
+        fetch("/api/books/${resource.id.value}/wish", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -376,7 +376,7 @@
         const caller = "unwish-book-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/${resource.id.value}/wish", {
+        fetch("/api/books/${resource.id.value}/wish", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({

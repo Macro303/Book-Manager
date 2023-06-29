@@ -47,7 +47,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/publishers/${resource.id.value}", {
+        fetch("/api/publishers/${resource.id.value}", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({

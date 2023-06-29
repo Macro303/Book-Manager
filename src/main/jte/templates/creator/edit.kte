@@ -102,7 +102,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/creators/${resource.id.value}/credits", {
+        fetch("/api/creators/${resource.id.value}/credits", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -126,7 +126,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/creators/${resource.id.value}/credits", {
+        fetch("/api/creators/${resource.id.value}/credits", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -151,7 +151,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/creators/${resource.id.value}", {
+        fetch("/api/creators/${resource.id.value}", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({

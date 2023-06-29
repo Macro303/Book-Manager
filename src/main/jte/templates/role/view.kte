@@ -76,7 +76,7 @@
         const caller = "delete-role-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/roles/${resource.id.value}", {
+        fetch("/api/roles/${resource.id.value}", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {

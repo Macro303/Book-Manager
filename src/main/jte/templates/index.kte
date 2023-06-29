@@ -51,7 +51,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/users?" + new URLSearchParams({
+        fetch("/api/users?" + new URLSearchParams({
             username: formData["username"]
         }), {
             method: "GET",

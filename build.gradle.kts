@@ -19,7 +19,7 @@ version = projectVersion
 
 repositories {
     mavenCentral()
-    maven("https://maven.reposilite.com/snapshots")
+    mavenLocal()
 }
 
 dependencies {

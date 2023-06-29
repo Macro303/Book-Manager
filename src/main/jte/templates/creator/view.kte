@@ -87,7 +87,7 @@
         const caller = "delete-creator-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/creators/${resource.id.value}", {
+        fetch("/api/creators/${resource.id.value}", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {

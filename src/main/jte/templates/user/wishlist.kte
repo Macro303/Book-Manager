@@ -95,7 +95,7 @@
         }
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/books/import", {
+        fetch("/api/books/import", {
             method: "POST",
             headers: HEADERS,
             body: JSON.stringify({

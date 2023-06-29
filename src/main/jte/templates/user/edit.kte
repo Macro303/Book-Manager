@@ -153,7 +153,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/read", {
+        fetch("/api/users/${resource.id.value}/read", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -176,7 +176,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/read", {
+        fetch("/api/users/${resource.id.value}/read", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -199,7 +199,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/wished", {
+        fetch("/api/users/${resource.id.value}/wished", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({
@@ -222,7 +222,7 @@
         @endraw
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/users/${resource.id.value}/wished", {
+        fetch("/api/users/${resource.id.value}/wished", {
             method: "DELETE",
             headers: HEADERS,
             body: JSON.stringify({
@@ -245,7 +245,7 @@
         console.log(formData);
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/users/${resource.id.value}", {
+        fetch("/api/users/${resource.id.value}", {
             method: "PATCH",
             headers: HEADERS,
             body: JSON.stringify({

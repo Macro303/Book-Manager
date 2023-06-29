@@ -111,7 +111,7 @@
         const caller = "delete-user-button";
 
         addLoading(caller);
-        fetch(BASE_ENDPOINT + "/users/${resource.id.value}", {
+        fetch("/api/users/${resource.id.value}", {
             method: "DELETE",
             headers: HEADERS,
         }).then((response) => {
