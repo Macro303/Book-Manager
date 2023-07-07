@@ -1,4 +1,4 @@
-openapi: "3.0.3"
+openapi: "3.1.0"
 info:
   title: "Bookshelf API"
   description: "Lots and lots of well described and documented API."
@@ -8,6 +8,7 @@ info:
     email: "BuriedInCode@tuta.io"
   license:
     name: "MIT License"
+    identifier: "MIT"
   version: "0.0.0"
 servers:
   - url: "http://{server}:25710/api"
@@ -317,7 +318,7 @@ paths:
       tags:
         - "Book"
       summary: "Add Genre to Book"
-      operationId: "addBookGenre"
+      operationId: "addGenreToBook"
       parameters:
         - $ref: "#/components/parameters/BookId"
       requestBody:
@@ -339,7 +340,7 @@ paths:
       tags:
         - "Book"
       summary: "Remove Genre from Book"
-      operationId: "removeBookGenre"
+      operationId: "removeGenreFromBook"
       parameters:
         - $ref: "#/components/parameters/BookId"
       requestBody:
@@ -360,7 +361,7 @@ paths:
       tags:
         - "Book"
       summary: "Add Series to Book"
-      operationId: "addBookSeries"
+      operationId: "addSeriesToBook"
       parameters:
         - $ref: "#/components/parameters/BookId"
       requestBody:
@@ -382,7 +383,7 @@ paths:
       tags:
         - "Book"
       summary: "Remove Series from Book"
-      operationId: "removeBookSeries"
+      operationId: "removeSeriesFromBook"
       parameters:
         - $ref: "#/components/parameters/BookId"
       requestBody:
@@ -623,9 +624,274 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+  "/genres/{genre-id}/books":
+    post:
+      tags:
+        - "Genre"
+      summary: "Add Book to Genre"
+      operationId: "addBookToGenre"
+      parameters:
+        - $ref: "#/components/parameters/GenreId"
+      requestBody:
+        $ref: "#/components/requestBodies/IdValue"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Genre"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags:
+        - "Genre"
+      summary: "Remove Book from Genre"
+      operationId: "removeBookFromGenre"
+      parameters:
+        - $ref: "#/components/parameters/GenreId"
+      requestBody:
+        $ref: "#/components/requestBodies/IdValue"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Genre"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
   "/publishers":
     get:
-
+      tags:
+        - "Publisher"
+      summary: "List all Publishers"
+      operationId: "listPublishers"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PublisherEntry"
+    post:
+      tags:
+        - "Publisher"
+      summary: "Create Publisher"
+      operationId: "createPublisher"
+      requestBody:
+        $ref: "#/components/requestBodies/PublisherInput"
+      responses:
+        "201":
+          description: "Created"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Publisher"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  "/publishers/{publisher-id}":
+    get:
+      tags:
+        - "Publisher"
+      summary: "Get Publisher by Id"
+      operationId: "getPublisher"
+      parameters:
+        - $ref: "#/components/parameters/PublisherId"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Publisher"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - "Publisher"
+      summary: "Update Publisher"
+      operationId: "updatePublisher"
+      parameters:
+        - $ref: "#/components/parameters/PublisherId"
+      requestBody:
+        $ref: "#/components/requestBodies/PublisherInput"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Publisher"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags:
+        - "Publisher"
+      summary: "Delete Publisher"
+      operationId: "deletePublisher"
+      parameters:
+        - $ref: "#/components/parameters/PublisherId"
+      responses:
+        "204":
+          description: "No Content"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  "/roles":
+    get:
+      tags:
+        - "Role"
+      summary: "List all Roles"
+      operationId: "listRoles"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/RoleEntry"
+    post:
+      tags:
+        - "Role"
+      summary: "Create Role"
+      operationId: "createRole"
+      requestBody:
+        $ref: "#/components/requestBodies/RoleInput"
+      responses:
+        "201":
+          description: "Created"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Role"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  "/roles/{role-id}":
+    get:
+      tags:
+        - "Role"
+      summary: "Get Role by Id"
+      operationId: "getRole"
+      parameters:
+        - $ref: "#/components/parameters/RoleId"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Role"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - "Role"
+      summary: "Update Role"
+      operationId: "updateRole"
+      parameters:
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        $ref: "#/components/requestBodies/RoleInput"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Role"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags:
+        - "Role"
+      summary: "Delete Role"
+      operationId: "deleteRole"
+      parameters:
+        - $ref: "#/components/parameters/RoleId"
+      responses:
+        "204":
+          description: "No Content"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  "/roles/{role-id}/credits":
+    post:
+      tags:
+        - "Role"
+      summary: "Add Credit to Role"
+      operationId: "addRoleCredit"
+      parameters:
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        $ref: "#/components/requestBodies/RoleCreditInput"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Role"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags:
+        - "Role"
+      summary: "Remove Credit from Role"
+      operationId: "removeRoleCredit"
+      parameters:
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        $ref: "#/components/requestBodies/RoleCreditInput"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Role"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
 components:
   parameters:
     BookId:
@@ -645,6 +911,20 @@ components:
     GenreId:
       in: "path"
       name: "genre-id"
+      required: true
+      schema:
+        type: "integer"
+        format: "int64"
+    PublisherId:
+      in: "path"
+      name: "publisher-id"
+      required: true
+      schema:
+        type: "integer"
+        format: "int64"
+    RoleId:
+      in: "path"
+      name: "role-id"
       required: true
       schema:
         type: "integer"
@@ -703,6 +983,24 @@ components:
         "application/json":
           schema:
             $ref: "#/components/schemas/GenreInput"
+      required: true
+    PublisherInput:
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/PublisherInput"
+      required: true
+    RoleInput:
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/RoleInput"
+      required: true
+    RoleCreditInput:
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/RoleCreditInput"
       required: true
   responses:
     BadRequest:
@@ -1107,23 +1405,125 @@ components:
     GenreEntry:
       type: "object"
       additionalProperties: false
-      properties: {}
+      properties:
+        genreId:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+      required:
+        - genreId
+        - title
     GenreInput:
       type: "object"
       additionalProperties: false
-      properties: {}
+      properties:
+        bookIds:
+          type: "array"
+          items:
+            type: "integer"
+            format: "int64"
+          default: []
+        title:
+          type: "string"
+      required:
+        - title
     Genre:
       type: "object"
       additionalProperties: false
-      properties: {}
+      properties:
+        genreId:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        books:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/BookEntry"
+          default: []
+      required:
+        - genreId
+        - title
     PublisherEntry:
       type: "object"
       additionalProperties: false
-      properties: {}
+      properties:
+        publisherId:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+      required:
+        - publisherId
+        - title
+    PublisherInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        bookIds:
+          type: "array"
+          items:
+            type: "integer"
+            format: "int64"
+          default: []
+        title:
+          type: "string"
+      required:
+        - title
+    Publisher:
+      type: "object"
+      additionalProperties: false
+      properties:
+        publisherId:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        books:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/BookEntry"
+          default: []
+      required:
+        - publisherId
+        - title
     RoleEntry:
       type: "object"
       additionalProperties: false
       properties: {}
+    RoleInput:
+      type: "object"
+      additionalProperties: false
+      properties: {}
+    RoleCreditInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        bookId:
+          type: "integer"
+          format: "int64"
+        creatorId:
+          type: "integer"
+          format: "int64"
+      required:
+        - bookId
+        - creatorId
+    Role:
+      type: "object"
+      additionalProperties: false
+      properties: {}
+    RoleCredit:
+      type: "object"
+      additionalProperties: false
+      properties:
+        book:
+          $ref: "#/components/schemas/BookEntry"
+        creator:
+          $ref: "#/components/schemas/CreatorEntry"
+      required:
+        - book
+        - creator
     SeriesEntry:
       type: "object"
       additionalProperties: false
