@@ -45,6 +45,8 @@ fun toHumanReadable(milliseconds: Float): String {
 
 fun main() {
     val logger = logger("github.buriedincode.bookshelf.App")
+    println("Kotlin v${KotlinVersion.CURRENT}")
+    println("Java: ${System.getProperty("java.version")}, Arch: ${System.getProperty("os.arch")}")
     val settings = Settings.loadSettings()
     logger.info(settings.toString())
     Settings.saveSettings(settings)
