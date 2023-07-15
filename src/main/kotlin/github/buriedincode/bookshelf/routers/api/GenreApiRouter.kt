@@ -27,6 +27,9 @@ object GenreApiRouter : CrudHandler, Logging {
         methods = [HttpMethod.GET],
         operationId = "listGenres",
         path = "/genres",
+        queryParams = [
+        	OpenApiParam(name = "title", type = String::class),
+        ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<GenreEntry>::class)]),
         ],
@@ -34,7 +37,10 @@ object GenreApiRouter : CrudHandler, Logging {
         tags = ["Genre"]
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
-        val genres = Genre.all()
+        var genres = Genre.all().toList()
+        val title = ctx.queryParam("title")
+        if (title != null)
+            genres = genres.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
         ctx.json(genres.sorted().map { it.toJson() })
     }
 

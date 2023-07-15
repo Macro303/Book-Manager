@@ -27,6 +27,9 @@ object PublisherApiRouter : CrudHandler, Logging {
         methods = [HttpMethod.GET],
         operationId = "listPublishers",
         path = "/publishers",
+        queryParams = [
+        	OpenApiParam(name = "title", type = String::class),
+        ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<PublisherEntry>::class)]),
         ],
@@ -34,7 +37,10 @@ object PublisherApiRouter : CrudHandler, Logging {
         tags = ["Publisher"]
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
-        val publishers = Publisher.all()
+        var publishers = Publisher.all().toList()
+        val title = ctx.queryParam("title")
+        if (title != null)
+            publishers = publishers.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
         ctx.json(publishers.sorted().map { it.toJson() })
     }
 

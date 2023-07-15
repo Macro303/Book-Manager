@@ -1,45 +1,25 @@
 package github.buriedincode.bookshelf
 
-import com.uchuhimo.konf.Config
-import com.uchuhimo.konf.ConfigSpec
-import com.uchuhimo.konf.source.properties.toProperties
-import com.uchuhimo.konf.source.yaml
-import com.uchuhimo.konf.source.yaml.toYaml
 import org.apache.logging.log4j.kotlin.Logging
 import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.exists
+import com.sksamuel.hoplite.ConfigLoaderBuilder
+import com.sksamuel.hoplite.addPathSource
+import com.sksamuel.hoplite.addResourceSource
 
 enum class Environment {
     DEV,
     PROD
 }
 
-object Settings : ConfigSpec(prefix = ""), Logging {
-    private val PROPERTIES_PATH: Path = Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.properties")
-    private val YAML_PATH: Path = Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.yaml")
-
-    val env by optional(default = Environment.DEV)
-
-    object Database : ConfigSpec(), Logging {
-        val name by optional(default = "bookshelf.sqlite")
-    }
-
-    object Website : ConfigSpec(), Logging {
-        val host by optional(default = "127.0.0.1")
-        val port by optional(default = 25711)
-    }
-
-    fun loadSettings(): Config = Config {
-        addSpec(Settings)
-    }.from.properties.file(file = PROPERTIES_PATH.toFile(), optional = true)
-        .from.yaml.file(file = YAML_PATH.toFile(), optional = true)
-        .from.systemProperties()
-
-    fun saveSettings(config: Config = loadSettings()) {
-        if (YAML_PATH.exists())
-            config.toYaml.toFile(file = YAML_PATH.toFile())
-        else
-            config.toProperties.toFile(PROPERTIES_PATH.toFile())
+data class Database(val name: String)
+data class Website(val host: String, val port: Int)
+data class Settings(val env: Environment, val database: Database, val website: Website) {
+    companion object: Logging {
+        fun load(): Settings = ConfigLoaderBuilder.default()
+            .addPathSource(Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.yaml"), optional = true, allowEmpty = true)
+            .addPathSource(Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.properties"), optional = true, allowEmpty = true)
+            .addResourceSource("/default.properties")
+            .build()
+            .loadConfigOrThrow<Settings>()
     }
 }

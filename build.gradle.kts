@@ -22,11 +22,24 @@ repositories {
 dependencies {
     runtimeOnly("org.xerial:sqlite-jdbc:3.42.0.0")
 
-    // Konf
-    val konfVersion = "1.1.2"
-    implementation("com.uchuhimo:konf-core:$konfVersion")
-    implementation("com.uchuhimo:konf-yaml:$konfVersion")
-    
+    // Exposed
+    val exposedVersion = "0.41.1"
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+
+    // Hoplite
+    val hopliteVersion = "2.7.4"
+    implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
+    implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
+
+    // Jackson
+    val jacksonVersion = "2.15.2"
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
     // Javalin
     val javalinVersion = "5.6.1"
     implementation("io.javalin:javalin:$javalinVersion")
@@ -40,19 +53,6 @@ dependencies {
     val jteVersion = "3.0.1"
     implementation("gg.jte:jte:$jteVersion")
     implementation("gg.jte:jte-kotlin:$jteVersion")
-
-    // Exposed
-    val exposedVersion = "0.41.1"
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-
-    // Jackson
-    val jacksonVersion = "2.15.2"
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     // Log4j2
     implementation("org.apache.logging.log4j:log4j-api-kotlin:1.2.0")
@@ -71,6 +71,7 @@ java {
 
 application {
     mainClass.set("github.buriedincode.bookshelf.AppKt")
+    applicationName = "Bookshelf"
 }
 
 jte {

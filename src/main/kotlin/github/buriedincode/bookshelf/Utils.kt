@@ -31,7 +31,7 @@ object Utils : Logging {
     val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    private val database: Database = Database.connect(url = "jdbc:sqlite:${DATA_ROOT}/${Settings.loadSettings()[Settings.Database.name]}", driver = "org.sqlite.JDBC")
+    private val database: Database = Database.connect(url = "jdbc:sqlite:${DATA_ROOT}/${Settings.load().database.name}", driver = "org.sqlite.JDBC")
 
     internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
         .addModule(JavaTimeModule())

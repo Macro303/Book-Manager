@@ -29,6 +29,9 @@ object SeriesApiRouter : CrudHandler, Logging {
         methods = [HttpMethod.GET],
         operationId = "listSeries",
         path = "/series",
+        queryParams = [
+        	OpenApiParam(name = "title", type = String::class),
+        ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<SeriesEntry>::class)]),
         ],
@@ -36,7 +39,10 @@ object SeriesApiRouter : CrudHandler, Logging {
         tags = ["Series"]
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
-        val series = Series.all()
+        var series = Series.all().toList()
+        val title = ctx.queryParam("title")
+        if (title != null)
+            series = series.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
         ctx.json(series.sorted().map { it.toJson() })
     }
 

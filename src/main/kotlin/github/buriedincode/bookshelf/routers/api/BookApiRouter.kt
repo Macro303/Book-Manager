@@ -34,6 +34,14 @@ object BookApiRouter : CrudHandler, Logging {
         methods = [HttpMethod.GET],
         operationId = "listBooks",
         path = "/books",
+        queryParams = [
+        	OpenApiParam(name = "creator-id", type = Long::class),
+        	OpenApiParam(name = "format", type = String::class),
+        	OpenApiParam(name = "genre-id", type = Long::class),
+        	OpenApiParam(name = "publisher-id", type = Long::class),
+        	OpenApiParam(name = "series-id", type = Long::class),
+        	OpenApiParam(name = "title", type = String::class),
+        ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<BookEntry>::class)])
         ],

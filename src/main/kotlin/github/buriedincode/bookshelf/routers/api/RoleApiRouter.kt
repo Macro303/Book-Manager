@@ -28,6 +28,9 @@ object RoleApiRouter : CrudHandler, Logging {
         methods = [HttpMethod.GET],
         operationId = "listRoles",
         path = "/roles",
+        queryParams = [
+        	OpenApiParam(name = "title", type = String::class),
+        ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<RoleEntry>::class)]),
         ],
@@ -35,7 +38,10 @@ object RoleApiRouter : CrudHandler, Logging {
         tags = ["Role"]
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
-        val roles = Role.all()
+        var roles = Role.all().toList()
+        val title = ctx.queryParam("title")
+        if (title != null)
+            roles = roles.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
         ctx.json(roles.sorted().map { it.toJson() })
     }
 

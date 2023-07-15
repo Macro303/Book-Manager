@@ -27,6 +27,9 @@ object CreatorApiRouter : CrudHandler, Logging {
         methods = [HttpMethod.GET],
         operationId = "listCreators",
         path = "/creators",
+        queryParams = [
+        	OpenApiParam(name = "name", type = String::class),
+        ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<CreatorEntry>::class)]),
         ],
@@ -34,7 +37,10 @@ object CreatorApiRouter : CrudHandler, Logging {
         tags = ["Creator"]
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
-        val creators = Creator.all()
+        var creators = Creator.all().toList()
+        val name = ctx.queryParam("name")
+        if (name != null)
+            creators = creators.filter { it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true) }
         ctx.json(creators.sorted().map { it.toJson() })
     }
 
