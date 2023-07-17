@@ -60,13 +60,18 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             }
             output["genres"] = genres.sorted().map { it.toJson() }
             output["publisher"] = publisher?.toJson()
-            output["readers"] = readers.sortedWith(compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) }).map {
+            output["readers"] = readers.sortedWith(
+                compareBy<ReadBook> { it.user }
+                    .thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) }
+            ).map {
                 mapOf(
                     "readDate" to it.readDate?.format(DATE_FORMATTER),
                     "user" to it.user.toJson(),
                 )
             }
-            output["series"] = series.sortedWith(compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE }).map {
+            output["series"] = series.sortedWith(
+                compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE }
+            ).map {
                 mapOf(
                     "number" to it.number,
                     "series" to it.series.toJson(),

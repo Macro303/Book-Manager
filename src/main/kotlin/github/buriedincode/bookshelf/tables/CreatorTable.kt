@@ -11,7 +11,7 @@ object CreatorTable : LongIdTable(name = "creators"), Logging {
     val nameCol: Column<String> = text(name = "name").uniqueIndex()
 
     init {
-        Utils.query(description = "Create Creator Table") {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

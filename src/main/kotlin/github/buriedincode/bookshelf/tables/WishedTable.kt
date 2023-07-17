@@ -24,7 +24,7 @@ object WishedTable : Table(name = "wished_books"), Logging {
     override val primaryKey = PrimaryKey(bookCol, userCol)
 
     init {
-        Utils.query(description = "Create Wished Table") {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

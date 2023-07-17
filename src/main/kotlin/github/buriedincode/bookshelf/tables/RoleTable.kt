@@ -10,7 +10,7 @@ object RoleTable : LongIdTable(name = "roles"), Logging {
     val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {
-        Utils.query(description = "Create Role Table") {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

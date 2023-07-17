@@ -28,7 +28,7 @@ object CreatorApiRouter : CrudHandler, Logging {
         operationId = "listCreators",
         path = "/creators",
         queryParams = [
-        	OpenApiParam(name = "name", type = String::class),
+            OpenApiParam(name = "name", type = String::class),
         ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<CreatorEntry>::class)]),
@@ -40,7 +40,12 @@ object CreatorApiRouter : CrudHandler, Logging {
         var creators = Creator.all().toList()
         val name = ctx.queryParam("name")
         if (name != null)
-            creators = creators.filter { it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true) }
+            creators = creators.filter {
+                it.name.contains(name, ignoreCase = true) || name.contains(
+                    it.name,
+                    ignoreCase = true
+                )
+            }
         ctx.json(creators.sorted().map { it.toJson() })
     }
 
@@ -51,7 +56,10 @@ object CreatorApiRouter : CrudHandler, Logging {
         path = "/creators",
         requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
+            OpenApiResponse(
+                status = "201",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -81,7 +89,10 @@ object CreatorApiRouter : CrudHandler, Logging {
         path = "/creators/{creator-id}",
         pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
@@ -101,7 +112,10 @@ object CreatorApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -157,7 +171,10 @@ object CreatorApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorCreditInput::class)]),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -195,7 +212,10 @@ object CreatorApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "creator-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(CreatorCreditInput::class)]),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],

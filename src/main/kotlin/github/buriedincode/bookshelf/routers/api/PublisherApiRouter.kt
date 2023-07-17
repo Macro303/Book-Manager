@@ -28,7 +28,7 @@ object PublisherApiRouter : CrudHandler, Logging {
         operationId = "listPublishers",
         path = "/publishers",
         queryParams = [
-        	OpenApiParam(name = "title", type = String::class),
+            OpenApiParam(name = "title", type = String::class),
         ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<PublisherEntry>::class)]),
@@ -40,7 +40,12 @@ object PublisherApiRouter : CrudHandler, Logging {
         var publishers = Publisher.all().toList()
         val title = ctx.queryParam("title")
         if (title != null)
-            publishers = publishers.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            publishers = publishers.filter {
+                it.title.contains(title, ignoreCase = true) || title.contains(
+                    it.title,
+                    ignoreCase = true
+                )
+            }
         ctx.json(publishers.sorted().map { it.toJson() })
     }
 
@@ -51,7 +56,10 @@ object PublisherApiRouter : CrudHandler, Logging {
         path = "/publishers",
         requestBody = OpenApiRequestBody(content = [OpenApiContent(PublisherInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
+            OpenApiResponse(
+                status = "201",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -80,7 +88,10 @@ object PublisherApiRouter : CrudHandler, Logging {
         path = "/publishers/{publisher-id}",
         pathParams = [OpenApiParam(name = "publisher-id", type = Long::class, required = true)],
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
@@ -100,7 +111,10 @@ object PublisherApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "publisher-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(PublisherInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),

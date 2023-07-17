@@ -24,7 +24,7 @@ object BookSeriesTable : LongIdTable(name = "books__series"), Logging {
     val numberCol: Column<Int?> = integer(name = "number").nullable()
 
     init {
-        Utils.query(description = "Create Book/Genre Table") {
+        Utils.query {
             uniqueIndex(bookCol, seriesCol)
             SchemaUtils.create(this)
         }

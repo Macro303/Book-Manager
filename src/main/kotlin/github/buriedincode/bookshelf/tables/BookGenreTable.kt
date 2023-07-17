@@ -24,7 +24,7 @@ object BookGenreTable : Table(name = "books__genres"), Logging {
     override val primaryKey = PrimaryKey(bookCol, genreCol)
 
     init {
-        Utils.query(description = "Create Book/Genre Table") {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

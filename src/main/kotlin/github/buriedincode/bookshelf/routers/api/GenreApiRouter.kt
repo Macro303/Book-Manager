@@ -28,7 +28,7 @@ object GenreApiRouter : CrudHandler, Logging {
         operationId = "listGenres",
         path = "/genres",
         queryParams = [
-        	OpenApiParam(name = "title", type = String::class),
+            OpenApiParam(name = "title", type = String::class),
         ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<GenreEntry>::class)]),
@@ -40,7 +40,12 @@ object GenreApiRouter : CrudHandler, Logging {
         var genres = Genre.all().toList()
         val title = ctx.queryParam("title")
         if (title != null)
-            genres = genres.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            genres = genres.filter {
+                it.title.contains(title, ignoreCase = true) || title.contains(
+                    it.title,
+                    ignoreCase = true
+                )
+            }
         ctx.json(genres.sorted().map { it.toJson() })
     }
 
@@ -51,7 +56,10 @@ object GenreApiRouter : CrudHandler, Logging {
         path = "/genres",
         requestBody = OpenApiRequestBody(content = [OpenApiContent(GenreInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "201",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -84,7 +92,10 @@ object GenreApiRouter : CrudHandler, Logging {
         path = "/genres/{genre-id}",
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
@@ -104,7 +115,10 @@ object GenreApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(GenreInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -161,7 +175,10 @@ object GenreApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -191,7 +208,10 @@ object GenreApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "genre-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],

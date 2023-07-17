@@ -1,7 +1,9 @@
 package github.buriedincode.bookshelf.models
 
 import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
-import github.buriedincode.bookshelf.tables.*
+import github.buriedincode.bookshelf.tables.ReadBookTable
+import github.buriedincode.bookshelf.tables.UserTable
+import github.buriedincode.bookshelf.tables.WishedTable
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -27,7 +29,10 @@ class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
             "username" to username
         )
         if (showAll) {
-            output["read"] = readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.thenBy { it.book }).map {
+            output["read"] = readBooks.sortedWith(
+                compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }
+                    .thenBy { it.book }
+            ).map {
                 mapOf(
                     "book" to it.book.toJson(),
                     "readDate" to it.readDate?.format(DATE_FORMATTER)

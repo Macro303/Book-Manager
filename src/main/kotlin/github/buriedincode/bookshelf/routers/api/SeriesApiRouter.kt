@@ -30,7 +30,7 @@ object SeriesApiRouter : CrudHandler, Logging {
         operationId = "listSeries",
         path = "/series",
         queryParams = [
-        	OpenApiParam(name = "title", type = String::class),
+            OpenApiParam(name = "title", type = String::class),
         ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<SeriesEntry>::class)]),
@@ -42,7 +42,12 @@ object SeriesApiRouter : CrudHandler, Logging {
         var series = Series.all().toList()
         val title = ctx.queryParam("title")
         if (title != null)
-            series = series.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            series = series.filter {
+                it.title.contains(title, ignoreCase = true) || title.contains(
+                    it.title,
+                    ignoreCase = true
+                )
+            }
         ctx.json(series.sorted().map { it.toJson() })
     }
 
@@ -53,7 +58,10 @@ object SeriesApiRouter : CrudHandler, Logging {
         path = "/series",
         requestBody = OpenApiRequestBody(content = [OpenApiContent(SeriesInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "201",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -91,7 +99,10 @@ object SeriesApiRouter : CrudHandler, Logging {
         path = "/series/{series-id}",
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
@@ -111,7 +122,10 @@ object SeriesApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(SeriesInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -186,7 +200,10 @@ object SeriesApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(SeriesBookInput::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
@@ -221,7 +238,10 @@ object SeriesApiRouter : CrudHandler, Logging {
         pathParams = [OpenApiParam(name = "series-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]),
+            OpenApiResponse(
+                status = "200",
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Series::class)]
+            ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],

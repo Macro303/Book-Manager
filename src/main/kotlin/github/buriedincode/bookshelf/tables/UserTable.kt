@@ -12,7 +12,7 @@ object UserTable : LongIdTable(name = "users"), Logging {
     val usernameCol: Column<String> = text(name = "username").uniqueIndex()
 
     init {
-        Utils.query(description = "Create User Table") {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

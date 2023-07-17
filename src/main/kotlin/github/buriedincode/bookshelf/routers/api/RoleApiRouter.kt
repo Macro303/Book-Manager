@@ -29,7 +29,7 @@ object RoleApiRouter : CrudHandler, Logging {
         operationId = "listRoles",
         path = "/roles",
         queryParams = [
-        	OpenApiParam(name = "title", type = String::class),
+            OpenApiParam(name = "title", type = String::class),
         ],
         responses = [
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<RoleEntry>::class)]),
@@ -41,7 +41,12 @@ object RoleApiRouter : CrudHandler, Logging {
         var roles = Role.all().toList()
         val title = ctx.queryParam("title")
         if (title != null)
-            roles = roles.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            roles = roles.filter {
+                it.title.contains(title, ignoreCase = true) || title.contains(
+                    it.title,
+                    ignoreCase = true
+                )
+            }
         ctx.json(roles.sorted().map { it.toJson() })
     }
 
@@ -136,7 +141,7 @@ object RoleApiRouter : CrudHandler, Logging {
         summary = "Delete Role",
         tags = ["Role"]
     )
-    override fun delete(ctx: Context, resourceId: String): Unit = Utils.query(description = "Delete Role") {
+    override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val role = getResource(resourceId = resourceId)
         role.credits.forEach {
             it.delete()

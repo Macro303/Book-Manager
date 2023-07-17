@@ -54,7 +54,14 @@ data class Edition(
             try {
                 LocalDate.parse(publishDateStr, DateTimeFormatter.ISO_DATE)
             } catch (err: DateTimeParseException) {
-                for (pattern in arrayOf("MMMM d, yyyy", "yyyy-MMM-dd", "MMM dd, yyyy", "yyyy", "MMMM yyyy", "MMM, yyyy")) {
+                for (pattern in arrayOf(
+                    "MMMM d, yyyy",
+                    "yyyy-MMM-dd",
+                    "MMM dd, yyyy",
+                    "yyyy",
+                    "MMMM yyyy",
+                    "MMM, yyyy"
+                )) {
                     try {
                         return LocalDate.parse(
                             publishDateStr,

@@ -10,7 +10,7 @@ object GenreTable : LongIdTable(name = "genres"), Logging {
     val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {
-        Utils.query(description = "Create Genre Table") {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

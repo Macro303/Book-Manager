@@ -29,7 +29,7 @@ object BookCreatorRoleTable : LongIdTable(name = "books__creators__roles"), Logg
     )
 
     init {
-        Utils.query(description = "Create Book/Creator/Role Table") {
+        Utils.query {
             uniqueIndex(bookCol, creatorCol, roleCol)
             SchemaUtils.create(this)
         }

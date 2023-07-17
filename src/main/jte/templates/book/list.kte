@@ -4,6 +4,7 @@
 @param session: User
 @param creators: List<Creator>
 @param selectedCreator: Creator? = null
+@param formats: List<Format>
 @param selectedFormat: Format? = null
 @param genres: List<Genre>
 @param selectedGenre: Genre? = null
@@ -39,7 +40,7 @@
                     <h1 class="title is-5 has-text-info-light">Filter Books</h1>
                     <form accept-charset="UTF-8" action="/books" method="GET">
                         @template.components.forms.select.creator(label="Creator", options=creators.sorted(), selected=selectedCreator)
-                        @template.components.forms.select.format(label="Format", selected=selectedFormat)
+                        @template.components.forms.select.format(label="Format", options=formats.sorted(), selected=selectedFormat)
                         @template.components.forms.select.genre(label="Genre", options=genres.sorted(), selected=selectedGenre)
                         @template.components.forms.select.publisher(label="Publisher", options=publishers.sorted(), selected=selectedPublisher)
                         @template.components.forms.select.series(label="Series", options=series.sorted(), selected=selectedSeries)

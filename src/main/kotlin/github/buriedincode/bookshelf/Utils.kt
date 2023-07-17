@@ -31,7 +31,10 @@ object Utils : Logging {
     val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    private val database: Database = Database.connect(url = "jdbc:sqlite:${DATA_ROOT}/${Settings.load().database.name}", driver = "org.sqlite.JDBC")
+    private val database: Database = Database.connect(
+        url = "jdbc:sqlite:${DATA_ROOT}/${Settings.load().database.name}",
+        driver = "org.sqlite.JDBC"
+    )
 
     internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
         .addModule(JavaTimeModule())
@@ -47,7 +50,7 @@ object Utils : Logging {
         )
         .build()
 
-    internal fun <T> query(description: String = "", block: () -> T): T {
+    internal fun <T> query(block: () -> T): T {
         val startTime = LocalDateTime.now()
         val transaction = transaction(
             transactionIsolation = Connection.TRANSACTION_SERIALIZABLE,
@@ -57,7 +60,7 @@ object Utils : Logging {
             addLogger(Slf4jSqlDebugLogger)
             block()
         }
-        logger.debug("Took ${ChronoUnit.MILLIS.between(startTime, LocalDateTime.now())}ms to $description")
+        logger.debug("Took ${ChronoUnit.MILLIS.between(startTime, LocalDateTime.now())}ms")
         return transaction
     }
 
@@ -82,7 +85,9 @@ object Utils : Logging {
             }
     }
 
-    fun getUserDateFormatter(date: LocalDate): DateTimeFormatter = DateTimeFormatter.ofPattern("d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy")
+    fun getUserDateFormatter(date: LocalDate): DateTimeFormatter {
+        return DateTimeFormatter.ofPattern("d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy")
+    }
 
     private fun getDayNumberSuffix(day: Int): String {
         return if (day in 11..13) {
@@ -94,7 +99,14 @@ object Utils : Logging {
             else -> "th"
         }
     }
-    
-    inline fun <reified T: Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
-    inline fun <reified T: Enum<T>> T.titleCase(): String = this.name.lowercase().split("_").joinToString(" ") { it.replaceFirstChar(Char::uppercaseChar) }
+
+    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? {
+        return enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
+    }
+
+    inline fun <reified T : Enum<T>> T.titleCase(): String {
+        return this.name.lowercase().split("_").joinToString(" ") {
+            it.replaceFirstChar(Char::uppercaseChar)
+        }
+    }
 }

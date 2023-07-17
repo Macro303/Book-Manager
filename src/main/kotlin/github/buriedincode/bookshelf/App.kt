@@ -27,7 +27,7 @@ import org.apache.logging.log4j.kotlin.Logging
 import java.nio.file.Path
 import java.time.Duration
 
-object App: Logging {
+object App : Logging {
     private fun toHumanReadable(milliseconds: Float): String {
         val duration = Duration.ofMillis(milliseconds.toLong())
         val minutes = duration.toMinutes()
@@ -43,7 +43,7 @@ object App: Logging {
         }
         return "${duration.toMillis()}ms"
     }
-    
+
     private fun createTemplateEngine(): TemplateEngine {
         return if (Settings.load().env == Environment.DEV) {
             val codeResolver = DirectoryCodeResolver(Path.of("src", "main", "jte"))
@@ -52,7 +52,7 @@ object App: Logging {
             TemplateEngine.createPrecompiled(Path.of("jte-classes"), ContentType.Html)
         }
     }
-    
+
     fun start(settings: Settings) {
         val engine = createTemplateEngine()
         // engine.setTrimControlStructures = true
@@ -170,16 +170,16 @@ object App: Logging {
                         crud(BookApiRouter)
                         put("refresh", BookApiRouter::refreshBook)
                         path("wish") {
-                            patch(BookApiRouter::wishBook)
-                            delete(BookApiRouter::unwishBook)
+                            patch(BookApiRouter::addWisher)
+                            delete(BookApiRouter::removeWisher)
                         }
                         path("collect") {
                             patch(BookApiRouter::collectBook)
                             delete(BookApiRouter::discardBook)
                         }
                         path("read") {
-                            patch(BookApiRouter::readBook)
-                            delete(BookApiRouter::unreadBook)
+                            patch(BookApiRouter::addReader)
+                            delete(BookApiRouter::removeReader)
                         }
                         path("credits") {
                             patch(BookApiRouter::addCredit)
@@ -258,7 +258,10 @@ object App: Logging {
                 entry = entry.plus(value.map { it.message })
                 details[key] = entry
             }
-            throw BadRequestResponse(message = "Validation Error", details = details.mapValues { it.value.joinToString(", ") })
+            throw BadRequestResponse(
+                message = "Validation Error",
+                details = details.mapValues { it.value.joinToString(", ") }
+            )
         }
         app.start(settings.website.host, settings.website.port)
     }
@@ -270,5 +273,5 @@ fun main(vararg args: String) {
     println("Arch: ${System.getProperty("os.arch")}")
     val settings = Settings.load()
     println(settings.toString())
-    App.start(settings=settings)
+    App.start(settings = settings)
 }

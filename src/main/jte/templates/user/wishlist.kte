@@ -3,6 +3,17 @@
 @param resource: User
 @param session: User
 @param books: List<Book>
+@param creators: List<Creator>
+@param selectedCreator: Creator? = null
+@param formats: List<Format>
+@param selectedFormat: Format? = null
+@param genres: List<Genre>
+@param selectedGenre: Genre? = null
+@param publishers: List<Publisher>
+@param selectedPublisher: Publisher? = null
+@param series: List<Series>
+@param selectedSeries: Series? = null
+@param selectedTitle: String? = null
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -29,13 +40,24 @@
                 <div class="box">
                     <h1 class="title is-5 has-text-info-light">Filter Books</h1>
                     <form accept-charset="UTF-8" action="/users/${resource.id.value}/wishlist" method="GET">
-                        @template.components.forms.input(label="Title", name="title")
+                        @template.components.forms.select.creator(label="Creator", options=creators.sorted(), selected=selectedCreator)
+                        @template.components.forms.select.format(label="Format", options=formats.sorted(), selected=selectedFormat)
+                        @template.components.forms.select.genre(label="Genre", options=genres.sorted(), selected=selectedGenre)
+                        @template.components.forms.select.publisher(label="Publisher", options=publishers.sorted(), selected=selectedPublisher)
+                        @template.components.forms.select.series(label="Series", options=series.sorted(), selected=selectedSeries)
+                        @template.components.forms.input(label="Title", name="title", value=selectedTitle)
                         <div class="buttons is-centered">
                             <button class="button is-info">
                                 <span class="icon">
                                     <i class="fa-solid fa-filter"></i>
                                 </span>
                                 <span>Filter</span>
+                            </button>
+                            <button class="button is-warning" onclick="resetForm('/users/${resource.id.value}/wishlist')" type="button">
+                                <span class="icon">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </span>
+                                <span>Reset</span>
                             </button>
                         </div>
                     </form>

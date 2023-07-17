@@ -12,7 +12,6 @@ import io.javalin.openapi.*
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
-import java.time.LocalDate
 
 object UserApiRouter : CrudHandler, Logging {
     private fun getResource(resourceId: String): User {
@@ -42,10 +41,12 @@ object UserApiRouter : CrudHandler, Logging {
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         var users = User.all().toList()
-        val username = ctx.queryParam("username")
+        val username = ctx.queryParam(key = "username")
         if (username != null)
-            users = users.filter { it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true) }
-        ctx.json(users.sorted().map { it.toJson() })
+            users = users.filter {
+                it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true)
+            }
+        ctx.json(obj = users.sorted().map { it.toJson() })
     }
 
     @OpenApi(
@@ -88,7 +89,7 @@ object UserApiRouter : CrudHandler, Logging {
             }
         }
 
-        ctx.status(HttpStatus.CREATED).json(user.toJson(showAll = true))
+        ctx.status(status = HttpStatus.CREATED).json(obj = user.toJson(showAll = true))
     }
 
     @OpenApi(
@@ -107,7 +108,7 @@ object UserApiRouter : CrudHandler, Logging {
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
         val user = getResource(resourceId = resourceId)
-        ctx.json(user.toJson(showAll = true))
+        ctx.json(obj = user.toJson(showAll = true))
     }
 
     @OpenApi(
@@ -154,7 +155,7 @@ object UserApiRouter : CrudHandler, Logging {
                 ?: throw NotFoundResponse(message = "Book not found")
         })
 
-        ctx.json(user.toJson(showAll = true))
+        ctx.json(obj = user.toJson(showAll = true))
     }
 
     @OpenApi(
@@ -177,7 +178,7 @@ object UserApiRouter : CrudHandler, Logging {
             it.delete()
         }
         user.delete()
-        ctx.status(HttpStatus.NO_CONTENT)
+        ctx.status(status = HttpStatus.NO_CONTENT)
     }
 
     private fun Context.getIdValue(): IdValue = this.bodyValidator<IdValue>()
@@ -187,7 +188,7 @@ object UserApiRouter : CrudHandler, Logging {
     @OpenApi(
         description = "Add Book to User read list",
         methods = [HttpMethod.PATCH],
-        operationId = "addBookToUserReadList",
+        operationId = "addReadBook",
         path = "/users/{user-id}/read",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
@@ -215,13 +216,13 @@ object UserApiRouter : CrudHandler, Logging {
             this.user = user
         }
 
-        ctx.json(user.toJson(showAll = true))
+        ctx.json(obj = user.toJson(showAll = true))
     }
 
     @OpenApi(
         description = "Remove Book from User read list",
         methods = [HttpMethod.DELETE],
-        operationId = "removeBookFromUserReadList",
+        operationId = "removeReadBook",
         path = "/users/{user-id}/read",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
@@ -243,13 +244,13 @@ object UserApiRouter : CrudHandler, Logging {
         }.firstOrNull() ?: throw BadRequestResponse(message = "Book has not been read by this User.")
         exists.delete()
 
-        ctx.json(user.toJson(showAll = true))
+        ctx.json(obj = user.toJson(showAll = true))
     }
 
     @OpenApi(
         description = "Add Book to User wished list",
         methods = [HttpMethod.PATCH],
-        operationId = "addBookToUserWishedList",
+        operationId = "addWishedBook",
         path = "/users/{user-id}/wished",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
@@ -273,13 +274,13 @@ object UserApiRouter : CrudHandler, Logging {
         temp.add(book)
         user.wishedBooks = SizedCollection(temp)
 
-        ctx.json(user.toJson(showAll = true))
+        ctx.json(obj = user.toJson(showAll = true))
     }
 
     @OpenApi(
         description = "Remove Book from User wished list",
         methods = [HttpMethod.DELETE],
-        operationId = "removeBookFromUserWishedList",
+        operationId = "removeWishedBook",
         path = "/users/{user-id}/wished",
         pathParams = [OpenApiParam(name = "user-id", type = Long::class, required = true)],
         requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)], required = true),
@@ -302,6 +303,6 @@ object UserApiRouter : CrudHandler, Logging {
         temp.remove(book)
         user.wishedBooks = SizedCollection(temp)
 
-        ctx.json(user.toJson(showAll = true))
+        ctx.json(obj = user.toJson(showAll = true))
     }
 }
