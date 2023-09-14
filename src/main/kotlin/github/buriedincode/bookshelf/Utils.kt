@@ -19,7 +19,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-
 object Utils : Logging {
     private val HOME_ROOT: String = System.getProperty("user.home")
 
@@ -33,7 +32,7 @@ object Utils : Logging {
 
     private val database: Database = Database.connect(
         url = "jdbc:sqlite:${DATA_ROOT}/${Settings.load().database.name}",
-        driver = "org.sqlite.JDBC"
+        driver = "org.sqlite.JDBC",
     )
 
     internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
@@ -46,17 +45,13 @@ object Utils : Logging {
                 .configure(KotlinFeature.NullIsSameAsDefault, true)
                 .configure(KotlinFeature.SingletonSupport, false)
                 .configure(KotlinFeature.StrictNullChecks, true)
-                .build()
+                .build(),
         )
         .build()
 
     internal fun <T> query(block: () -> T): T {
         val startTime = LocalDateTime.now()
-        val transaction = transaction(
-            transactionIsolation = Connection.TRANSACTION_SERIALIZABLE,
-            repetitionAttempts = 1,
-            db = database
-        ) {
+        val transaction = transaction(transactionIsolation = Connection.TRANSACTION_SERIALIZABLE, db = database) {
             addLogger(Slf4jSqlDebugLogger)
             block()
         }
@@ -65,24 +60,27 @@ object Utils : Logging {
     }
 
     init {
-        if (!Files.exists(CACHE_ROOT))
+        if (!Files.exists(CACHE_ROOT)) {
             try {
                 Files.createDirectories(CACHE_ROOT)
             } catch (ioe: IOException) {
                 logger.error("Unable to create cache folder", ioe)
             }
-        if (!Files.exists(CONFIG_ROOT))
+        }
+        if (!Files.exists(CONFIG_ROOT)) {
             try {
                 Files.createDirectories(CONFIG_ROOT)
             } catch (ioe: IOException) {
                 logger.error("Unable to create config folder", ioe)
             }
-        if (!Files.exists(DATA_ROOT))
+        }
+        if (!Files.exists(DATA_ROOT)) {
             try {
                 Files.createDirectories(DATA_ROOT)
             } catch (ioe: IOException) {
                 logger.error("Unable to create data folder", ioe)
             }
+        }
     }
 
     fun getUserDateFormatter(date: LocalDate): DateTimeFormatter {
@@ -92,11 +90,13 @@ object Utils : Logging {
     private fun getDayNumberSuffix(day: Int): String {
         return if (day in 11..13) {
             "th"
-        } else when (day % 10) {
-            1 -> "st"
-            2 -> "nd"
-            3 -> "rd"
-            else -> "th"
+        } else {
+            when (day % 10) {
+                1 -> "st"
+                2 -> "nd"
+                3 -> "rd"
+                else -> "th"
+            }
         }
     }
 

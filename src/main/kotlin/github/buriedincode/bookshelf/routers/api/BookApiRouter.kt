@@ -4,13 +4,47 @@ import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.Utils.asEnumOrNull
 import github.buriedincode.bookshelf.docs.BookEntry
-import github.buriedincode.bookshelf.models.*
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.BookCreatorRole
+import github.buriedincode.bookshelf.models.BookCreditInput
+import github.buriedincode.bookshelf.models.BookImport
+import github.buriedincode.bookshelf.models.BookInput
+import github.buriedincode.bookshelf.models.BookSeries
+import github.buriedincode.bookshelf.models.BookSeriesInput
+import github.buriedincode.bookshelf.models.Creator
+import github.buriedincode.bookshelf.models.Format
+import github.buriedincode.bookshelf.models.Genre
+import github.buriedincode.bookshelf.models.IdValue
+import github.buriedincode.bookshelf.models.Publisher
+import github.buriedincode.bookshelf.models.ReadBook
+import github.buriedincode.bookshelf.models.Role
+import github.buriedincode.bookshelf.models.Series
+import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.services.OpenLibrary
-import github.buriedincode.bookshelf.services.openlibrary.*
-import github.buriedincode.bookshelf.tables.*
-import io.javalin.apibuilder.*
-import io.javalin.http.*
-import io.javalin.openapi.*
+import github.buriedincode.bookshelf.services.openlibrary.Edition
+import github.buriedincode.bookshelf.services.openlibrary.Work
+import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
+import github.buriedincode.bookshelf.tables.BookSeriesTable
+import github.buriedincode.bookshelf.tables.BookTable
+import github.buriedincode.bookshelf.tables.CreatorTable
+import github.buriedincode.bookshelf.tables.GenreTable
+import github.buriedincode.bookshelf.tables.PublisherTable
+import github.buriedincode.bookshelf.tables.ReadBookTable
+import github.buriedincode.bookshelf.tables.RoleTable
+import io.javalin.apibuilder.CrudHandler
+import io.javalin.http.BadRequestResponse
+import io.javalin.http.ConflictResponse
+import io.javalin.http.Context
+import io.javalin.http.HttpStatus
+import io.javalin.http.NotFoundResponse
+import io.javalin.http.NotImplementedResponse
+import io.javalin.http.bodyValidator
+import io.javalin.openapi.HttpMethod
+import io.javalin.openapi.OpenApi
+import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiParam
+import io.javalin.openapi.OpenApiRequestBody
+import io.javalin.openapi.OpenApiResponse
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
@@ -43,56 +77,66 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiParam(name = "title", type = String::class),
         ],
         responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(Array<BookEntry>::class)])
+            OpenApiResponse(status = "200", content = [OpenApiContent(Array<BookEntry>::class)]),
         ],
         summary = "List all Books",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         var books = Book.all().toList()
         val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let {
             Creator.findById(id = it)
         }
-        if (creator != null)
+        if (creator != null) {
             books = books.filter {
                 creator in it.credits.map { it.creator }
             }
+        }
         val format: Format? = ctx.queryParam("format")?.asEnumOrNull<Format>()
-        if (format != null)
+        if (format != null) {
             books = books.filter {
                 it.format == format
             }
+        }
         val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let {
             Genre.findById(id = it)
         }
-        if (genre != null)
+        if (genre != null) {
             books = books.filter {
                 genre in it.genres
             }
+        }
         val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
             Publisher.findById(id = it)
         }
-        if (publisher != null)
+        if (publisher != null) {
             books = books.filter {
                 it.publisher == publisher
             }
+        }
         val series = ctx.queryParam("series-id")?.toLongOrNull()?.let {
             Series.findById(id = it)
         }
-        if (series != null)
+        if (series != null) {
             books = books.filter {
                 series in it.series.map { it.series }
             }
+        }
         val title = ctx.queryParam("title")
-        if (title != null)
+        if (title != null) {
             books = books.filter {
-                (it.title.contains(title, ignoreCase = true) || title.contains(
-                    it.title,
-                    ignoreCase = true
-                )) || (it.subtitle?.let {
-                    it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                } ?: false)
+                (
+                    it.title.contains(title, ignoreCase = true) || title.contains(
+                        it.title,
+                        ignoreCase = true,
+                    )
+                    ) || (
+                    it.subtitle?.let {
+                        it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                    } ?: false
+                    )
             }
+        }
         ctx.json(books.sorted().map { it.toJson() })
     }
 
@@ -109,22 +153,25 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Create Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     override fun create(ctx: Context): Unit = Utils.query {
         val body = ctx.getBody()
         val exists = Book.find {
             (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null) {
             throw ConflictResponse(message = "Book already exists")
+        }
         val book = Book.new {
             description = body.description
             format = body.format
-            genres = SizedCollection(body.genreIds.map {
-                Genre.findById(id = it)
-                    ?: throw NotFoundResponse(message = "Genre not found")
-            })
+            genres = SizedCollection(
+                body.genreIds.map {
+                    Genre.findById(id = it)
+                        ?: throw NotFoundResponse(message = "Genre not found")
+                },
+            )
             goodreadsId = body.goodreadsId
             googleBooksId = body.googleBooksId
             imageUrl = body.imageUrl
@@ -139,10 +186,12 @@ object BookApiRouter : CrudHandler, Logging {
             }
             subtitle = body.subtitle
             title = body.title
-            wishers = SizedCollection(body.wisherIds.map {
-                User.findById(id = it)
-                    ?: throw NotFoundResponse(message = "Wisher not found")
-            })
+            wishers = SizedCollection(
+                body.wisherIds.map {
+                    User.findById(id = it)
+                        ?: throw NotFoundResponse(message = "Wisher not found")
+                },
+            )
         }
         body.credits.forEach {
             val creator = Creator.findById(id = it.creatorId)
@@ -188,7 +237,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Get Book by id",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
         val book = getResource(resourceId = resourceId)
@@ -209,7 +258,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Update Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
         val book = getResource(resourceId = resourceId)
@@ -217,14 +266,17 @@ object BookApiRouter : CrudHandler, Logging {
         val exists = Book.find {
             (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
         }.firstOrNull()
-        if (exists != null && exists != book)
+        if (exists != null && exists != book) {
             throw ConflictResponse(message = "Book already exists")
+        }
         book.description = body.description
         book.format = body.format
-        book.genres = SizedCollection(body.genreIds.map {
-            Genre.findById(id = it)
-                ?: throw NotFoundResponse(message = "Genre not found")
-        })
+        book.genres = SizedCollection(
+            body.genreIds.map {
+                Genre.findById(id = it)
+                    ?: throw NotFoundResponse(message = "Genre not found")
+            },
+        )
         book.goodreadsId = body.goodreadsId
         book.googleBooksId = body.googleBooksId
         book.imageUrl = body.imageUrl
@@ -239,24 +291,29 @@ object BookApiRouter : CrudHandler, Logging {
         }
         book.subtitle = body.subtitle
         book.title = body.title
-        book.wishers = SizedCollection(body.wisherIds.map {
-            User.findById(id = it)
-                ?: throw NotFoundResponse(message = "User not found")
-        })
+        book.wishers = SizedCollection(
+            body.wisherIds.map {
+                User.findById(id = it)
+                    ?: throw NotFoundResponse(message = "User not found")
+            },
+        )
         body.credits.forEach {
             val creator = Creator.findById(id = it.creatorId)
                 ?: throw NotFoundResponse(message = "Creator not found")
             val role = Role.findById(id = it.roleId)
                 ?: throw NotFoundResponse(message = "Role not found")
             val bookCreatorRole = BookCreatorRole.find {
-                (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq creator.id) and (BookCreatorRoleTable.roleCol eq role.id)
+                (BookCreatorRoleTable.bookCol eq book.id) and
+                    (BookCreatorRoleTable.creatorCol eq creator.id) and
+                    (BookCreatorRoleTable.roleCol eq role.id)
             }.firstOrNull()
-            if (bookCreatorRole == null)
+            if (bookCreatorRole == null) {
                 BookCreatorRole.new {
                     this.book = book
                     this.creator = creator
                     this.role = role
                 }
+            }
         }
         body.readers.forEach {
             val user = User.findById(id = it.userId)
@@ -264,11 +321,12 @@ object BookApiRouter : CrudHandler, Logging {
             val readBook = ReadBook.find {
                 (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
             }.firstOrNull()
-            if (readBook == null)
+            if (readBook == null) {
                 ReadBook.new {
                     this.book = book
                     this.user = user
                 }
+            }
         }
         body.series.forEach {
             val series = Series.findById(id = it.seriesId)
@@ -276,14 +334,15 @@ object BookApiRouter : CrudHandler, Logging {
             val bookSeries = BookSeries.find {
                 (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
             }.firstOrNull()
-            if (bookSeries == null)
+            if (bookSeries == null) {
                 BookSeries.new {
                     this.book = book
                     this.series = series
                     number = if (it.number == 0) null else it.number
                 }
-            else
+            } else {
                 bookSeries.number = if (it.number == 0) null else it.number
+            }
         }
 
         ctx.json(book.toJson(showAll = true))
@@ -301,7 +360,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Delete Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val book = getResource(resourceId = resourceId)
@@ -320,8 +379,14 @@ object BookApiRouter : CrudHandler, Logging {
 
     private fun Context.getImportBody(): BookImport = this.bodyValidator<BookImport>()
         .check(
-            { !it.goodreadsId.isNullOrBlank() || !it.googleBooksId.isNullOrBlank() || !it.isbn.isNullOrBlank() || !it.libraryThingId.isNullOrBlank() || !it.openLibraryId.isNullOrBlank() },
-            error = "At least 1 id to import must be specified"
+            {
+                !it.goodreadsId.isNullOrBlank() ||
+                    !it.googleBooksId.isNullOrBlank() ||
+                    !it.isbn.isNullOrBlank() ||
+                    !it.libraryThingId.isNullOrBlank() ||
+                    !it.openLibraryId.isNullOrBlank()
+            },
+            error = "At least 1 id to import must be specified",
         )
         .get()
 
@@ -336,7 +401,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Import Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun importBook(ctx: Context): Unit = Utils.query {
         val body = ctx.getImportBody()
@@ -351,29 +416,40 @@ object BookApiRouter : CrudHandler, Logging {
             val temp = OpenLibrary.lookupBook(isbn = body.isbn)
             edition = temp.first
             work = temp.second
-        } else
+        } else {
             throw NotImplementedResponse(message = "Only import via OpenLibrary edition id or Isbn currently supported.")
-        val exists = if (edition.isbn == null)
+        }
+        val exists = if (edition.isbn == null) {
             Book.find {
-                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId)
+                (
+                    (BookTable.titleCol eq edition.title) and
+                        (BookTable.subtitleCol eq edition.subtitle)
+                    ) or (BookTable.openLibraryCol eq edition.editionId)
             }.firstOrNull()
-        else
+        } else {
             Book.find {
-                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
+                (
+                    (BookTable.titleCol eq edition.title) and
+                        (BookTable.subtitleCol eq edition.subtitle)
+                    ) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
             }.firstOrNull()
-        if (exists != null)
+        }
+        if (exists != null) {
             throw ConflictResponse(message = "This Book already exists in the database.")
+        }
 
         val book = Book.new {
             description = edition.description ?: work.description
             format = Format.PAPERBACK // TODO
-            genres = SizedCollection(edition.genres.map {
-                Genre.find {
-                    GenreTable.titleCol eq it
-                }.firstOrNull() ?: Genre.new {
-                    title = it
-                }
-            })
+            genres = SizedCollection(
+                edition.genres.map {
+                    Genre.find {
+                        GenreTable.titleCol eq it
+                    }.firstOrNull() ?: Genre.new {
+                        title = it
+                    }
+                },
+            )
             goodreadsId = edition.identifiers.goodreads.firstOrNull()
             googleBooksId = edition.identifiers.google.firstOrNull()
             imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
@@ -391,10 +467,12 @@ object BookApiRouter : CrudHandler, Logging {
             }
             subtitle = edition.subtitle
             title = edition.title
-            wishers = SizedCollection(body.wisherIds.map {
-                User.findById(id = it)
-                    ?: throw NotFoundResponse(message = "User not found")
-            })
+            wishers = SizedCollection(
+                body.wisherIds.map {
+                    User.findById(id = it)
+                        ?: throw NotFoundResponse(message = "User not found")
+                },
+            )
         }
         work.authors.map {
             OpenLibrary.getAuthor(authorId = it.authorId)
@@ -405,7 +483,7 @@ object BookApiRouter : CrudHandler, Logging {
                 name = it.name
             }
             it.photos.firstOrNull()?.let {
-                creator.imageUrl = "https://covers.openlibrary.org/a/id/${it}-L.jpg"
+                creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
             }
             creator
         }.forEach {
@@ -449,7 +527,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Refresh Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun refreshBook(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
@@ -464,28 +542,39 @@ object BookApiRouter : CrudHandler, Logging {
             val temp = OpenLibrary.lookupBook(isbn = book.isbn!!)
             edition = temp.first
             work = temp.second
-        } else
+        } else {
             throw NotImplementedResponse(message = "Only refresh via OpenLibrary edition id or Isbn currently supported.")
-        val exists = if (edition.isbn == null)
+        }
+        val exists = if (edition.isbn == null) {
             Book.find {
-                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId)
+                (
+                    (BookTable.titleCol eq edition.title) and
+                        (BookTable.subtitleCol eq edition.subtitle)
+                    ) or (BookTable.openLibraryCol eq edition.editionId)
             }.firstOrNull()
-        else
+        } else {
             Book.find {
-                ((BookTable.titleCol eq edition.title) and (BookTable.subtitleCol eq edition.subtitle)) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
+                (
+                    (BookTable.titleCol eq edition.title) and
+                        (BookTable.subtitleCol eq edition.subtitle)
+                    ) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
             }.firstOrNull()
-        if (exists != null && exists != book)
+        }
+        if (exists != null && exists != book) {
             throw ConflictResponse(message = "This Book already exists in the database.")
+        }
 
         book.description = edition.description ?: work.description
         // book.format = Format.PAPERBACK
-        book.genres = SizedCollection(edition.genres.map {
-            Genre.find {
-                GenreTable.titleCol eq it
-            }.firstOrNull() ?: Genre.new {
-                title = it
-            }
-        })
+        book.genres = SizedCollection(
+            edition.genres.map {
+                Genre.find {
+                    GenreTable.titleCol eq it
+                }.firstOrNull() ?: Genre.new {
+                    title = it
+                }
+            },
+        )
         book.goodreadsId = edition.identifiers.goodreads.firstOrNull()
         book.googleBooksId = edition.identifiers.google.firstOrNull()
         book.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
@@ -511,7 +600,7 @@ object BookApiRouter : CrudHandler, Logging {
                 name = it.name
             }
             it.photos.firstOrNull()?.let {
-                creator.imageUrl = "https://covers.openlibrary.org/a/id/${it}-L.jpg"
+                creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
             }
             creator
         }.forEach {
@@ -521,7 +610,9 @@ object BookApiRouter : CrudHandler, Logging {
                 title = "Author"
             }
             BookCreatorRole.find {
-                (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq it.id) and (BookCreatorRoleTable.roleCol eq role.id)
+                (BookCreatorRoleTable.bookCol eq book.id) and
+                    (BookCreatorRoleTable.creatorCol eq it.id) and
+                    (BookCreatorRoleTable.roleCol eq role.id)
             }.firstOrNull() ?: BookCreatorRole.new {
                 this.book = book
                 creator = it
@@ -540,7 +631,9 @@ object BookApiRouter : CrudHandler, Logging {
                 title = it.role
             }
             BookCreatorRole.find {
-                (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq creator.id) and (BookCreatorRoleTable.roleCol eq role.id)
+                (BookCreatorRoleTable.bookCol eq book.id) and
+                    (BookCreatorRoleTable.creatorCol eq creator.id) and
+                    (BookCreatorRoleTable.roleCol eq role.id)
             }.firstOrNull() ?: BookCreatorRole.new {
                 this.book = book
                 this.creator = creator
@@ -563,7 +656,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Collect Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun collectBook(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
@@ -584,7 +677,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Discard Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun discardBook(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
@@ -612,20 +705,22 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Reader to Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun addReader(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
-        if (!book.isCollected)
+        if (!book.isCollected) {
             throw BadRequestResponse(message = "Book hasn't been collected to be able to read")
+        }
         val body = ctx.getIdValue()
         val user = User.findById(id = body.id)
             ?: throw NotFoundResponse(message = "User not found")
         val exists = ReadBook.find {
             (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null) {
             throw BadRequestResponse(message = "Book has already been read by User")
+        }
         ReadBook.new {
             this.book = book
             this.user = user
@@ -648,12 +743,13 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Reader from Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun removeReader(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
-        if (!book.isCollected)
+        if (!book.isCollected) {
             throw BadRequestResponse(message = "Book hasn't been collected to be able to unread")
+        }
         val body = ctx.getIdValue()
         val user = User.findById(id = body.id)
             ?: throw NotFoundResponse(message = "User not found")
@@ -678,17 +774,19 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Wisher to Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun addWisher(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
-        if (book.isCollected)
+        if (book.isCollected) {
             throw BadRequestResponse(message = "Book has already been collected")
+        }
         val body = ctx.getIdValue()
         val user = User.findById(id = body.id)
             ?: throw NotFoundResponse(message = "User not found")
-        if (user in book.wishers)
+        if (user in book.wishers) {
             throw BadRequestResponse(message = "Book has already been wished by User")
+        }
         val temp = book.wishers.toMutableList()
         temp.add(user)
         book.wishers = SizedCollection(temp)
@@ -709,17 +807,19 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Wisher from Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun removeWisher(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
-        if (book.isCollected)
+        if (book.isCollected) {
             throw BadRequestResponse(message = "Book has already been collected")
+        }
         val body = ctx.getIdValue()
         val user = User.findById(id = body.id)
             ?: throw NotFoundResponse(message = "User not found")
-        if (!book.wishers.contains(user))
+        if (!book.wishers.contains(user)) {
             throw BadRequestResponse(message = "Book hasn't been wished by User")
+        }
         val temp = book.wishers.toMutableList()
         temp.remove(user)
         book.wishers = SizedCollection(temp)
@@ -744,7 +844,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Credit to Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun addCredit(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
@@ -754,16 +854,19 @@ object BookApiRouter : CrudHandler, Logging {
         val role = Role.findById(id = body.roleId)
             ?: throw NotFoundResponse(message = "Role not found")
         val credit = BookCreatorRole.find {
-            (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq creator.id) and (BookCreatorRoleTable.roleCol eq role.id)
+            (BookCreatorRoleTable.bookCol eq book.id) and
+                (BookCreatorRoleTable.creatorCol eq creator.id) and
+                (BookCreatorRoleTable.roleCol eq role.id)
         }.firstOrNull()
         if (credit != null) {
             throw ConflictResponse(message = "Book Creator already has this role")
-        } else
+        } else {
             BookCreatorRole.new {
                 this.book = book
                 this.creator = creator
                 this.role = role
             }
+        }
 
         ctx.json(book.toJson(showAll = true))
     }
@@ -781,7 +884,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Credit from Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun removeCredit(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
@@ -791,7 +894,9 @@ object BookApiRouter : CrudHandler, Logging {
         val role = Role.findById(id = body.roleId)
             ?: throw NotFoundResponse(message = "Role not found")
         val credit = BookCreatorRole.find {
-            (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq creator.id) and (BookCreatorRoleTable.roleCol eq role.id)
+            (BookCreatorRoleTable.bookCol eq book.id) and
+                (BookCreatorRoleTable.creatorCol eq creator.id) and
+                (BookCreatorRoleTable.roleCol eq role.id)
         }.firstOrNull() ?: throw NotFoundResponse(message = "Unable to find Book Creator Role")
         credit.delete()
 
@@ -812,15 +917,16 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Genre to Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun addGenre(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getIdValue()
         val genre = Genre.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Genre not found")
-        if (genre in book.genres)
+        if (genre in book.genres) {
             throw ConflictResponse(message = "Genre is already linked to Book")
+        }
         val temp = book.genres.toMutableList()
         temp.add(genre)
         book.genres = SizedCollection(temp)
@@ -841,15 +947,16 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Genre from Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun removeGenre(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
         val body = ctx.getIdValue()
         val genre = Genre.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Genre not found")
-        if (!book.genres.contains(genre))
+        if (!book.genres.contains(genre)) {
             throw BadRequestResponse(message = "Genre is already linked to Book")
+        }
         val temp = book.genres.toMutableList()
         temp.remove(genre)
         book.genres = SizedCollection(temp)
@@ -875,7 +982,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Series to Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun addSeries(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))
@@ -885,8 +992,9 @@ object BookApiRouter : CrudHandler, Logging {
         val bookSeries = BookSeries.find {
             (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
         }.firstOrNull()
-        if (bookSeries != null)
+        if (bookSeries != null) {
             throw ConflictResponse(message = "Series already is linked to Series")
+        }
         BookSeries.new {
             this.book = book
             this.series = series
@@ -909,7 +1017,7 @@ object BookApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Series from Book",
-        tags = ["Book"]
+        tags = ["Book"],
     )
     fun removeSeries(ctx: Context): Unit = Utils.query {
         val book = getResource(resourceId = ctx.pathParam("book-id"))

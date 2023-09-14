@@ -6,5 +6,5 @@ enum class Format {
     HARDBACK,
     MANGA,
     PAPERBACK,
-    TRADEPAPERBACK
+    TRADEPAPERBACK,
 }

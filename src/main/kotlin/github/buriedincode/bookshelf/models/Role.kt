@@ -18,15 +18,16 @@ class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
     fun toJson(showAll: Boolean = false): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "roleId" to id.value,
-            "title" to title
+            "title" to title,
         )
-        if (showAll)
+        if (showAll) {
             output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.book }.thenBy { it.creator }).map {
                 mapOf(
                     "book" to it.book.toJson(),
-                    "creator" to it.creator.toJson()
+                    "creator" to it.creator.toJson(),
                 )
             }
+        }
         return output.toSortedMap()
     }
 
@@ -35,10 +36,10 @@ class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
 
 data class RoleInput(
     val credits: List<RoleCreditInput> = ArrayList(),
-    val title: String
+    val title: String,
 )
 
 data class RoleCreditInput(
     val bookId: Long,
-    val creatorId: Long
+    val creatorId: Long,
 )

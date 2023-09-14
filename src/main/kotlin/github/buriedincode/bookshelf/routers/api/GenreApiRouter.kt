@@ -3,11 +3,24 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.GenreEntry
-import github.buriedincode.bookshelf.models.*
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.Genre
+import github.buriedincode.bookshelf.models.GenreInput
+import github.buriedincode.bookshelf.models.IdValue
 import github.buriedincode.bookshelf.tables.GenreTable
 import io.javalin.apibuilder.CrudHandler
-import io.javalin.http.*
-import io.javalin.openapi.*
+import io.javalin.http.BadRequestResponse
+import io.javalin.http.ConflictResponse
+import io.javalin.http.Context
+import io.javalin.http.HttpStatus
+import io.javalin.http.NotFoundResponse
+import io.javalin.http.bodyValidator
+import io.javalin.openapi.HttpMethod
+import io.javalin.openapi.OpenApi
+import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiParam
+import io.javalin.openapi.OpenApiRequestBody
+import io.javalin.openapi.OpenApiResponse
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 
@@ -34,18 +47,19 @@ object GenreApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<GenreEntry>::class)]),
         ],
         summary = "List all Genres",
-        tags = ["Genre"]
+        tags = ["Genre"],
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         var genres = Genre.all().toList()
         val title = ctx.queryParam("title")
-        if (title != null)
+        if (title != null) {
             genres = genres.filter {
                 it.title.contains(title, ignoreCase = true) || title.contains(
                     it.title,
-                    ignoreCase = true
+                    ignoreCase = true,
                 )
             }
+        }
         ctx.json(genres.sorted().map { it.toJson() })
     }
 
@@ -58,27 +72,30 @@ object GenreApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "201",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Create Genre",
-        tags = ["Genre"]
+        tags = ["Genre"],
     )
     override fun create(ctx: Context): Unit = Utils.query {
         val body = ctx.getBody()
         val exists = Genre.find {
             GenreTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null) {
             throw ConflictResponse(message = "Genre already exists")
+        }
         val genre = Genre.new {
-            books = SizedCollection(body.bookIds.map {
-                Book.findById(id = it)
-                    ?: throw NotFoundResponse(message = "Book not found")
-            })
+            books = SizedCollection(
+                body.bookIds.map {
+                    Book.findById(id = it)
+                        ?: throw NotFoundResponse(message = "Book not found")
+                },
+            )
             title = body.title
         }
 
@@ -94,13 +111,13 @@ object GenreApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Get Genre by id",
-        tags = ["Genre"]
+        tags = ["Genre"],
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
         val genre = getResource(resourceId = resourceId)
@@ -117,14 +134,14 @@ object GenreApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Update Genre",
-        tags = ["Genre"]
+        tags = ["Genre"],
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
         val genre = getResource(resourceId = resourceId)
@@ -132,12 +149,15 @@ object GenreApiRouter : CrudHandler, Logging {
         val exists = Genre.find {
             GenreTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null && exists != genre)
+        if (exists != null && exists != genre) {
             throw ConflictResponse(message = "Genre already exists")
-        genre.books = SizedCollection(body.bookIds.map {
-            Book.findById(id = it)
-                ?: throw NotFoundResponse(message = "Book not found")
-        })
+        }
+        genre.books = SizedCollection(
+            body.bookIds.map {
+                Book.findById(id = it)
+                    ?: throw NotFoundResponse(message = "Book not found")
+            },
+        )
         genre.title = body.title
 
         ctx.json(genre.toJson(showAll = true))
@@ -155,7 +175,7 @@ object GenreApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Delete Genre",
-        tags = ["Genre"]
+        tags = ["Genre"],
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val genre = getResource(resourceId = resourceId)
@@ -177,22 +197,23 @@ object GenreApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Book to Genre",
-        tags = ["Genre"]
+        tags = ["Genre"],
     )
     fun addBook(ctx: Context): Unit = Utils.query {
         val genre = getResource(resourceId = ctx.pathParam("genre-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")
-        if (book in genre.books)
+        if (book in genre.books) {
             throw ConflictResponse(message = "Book already is linked to Genre")
+        }
         val temp = genre.books.toMutableList()
         temp.add(book)
         genre.books = SizedCollection(temp)
@@ -210,21 +231,22 @@ object GenreApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Genre::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Book from Genre",
-        tags = ["Genre"]
+        tags = ["Genre"],
     )
     fun removeBook(ctx: Context): Unit = Utils.query {
         val genre = getResource(resourceId = ctx.pathParam("genre-id"))
         val body = ctx.getIdValue()
         val book = Book.findById(id = body.id)
             ?: throw NotFoundResponse(message = "Book not found")
-        if (!genre.books.contains(book))
+        if (!genre.books.contains(book)) {
             throw BadRequestResponse(message = "Book isn't linked to Genre")
+        }
         val temp = genre.books.toMutableList()
         temp.remove(book)
         genre.books = SizedCollection(temp)

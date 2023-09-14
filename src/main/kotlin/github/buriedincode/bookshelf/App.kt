@@ -3,19 +3,35 @@ package github.buriedincode.bookshelf
 import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
-import github.buriedincode.bookshelf.Utils.VERSION
 import github.buriedincode.bookshelf.models.User
-import github.buriedincode.bookshelf.routers.*
-import github.buriedincode.bookshelf.routers.api.*
+import github.buriedincode.bookshelf.routers.BookHtmlRouter
+import github.buriedincode.bookshelf.routers.CreatorHtmlRouter
+import github.buriedincode.bookshelf.routers.GenreHtmlRouter
+import github.buriedincode.bookshelf.routers.PublisherHtmlRouter
+import github.buriedincode.bookshelf.routers.RoleHtmlRouter
+import github.buriedincode.bookshelf.routers.SeriesHtmlRouter
+import github.buriedincode.bookshelf.routers.UserHtmlRouter
+import github.buriedincode.bookshelf.routers.api.BookApiRouter
+import github.buriedincode.bookshelf.routers.api.CreatorApiRouter
+import github.buriedincode.bookshelf.routers.api.GenreApiRouter
+import github.buriedincode.bookshelf.routers.api.PublisherApiRouter
+import github.buriedincode.bookshelf.routers.api.RoleApiRouter
+import github.buriedincode.bookshelf.routers.api.SeriesApiRouter
+import github.buriedincode.bookshelf.routers.api.UserApiRouter
 import io.javalin.Javalin
-import io.javalin.apibuilder.ApiBuilder.*
+import io.javalin.apibuilder.ApiBuilder.crud
+import io.javalin.apibuilder.ApiBuilder.delete
+import io.javalin.apibuilder.ApiBuilder.get
+import io.javalin.apibuilder.ApiBuilder.patch
+import io.javalin.apibuilder.ApiBuilder.path
+import io.javalin.apibuilder.ApiBuilder.post
+import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.http.BadRequestResponse
 import io.javalin.openapi.OpenApiContact
-import io.javalin.openapi.OpenApiInfo
 import io.javalin.openapi.OpenApiLicense
 import io.javalin.openapi.OpenApiServer
-import io.javalin.openapi.plugin.OpenApiConfiguration
 import io.javalin.openapi.plugin.OpenApiPlugin
+import io.javalin.openapi.plugin.OpenApiPluginConfiguration
 import io.javalin.openapi.plugin.redoc.ReDocConfiguration
 import io.javalin.openapi.plugin.redoc.ReDocPlugin
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
@@ -44,8 +60,8 @@ object App : Logging {
         return "${duration.toMillis()}ms"
     }
 
-    private fun createTemplateEngine(): TemplateEngine {
-        return if (Settings.load().env == Environment.DEV) {
+    private fun createTemplateEngine(environment: Environment): TemplateEngine {
+        return if (environment == Environment.DEV) {
             val codeResolver = DirectoryCodeResolver(Path.of("src", "main", "jte"))
             TemplateEngine.create(codeResolver, ContentType.Html)
         } else {
@@ -54,7 +70,7 @@ object App : Logging {
     }
 
     fun start(settings: Settings) {
-        val engine = createTemplateEngine()
+        val engine = createTemplateEngine(environment = settings.env)
         // engine.setTrimControlStructures = true
         JavalinJte.init(templateEngine = engine)
         val app = Javalin.create {
@@ -75,29 +91,41 @@ object App : Logging {
                 it.hostedPath = "/static"
                 it.directory = "/static"
             }
-            it.plugins.register(OpenApiPlugin(OpenApiConfiguration().apply {
-                info = OpenApiInfo().apply {
-                    title = "Bookshelf API"
-                    description = "Lots and lots of well described and documented APIs."
-                    contact = OpenApiContact().apply {
-                        name = "Jonah Jackson"
-                        url = "https://github.com/Buried-In-Code/Bookshelf"
-                        email = "BuriedInCode@tuta.io"
-                    }
-                    license = OpenApiLicense().apply {
-                        name = "MIT License"
-                        identifier = "MIT"
-                    }
-                    version = VERSION
-                }
-                servers = arrayOf(OpenApiServer().apply {
-                    url = "http://${settings.website.host}:${settings.website.port}/api/"
-                    description = "Local DEV Server"
-                })
-            }))
-            it.plugins.register(SwaggerPlugin(SwaggerConfiguration().apply {
-                uiPath = "/docs"
-            }))
+            it.plugins.register(
+                OpenApiPlugin(
+                    configuration = OpenApiPluginConfiguration().apply {
+                        withDefinitionConfiguration { _, definition ->
+                            definition.withOpenApiInfo {
+                                it.title = "Bookshelf API"
+                                it.summary = "Lots and lots of well described and documented APIs."
+                                it.contact = OpenApiContact().apply {
+                                    name = "Jonah Jackson"
+                                    url = "https://github.com/Buried-In-Code/Bookshelf"
+                                    email = "BuriedInCode@tuta.io"
+                                }
+                                it.license = OpenApiLicense().apply {
+                                    name = "MIT License"
+                                    identifier = "MIT"
+                                }
+                                it.version = Utils.VERSION
+                            }
+                            definition.withServer {
+                                OpenApiServer().apply {
+                                    url = "http://${settings.website.host}:${settings.website.port}/api"
+                                    description = "Local DEV Server"
+                                }
+                            }
+                        }
+                    },
+                ),
+            )
+            it.plugins.register(
+                SwaggerPlugin(
+                    SwaggerConfiguration().apply {
+                        uiPath = "/docs"
+                    },
+                ),
+            )
             it.plugins.register(ReDocPlugin(ReDocConfiguration()))
         }
         app.routes {
@@ -106,10 +134,11 @@ object App : Logging {
                     Utils.query {
                         val cookie = ctx.cookie("session-id")?.toLongOrNull() ?: -1L
                         val session = User.findById(id = cookie)
-                        if (session == null)
+                        if (session == null) {
                             ctx.render("templates/index.kte")
-                        else
+                        } else {
                             ctx.redirect("/users/${session.id.value}")
+                        }
                     }
                 }
                 path("books") {
@@ -237,8 +266,12 @@ object App : Logging {
                     }
                 }
                 path("users") {
+                    get(UserApiRouter::listEndpoint)
+                    post(UserApiRouter::createEndpoint)
                     path("{user-id}") {
-                        crud(UserApiRouter)
+                        get(UserApiRouter::getEndpoint)
+                        put(UserApiRouter::updateEndpoint)
+                        delete(UserApiRouter::deleteEndpoint)
                         path("read") {
                             patch(UserApiRouter::addReadBook)
                             delete(UserApiRouter::removeReadBook)
@@ -260,7 +293,7 @@ object App : Logging {
             }
             throw BadRequestResponse(
                 message = "Validation Error",
-                details = details.mapValues { it.value.joinToString(", ") }
+                details = details.mapValues { it.value.joinToString(", ") },
             )
         }
         app.start(settings.website.host, settings.website.port)

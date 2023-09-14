@@ -2,7 +2,7 @@ package github.buriedincode.bookshelf.docs
 
 class RoleEntry(
     val roleId: Long,
-    val title: String
+    val title: String,
 )
 
 class Role(
@@ -13,5 +13,5 @@ class Role(
 
 class RoleCredit(
     val book: BookEntry,
-    val creator: CreatorEntry
+    val creator: CreatorEntry,
 )

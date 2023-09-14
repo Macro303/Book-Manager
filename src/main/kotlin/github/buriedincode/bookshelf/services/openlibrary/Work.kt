@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Resource(
-    val key: String
+    val key: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AuthorResource(
-    val author: Resource
+    val author: Resource,
 ) {
     val authorId: String
         get() = author.key.split("/").last()

@@ -1,15 +1,16 @@
 plugins {
     kotlin("jvm") version "1.9.0"
-    id("gg.jte.gradle") version "3.0.1"
-    kotlin("kapt") version "1.9.0"
+    kotlin("kapt") version "1.9.10"
     application
+    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
     id("com.github.ben-manes.versions") version "0.47.0"
+    id("gg.jte.gradle") version "3.0.3"
 }
 
 group = "github.buriedincode"
 version = "0.1.0"
 
-println("Bookshelf v${version}")
+println("Bookshelf v$version")
 println("Kotlin v${KotlinVersion.CURRENT}")
 println("Java v${System.getProperty("java.version")}")
 println("Arch: ${System.getProperty("os.arch")}")
@@ -17,46 +18,51 @@ println("Arch: ${System.getProperty("os.arch")}")
 repositories {
     mavenCentral()
     mavenLocal()
+    maven("https://maven.reposilite.com/snapshots")
 }
 
 dependencies {
-    runtimeOnly("org.xerial:sqlite-jdbc:3.42.0.0")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.42.0.0")
 
     // Exposed
-    val exposedVersion = "0.41.1"
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+    val exposedVersion = "0.42.0"
+    implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
+    implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
+    implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
+    implementation("org.jetbrains.exposed", "exposed-java-time", exposedVersion)
 
     // Hoplite
     val hopliteVersion = "2.7.4"
-    implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
-    implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
+    implementation("com.sksamuel.hoplite", "hoplite-core", hopliteVersion)
+    implementation("com.sksamuel.hoplite", "hoplite-hocon", hopliteVersion)
+    implementation("com.sksamuel.hoplite", "hoplite-json", hopliteVersion)
+    implementation("com.sksamuel.hoplite", "hoplite-toml", hopliteVersion)
+    implementation("com.sksamuel.hoplite", "hoplite-yaml", hopliteVersion)
 
     // Jackson
     val jacksonVersion = "2.15.2"
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("com.fasterxml.jackson.core", "jackson-databind", jacksonVersion)
+    implementation("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
+    implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonVersion)
 
     // Javalin
-    val javalinVersion = "5.6.1"
-    implementation("io.javalin:javalin:$javalinVersion")
-    implementation("io.javalin:javalin-rendering:5.6.0")
-    implementation("io.javalin.community.openapi:javalin-openapi-plugin:$javalinVersion")
-    implementation("io.javalin.community.openapi:javalin-swagger-plugin:$javalinVersion")
-    implementation("io.javalin.community.openapi:javalin-redoc-plugin:$javalinVersion")
-    kapt("io.javalin.community.openapi:openapi-annotation-processor:$javalinVersion")
+    val javalinVersion = "5.6.2"
+    val javalinApiVersion = "5.6.2-1"
+    implementation("io.javalin", "javalin", javalinVersion)
+    implementation("io.javalin", "javalin-rendering", javalinVersion)
+    implementation("io.javalin.community.openapi", "javalin-openapi-plugin", javalinApiVersion)
+    implementation("io.javalin.community.openapi", "javalin-swagger-plugin", javalinApiVersion)
+    implementation("io.javalin.community.openapi", "javalin-redoc-plugin", javalinApiVersion)
+    kapt("io.javalin.community.openapi", "openapi-annotation-processor", javalinApiVersion)
 
     // Jte
-    val jteVersion = "3.0.1"
-    implementation("gg.jte:jte:$jteVersion")
-    implementation("gg.jte:jte-kotlin:$jteVersion")
+    val jteVersion = "3.0.3"
+    implementation("gg.jte", "jte", jteVersion)
+    implementation("gg.jte", "jte-kotlin", jteVersion)
 
     // Log4j2
-    implementation("org.apache.logging.log4j:log4j-api-kotlin:1.2.0")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
+    implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.2.0")
+    runtimeOnly("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.20.0")
 }
 
 kotlin {
@@ -74,14 +80,20 @@ application {
     applicationName = "Bookshelf"
 }
 
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    version.set("0.50.0")
+}
+
 jte {
     precompile()
 }
 
 tasks.jar {
     dependsOn(tasks.precompileJte)
-    from(fileTree("jte-classes") {
-        include("**/*.class")
-        include("**/*.bin") // Only required if you use binary templates
-    })
+    from(
+        fileTree("jte-classes") {
+            include("**/*.class")
+            include("**/*.bin") // Only required if you use binary templates
+        },
+    )
 }

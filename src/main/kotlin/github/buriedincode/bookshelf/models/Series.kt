@@ -18,14 +18,14 @@ class Series(id: EntityID<Long>) : LongEntity(id), Comparable<Series> {
     fun toJson(showAll: Boolean = false): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "seriesId" to id.value,
-            "title" to title
+            "title" to title,
         )
         if (showAll) {
             output["books"] = books.sortedWith(compareBy<BookSeries> { it.number ?: Int.MAX_VALUE }.thenBy { it.book })
                 .map {
                     mapOf(
                         "book" to it.book.toJson(),
-                        "number" to it.number
+                        "number" to it.number,
                     )
                 }
         }
@@ -42,5 +42,5 @@ data class SeriesInput(
 
 data class SeriesBookInput(
     val bookId: Long,
-    val number: Int? = null
+    val number: Int? = null,
 )

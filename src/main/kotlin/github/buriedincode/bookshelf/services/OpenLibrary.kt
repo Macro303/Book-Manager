@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.stream.Collectors
 
-
 object OpenLibrary : Logging {
     private const val BASE_URL = "https://openlibrary.org"
     private val CLIENT: HttpClient = HttpClient.newBuilder()

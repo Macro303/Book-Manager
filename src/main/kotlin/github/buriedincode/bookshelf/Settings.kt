@@ -8,7 +8,7 @@ import java.nio.file.Paths
 
 enum class Environment {
     DEV,
-    PROD
+    PROD,
 }
 
 data class Database(val name: String)
@@ -19,12 +19,12 @@ data class Settings(val env: Environment, val database: Database, val website: W
             .addPathSource(
                 Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.yaml"),
                 optional = true,
-                allowEmpty = true
+                allowEmpty = true,
             )
             .addPathSource(
                 Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.properties"),
                 optional = true,
-                allowEmpty = true
+                allowEmpty = true,
             )
             .addResourceSource("/default.properties")
             .build()

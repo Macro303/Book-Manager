@@ -1,7 +1,12 @@
 package github.buriedincode.bookshelf.models
 
 import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
-import github.buriedincode.bookshelf.tables.*
+import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
+import github.buriedincode.bookshelf.tables.BookGenreTable
+import github.buriedincode.bookshelf.tables.BookSeriesTable
+import github.buriedincode.bookshelf.tables.BookTable
+import github.buriedincode.bookshelf.tables.ReadBookTable
+import github.buriedincode.bookshelf.tables.WishedTable
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -49,7 +54,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             "openLibraryId" to openLibraryId,
             "publishDate" to publishDate?.format(DATE_FORMATTER),
             "subtitle" to subtitle,
-            "title" to title
+            "title" to title,
         )
         if (showAll) {
             output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.role }).map {
@@ -62,7 +67,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             output["publisher"] = publisher?.toJson()
             output["readers"] = readers.sortedWith(
                 compareBy<ReadBook> { it.user }
-                    .thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) }
+                    .thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
             ).map {
                 mapOf(
                     "readDate" to it.readDate?.format(DATE_FORMATTER),
@@ -70,7 +75,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
                 )
             }
             output["series"] = series.sortedWith(
-                compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE }
+                compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE },
             ).map {
                 mapOf(
                     "number" to it.number,
@@ -78,8 +83,9 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
                 )
             }
             output["wishers"] = wishers.sorted().map { it.toJson() }
-        } else
+        } else {
             output["publisherId"] = publisher?.id?.value
+        }
         return output.toSortedMap()
     }
 
@@ -104,7 +110,7 @@ data class BookInput(
     val series: List<BookSeriesInput> = ArrayList(),
     val subtitle: String? = null,
     val title: String,
-    val wisherIds: List<Long> = ArrayList()
+    val wisherIds: List<Long> = ArrayList(),
 )
 
 data class BookCreditInput(
@@ -114,12 +120,12 @@ data class BookCreditInput(
 
 data class BookReaderInput(
     val userId: Long,
-    val readDate: LocalDate? = LocalDate.now()
+    val readDate: LocalDate? = LocalDate.now(),
 )
 
 data class BookSeriesInput(
     val seriesId: Long,
-    val number: Int? = null
+    val number: Int? = null,
 )
 
 data class BookImport(
@@ -129,5 +135,5 @@ data class BookImport(
     val isbn: String? = null,
     val libraryThingId: String? = null,
     val openLibraryId: String? = null,
-    val wisherIds: List<Long> = ArrayList()
+    val wisherIds: List<Long> = ArrayList(),
 )

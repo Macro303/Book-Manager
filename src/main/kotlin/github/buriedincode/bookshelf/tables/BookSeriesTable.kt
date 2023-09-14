@@ -13,13 +13,13 @@ object BookSeriesTable : LongIdTable(name = "books__series"), Logging {
         name = "book_id",
         foreign = BookTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     val seriesCol: Column<EntityID<Long>> = reference(
         name = "series_id",
         foreign = SeriesTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     val numberCol: Column<Int?> = integer(name = "number").nullable()
 

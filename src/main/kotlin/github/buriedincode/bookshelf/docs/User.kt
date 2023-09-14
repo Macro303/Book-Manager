@@ -6,7 +6,7 @@ class UserEntry(
     val userId: Long,
     val imageUrl: String?,
     val role: Short,
-    val username: String
+    val username: String,
 )
 
 class User(
@@ -15,7 +15,7 @@ class User(
     val readBooks: List<ReadBook>,
     val role: Short,
     val username: String,
-    val wishedBooks: List<BookEntry>
+    val wishedBooks: List<BookEntry>,
 )
 
 class ReadBook(

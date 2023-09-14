@@ -2,7 +2,7 @@ package github.buriedincode.bookshelf.docs
 
 class GenreEntry(
     val genreId: Long,
-    val title: String
+    val title: String,
 )
 
 class Genre(

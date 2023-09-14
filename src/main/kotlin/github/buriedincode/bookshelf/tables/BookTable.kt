@@ -16,7 +16,7 @@ object BookTable : LongIdTable(name = "books"), Logging {
     val formatCol: Column<Format> = enumerationByName(
         name = "format",
         length = 24,
-        klass = Format::class
+        klass = Format::class,
     ).default(defaultValue = Format.PAPERBACK)
     val goodreadsCol: Column<String?> = text(name = "goodreads_id").nullable()
     val googleBooksCol: Column<String?> = text(name = "google_books_id").nullable()
@@ -30,7 +30,7 @@ object BookTable : LongIdTable(name = "books"), Logging {
         name = "publisher_id",
         foreign = PublisherTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     val subtitleCol: Column<String?> = text(name = "subtitle").nullable()
     val titleCol: Column<String> = text(name = "title")

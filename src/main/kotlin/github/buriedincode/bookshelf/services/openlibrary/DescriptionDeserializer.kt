@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 
-
 class DescriptionDeserializer : JsonDeserializer<String?>() {
     @Throws(IOException::class, JsonProcessingException::class)
     override fun deserialize(parser: JsonParser, ctxt: DeserializationContext?): String? {

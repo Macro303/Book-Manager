@@ -18,125 +18,125 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Bookshelf</title>
-    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
-    <link id="dark-theme" href="/static/css/custom-bulma-dark.css" rel="stylesheet">
-    <link id="light-theme" disabled href="/static/css/custom-bulma-light.css" rel="stylesheet">
-    <link href="/static/css/styles.css" rel="stylesheet">
-    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>Bookshelf</title>
+  <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+  <link disabled href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" id="light-theme" rel="stylesheet">
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" id="dark-theme" rel="stylesheet">
+  <link href="/static/css/styles.css" rel="stylesheet">
+  <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
 @template.components.navbar(session = session)
 <main class="section">
-    <div class="container">
-        <header class="block has-text-centered">
-            <h1 class="title is-1">${resource.username}'s Wishlist</h1>
-        </header>
-        <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                @template.components.settings_box()
-                <div class="box">
-                    <h1 class="title is-5 has-text-info-light">Filter Books</h1>
-                    <form accept-charset="UTF-8" action="/users/${resource.id.value}/wishlist" method="GET">
-                        @template.components.forms.select.creator(label="Creator", options=creators.sorted(), selected=selectedCreator)
-                        @template.components.forms.select.format(label="Format", options=formats.sorted(), selected=selectedFormat)
-                        @template.components.forms.select.genre(label="Genre", options=genres.sorted(), selected=selectedGenre)
-                        @template.components.forms.select.publisher(label="Publisher", options=publishers.sorted(), selected=selectedPublisher)
-                        @template.components.forms.select.series(label="Series", options=series.sorted(), selected=selectedSeries)
-                        @template.components.forms.input(label="Title", name="title", value=selectedTitle)
-                        <div class="buttons is-centered">
-                            <button class="button is-info">
-                                <span class="icon">
-                                    <i class="fa-solid fa-filter"></i>
-                                </span>
-                                <span>Filter</span>
-                            </button>
-                            <button class="button is-warning" onclick="resetForm('/users/${resource.id.value}/wishlist')" type="button">
-                                <span class="icon">
-                                    <i class="fa-solid fa-rotate"></i>
-                                </span>
-                                <span>Reset</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                @if(session == resource || (session.role >= 1 && session.role >= resource.role))
-                    <div class="box">
-                        <h5 class="title is-5 has-text-info-light">Import Book</h5>
-                        <form id="import-book-form" onsubmit="return false;">
-                            @template.components.forms.input(label="Isbn", name="isbn")
-                            @template.components.forms.input(label="OpenLibrary Url", "open-library-url")
-                            <div class="buttons is-centered">
-                                <button class="button is-success" id="import-book-button" onclick="importBook()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-add"></i>
-                                    </span>
-                                    <span>Import</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                @endif
+  <div class="container">
+    <header class="block has-text-centered">
+      <h1 class="title is-1">${resource.username}'s Wishlist</h1>
+    </header>
+    <div class="columns">
+      <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+        @template.components.settings_box()
+        <div class="box">
+          <h1 class="title is-5 has-text-info-light">Filter Books</h1>
+          <form accept-charset="UTF-8" action="/users/${resource.id.value}/wishlist" method="GET">
+            @template.components.forms.select.creator(label="Creator", options=creators.sorted(), selected=selectedCreator)
+            @template.components.forms.select.format(label="Format", options=formats.sorted(), selected=selectedFormat)
+            @template.components.forms.select.genre(label="Genre", options=genres.sorted(), selected=selectedGenre)
+            @template.components.forms.select.publisher(label="Publisher", options=publishers.sorted(), selected=selectedPublisher)
+            @template.components.forms.select.series(label="Series", options=series.sorted(), selected=selectedSeries)
+            @template.components.forms.input(label="Title", name="title", value=selectedTitle)
+            <div class="buttons is-centered">
+              <button class="button is-info">
+                <span class="icon">
+                  <i class="fa-solid fa-filter"></i>
+                </span>
+                <span>Filter</span>
+              </button>
+              <button class="button is-warning" onclick="resetForm('/users/${resource.id.value}/wishlist')" type="button">
+                <span class="icon">
+                  <i class="fa-solid fa-rotate"></i>
+                </span>
+                <span>Reset</span>
+              </button>
             </div>
-            <div class="column">
-                <div class="columns is-multiline is-centered">
-                    @for(entry in books.sorted())
-                        <div class="adjustable-column column">
-                            @template.components.view_box.book(entry=entry)
-                        </div>
-                    @else
-                        <div class="column">
-                            <div class="box has-text-centered">
-                                <h5 class="title is-5 has-text-danger-light">No Books found.</h5>
-                            </div>
-                        </div>
-                    @endfor
-                </div>
-            </div>
+          </form>
         </div>
+        @if(session == resource || (session.role >= 1 && session.role >= resource.role))
+          <div class="box">
+            <h5 class="title is-5 has-text-info-light">Import Book</h5>
+            <form id="import-book-form" onsubmit="return false;">
+              @template.components.forms.input(label="Isbn", name="isbn")
+              @template.components.forms.input(label="OpenLibrary Url", "open-library-url")
+              <div class="buttons is-centered">
+                <button class="button is-success" id="import-book-button" onclick="importBook()" type="button">
+                  <span class="icon">
+                    <i class="fa-solid fa-add"></i>
+                  </span>
+                  <span>Import</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        @endif
+      </div>
+      <div class="column">
+        <div class="columns is-multiline is-centered">
+          @for(entry in books.sorted())
+            <div class="adjustable-column column">
+              @template.components.view_box.book(entry=entry)
+            </div>
+          @else
+            <div class="column">
+              <div class="box has-text-centered">
+                <h5 class="title is-5 has-text-danger-light">No Books found.</h5>
+              </div>
+            </div>
+          @endfor
+        </div>
+      </div>
     </div>
+  </div>
 </main>
 @template.components.footer()
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 <script src="/static/js/scripts.js" type="text/javascript"></script>
 <script src="/static/js/settings-box.js" type="text/javascript"></script>
 <script type="text/javascript">
-    function importBook() {
-        const caller = "import-book-button";
-        let form = document.getElementById("import-book-form");
-        let formData = Object.fromEntries(new FormData(form));
-        console.log(formData);
+  function importBook() {
+    const caller = "import-book-button";
+    let form = document.getElementById("import-book-form");
+    let formData = Object.fromEntries(new FormData(form));
+    console.log(formData);
 
-        let open_library_id = null;
-        let open_library_url = formData["open-library-url"];
-        if (open_library_url) {
-            let segments = new URL(open_library_url).pathname.split('/');
-            open_library_id = segments.pop() || segments.pop();
-        }
-
-        addLoading(caller);
-        fetch("/api/books/import", {
-            method: "POST",
-            headers: HEADERS,
-            body: JSON.stringify({
-                "isbn": formData["isbn"].trim() || null,
-                "isCollected": false,
-                "openLibraryId": open_library_id,
-                "wisherIds": [${resource.id.value}]
-            }),
-        }).then((response) => {
-            if (!response.ok)
-                return Promise.reject(response);
-            form.reset();
-            window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-            @raw
-                alert(`${response.status} ${response.statusText} => ${msg.title}`);
-            @endraw
-        })).finally(() => removeLoading(caller));
+    let open_library_id = null;
+    let open_library_url = formData["open-library-url"];
+    if (open_library_url) {
+      let segments = new URL(open_library_url).pathname.split('/');
+      open_library_id = segments.pop() || segments.pop();
     }
+
+    addLoading(caller);
+    fetch("/api/books/import", {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify({
+        "isbn": formData["isbn"].trim() || null,
+        "isCollected": false,
+        "openLibraryId": open_library_id,
+        "wisherIds": [${resource.id.value}]
+      }),
+    }).then((response) => {
+      if (!response.ok)
+        return Promise.reject(response);
+      form.reset();
+      window.location.reload();
+    }).catch((response) => response.json().then((msg) => {
+      @raw
+        alert(`${response.status} ${response.statusText} => ${msg.title}`);
+      @endraw
+    })).finally(() => removeLoading(caller));
+  }
 </script>
 </body>
 </html>

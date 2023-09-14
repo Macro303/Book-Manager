@@ -13,13 +13,13 @@ object WishedTable : Table(name = "wished_books"), Logging {
         name = "book_id",
         foreign = BookTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     val userCol: Column<EntityID<Long>> = reference(
         name = "user_id",
         foreign = UserTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     override val primaryKey = PrimaryKey(bookCol, userCol)
 

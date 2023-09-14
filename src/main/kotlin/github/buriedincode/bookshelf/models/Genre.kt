@@ -18,10 +18,11 @@ class Genre(id: EntityID<Long>) : LongEntity(id), Comparable<Genre> {
     fun toJson(showAll: Boolean = false): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "genreId" to id.value,
-            "title" to title
+            "title" to title,
         )
-        if (showAll)
+        if (showAll) {
             output["books"] = books.sorted().map { it.toJson() }
+        }
         return output.toSortedMap()
     }
 
@@ -30,5 +31,5 @@ class Genre(id: EntityID<Long>) : LongEntity(id), Comparable<Genre> {
 
 data class GenreInput(
     val bookIds: List<Long> = ArrayList(),
-    val title: String
+    val title: String,
 )

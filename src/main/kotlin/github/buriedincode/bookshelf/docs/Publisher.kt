@@ -2,7 +2,7 @@ package github.buriedincode.bookshelf.docs
 
 class PublisherEntry(
     val publisherId: Long,
-    val title: String
+    val title: String,
 )
 
 class Publisher(

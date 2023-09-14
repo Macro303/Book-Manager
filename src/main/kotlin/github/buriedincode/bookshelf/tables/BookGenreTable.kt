@@ -13,13 +13,13 @@ object BookGenreTable : Table(name = "books__genres"), Logging {
         name = "book_id",
         foreign = BookTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     val genreCol: Column<EntityID<Long>> = reference(
         name = "genre_id",
         foreign = GenreTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     override val primaryKey = PrimaryKey(bookCol, genreCol)
 

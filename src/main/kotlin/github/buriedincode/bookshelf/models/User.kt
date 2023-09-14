@@ -26,16 +26,16 @@ class User(id: EntityID<Long>) : LongEntity(id), Comparable<User> {
             "userId" to id.value,
             "imageUrl" to imageUrl,
             "role" to role,
-            "username" to username
+            "username" to username,
         )
         if (showAll) {
             output["read"] = readBooks.sortedWith(
                 compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }
-                    .thenBy { it.book }
+                    .thenBy { it.book },
             ).map {
                 mapOf(
                     "book" to it.book.toJson(),
-                    "readDate" to it.readDate?.format(DATE_FORMATTER)
+                    "readDate" to it.readDate?.format(DATE_FORMATTER),
                 )
             }
             output["wished"] = wishedBooks.sorted().map { it.toJson() }
@@ -51,10 +51,10 @@ data class UserInput(
     val readBooks: List<UserReadInput> = ArrayList(),
     val role: Short = 0,
     val username: String,
-    val wishedBookIds: List<Long> = ArrayList()
+    val wishedBookIds: List<Long> = ArrayList(),
 )
 
 data class UserReadInput(
     val bookId: Long,
-    val readDate: LocalDate? = LocalDate.now()
+    val readDate: LocalDate? = LocalDate.now(),
 )

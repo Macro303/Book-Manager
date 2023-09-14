@@ -7,8 +7,18 @@ import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.PublisherInput
 import github.buriedincode.bookshelf.tables.PublisherTable
 import io.javalin.apibuilder.CrudHandler
-import io.javalin.http.*
-import io.javalin.openapi.*
+import io.javalin.http.BadRequestResponse
+import io.javalin.http.ConflictResponse
+import io.javalin.http.Context
+import io.javalin.http.HttpStatus
+import io.javalin.http.NotFoundResponse
+import io.javalin.http.bodyValidator
+import io.javalin.openapi.HttpMethod
+import io.javalin.openapi.OpenApi
+import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiParam
+import io.javalin.openapi.OpenApiRequestBody
+import io.javalin.openapi.OpenApiResponse
 import org.apache.logging.log4j.kotlin.Logging
 
 object PublisherApiRouter : CrudHandler, Logging {
@@ -34,18 +44,19 @@ object PublisherApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<PublisherEntry>::class)]),
         ],
         summary = "List all Publishers",
-        tags = ["Publisher"]
+        tags = ["Publisher"],
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         var publishers = Publisher.all().toList()
         val title = ctx.queryParam("title")
-        if (title != null)
+        if (title != null) {
             publishers = publishers.filter {
                 it.title.contains(title, ignoreCase = true) || title.contains(
                     it.title,
-                    ignoreCase = true
+                    ignoreCase = true,
                 )
             }
+        }
         ctx.json(publishers.sorted().map { it.toJson() })
     }
 
@@ -58,22 +69,23 @@ object PublisherApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "201",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Create Publisher",
-        tags = ["Publisher"]
+        tags = ["Publisher"],
     )
     override fun create(ctx: Context): Unit = Utils.query {
         val body = ctx.getBody()
         val exists = Publisher.find {
             PublisherTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null) {
             throw ConflictResponse(message = "Publisher already exists")
+        }
         val publisher = Publisher.new {
             title = body.title
         }
@@ -90,13 +102,13 @@ object PublisherApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Get Publisher by id",
-        tags = ["Publisher"]
+        tags = ["Publisher"],
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
         val publisher = getResource(resourceId = resourceId)
@@ -113,14 +125,14 @@ object PublisherApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Publisher::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Update Publisher",
-        tags = ["Publisher"]
+        tags = ["Publisher"],
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
         val publisher = getResource(resourceId = resourceId)
@@ -128,8 +140,9 @@ object PublisherApiRouter : CrudHandler, Logging {
         val exists = Publisher.find {
             PublisherTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null && exists != publisher)
+        if (exists != null && exists != publisher) {
             throw ConflictResponse(message = "Publisher already exists")
+        }
         publisher.title = body.title
 
         ctx.json(publisher.toJson(showAll = true))
@@ -147,7 +160,7 @@ object PublisherApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Delete Publisher",
-        tags = ["Publisher"]
+        tags = ["Publisher"],
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val publisher = getResource(resourceId = resourceId)

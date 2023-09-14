@@ -19,10 +19,11 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), Comparable<Publisher> {
     fun toJson(showAll: Boolean = false): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "publisherId" to id.value,
-            "title" to title
+            "title" to title,
         )
-        if (showAll)
+        if (showAll) {
             output["books"] = books.sorted().map { it.toJson() }
+        }
         return output.toSortedMap()
     }
 
@@ -30,5 +31,5 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), Comparable<Publisher> {
 }
 
 data class PublisherInput(
-    val title: String
+    val title: String,
 )

@@ -13,19 +13,19 @@ object BookCreatorRoleTable : LongIdTable(name = "books__creators__roles"), Logg
         name = "book_id",
         foreign = BookTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     val creatorCol: Column<EntityID<Long>> = reference(
         name = "creator_id",
         foreign = CreatorTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
     val roleCol: Column<EntityID<Long>> = reference(
         name = "role_id",
         foreign = RoleTable,
         onUpdate = ReferenceOption.CASCADE,
-        onDelete = ReferenceOption.CASCADE
+        onDelete = ReferenceOption.CASCADE,
     )
 
     init {

@@ -12,14 +12,14 @@ import java.time.temporal.ChronoField
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Contributor(
     val name: String,
-    val role: String
+    val role: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Identifiers(
     val goodreads: List<String> = ArrayList(),
     val google: List<String> = ArrayList(),
-    val librarything: List<String> = ArrayList()
+    val librarything: List<String> = ArrayList(),
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -49,8 +49,9 @@ data class Edition(
         get() = isbn13.firstOrNull() ?: isbn10.firstOrNull()
     val publishDate: LocalDate?
         get() {
-            if (publishDateStr == null)
+            if (publishDateStr == null) {
                 return null
+            }
             try {
                 LocalDate.parse(publishDateStr, DateTimeFormatter.ISO_DATE)
             } catch (err: DateTimeParseException) {
@@ -60,7 +61,7 @@ data class Edition(
                     "MMM dd, yyyy",
                     "yyyy",
                     "MMMM yyyy",
-                    "MMM, yyyy"
+                    "MMM, yyyy",
                 )) {
                     try {
                         return LocalDate.parse(
@@ -69,7 +70,7 @@ data class Edition(
                                 .appendPattern(pattern)
                                 .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
                                 .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
-                                .toFormatter()
+                                .toFormatter(),
                         )
                     } catch (_: DateTimeParseException) {
                     }

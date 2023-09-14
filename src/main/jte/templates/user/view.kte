@@ -9,121 +9,121 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Bookshelf</title>
-    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
-    <link id="dark-theme" href="/static/css/custom-bulma-dark.css" rel="stylesheet">
-    <link id="light-theme" disabled href="/static/css/custom-bulma-light.css" rel="stylesheet">
-    <link href="/static/css/styles.css" rel="stylesheet">
-    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>Bookshelf</title>
+  <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+  <link disabled href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" id="light-theme" rel="stylesheet">
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" id="dark-theme" rel="stylesheet">
+  <link href="/static/css/styles.css" rel="stylesheet">
+  <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
 @template.components.navbar(session = session)
 <main class="section">
-    <div class="container">
-        <header class="block has-text-centered">
-            <h1 class="title is-1">${resource.username}</h1>
-        </header>
-        <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
-                <figure class="image is-256x256 is-inline-block">
-                    @if(resource.imageUrl == null)
-                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="/static/img/logo.png"/>
-                    @else
-                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="${resource.imageUrl}"/>
-                    @endif
-                </figure>
-            </div>
-            <div class="column">
-                <div class="box">
-                    <h4 class="subtitle is-4 has-text-centered has-text-info-light">Stats</h4>
-                    <div class="block">
-                        <p><strong class="subtitle is-size-5 has-text-info">Wishlist:</strong> ${stats["wishlist"]}@if(stats["shared"]!! > 0) + ${stats["shared"]}@endif</p>
-                    </div>
-                    <div class="block">
-                        <p><strong class="subtitle is-size-5 has-text-info">Unread:</strong> ${stats["unread"]}</p>
-                    </div>
-                    <div class="block">
-                        <p><strong class="subtitle is-size-5 has-text-info">Read:</strong> ${stats["read"]}</p>
-                    </div>
-                </div>
-            </div>
+  <div class="container">
+    <header class="block has-text-centered">
+      <h1 class="title is-1">${resource.username}</h1>
+    </header>
+    <div class="columns">
+      <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
+        <figure class="image is-256x256 is-inline-block">
+          @if(resource.imageUrl == null)
+            <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="/static/img/logo.png"/>
+          @else
+            <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="${resource.imageUrl}"/>
+          @endif
+        </figure>
+      </div>
+      <div class="column">
+        <div class="box">
+          <h4 class="subtitle is-4 has-text-centered has-text-info-light">Stats</h4>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info">Wishlist:</strong> ${stats["wishlist"]}@if(stats["shared"]!! > 0) + ${stats["shared"]}@endif</p>
+          </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info">Unread:</strong> ${stats["unread"]}</p>
+          </div>
+          <div class="block">
+            <p><strong class="subtitle is-size-5 has-text-info">Read:</strong> ${stats["read"]}</p>
+          </div>
         </div>
-        <div class="buttons is-multiline is-centered">
-            @if(session == resource || (session.role >= 2 && session.role > resource.role))
-                <a class="button is-warning" href="/users/${resource.id.value}/edit">
-                    <span class="icon">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </span>
-                    <span>Edit</span>
-                </a>
-            @endif
-            @if(session == resource || (session.role >= 3 && session.role >= resource.role))
-                <button class="button is-danger" id="delete-user-button" onclick="deleteUser()" type="button">
-                    <span class="icon">
-                        <i class="fa-solid fa-trash"></i>
-                    </span>
-                    <span>Delete</span>
-                </button>
-            @endif
-            <a class="button is-info" href="/users/${resource.id.value}/wishlist">
-                <span class="icon">
-                    <i class="fa-solid fa-star"></i>
-                </span>
-                <span>Wishlist</span>
-            </a>
-        </div>
-        <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                @template.components.settings_box()
-            </div>
-            <div class="column">
-                <h3 class="subtitle is-3 has-text-primary-dark">Last Read Books</h3>
-                <div class="columns is-multiline is-centered">
-                    @if(resource.readBooks.empty())
-                        <div class="column">
-                            <div class="box has-text-centered">
-                                <h5 class="title is-5 has-text-danger-light">No Books found.</h5>
-                            </div>
-                        </div>
-                    @else
-                        @for(entry in ForSupport.of(resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.reversed().thenBy{ it.book })))
-                            @if(entry.index >= 5)
-                                !{break}
-                            @endif
-                            <div class="adjustable-column column">
-                                @template.components.view_box.book(entry = entry.get().book, readDate = entry.get().readDate)
-                            </div>
-                        @endfor
-                    @endif
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+    <div class="buttons is-multiline is-centered">
+      @if(session == resource || (session.role >= 2 && session.role > resource.role))
+        <a class="button is-warning" href="/users/${resource.id.value}/edit">
+          <span class="icon">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </span>
+          <span>Edit</span>
+        </a>
+      @endif
+      @if(session == resource || (session.role >= 3 && session.role >= resource.role))
+        <button class="button is-danger" id="delete-user-button" onclick="deleteUser()" type="button">
+          <span class="icon">
+            <i class="fa-solid fa-trash"></i>
+          </span>
+          <span>Delete</span>
+        </button>
+      @endif
+      <a class="button is-info" href="/users/${resource.id.value}/wishlist">
+        <span class="icon">
+          <i class="fa-solid fa-star"></i>
+        </span>
+        <span>Wishlist</span>
+      </a>
+    </div>
+    <div class="columns">
+      <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+        @template.components.settings_box()
+      </div>
+      <div class="column">
+        <h3 class="subtitle is-3 has-text-primary-dark">Last Read Books</h3>
+        <div class="columns is-multiline is-centered">
+          @if(resource.readBooks.empty())
+            <div class="column">
+              <div class="box has-text-centered">
+                <h5 class="title is-5 has-text-danger-light">No Books found.</h5>
+              </div>
+            </div>
+          @else
+            @for(entry in ForSupport.of(resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.reversed().thenBy{ it.book })))
+              @if(entry.index >= 5)
+                !{break}
+              @endif
+              <div class="adjustable-column column">
+                @template.components.view_box.book(entry = entry.get().book, readDate = entry.get().readDate)
+              </div>
+            @endfor
+          @endif
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 @template.components.footer()
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 <script src="/static/js/scripts.js" type="text/javascript"></script>
 <script src="/static/js/settings-box.js" type="text/javascript"></script>
 <script type="text/javascript">
-    function deleteUser() {
-        const caller = "delete-user-button";
+  function deleteUser() {
+    const caller = "delete-user-button";
 
-        addLoading(caller);
-        fetch("/api/users/${resource.id.value}", {
-            method: "DELETE",
-            headers: HEADERS,
-        }).then((response) => {
-            if (!response.ok)
-                return Promise.reject(response);
-            window.location = "/users";
-        }).catch((response) => response.json().then((msg) => {
-            @raw
-                alert(`${response.status} ${response.statusText} => ${msg.title}`);
-            @endraw
-        })).finally(() => removeLoading(caller));
-    }
+    addLoading(caller);
+    fetch("/api/users/${resource.id.value}", {
+      method: "DELETE",
+      headers: HEADERS,
+    }).then((response) => {
+      if (!response.ok)
+        return Promise.reject(response);
+      window.location = "/users";
+    }).catch((response) => response.json().then((msg) => {
+      @raw
+        alert(`${response.status} ${response.statusText} => ${msg.title}`);
+      @endraw
+    })).finally(() => removeLoading(caller));
+  }
 </script>
 </body>
 </html>

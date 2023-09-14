@@ -2,7 +2,7 @@ package github.buriedincode.bookshelf.docs
 
 class SeriesEntry(
     val seriesId: Long,
-    val title: String
+    val title: String,
 )
 
 class Series(
@@ -13,5 +13,5 @@ class Series(
 
 class SeriesBook(
     val book: BookEntry,
-    val number: Int?
+    val number: Int?,
 )

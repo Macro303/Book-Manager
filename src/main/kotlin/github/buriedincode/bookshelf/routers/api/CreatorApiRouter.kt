@@ -3,11 +3,27 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.CreatorEntry
-import github.buriedincode.bookshelf.models.*
-import github.buriedincode.bookshelf.tables.*
-import io.javalin.apibuilder.*
-import io.javalin.http.*
-import io.javalin.openapi.*
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.BookCreatorRole
+import github.buriedincode.bookshelf.models.Creator
+import github.buriedincode.bookshelf.models.CreatorCreditInput
+import github.buriedincode.bookshelf.models.CreatorInput
+import github.buriedincode.bookshelf.models.Role
+import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
+import github.buriedincode.bookshelf.tables.CreatorTable
+import io.javalin.apibuilder.CrudHandler
+import io.javalin.http.BadRequestResponse
+import io.javalin.http.ConflictResponse
+import io.javalin.http.Context
+import io.javalin.http.HttpStatus
+import io.javalin.http.NotFoundResponse
+import io.javalin.http.bodyValidator
+import io.javalin.openapi.HttpMethod
+import io.javalin.openapi.OpenApi
+import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiParam
+import io.javalin.openapi.OpenApiRequestBody
+import io.javalin.openapi.OpenApiResponse
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
 
@@ -34,18 +50,19 @@ object CreatorApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<CreatorEntry>::class)]),
         ],
         summary = "List all Creators",
-        tags = ["Creator"]
+        tags = ["Creator"],
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         var creators = Creator.all().toList()
         val name = ctx.queryParam("name")
-        if (name != null)
+        if (name != null) {
             creators = creators.filter {
                 it.name.contains(name, ignoreCase = true) || name.contains(
                     it.name,
-                    ignoreCase = true
+                    ignoreCase = true,
                 )
             }
+        }
         ctx.json(creators.sorted().map { it.toJson() })
     }
 
@@ -58,22 +75,23 @@ object CreatorApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "201",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Create Creator",
-        tags = ["Creator"]
+        tags = ["Creator"],
     )
     override fun create(ctx: Context): Unit = Utils.query {
         val body = ctx.getBody()
         val exists = Creator.find {
             CreatorTable.nameCol eq body.name
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null) {
             throw ConflictResponse(message = "Creator already exists")
+        }
         val creator = Creator.new {
             imageUrl = body.imageUrl
             name = body.name
@@ -91,13 +109,13 @@ object CreatorApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Get Creator by id",
-        tags = ["Creator"]
+        tags = ["Creator"],
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
         val resource = getResource(resourceId = resourceId)
@@ -114,14 +132,14 @@ object CreatorApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Update Creator",
-        tags = ["Creator"]
+        tags = ["Creator"],
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
         val resource = getResource(resourceId = resourceId)
@@ -129,8 +147,9 @@ object CreatorApiRouter : CrudHandler, Logging {
         val exists = Creator.find {
             CreatorTable.nameCol eq body.name
         }.firstOrNull()
-        if (exists != null && exists != resource)
+        if (exists != null && exists != resource) {
             throw ConflictResponse(message = "Creator already exists")
+        }
         resource.imageUrl = body.imageUrl
         resource.name = body.name
 
@@ -149,7 +168,7 @@ object CreatorApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Delete Creator",
-        tags = ["Creator"]
+        tags = ["Creator"],
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val resource = getResource(resourceId = resourceId)
@@ -173,14 +192,14 @@ object CreatorApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Book and Role to Creator",
-        tags = ["Creator"]
+        tags = ["Creator"],
     )
     fun addCredit(ctx: Context): Unit = Utils.query {
         val resource = getResource(resourceId = ctx.pathParam("creator-id"))
@@ -190,16 +209,19 @@ object CreatorApiRouter : CrudHandler, Logging {
         val role = Role.findById(id = body.roleId)
             ?: throw NotFoundResponse(message = "Role not found")
         val credit = BookCreatorRole.find {
-            (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq resource.id) and (BookCreatorRoleTable.roleCol eq role.id)
+            (BookCreatorRoleTable.bookCol eq book.id) and
+                (BookCreatorRoleTable.creatorCol eq resource.id) and
+                (BookCreatorRoleTable.roleCol eq role.id)
         }.firstOrNull()
         if (credit != null) {
             throw ConflictResponse(message = "Book Creator already has this role")
-        } else
+        } else {
             BookCreatorRole.new {
                 this.book = book
                 creator = resource
                 this.role = role
             }
+        }
 
         ctx.json(resource.toJson(showAll = true))
     }
@@ -214,13 +236,13 @@ object CreatorApiRouter : CrudHandler, Logging {
         responses = [
             OpenApiResponse(
                 status = "200",
-                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)]
+                content = [OpenApiContent(github.buriedincode.bookshelf.docs.Creator::class)],
             ),
             OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Book and Role from Creator",
-        tags = ["Creator"]
+        tags = ["Creator"],
     )
     fun removeCredit(ctx: Context): Unit = Utils.query {
         val resource = getResource(resourceId = ctx.pathParam("creator-id"))
@@ -230,7 +252,9 @@ object CreatorApiRouter : CrudHandler, Logging {
         val role = Role.findById(id = body.roleId)
             ?: throw NotFoundResponse(message = "Role not found")
         val credit = BookCreatorRole.find {
-            (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq resource.id) and (BookCreatorRoleTable.roleCol eq role.id)
+            (BookCreatorRoleTable.bookCol eq book.id) and
+                (BookCreatorRoleTable.creatorCol eq resource.id) and
+                (BookCreatorRoleTable.roleCol eq role.id)
         }.firstOrNull() ?: throw NotFoundResponse(message = "Unable to find Book Creator Role")
         credit.delete()
 

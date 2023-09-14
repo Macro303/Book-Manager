@@ -3,12 +3,27 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.docs.RoleEntry
-import github.buriedincode.bookshelf.models.*
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.BookCreatorRole
+import github.buriedincode.bookshelf.models.Creator
+import github.buriedincode.bookshelf.models.Role
+import github.buriedincode.bookshelf.models.RoleCreditInput
+import github.buriedincode.bookshelf.models.RoleInput
 import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
 import github.buriedincode.bookshelf.tables.RoleTable
 import io.javalin.apibuilder.CrudHandler
-import io.javalin.http.*
-import io.javalin.openapi.*
+import io.javalin.http.BadRequestResponse
+import io.javalin.http.ConflictResponse
+import io.javalin.http.Context
+import io.javalin.http.HttpStatus
+import io.javalin.http.NotFoundResponse
+import io.javalin.http.bodyValidator
+import io.javalin.openapi.HttpMethod
+import io.javalin.openapi.OpenApi
+import io.javalin.openapi.OpenApiContent
+import io.javalin.openapi.OpenApiParam
+import io.javalin.openapi.OpenApiRequestBody
+import io.javalin.openapi.OpenApiResponse
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
 
@@ -35,18 +50,19 @@ object RoleApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "200", content = [OpenApiContent(Array<RoleEntry>::class)]),
         ],
         summary = "List all Roles",
-        tags = ["Role"]
+        tags = ["Role"],
     )
     override fun getAll(ctx: Context): Unit = Utils.query {
         var roles = Role.all().toList()
         val title = ctx.queryParam("title")
-        if (title != null)
+        if (title != null) {
             roles = roles.filter {
                 it.title.contains(title, ignoreCase = true) || title.contains(
                     it.title,
-                    ignoreCase = true
+                    ignoreCase = true,
                 )
             }
+        }
         ctx.json(roles.sorted().map { it.toJson() })
     }
 
@@ -63,15 +79,16 @@ object RoleApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Create Role",
-        tags = ["Role"]
+        tags = ["Role"],
     )
     override fun create(ctx: Context): Unit = Utils.query {
         val body = ctx.getBody()
         val exists = Role.find {
             RoleTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null)
+        if (exists != null) {
             throw ConflictResponse(message = "Role already exists")
+        }
         val role = Role.new {
             title = body.title
         }
@@ -91,7 +108,7 @@ object RoleApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Get Role by id",
-        tags = ["Role"]
+        tags = ["Role"],
     )
     override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
         val role = getResource(resourceId = resourceId)
@@ -112,7 +129,7 @@ object RoleApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Update Role",
-        tags = ["Role"]
+        tags = ["Role"],
     )
     override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
         val role = getResource(resourceId = resourceId)
@@ -120,8 +137,9 @@ object RoleApiRouter : CrudHandler, Logging {
         val exists = Role.find {
             RoleTable.titleCol eq body.title
         }.firstOrNull()
-        if (exists != null && exists != role)
+        if (exists != null && exists != role) {
             throw ConflictResponse(message = "Role already exists")
+        }
         role.title = body.title
 
         ctx.json(role.toJson(showAll = true))
@@ -139,7 +157,7 @@ object RoleApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Delete Role",
-        tags = ["Role"]
+        tags = ["Role"],
     )
     override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
         val role = getResource(resourceId = resourceId)
@@ -167,7 +185,7 @@ object RoleApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Add Book and Creator to Role",
-        tags = ["Role"]
+        tags = ["Role"],
     )
     fun addCredit(ctx: Context): Unit = Utils.query {
         val resource = getResource(resourceId = ctx.pathParam("role-id"))
@@ -177,16 +195,19 @@ object RoleApiRouter : CrudHandler, Logging {
         val creator = Creator.findById(id = body.creatorId)
             ?: throw NotFoundResponse(message = "Creator not found")
         val credit = BookCreatorRole.find {
-            (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq creator.id) and (BookCreatorRoleTable.roleCol eq resource.id)
+            (BookCreatorRoleTable.bookCol eq book.id) and
+                (BookCreatorRoleTable.creatorCol eq creator.id) and
+                (BookCreatorRoleTable.roleCol eq resource.id)
         }.firstOrNull()
         if (credit != null) {
             throw ConflictResponse(message = "Book Creator already has this role")
-        } else
+        } else {
             BookCreatorRole.new {
                 this.book = book
                 this.creator = creator
                 role = resource
             }
+        }
 
         ctx.json(resource.toJson(showAll = true))
     }
@@ -204,7 +225,7 @@ object RoleApiRouter : CrudHandler, Logging {
             OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
         ],
         summary = "Remove Book and Creator from Role",
-        tags = ["Role"]
+        tags = ["Role"],
     )
     fun removeCredit(ctx: Context): Unit = Utils.query {
         val resource = getResource(resourceId = ctx.pathParam("role-id"))
@@ -214,7 +235,9 @@ object RoleApiRouter : CrudHandler, Logging {
         val creator = Creator.findById(id = body.creatorId)
             ?: throw NotFoundResponse(message = "Creator not found")
         val credit = BookCreatorRole.find {
-            (BookCreatorRoleTable.bookCol eq book.id) and (BookCreatorRoleTable.creatorCol eq creator.id) and (BookCreatorRoleTable.roleCol eq resource.id)
+            (BookCreatorRoleTable.bookCol eq book.id) and
+                (BookCreatorRoleTable.creatorCol eq creator.id) and
+                (BookCreatorRoleTable.roleCol eq resource.id)
         }.firstOrNull() ?: throw NotFoundResponse(message = "Unable to find Book Creator Role")
         credit.delete()
 
