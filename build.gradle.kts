@@ -3,8 +3,8 @@ plugins {
     kotlin("kapt") version "1.9.10"
     application
     id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
-    id("com.github.ben-manes.versions") version "0.47.0"
-    id("gg.jte.gradle") version "3.0.3"
+    id("com.github.ben-manes.versions") version "0.48.0"
+    id("gg.jte.gradle") version "3.1.0"
 }
 
 group = "github.buriedincode"
@@ -22,10 +22,10 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.42.0.0")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.43.0.0")
 
     // Exposed
-    val exposedVersion = "0.42.0"
+    val exposedVersion = "0.43.0"
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
@@ -47,7 +47,7 @@ dependencies {
 
     // Javalin
     val javalinVersion = "5.6.2"
-    val javalinApiVersion = "5.6.2-1"
+    val javalinApiVersion = "5.6.2-2"
     implementation("io.javalin", "javalin", javalinVersion)
     implementation("io.javalin", "javalin-rendering", javalinVersion)
     implementation("io.javalin.community.openapi", "javalin-openapi-plugin", javalinApiVersion)
@@ -56,7 +56,7 @@ dependencies {
     kapt("io.javalin.community.openapi", "openapi-annotation-processor", javalinApiVersion)
 
     // Jte
-    val jteVersion = "3.0.3"
+    val jteVersion = "3.1.0"
     implementation("gg.jte", "jte", jteVersion)
     implementation("gg.jte", "jte-kotlin", jteVersion)
 

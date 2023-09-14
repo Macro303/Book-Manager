@@ -22,6 +22,16 @@ data class Settings(val env: Environment, val database: Database, val website: W
                 allowEmpty = true,
             )
             .addPathSource(
+                Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.json"),
+                optional = true,
+                allowEmpty = true,
+            )
+            .addPathSource(
+                Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.conf"),
+                optional = true,
+                allowEmpty = true,
+            )
+            .addPathSource(
                 Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.properties"),
                 optional = true,
                 allowEmpty = true,
