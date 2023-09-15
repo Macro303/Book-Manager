@@ -1,7 +1,7 @@
 @import java.time.LocalDate
 @import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.*
-@import github.buriedincode.bookshelf.Utils.getUserDateFormatter
+@import github.buriedincode.bookshelf.Utils.getHumanReadableDateFormatter
 @import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 @import gg.jte.support.ForSupport
 @param resource: User
@@ -16,8 +16,7 @@
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <title>Bookshelf</title>
   <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
-  <link id="dark-theme" href="/static/css/custom-bulma-dark.css" rel="stylesheet">
-  <link id="light-theme" disabled href="/static/css/custom-bulma-light.css" rel="stylesheet">
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
   <link href="/static/css/styles.css" rel="stylesheet">
   <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
@@ -51,7 +50,7 @@
             <tbody>
             @for(entry in resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.thenBy{ it.book }))
               <tr>
-                <td>${entry.readDate?.format(getUserDateFormatter(date = entry.readDate!!))}</td>
+                <td>${entry.readDate?.format(getHumanReadableDateFormatter(date = entry.readDate!!))}</td>
                 <td>${entry.book.title}</td>
                 <td>${entry.book.subtitle}</td>
                 <td>
@@ -185,7 +184,7 @@
   }
   function removeReadBook(bookId) {
     @raw
-      const caller = `remove-read-book-${bookId}-button`;
+    const caller = `remove-read-book-${bookId}-button`;
     @endraw
 
     addLoading(caller);
@@ -231,7 +230,7 @@
   }
   function removeWishedBook(bookId) {
     @raw
-    const caller = `remove-wished-book-${bookId}-button`;
+      const caller = `remove-wished-book-${bookId}-button`;
     @endraw
 
     addLoading(caller);

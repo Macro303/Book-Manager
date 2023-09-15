@@ -5,35 +5,59 @@ import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.sksamuel.hoplite.Secret
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.sql.Connection
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlin.io.path.div
 
 object Utils : Logging {
-    private val HOME_ROOT: String = System.getProperty("user.home")
+    private val HOME_ROOT: Path = Paths.get(System.getProperty("user.home"))
+    private val DATABASE: Database = Database.connect(url = "jdbc:sqlite:${Settings.load().database}", driver = "org.sqlite.JDBC")
 
     internal const val VERSION = "0.0.0"
-    internal val CACHE_ROOT = Paths.get(HOME_ROOT, ".cache", "bookshelf")
-    internal val CONFIG_ROOT = Paths.get(HOME_ROOT, ".config", "bookshelf")
-    internal val DATA_ROOT = Paths.get(HOME_ROOT, ".local", "share", "bookshelf")
+    internal val CACHE_ROOT = HOME_ROOT / ".cache" / "bookshelf"
+    internal val CONFIG_ROOT = HOME_ROOT / ".config" / "bookshelf"
+    internal val DATA_ROOT = HOME_ROOT / ".local" / "share" / "bookshelf"
 
-    val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-    private val database: Database = Database.connect(
-        url = "jdbc:sqlite:${DATA_ROOT}/${Settings.load().database.name}",
-        driver = "org.sqlite.JDBC",
-    )
+    init {
+        if (!Files.exists(CACHE_ROOT)) {
+            CACHE_ROOT.toFile().mkdirs()
+        }
+        if (!Files.exists(CONFIG_ROOT)) {
+            CONFIG_ROOT.toFile().mkdirs()
+        }
+        if (!Files.exists(DATA_ROOT)) {
+            DATA_ROOT.toFile().mkdirs()
+        }
+    }
+
+    private fun getDayNumberSuffix(day: Int): String {
+        return if (day in 11..13) {
+            "th"
+        } else {
+            when (day % 10) {
+                1 -> "st"
+                2 -> "nd"
+                3 -> "rd"
+                else -> "th"
+            }
+        }
+    }
 
     internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
         .addModule(JavaTimeModule())
@@ -51,7 +75,7 @@ object Utils : Logging {
 
     internal fun <T> query(block: () -> T): T {
         val startTime = LocalDateTime.now()
-        val transaction = transaction(transactionIsolation = Connection.TRANSACTION_SERIALIZABLE, db = database) {
+        val transaction = transaction(transactionIsolation = Connection.TRANSACTION_SERIALIZABLE, db = DATABASE) {
             addLogger(Slf4jSqlDebugLogger)
             block()
         }
@@ -59,54 +83,31 @@ object Utils : Logging {
         return transaction
     }
 
-    init {
-        if (!Files.exists(CACHE_ROOT)) {
-            try {
-                Files.createDirectories(CACHE_ROOT)
-            } catch (ioe: IOException) {
-                logger.error("Unable to create cache folder", ioe)
-            }
-        }
-        if (!Files.exists(CONFIG_ROOT)) {
-            try {
-                Files.createDirectories(CONFIG_ROOT)
-            } catch (ioe: IOException) {
-                logger.error("Unable to create config folder", ioe)
-            }
-        }
-        if (!Files.exists(DATA_ROOT)) {
-            try {
-                Files.createDirectories(DATA_ROOT)
-            } catch (ioe: IOException) {
-                logger.error("Unable to create data folder", ioe)
-            }
-        }
+    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
+
+    inline fun <reified T : Enum<T>> T.titlecase(): String = this.name.lowercase().split("_").joinToString(" ") {
+        it.replaceFirstChar(Char::uppercaseChar)
     }
 
-    fun getUserDateFormatter(date: LocalDate): DateTimeFormatter {
-        return DateTimeFormatter.ofPattern("d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy")
-    }
-
-    private fun getDayNumberSuffix(day: Int): String {
-        return if (day in 11..13) {
-            "th"
-        } else {
-            when (day % 10) {
-                1 -> "st"
-                2 -> "nd"
-                3 -> "rd"
-                else -> "th"
-            }
+    fun toHumanReadable(milliseconds: Float): String {
+        val duration = Duration.ofMillis(milliseconds.toLong())
+        val minutes = duration.toMinutes()
+        if (minutes > 0) {
+            val seconds = duration.minusMinutes(minutes).toSeconds()
+            val millis = duration.minusMinutes(minutes).minusSeconds(seconds)
+            return "${minutes}min ${seconds}sec ${millis}ms"
         }
-    }
-
-    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? {
-        return enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
-    }
-
-    inline fun <reified T : Enum<T>> T.titleCase(): String {
-        return this.name.lowercase().split("_").joinToString(" ") {
-            it.replaceFirstChar(Char::uppercaseChar)
+        val seconds = duration.toSeconds()
+        if (seconds > 0) {
+            val millis = duration.minusSeconds(seconds).toMillis()
+            return "${seconds}sec ${millis}ms"
         }
+        return "${duration.toMillis()}ms"
     }
+
+    fun getHumanReadableDateFormatter(date: LocalDate): DateTimeFormatter = DateTimeFormatter.ofPattern(
+        "d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy",
+    )
+
+    fun Secret?.isNullOrBlank(): Boolean = this?.value.isNullOrBlank()
 }

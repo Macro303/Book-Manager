@@ -1,10 +1,12 @@
+@import java.time.LocalDate
+@import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 @param label: String
 @param name: String
-@param value: String? = null
+@param value: LocalDate? = null
 
 <div class="field">
     <label class="label has-text-info">${label}</label>
     <div class="control is-expanded">
-        <input class="input" name="${name}" placeholder="yyyy-mm-dd" type="date" value="${value}">
+        <input class="input" name="${name}" placeholder="yyyy-mm-dd" type="date" value="${value?.format(DATE_FORMATTER)}">
     </div>
 </div>

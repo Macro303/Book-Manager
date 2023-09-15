@@ -1,6 +1,6 @@
 @import java.time.LocalDate
 @import github.buriedincode.bookshelf.models.User
-@import github.buriedincode.bookshelf.Utils.getUserDateFormatter
+@import github.buriedincode.bookshelf.Utils.getHumanReadableDateFormatter
 @param entry: User
 @param readDate: LocalDate? = null
 
@@ -18,7 +18,7 @@
         <div class="column content">
             <h5 class="title is-5 has-text-info-light is-spaced">${entry.username}</h5>
             @if(readDate != null)
-                <p>${readDate.format(getUserDateFormatter(date=readDate))}</p>
+                <p>${readDate.format(getHumanReadableDateFormatter(date=readDate))}</p>
             @endif
         </div>
     </div>

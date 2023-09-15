@@ -9,170 +9,169 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Bookshelf</title>
-    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
-    <link id="dark-theme" href="/static/css/custom-bulma-dark.css" rel="stylesheet">
-    <link id="light-theme" disabled href="/static/css/custom-bulma-light.css" rel="stylesheet">
-    <link href="/static/css/styles.css" rel="stylesheet">
-    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>Bookshelf</title>
+  <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
+  <link href="/static/css/styles.css" rel="stylesheet">
+  <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
 @template.components.navbar(session = session)
 <main class="section">
-    <div class="container">
-        <header class="block has-text-centered">
-            <h1 class="title is-1">Edit Role</h1>
-        </header>
-        <div class="box">
-            <form id="edit-role-form" onsubmit="return false;">
-                @template.components.forms.input(label = "Title", name = "title", value = resource.title)
-            </form>
-        </div>
-        <h3 class="subtitle is-3 has-text-primary-dark">Credits</h3>
-        <div class="box">
-            <div class="table-container">
-                <form id="add-credit-form" onsubmit="return false;">
-                    <table class="table is-fullwidth">
-                        <thead>
-                        <tr>
-                            <th class="is-size-5 has-text-info">Creator</th>
-                            <th class="is-size-5 has-text-info">Book Title</th>
-                            <th class="is-size-5 has-text-info">Book Subtitle</th>
-                            <th class="is-size-5 has-text-info">Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.book }))
-                            <tr>
-                                <td>${entry.creator.name}</td>
-                                <td>${entry.book.title}</td>
-                                <td>${entry.book.subtitle}</td>
-                                <td>
-                                    <div class="buttons is-centered">
-                                        <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-book-${entry.book.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.book.id.value})" type="button">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-minus"></i>
-                                            </span>
-                                            <span>Remove</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endfor
-                        <tr>
-                            <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
-                            <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
-                            <td>
-                                <div class="buttons is-centered">
-                                    <button class="button is-success" id="add-book-button" onclick="addCredit()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </span>
-                                        <span>Add</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-        </div>
-        <div class="buttons is-multiline is-centered">
-            <button class="button is-success" id="save-role-button" onclick="saveRole()" type="button">
-                <span class="icon">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                </span>
-                <span>Save</span>
-            </button>
-        </div>
+  <div class="container">
+    <header class="block has-text-centered">
+      <h1 class="title is-1">Edit Role</h1>
+    </header>
+    <div class="box">
+      <form id="edit-role-form" onsubmit="return false;">
+        @template.components.forms.input(label = "Title", name = "title", value = resource.title)
+      </form>
     </div>
+    <h3 class="subtitle is-3 has-text-primary-dark">Credits</h3>
+    <div class="box">
+      <div class="table-container">
+        <form id="add-credit-form" onsubmit="return false;">
+          <table class="table is-fullwidth">
+            <thead>
+            <tr>
+              <th class="is-size-5 has-text-info">Creator</th>
+              <th class="is-size-5 has-text-info">Book Title</th>
+              <th class="is-size-5 has-text-info">Book Subtitle</th>
+              <th class="is-size-5 has-text-info">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.book }))
+              <tr>
+                <td>${entry.creator.name}</td>
+                <td>${entry.book.title}</td>
+                <td>${entry.book.subtitle}</td>
+                <td>
+                  <div class="buttons is-centered">
+                    <button class="button is-danger" id="remove-creator-${entry.creator.id.value}-book-${entry.book.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.book.id.value})" type="button">
+                      <span class="icon">
+                        <i class="fa-solid fa-minus"></i>
+                      </span>
+                      <span>Remove</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            @endfor
+            <tr>
+              <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
+              <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
+              <td>
+                <div class="buttons is-centered">
+                  <button class="button is-success" id="add-book-button" onclick="addCredit()" type="button">
+                    <span class="icon">
+                      <i class="fa-solid fa-plus"></i>
+                    </span>
+                    <span>Add</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+    <div class="buttons is-multiline is-centered">
+      <button class="button is-success" id="save-role-button" onclick="saveRole()" type="button">
+        <span class="icon">
+          <i class="fa-solid fa-floppy-disk"></i>
+        </span>
+        <span>Save</span>
+      </button>
+    </div>
+  </div>
 </main>
 @template.components.footer()
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 <script src="/static/js/scripts.js" type="text/javascript"></script>
 <script type="text/javascript">
-    function addCredit() {
-        const caller = "add-credit-button";
-        let form = document.getElementById("add-credit-form");
-        let formData = Object.fromEntries(new FormData(form));
-        console.log(formData);
+  function addCredit() {
+    const caller = "add-credit-button";
+    let form = document.getElementById("add-credit-form");
+    let formData = Object.fromEntries(new FormData(form));
+    console.log(formData);
 
-        addLoading(caller);
-        fetch("/api/roles/${resource.id.value}/credits", {
-            method: "PATCH",
-            headers: HEADERS,
-            body: JSON.stringify({
-                "bookId": formData["book-id"],
-                "creatorId": formData["creator-id"],
-            }),
-        }).then((response) => {
-            if (!response.ok)
-                return Promise.reject(response);
-            form.reset();
-            window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-            @raw
-                alert(`${response.status} ${response.statusText} => ${msg.title}`);
-            @endraw
-        })).finally(() => removeLoading(caller));
-    }
-    function removeCredit(creatorId, bookId) {
-        @raw
-            const caller = `remove-creator-${creatorId}-book-${bookId}-button`;
-        @endraw
+    addLoading(caller);
+    fetch("/api/roles/${resource.id.value}/credits", {
+      method: "PATCH",
+      headers: HEADERS,
+      body: JSON.stringify({
+        "bookId": formData["book-id"],
+        "creatorId": formData["creator-id"],
+      }),
+    }).then((response) => {
+      if (!response.ok)
+        return Promise.reject(response);
+      form.reset();
+      window.location.reload();
+    }).catch((response) => response.json().then((msg) => {
+      @raw
+        alert(`${response.status} ${response.statusText} => ${msg.title}`);
+      @endraw
+    })).finally(() => removeLoading(caller));
+  }
+  function removeCredit(creatorId, bookId) {
+    @raw
+      const caller = `remove-creator-${creatorId}-book-${bookId}-button`;
+    @endraw
 
-        addLoading(caller);
-        fetch("/api/roles/${resource.id.value}/credits", {
-            method: "DELETE",
-            headers: HEADERS,
-            body: JSON.stringify({
-                "bookId": bookId,
-                "creatorId": creatorId,
-            }),
-        }).then((response) => {
-            if (!response.ok)
-                return Promise.reject(response);
-            form.reset();
-            window.location.reload();
-        }).catch((response) => response.json().then((msg) => {
-            @raw
-                alert(`${response.status} ${response.statusText} => ${msg.title}`);
-            @endraw
-        })).finally(() => removeLoading(caller));
-    }
-    function saveRole() {
-        const caller = "save-role-button";
-        let form = document.getElementById("edit-role-form");
-        let formData = Object.fromEntries(new FormData(form));
-        console.log(formData);
+    addLoading(caller);
+    fetch("/api/roles/${resource.id.value}/credits", {
+      method: "DELETE",
+      headers: HEADERS,
+      body: JSON.stringify({
+        "bookId": bookId,
+        "creatorId": creatorId,
+      }),
+    }).then((response) => {
+      if (!response.ok)
+        return Promise.reject(response);
+      form.reset();
+      window.location.reload();
+    }).catch((response) => response.json().then((msg) => {
+      @raw
+        alert(`${response.status} ${response.statusText} => ${msg.title}`);
+      @endraw
+    })).finally(() => removeLoading(caller));
+  }
+  function saveRole() {
+    const caller = "save-role-button";
+    let form = document.getElementById("edit-role-form");
+    let formData = Object.fromEntries(new FormData(form));
+    console.log(formData);
 
-        addLoading(caller);
-        fetch("/api/roles/${resource.id.value}", {
-            method: "PATCH",
-            headers: HEADERS,
-            body: JSON.stringify({
-                "credits": [@for(entry in ForSupport.of(resource.credits))
-                    {
-                        "bookId": ${entry.get().book.id.value},
-                        "creatorId": ${entry.get().creator.id.value},
-                    }@if(!entry.isLast),@endif
-                @endfor],
-                "title": formData["title"].trim(),
-            }),
-        }).then((response) => {
-            if (!response.ok)
-                return Promise.reject(response);
-            form.reset();
-            window.location = "/roles/${resource.id.value}";
-        }).catch((response) => response.json().then((msg) => {
-            @raw
-                alert(`${response.status} ${response.statusText} => ${msg.title}`);
-            @endraw
-        })).finally(() => removeLoading(caller));
-    }
+    addLoading(caller);
+    fetch("/api/roles/${resource.id.value}", {
+      method: "PATCH",
+      headers: HEADERS,
+      body: JSON.stringify({
+        "credits": [@for(entry in ForSupport.of(resource.credits))
+          {
+            "bookId": ${entry.get().book.id.value},
+            "creatorId": ${entry.get().creator.id.value},
+          }@if(!entry.isLast),@endif
+        @endfor],
+        "title": formData["title"].trim(),
+      }),
+    }).then((response) => {
+      if (!response.ok)
+        return Promise.reject(response);
+      form.reset();
+      window.location = "/roles/${resource.id.value}";
+    }).catch((response) => response.json().then((msg) => {
+      @raw
+        alert(`${response.status} ${response.statusText} => ${msg.title}`);
+      @endraw
+    })).finally(() => removeLoading(caller));
+  }
 </script>
 </body>
 </html>

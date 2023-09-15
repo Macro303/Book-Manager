@@ -35,8 +35,5 @@
                 </a>
             </div>
         </div>
-        <div class="column is-narrow">
-            <button class="button" onclick="changeTheme()">Toggle Theme</button>
-        </div>
     </div>
 </footer>

@@ -1,8 +1,9 @@
+@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Format
-@import github.buriedincode.bookshelf.Utils.titleCase
+@import github.buriedincode.bookshelf.Utils.titlecase
 @param label: String = "Select Format"
 @param name: String = "format"
-@param options: List<Format> = Format.values() as List<Format>
+@param options: List<Format> = Format.entries.toList() as List<Format>
 @param selected: Format? = null
 
 <div class="field">
@@ -13,13 +14,13 @@
                 @if(selected == null)
                     <option disabled selected value="">Select Format</option>
                 @else
-                    <option selected value="${selected.name}">${selected.titleCase()}</option>
+                    <option selected value="${selected.name}">${selected.titlecase()}</option>
                 @endif
                 @for(entry in options)
                     @if(entry == selected)
                         !{continue}
                     @endif
-                    <option value="${entry.name}">${entry.titleCase()}</option>
+                    <option value="${entry.name}">${entry.titlecase()}</option>
                 @endfor
             </select>
         </div>

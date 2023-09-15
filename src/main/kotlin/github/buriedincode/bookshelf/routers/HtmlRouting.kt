@@ -31,7 +31,7 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
     }
 
     protected fun Context.getSession(): User? {
-        val cookie = this.cookie(name = "session-id")?.toLongOrNull() ?: -1L
+        val cookie = this.cookie(name = "bookshelf_session-id")?.toLongOrNull() ?: -1L
         return User.findById(id = cookie)
     }
 

@@ -41,28 +41,12 @@ import io.javalin.validation.ValidationException
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.kotlin.Logging
 import java.nio.file.Path
-import java.time.Duration
+import kotlin.io.path.div
 
 object App : Logging {
-    private fun toHumanReadable(milliseconds: Float): String {
-        val duration = Duration.ofMillis(milliseconds.toLong())
-        val minutes = duration.toMinutes()
-        if (minutes > 0) {
-            val seconds = duration.minusMinutes(minutes).toSeconds()
-            val millis = duration.minusMinutes(minutes).minusSeconds(seconds)
-            return "${minutes}min ${seconds}sec ${millis}ms"
-        }
-        val seconds = duration.toSeconds()
-        if (seconds > 0) {
-            val millis = duration.minusSeconds(seconds).toMillis()
-            return "${seconds}sec ${millis}ms"
-        }
-        return "${duration.toMillis()}ms"
-    }
-
     private fun createTemplateEngine(environment: Environment): TemplateEngine {
         return if (environment == Environment.DEV) {
-            val codeResolver = DirectoryCodeResolver(Path.of("src", "main", "jte"))
+            val codeResolver = DirectoryCodeResolver(Path.of("src") / "main" / "jte")
             TemplateEngine.create(codeResolver, ContentType.Html)
         } else {
             TemplateEngine.createPrecompiled(Path.of("jte-classes"), ContentType.Html)
@@ -70,7 +54,7 @@ object App : Logging {
     }
 
     fun start(settings: Settings) {
-        val engine = createTemplateEngine(environment = settings.env)
+        val engine = createTemplateEngine(environment = settings.environment)
         // engine.setTrimControlStructures = true
         JavalinJte.init(templateEngine = engine)
         val app = Javalin.create {
@@ -83,7 +67,7 @@ object App : Logging {
                     ctx.statusCode() in (400 until 500) -> Level.WARN
                     else -> Level.ERROR
                 }
-                logger.log(level, "${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${toHumanReadable(ms)}")
+                logger.log(level, "${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${Utils.toHumanReadable(ms)}")
             }
             it.routing.ignoreTrailingSlashes = true
             it.routing.treatMultipleSlashesAsSingleSlash = true
@@ -132,7 +116,7 @@ object App : Logging {
             path("/") {
                 get { ctx ->
                     Utils.query {
-                        val cookie = ctx.cookie("session-id")?.toLongOrNull() ?: -1L
+                        val cookie = ctx.cookie("bookshelf_session-id")?.toLongOrNull() ?: -1L
                         val session = User.findById(id = cookie)
                         if (session == null) {
                             ctx.render("templates/index.kte")

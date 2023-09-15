@@ -9,11 +9,11 @@ function changeColumnCount() {
 
 function adjustColumns(columnCount = null) {
     if (columnCount === null)
-        columnCount = getCookie("column-count");
+        columnCount = getCookie("bookshelf_column-count");
     columnCount = columnCount || 3;
 
     let settingsForm = document.getElementById("column-count").value=columnCount;
-    document.cookie = `column-count=${columnCount};path=/;max-age=${60*60*24*30};SameSite=Strict`;
+    document.cookie = `bookshelf_column-count=${columnCount};path=/;max-age=${60*60*24*30};SameSite=Strict`;
 
     let elements = document.getElementsByClassName("adjustable-column");
     for (let x=0; x < elements.length; x++) {

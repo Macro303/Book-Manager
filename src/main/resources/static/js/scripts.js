@@ -35,34 +35,11 @@ function removeLoading(caller) {
     element.classList.remove("is-loading");
 }
 
-function setTheme() {
-    let darkCss = document.getElementById("dark-theme");
-    let lightCss = document.getElementById("light-theme");
-    let theme = getCookie("theme");
-    if (theme == "light") {
-        darkCss.disabled = true;
-        lightCss.disabled = false;
-    } else {
-        darkCss.disabled = false;
-        lightCss.disabled = true;
-    }
-}
-
-function changeTheme() {
-    let currentTheme = getCookie("theme");
-    let newTheme = "dark";
-    if (currentTheme == "dark")
-        newTheme = "light";
-
-    document.cookie = `theme=${newTheme};path=/;max-age=${60*60*24*30};SameSite=Strict`;
-    setTheme();
-}
-
 function signOut() {
     const caller = "sign-out-button";
     addLoading(caller);
-    
-    document.cookie = "session-id=0;path=/;max-age=0";
+
+    document.cookie = "bookshelf_session-id=0;path=/;max-age=0";
     window.location = "/";
     removeLoading(caller);
 }
@@ -70,5 +47,3 @@ function signOut() {
 function resetForm(page) {
     window.location = page;
 }
-
-ready(setTheme());
