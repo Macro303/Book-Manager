@@ -26,7 +26,7 @@ object Utils : Logging {
     private val HOME_ROOT: Path = Paths.get(System.getProperty("user.home"))
     private val DATABASE: Database = Database.connect(url = "jdbc:sqlite:${Settings.load().database}", driver = "org.sqlite.JDBC")
 
-    internal const val VERSION = "0.0.0"
+    internal const val VERSION = "0.1.0"
     internal val CACHE_ROOT = HOME_ROOT / ".cache" / "bookshelf"
     internal val CONFIG_ROOT = HOME_ROOT / ".config" / "bookshelf"
     internal val DATA_ROOT = HOME_ROOT / ".local" / "share" / "bookshelf"
