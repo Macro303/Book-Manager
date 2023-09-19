@@ -34,10 +34,11 @@ object SeriesApiRouter : CrudHandler, Logging {
         } ?: throw BadRequestResponse(message = "Invalid Series Id")
     }
 
-    private fun Context.getBody(): SeriesInput = this.bodyValidator<SeriesInput>()
-        .check({ it.title.isNotBlank() }, error = "Title must not be empty")
-        .check({ it.books.all { it.bookId > 0 } }, error = "bookId must be greater than 0")
-        .get()
+    private fun Context.getBody(): SeriesInput =
+        this.bodyValidator<SeriesInput>()
+            .check({ it.title.isNotBlank() }, error = "Title must not be empty")
+            .check({ it.books.all { it.bookId > 0 } }, error = "bookId must be greater than 0")
+            .get()
 
     @OpenApi(
         description = "List all Series",
@@ -53,19 +54,20 @@ object SeriesApiRouter : CrudHandler, Logging {
         summary = "List all Series",
         tags = ["Series"],
     )
-    override fun getAll(ctx: Context): Unit = Utils.query {
-        var series = Series.all().toList()
-        val title = ctx.queryParam("title")
-        if (title != null) {
-            series = series.filter {
-                it.title.contains(title, ignoreCase = true) || title.contains(
-                    it.title,
-                    ignoreCase = true,
-                )
+    override fun getAll(ctx: Context): Unit =
+        Utils.query {
+            var series = Series.all().toList()
+            val title = ctx.queryParam("title")
+            if (title != null) {
+                series = series.filter {
+                    it.title.contains(title, ignoreCase = true) || title.contains(
+                        it.title,
+                        ignoreCase = true,
+                    )
+                }
             }
+            ctx.json(series.sorted().map { it.toJson() })
         }
-        ctx.json(series.sorted().map { it.toJson() })
-    }
 
     @OpenApi(
         description = "Create Series",
@@ -85,29 +87,30 @@ object SeriesApiRouter : CrudHandler, Logging {
         summary = "Create Series",
         tags = ["Series"],
     )
-    override fun create(ctx: Context): Unit = Utils.query {
-        val body = ctx.getBody()
-        val exists = Series.find {
-            SeriesTable.titleCol eq body.title
-        }.firstOrNull()
-        if (exists != null) {
-            throw ConflictResponse(message = "Series already exists")
-        }
-        val series = Series.new {
-            title = body.title
-        }
-        body.books.forEach {
-            val book = Book.findById(id = it.bookId)
-                ?: throw NotFoundResponse(message = "Book not found")
-            BookSeries.new {
-                this.book = book
-                this.series = series
-                number = if (it.number == 0) null else it.number
+    override fun create(ctx: Context): Unit =
+        Utils.query {
+            val body = ctx.getBody()
+            val exists = Series.find {
+                SeriesTable.titleCol eq body.title
+            }.firstOrNull()
+            if (exists != null) {
+                throw ConflictResponse(message = "Series already exists")
             }
-        }
+            val series = Series.new {
+                title = body.title
+            }
+            body.books.forEach {
+                val book = Book.findById(id = it.bookId)
+                    ?: throw NotFoundResponse(message = "Book not found")
+                BookSeries.new {
+                    this.book = book
+                    this.series = series
+                    number = if (it.number == 0) null else it.number
+                }
+            }
 
-        ctx.status(HttpStatus.CREATED).json(series.toJson(showAll = true))
-    }
+            ctx.status(HttpStatus.CREATED).json(series.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Get Series by id",
@@ -126,10 +129,14 @@ object SeriesApiRouter : CrudHandler, Logging {
         summary = "Get Series by id",
         tags = ["Series"],
     )
-    override fun getOne(ctx: Context, resourceId: String): Unit = Utils.query {
-        val series = getResource(resourceId = resourceId)
-        ctx.json(series.toJson(showAll = true))
-    }
+    override fun getOne(
+        ctx: Context,
+        resourceId: String,
+    ): Unit =
+        Utils.query {
+            val series = getResource(resourceId = resourceId)
+            ctx.json(series.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Update Series",
@@ -150,35 +157,39 @@ object SeriesApiRouter : CrudHandler, Logging {
         summary = "Update Series",
         tags = ["Series"],
     )
-    override fun update(ctx: Context, resourceId: String): Unit = Utils.query {
-        val series = getResource(resourceId = resourceId)
-        val body = ctx.getBody()
-        val exists = Series.find {
-            SeriesTable.titleCol eq body.title
-        }.firstOrNull()
-        if (exists != null && exists != series) {
-            throw ConflictResponse(message = "Series already exists")
-        }
-        series.title = body.title
-        body.books.forEach {
-            val book = Book.findById(id = it.bookId)
-                ?: throw NotFoundResponse(message = "Book not found")
-            val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
+    override fun update(
+        ctx: Context,
+        resourceId: String,
+    ): Unit =
+        Utils.query {
+            val series = getResource(resourceId = resourceId)
+            val body = ctx.getBody()
+            val exists = Series.find {
+                SeriesTable.titleCol eq body.title
             }.firstOrNull()
-            if (bookSeries == null) {
-                BookSeries.new {
-                    this.book = book
-                    this.series = series
-                    number = if (it.number == 0) null else it.number
-                }
-            } else {
-                bookSeries.number = if (it.number == 0) null else it.number
+            if (exists != null && exists != series) {
+                throw ConflictResponse(message = "Series already exists")
             }
-        }
+            series.title = body.title
+            body.books.forEach {
+                val book = Book.findById(id = it.bookId)
+                    ?: throw NotFoundResponse(message = "Book not found")
+                val bookSeries = BookSeries.find {
+                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
+                }.firstOrNull()
+                if (bookSeries == null) {
+                    BookSeries.new {
+                        this.book = book
+                        this.series = series
+                        number = if (it.number == 0) null else it.number
+                    }
+                } else {
+                    bookSeries.number = if (it.number == 0) null else it.number
+                }
+            }
 
-        ctx.json(series.toJson(showAll = true))
-    }
+            ctx.json(series.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Delete Series",
@@ -194,22 +205,28 @@ object SeriesApiRouter : CrudHandler, Logging {
         summary = "Delete Series",
         tags = ["Series"],
     )
-    override fun delete(ctx: Context, resourceId: String): Unit = Utils.query {
-        val series = getResource(resourceId = resourceId)
-        series.books.forEach {
-            it.delete()
+    override fun delete(
+        ctx: Context,
+        resourceId: String,
+    ): Unit =
+        Utils.query {
+            val series = getResource(resourceId = resourceId)
+            series.books.forEach {
+                it.delete()
+            }
+            series.delete()
+            ctx.status(HttpStatus.NO_CONTENT)
         }
-        series.delete()
-        ctx.status(HttpStatus.NO_CONTENT)
-    }
 
-    private fun Context.getBookBody(): SeriesBookInput = this.bodyValidator<SeriesBookInput>()
-        .check({ it.bookId > 0 }, error = "bookId must be greater than 0")
-        .get()
+    private fun Context.getBookBody(): SeriesBookInput =
+        this.bodyValidator<SeriesBookInput>()
+            .check({ it.bookId > 0 }, error = "bookId must be greater than 0")
+            .get()
 
-    private fun Context.getIdValue(): IdValue = this.bodyValidator<IdValue>()
-        .check({ it.id > 0 }, error = "Id must be greater than 0")
-        .get()
+    private fun Context.getIdValue(): IdValue =
+        this.bodyValidator<IdValue>()
+            .check({ it.id > 0 }, error = "Id must be greater than 0")
+            .get()
 
     @OpenApi(
         description = "Add Book to Series",
@@ -230,25 +247,26 @@ object SeriesApiRouter : CrudHandler, Logging {
         summary = "Add Book to Series",
         tags = ["Series"],
     )
-    fun addBook(ctx: Context): Unit = Utils.query {
-        val series = getResource(resourceId = ctx.pathParam("series-id"))
-        val body = ctx.getBookBody()
-        val book = Book.findById(id = body.bookId)
-            ?: throw NotFoundResponse(message = "Book not found")
-        val bookSeries = BookSeries.find {
-            (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
-        }.firstOrNull()
-        if (bookSeries != null) {
-            throw ConflictResponse(message = "Book already is linked to Series")
-        }
-        BookSeries.new {
-            this.book = book
-            this.series = series
-            number = body.number
-        }
+    fun addBook(ctx: Context): Unit =
+        Utils.query {
+            val series = getResource(resourceId = ctx.pathParam("series-id"))
+            val body = ctx.getBookBody()
+            val book = Book.findById(id = body.bookId)
+                ?: throw NotFoundResponse(message = "Book not found")
+            val bookSeries = BookSeries.find {
+                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
+            }.firstOrNull()
+            if (bookSeries != null) {
+                throw ConflictResponse(message = "Book already is linked to Series")
+            }
+            BookSeries.new {
+                this.book = book
+                this.series = series
+                number = body.number
+            }
 
-        ctx.json(series.toJson(showAll = true))
-    }
+            ctx.json(series.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Remove Book from Series",
@@ -268,16 +286,17 @@ object SeriesApiRouter : CrudHandler, Logging {
         summary = "Remove Book from Series",
         tags = ["Series"],
     )
-    fun removeBook(ctx: Context): Unit = Utils.query {
-        val series = getResource(resourceId = ctx.pathParam("series-id"))
-        val body = ctx.getIdValue()
-        val book = Book.findById(id = body.id)
-            ?: throw NotFoundResponse(message = "Book not found")
-        val bookSeries = BookSeries.find {
-            (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
-        }.firstOrNull() ?: throw NotFoundResponse(message = "Book isn't linked to Series")
-        bookSeries.delete()
+    fun removeBook(ctx: Context): Unit =
+        Utils.query {
+            val series = getResource(resourceId = ctx.pathParam("series-id"))
+            val body = ctx.getIdValue()
+            val book = Book.findById(id = body.id)
+                ?: throw NotFoundResponse(message = "Book not found")
+            val bookSeries = BookSeries.find {
+                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
+            }.firstOrNull() ?: throw NotFoundResponse(message = "Book isn't linked to Series")
+            bookSeries.delete()
 
-        ctx.json(series.toJson(showAll = true))
-    }
+            ctx.json(series.toJson(showAll = true))
+        }
 }

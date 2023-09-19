@@ -34,10 +34,11 @@ object UserApiRouter : Logging {
         } ?: throw BadRequestResponse(message = "Invalid User Id")
     }
 
-    private fun Context.getInput(): UserInput = this.bodyValidator<UserInput>()
-        .check({ it.role >= 0 }, error = "Role must be greater than or equal to 0")
-        .check({ it.username.isNotBlank() }, error = "Username must not be empty")
-        .get()
+    private fun Context.getInput(): UserInput =
+        this.bodyValidator<UserInput>()
+            .check({ it.role >= 0 }, error = "Role must be greater than or equal to 0")
+            .check({ it.username.isNotBlank() }, error = "Username must not be empty")
+            .get()
 
     @OpenApi(
         description = "List all Users",
@@ -53,16 +54,17 @@ object UserApiRouter : Logging {
         summary = "List all Users",
         tags = ["User"],
     )
-    fun listEndpoint(ctx: Context): Unit = Utils.query {
-        var users = User.all().toList()
-        val username = ctx.queryParam(key = "username")
-        if (username != null) {
-            users = users.filter {
-                it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true)
+    fun listEndpoint(ctx: Context): Unit =
+        Utils.query {
+            var users = User.all().toList()
+            val username = ctx.queryParam(key = "username")
+            if (username != null) {
+                users = users.filter {
+                    it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true)
+                }
             }
+            ctx.json(users.sorted().map { it.toJson() })
         }
-        ctx.json(users.sorted().map { it.toJson() })
-    }
 
     @OpenApi(
         description = "Create User",
@@ -79,36 +81,37 @@ object UserApiRouter : Logging {
         summary = "Create User",
         tags = ["User"],
     )
-    fun createEndpoint(ctx: Context): Unit = Utils.query {
-        val input = ctx.getInput()
-        val exists = User.find {
-            UserTable.usernameCol eq input.username
-        }.firstOrNull()
-        if (exists != null) {
-            throw ConflictResponse(message = "User already exists")
-        }
-        val user = User.new {
-            imageUrl = input.imageUrl
-            role = input.role
-            username = input.username
-            wishedBooks = SizedCollection(
-                input.wishedBookIds.map {
-                    Book.findById(id = it)
-                        ?: throw NotFoundResponse(message = "Book not found")
-                },
-            )
-        }
-        input.readBooks.forEach {
-            val book = Book.findById(id = it.bookId)
-                ?: throw NotFoundResponse(message = "Book not found")
-            ReadBook.new {
-                this.book = book
-                this.user = user
+    fun createEndpoint(ctx: Context): Unit =
+        Utils.query {
+            val input = ctx.getInput()
+            val exists = User.find {
+                UserTable.usernameCol eq input.username
+            }.firstOrNull()
+            if (exists != null) {
+                throw ConflictResponse(message = "User already exists")
             }
-        }
+            val user = User.new {
+                imageUrl = input.imageUrl
+                role = input.role
+                username = input.username
+                wishedBooks = SizedCollection(
+                    input.wishedBookIds.map {
+                        Book.findById(id = it)
+                            ?: throw NotFoundResponse(message = "Book not found")
+                    },
+                )
+            }
+            input.readBooks.forEach {
+                val book = Book.findById(id = it.bookId)
+                    ?: throw NotFoundResponse(message = "Book not found")
+                ReadBook.new {
+                    this.book = book
+                    this.user = user
+                }
+            }
 
-        ctx.status(HttpStatus.CREATED).json(user.toJson(showAll = true))
-    }
+            ctx.status(HttpStatus.CREATED).json(user.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Get User by id",
@@ -124,10 +127,11 @@ object UserApiRouter : Logging {
         summary = "Get User by id",
         tags = ["User"],
     )
-    fun getEndpoint(ctx: Context): Unit = Utils.query {
-        val user = ctx.getResource()
-        ctx.json(user.toJson(showAll = true))
-    }
+    fun getEndpoint(ctx: Context): Unit =
+        Utils.query {
+            val user = ctx.getResource()
+            ctx.json(user.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Update User",
@@ -145,40 +149,41 @@ object UserApiRouter : Logging {
         summary = "Update User",
         tags = ["User"],
     )
-    fun updateEndpoint(ctx: Context): Unit = Utils.query {
-        val user = ctx.getResource()
-        val input = ctx.getInput()
-        val exists = User.find {
-            UserTable.usernameCol eq input.username
-        }.firstOrNull()
-        if (exists != null && exists != user) {
-            throw ConflictResponse(message = "User already exists")
-        }
-        user.imageUrl = input.imageUrl
-        input.readBooks.forEach {
-            val book = Book.findById(id = it.bookId)
-                ?: throw NotFoundResponse(message = "Book not found")
-            val readBook = ReadBook.find {
-                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+    fun updateEndpoint(ctx: Context): Unit =
+        Utils.query {
+            val user = ctx.getResource()
+            val input = ctx.getInput()
+            val exists = User.find {
+                UserTable.usernameCol eq input.username
             }.firstOrNull()
-            if (readBook == null) {
-                ReadBook.new {
-                    this.book = book
-                    this.user = user
+            if (exists != null && exists != user) {
+                throw ConflictResponse(message = "User already exists")
+            }
+            user.imageUrl = input.imageUrl
+            input.readBooks.forEach {
+                val book = Book.findById(id = it.bookId)
+                    ?: throw NotFoundResponse(message = "Book not found")
+                val readBook = ReadBook.find {
+                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+                }.firstOrNull()
+                if (readBook == null) {
+                    ReadBook.new {
+                        this.book = book
+                        this.user = user
+                    }
                 }
             }
-        }
-        user.role = input.role
-        user.username = input.username
-        user.wishedBooks = SizedCollection(
-            input.wishedBookIds.map {
-                Book.findById(id = it)
-                    ?: throw NotFoundResponse(message = "Book not found")
-            },
-        )
+            user.role = input.role
+            user.username = input.username
+            user.wishedBooks = SizedCollection(
+                input.wishedBookIds.map {
+                    Book.findById(id = it)
+                        ?: throw NotFoundResponse(message = "Book not found")
+                },
+            )
 
-        ctx.json(user.toJson(showAll = true))
-    }
+            ctx.json(user.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Delete User",
@@ -194,22 +199,25 @@ object UserApiRouter : Logging {
         summary = "Delete User",
         tags = ["User"],
     )
-    fun deleteEndpoint(ctx: Context): Unit = Utils.query {
-        val user = ctx.getResource()
-        user.readBooks.forEach {
-            it.delete()
+    fun deleteEndpoint(ctx: Context): Unit =
+        Utils.query {
+            val user = ctx.getResource()
+            user.readBooks.forEach {
+                it.delete()
+            }
+            user.delete()
+            ctx.status(HttpStatus.NO_CONTENT)
         }
-        user.delete()
-        ctx.status(HttpStatus.NO_CONTENT)
-    }
 
-    private fun Context.getIdValue(): IdValue = this.bodyValidator<IdValue>()
-        .check({ it.id > 0 }, error = "Id must be greater than 0")
-        .get()
+    private fun Context.getIdValue(): IdValue =
+        this.bodyValidator<IdValue>()
+            .check({ it.id > 0 }, error = "Id must be greater than 0")
+            .get()
 
-    private fun Context.getReadInput(): UserReadInput = this.bodyValidator<UserReadInput>()
-        .check({ it.bookId > 0 }, error = "BookId must be greater than 0")
-        .get()
+    private fun Context.getReadInput(): UserReadInput =
+        this.bodyValidator<UserReadInput>()
+            .check({ it.bookId > 0 }, error = "BookId must be greater than 0")
+            .get()
 
     @OpenApi(
         description = "Add Book to User read list",
@@ -227,25 +235,26 @@ object UserApiRouter : Logging {
         summary = "Add Book to User read list",
         tags = ["User"],
     )
-    fun addReadBook(ctx: Context): Unit = Utils.query {
-        val user = ctx.getResource()
-        val input = ctx.getReadInput()
-        val book = Book.findById(id = input.bookId)
-            ?: throw NotFoundResponse(message = "Book not found")
-        val exists = ReadBook.find {
-            (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
-        }.firstOrNull()
-        if (exists != null) {
-            throw BadRequestResponse(message = "User has already been read the Book")
-        }
-        ReadBook.new {
-            this.book = book
-            this.user = user
-            this.readDate = input.readDate
-        }
+    fun addReadBook(ctx: Context): Unit =
+        Utils.query {
+            val user = ctx.getResource()
+            val input = ctx.getReadInput()
+            val book = Book.findById(id = input.bookId)
+                ?: throw NotFoundResponse(message = "Book not found")
+            val exists = ReadBook.find {
+                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+            }.firstOrNull()
+            if (exists != null) {
+                throw BadRequestResponse(message = "User has already been read the Book")
+            }
+            ReadBook.new {
+                this.book = book
+                this.user = user
+                this.readDate = input.readDate
+            }
 
-        ctx.json(obj = user.toJson(showAll = true))
-    }
+            ctx.json(obj = user.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Remove Book from User read list",
@@ -262,18 +271,19 @@ object UserApiRouter : Logging {
         summary = "Remove Book from User read list",
         tags = ["User"],
     )
-    fun removeReadBook(ctx: Context): Unit = Utils.query {
-        val user = ctx.getResource()
-        val body = ctx.getIdValue()
-        val book = Book.findById(id = body.id)
-            ?: throw NotFoundResponse(message = "Book not found")
-        val exists = ReadBook.find {
-            (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
-        }.firstOrNull() ?: throw BadRequestResponse(message = "Book has not been read by this User.")
-        exists.delete()
+    fun removeReadBook(ctx: Context): Unit =
+        Utils.query {
+            val user = ctx.getResource()
+            val body = ctx.getIdValue()
+            val book = Book.findById(id = body.id)
+                ?: throw NotFoundResponse(message = "Book not found")
+            val exists = ReadBook.find {
+                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+            }.firstOrNull() ?: throw BadRequestResponse(message = "Book has not been read by this User.")
+            exists.delete()
 
-        ctx.json(obj = user.toJson(showAll = true))
-    }
+            ctx.json(obj = user.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Add Book to User wished list",
@@ -291,20 +301,21 @@ object UserApiRouter : Logging {
         summary = "Add Book to User wished list",
         tags = ["User"],
     )
-    fun addWishedBook(ctx: Context): Unit = Utils.query {
-        val user = ctx.getResource()
-        val body = ctx.getIdValue()
-        val book = Book.findById(id = body.id)
-            ?: throw NotFoundResponse(message = "Book not found")
-        if (book in user.wishedBooks) {
-            throw ConflictResponse(message = "Book already is on User wished list")
-        }
-        val temp = user.wishedBooks.toMutableList()
-        temp.add(book)
-        user.wishedBooks = SizedCollection(temp)
+    fun addWishedBook(ctx: Context): Unit =
+        Utils.query {
+            val user = ctx.getResource()
+            val body = ctx.getIdValue()
+            val book = Book.findById(id = body.id)
+                ?: throw NotFoundResponse(message = "Book not found")
+            if (book in user.wishedBooks) {
+                throw ConflictResponse(message = "Book already is on User wished list")
+            }
+            val temp = user.wishedBooks.toMutableList()
+            temp.add(book)
+            user.wishedBooks = SizedCollection(temp)
 
-        ctx.json(obj = user.toJson(showAll = true))
-    }
+            ctx.json(obj = user.toJson(showAll = true))
+        }
 
     @OpenApi(
         description = "Remove Book from User wished list",
@@ -321,18 +332,19 @@ object UserApiRouter : Logging {
         summary = "Remove Book from User wished list",
         tags = ["User"],
     )
-    fun removeWishedBook(ctx: Context): Unit = Utils.query {
-        val user = ctx.getResource()
-        val body = ctx.getIdValue()
-        val book = Book.findById(id = body.id)
-            ?: throw NotFoundResponse(message = "Book not found")
-        if (!user.wishedBooks.contains(book)) {
-            throw NotFoundResponse(message = "Book isn't linked to User wished list")
-        }
-        val temp = user.wishedBooks.toMutableList()
-        temp.remove(book)
-        user.wishedBooks = SizedCollection(temp)
+    fun removeWishedBook(ctx: Context): Unit =
+        Utils.query {
+            val user = ctx.getResource()
+            val body = ctx.getIdValue()
+            val book = Book.findById(id = body.id)
+                ?: throw NotFoundResponse(message = "Book not found")
+            if (!user.wishedBooks.contains(book)) {
+                throw NotFoundResponse(message = "Book isn't linked to User wished list")
+            }
+            val temp = user.wishedBooks.toMutableList()
+            temp.remove(book)
+            user.wishedBooks = SizedCollection(temp)
 
-        ctx.json(obj = user.toJson(showAll = true))
-    }
+            ctx.json(obj = user.toJson(showAll = true))
+        }
 }

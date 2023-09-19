@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.0"
     kotlin("kapt") version "1.9.10"
     application
-    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
     id("com.github.ben-manes.versions") version "0.48.0"
     id("gg.jte.gradle") version "3.1.0"
 }
@@ -81,7 +81,7 @@ application {
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("0.50.0")
+    version.set("1.0.0")
 }
 
 jte {

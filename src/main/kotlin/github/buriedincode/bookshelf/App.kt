@@ -44,8 +44,8 @@ import java.nio.file.Path
 import kotlin.io.path.div
 
 object App : Logging {
-    private fun createTemplateEngine(environment: Environment): TemplateEngine {
-        return if (environment == Environment.DEV) {
+    private fun createTemplateEngine(environment: Settings.Environment): TemplateEngine {
+        return if (environment == Settings.Environment.DEV) {
             val codeResolver = DirectoryCodeResolver(Path.of("src") / "main" / "jte")
             TemplateEngine.create(codeResolver, ContentType.Html)
         } else {
@@ -284,7 +284,10 @@ object App : Logging {
     }
 }
 
-fun main(vararg args: String) {
+fun main(
+    @Suppress("UNUSED_PARAMETER") vararg args: String,
+) {
+    println("Bookshelf v${Utils.VERSION}")
     println("Kotlin v${KotlinVersion.CURRENT}")
     println("Java v${System.getProperty("java.version")}")
     println("Arch: ${System.getProperty("os.arch")}")

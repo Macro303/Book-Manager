@@ -25,7 +25,10 @@ object OpenLibrary : Logging {
         .connectTimeout(Duration.ofSeconds(5))
         .build()
 
-    private fun encodeURI(endpoint: String, params: MutableMap<String, String> = HashMap()): URI {
+    private fun encodeURI(
+        endpoint: String,
+        params: MutableMap<String, String> = HashMap(),
+    ): URI {
         val encodedUrl = if (params.isEmpty()) {
             BASE_URL + endpoint
         } else {
@@ -38,7 +41,10 @@ object OpenLibrary : Logging {
         return URI.create(encodedUrl)
     }
 
-    private fun <T> sendRequest(uri: URI, clazz: Class<T>): T? {
+    private fun <T> sendRequest(
+        uri: URI,
+        clazz: Class<T>,
+    ): T? {
         try {
             val request = HttpRequest.newBuilder()
                 .uri(uri)

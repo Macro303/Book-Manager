@@ -24,7 +24,9 @@ import kotlin.io.path.div
 
 object Utils : Logging {
     private val HOME_ROOT: Path = Paths.get(System.getProperty("user.home"))
-    private val DATABASE: Database = Database.connect(url = "jdbc:sqlite:${Settings.load().database}", driver = "org.sqlite.JDBC")
+    private val DATABASE: Database by lazy {
+        Database.connect(url = "jdbc:sqlite:${Settings.load().database}", driver = "org.sqlite.JDBC")
+    }
 
     internal const val VERSION = "0.1.0"
     internal val CACHE_ROOT = HOME_ROOT / ".cache" / "bookshelf"
@@ -85,8 +87,10 @@ object Utils : Logging {
 
     inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
 
-    inline fun <reified T : Enum<T>> T.titlecase(): String = this.name.lowercase().split("_").joinToString(" ") {
-        it.replaceFirstChar(Char::uppercaseChar)
+    inline fun <reified T : Enum<T>> T.titlecase(): String {
+        return this.name.lowercase().split("_").joinToString(" ") {
+            it.replaceFirstChar(Char::uppercaseChar)
+        }
     }
 
     fun toHumanReadable(milliseconds: Float): String {
@@ -105,9 +109,10 @@ object Utils : Logging {
         return "${duration.toMillis()}ms"
     }
 
-    fun getHumanReadableDateFormatter(date: LocalDate): DateTimeFormatter = DateTimeFormatter.ofPattern(
-        "d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy",
-    )
+    fun getHumanReadableDateFormatter(date: LocalDate): DateTimeFormatter =
+        DateTimeFormatter.ofPattern(
+            "d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy",
+        )
 
     fun Secret?.isNullOrBlank(): Boolean = this?.value.isNullOrBlank()
 }

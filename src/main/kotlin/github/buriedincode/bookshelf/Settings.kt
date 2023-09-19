@@ -5,39 +5,25 @@ import com.sksamuel.hoplite.addPathSource
 import com.sksamuel.hoplite.addResourceSource
 import org.apache.logging.log4j.kotlin.Logging
 import java.nio.file.Path
-import java.nio.file.Paths
+import kotlin.io.path.div
 
-enum class Environment {
-    DEV,
-    PROD,
-}
-
-data class Website(val host: String, val port: Int)
 data class Settings(val environment: Environment, val database: Path, val website: Website) {
+    enum class Environment {
+        DEV,
+        PROD,
+    }
+
+    data class Website(val host: String, val port: Int)
+
     companion object : Logging {
-        fun load(): Settings = ConfigLoaderBuilder.default()
-            .addPathSource(
-                Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.yaml"),
-                optional = true,
-                allowEmpty = true,
-            )
-            .addPathSource(
-                Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.json"),
-                optional = true,
-                allowEmpty = true,
-            )
-            .addPathSource(
-                Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.conf"),
-                optional = true,
-                allowEmpty = true,
-            )
-            .addPathSource(
-                Paths.get(System.getProperty("user.home"), ".config", "bookshelf", "settings.properties"),
-                optional = true,
-                allowEmpty = true,
-            )
-            .addResourceSource("/default.properties")
-            .build()
-            .loadConfigOrThrow<Settings>()
+        fun load(): Settings =
+            ConfigLoaderBuilder.default()
+                .addPathSource(Utils.CONFIG_ROOT / "settings.yaml", optional = true, allowEmpty = true)
+                .addPathSource(Utils.CONFIG_ROOT / "settings.json", optional = true, allowEmpty = true)
+                .addPathSource(Utils.CONFIG_ROOT / "settings.conf", optional = true, allowEmpty = true)
+                .addPathSource(Utils.CONFIG_ROOT / "settings.properties", optional = true, allowEmpty = true)
+                .addResourceSource("/default.properties")
+                .build()
+                .loadConfigOrThrow<Settings>()
     }
 }

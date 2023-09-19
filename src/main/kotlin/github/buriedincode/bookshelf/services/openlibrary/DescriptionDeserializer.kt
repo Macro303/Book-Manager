@@ -11,7 +11,10 @@ import java.io.IOException
 
 class DescriptionDeserializer : JsonDeserializer<String?>() {
     @Throws(IOException::class, JsonProcessingException::class)
-    override fun deserialize(parser: JsonParser, ctxt: DeserializationContext?): String? {
+    override fun deserialize(
+        parser: JsonParser,
+        ctxt: DeserializationContext?,
+    ): String? {
         val mapper = parser.codec as ObjectMapper
         val root = mapper.readTree(parser) as JsonNode
         if (root.isObject) {
