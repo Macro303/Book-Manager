@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.43.0.0")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.42.0.1")
 
     // Exposed
     val exposedVersion = "0.43.0"

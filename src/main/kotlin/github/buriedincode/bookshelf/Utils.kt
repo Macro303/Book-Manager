@@ -78,6 +78,7 @@ object Utils : Logging {
     internal fun <T> query(block: () -> T): T {
         val startTime = LocalDateTime.now()
         val transaction = transaction(transactionIsolation = Connection.TRANSACTION_SERIALIZABLE, db = DATABASE) {
+            repetitionAttempts = 1
             addLogger(Slf4jSqlDebugLogger)
             block()
         }
