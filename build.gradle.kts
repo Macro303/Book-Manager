@@ -22,10 +22,10 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.42.0.1")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.43.0.0")
 
     // Exposed
-    val exposedVersion = "0.43.0"
+    val exposedVersion = "0.44.0"
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
