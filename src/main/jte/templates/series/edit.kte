@@ -148,7 +148,7 @@
 
     addLoading(caller);
     fetch("/api/series/${resource.id.value}", {
-      method: "PATCH",
+      method: "PUT",
       headers: HEADERS,
       body: JSON.stringify({
         "books": [@for(entry in ForSupport.of(resource.books))

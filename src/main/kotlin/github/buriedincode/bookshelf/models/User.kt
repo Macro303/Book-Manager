@@ -1,5 +1,6 @@
 package github.buriedincode.bookshelf.models
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 import github.buriedincode.bookshelf.tables.ReadBookTable
 import github.buriedincode.bookshelf.tables.UserTable
@@ -56,5 +57,6 @@ data class UserInput(
 
 data class UserReadInput(
     val bookId: Long,
+    @JsonDeserialize(using = LocalDateDeserializer::class)
     val readDate: LocalDate? = LocalDate.now(),
 )

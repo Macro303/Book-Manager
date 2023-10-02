@@ -19,7 +19,6 @@ import github.buriedincode.bookshelf.routers.api.RoleApiRouter
 import github.buriedincode.bookshelf.routers.api.SeriesApiRouter
 import github.buriedincode.bookshelf.routers.api.UserApiRouter
 import io.javalin.Javalin
-import io.javalin.apibuilder.ApiBuilder.crud
 import io.javalin.apibuilder.ApiBuilder.delete
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.patch
@@ -178,9 +177,13 @@ object App : Logging {
             }
             path("api") {
                 path("books") {
+                    get(BookApiRouter::listEndpoint)
+                    post(BookApiRouter::createEndpoint)
                     post("import", BookApiRouter::importBook)
                     path("{book-id}") {
-                        crud(BookApiRouter)
+                        get(BookApiRouter::getEndpoint)
+                        put(BookApiRouter::updateEndpoint)
+                        delete(BookApiRouter::deleteEndpoint)
                         put("refresh", BookApiRouter::refreshBook)
                         path("wish") {
                             patch(BookApiRouter::addWisher)
@@ -209,8 +212,12 @@ object App : Logging {
                     }
                 }
                 path("creators") {
+                    get(CreatorApiRouter::listEndpoint)
+                    post(CreatorApiRouter::createEndpoint)
                     path("{creator-id}") {
-                        crud(CreatorApiRouter)
+                        get(CreatorApiRouter::getEndpoint)
+                        put(CreatorApiRouter::updateEndpoint)
+                        delete(CreatorApiRouter::deleteEndpoint)
                         path("credits") {
                             patch(CreatorApiRouter::addCredit)
                             delete(CreatorApiRouter::removeCredit)
@@ -218,8 +225,12 @@ object App : Logging {
                     }
                 }
                 path("genres") {
+                    get(GenreApiRouter::listEndpoint)
+                    post(GenreApiRouter::createEndpoint)
                     path("{genre-id}") {
-                        crud(GenreApiRouter)
+                        get(GenreApiRouter::getEndpoint)
+                        put(GenreApiRouter::updateEndpoint)
+                        delete(GenreApiRouter::deleteEndpoint)
                         path("books") {
                             patch(GenreApiRouter::addBook)
                             delete(GenreApiRouter::removeBook)
@@ -227,13 +238,21 @@ object App : Logging {
                     }
                 }
                 path("publishers") {
+                    get(PublisherApiRouter::listEndpoint)
+                    post(PublisherApiRouter::createEndpoint)
                     path("{publisher-id}") {
-                        crud(PublisherApiRouter)
+                        get(PublisherApiRouter::getEndpoint)
+                        put(PublisherApiRouter::updateEndpoint)
+                        delete(PublisherApiRouter::deleteEndpoint)
                     }
                 }
                 path("roles") {
+                    get(RoleApiRouter::listEndpoint)
+                    post(RoleApiRouter::createEndpoint)
                     path("{role-id}") {
-                        crud(RoleApiRouter)
+                        get(RoleApiRouter::getEndpoint)
+                        put(RoleApiRouter::updateEndpoint)
+                        delete(RoleApiRouter::deleteEndpoint)
                         path("credits") {
                             patch(RoleApiRouter::addCredit)
                             delete(RoleApiRouter::removeCredit)
@@ -241,8 +260,12 @@ object App : Logging {
                     }
                 }
                 path("series") {
+                    get(SeriesApiRouter::listEndpoint)
+                    post(SeriesApiRouter::createEndpoint)
                     path("{series-id}") {
-                        crud(SeriesApiRouter)
+                        get(SeriesApiRouter::getEndpoint)
+                        put(SeriesApiRouter::updateEndpoint)
+                        delete(SeriesApiRouter::deleteEndpoint)
                         path("books") {
                             patch(SeriesApiRouter::addBook)
                             delete(SeriesApiRouter::removeBook)

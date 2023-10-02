@@ -8,7 +8,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.SchemaUtils
 
-object BookCreatorRoleTable : LongIdTable(name = "books__creators__roles"), Logging {
+object CreditTable : LongIdTable(name = "books__creators__roles"), Logging {
     val bookCol: Column<EntityID<Long>> = reference(
         name = "book_id",
         foreign = BookTable,

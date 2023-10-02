@@ -151,7 +151,7 @@
 
     addLoading(caller);
     fetch("/api/creators/${resource.id.value}", {
-      method: "PATCH",
+      method: "PUT",
       headers: HEADERS,
       body: JSON.stringify({
         "credits": [@for(entry in ForSupport.of(resource.credits))

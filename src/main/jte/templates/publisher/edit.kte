@@ -47,7 +47,7 @@
 
     addLoading(caller);
     fetch("/api/publishers/${resource.id.value}", {
-      method: "PATCH",
+      method: "PUT",
       headers: HEADERS,
       body: JSON.stringify({
         "title": formData["title"].trim(),

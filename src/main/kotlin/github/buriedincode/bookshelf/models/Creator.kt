@@ -1,7 +1,7 @@
 package github.buriedincode.bookshelf.models
 
-import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
 import github.buriedincode.bookshelf.tables.CreatorTable
+import github.buriedincode.bookshelf.tables.CreditTable
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -12,7 +12,7 @@ class Creator(id: EntityID<Long>) : LongEntity(id), Comparable<Creator> {
         val comparator = compareBy(Creator::name)
     }
 
-    val credits by BookCreatorRole referrersOn BookCreatorRoleTable.creatorCol
+    val credits by Credit referrersOn CreditTable.creatorCol
     var imageUrl: String? by CreatorTable.imageUrlCol
     var name: String by CreatorTable.nameCol
 
@@ -23,7 +23,7 @@ class Creator(id: EntityID<Long>) : LongEntity(id), Comparable<Creator> {
             "name" to name,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.book }.thenBy { it.role }).map {
+            output["credits"] = credits.sortedWith(compareBy<Credit> { it.book }.thenBy { it.role }).map {
                 mapOf(
                     "book" to it.book.toJson(),
                     "role" to it.role.toJson(),

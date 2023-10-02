@@ -1,17 +1,16 @@
 package github.buriedincode.bookshelf.routers.api
 
-import github.buriedincode.bookshelf.ErrorResponse
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.Utils.asEnumOrNull
-import github.buriedincode.bookshelf.docs.BookEntry
 import github.buriedincode.bookshelf.models.Book
-import github.buriedincode.bookshelf.models.BookCreatorRole
 import github.buriedincode.bookshelf.models.BookCreditInput
 import github.buriedincode.bookshelf.models.BookImport
 import github.buriedincode.bookshelf.models.BookInput
+import github.buriedincode.bookshelf.models.BookReadInput
 import github.buriedincode.bookshelf.models.BookSeries
 import github.buriedincode.bookshelf.models.BookSeriesInput
 import github.buriedincode.bookshelf.models.Creator
+import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Format
 import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.IdValue
@@ -23,15 +22,14 @@ import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.services.OpenLibrary
 import github.buriedincode.bookshelf.services.openlibrary.Edition
 import github.buriedincode.bookshelf.services.openlibrary.Work
-import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
 import github.buriedincode.bookshelf.tables.CreatorTable
+import github.buriedincode.bookshelf.tables.CreditTable
 import github.buriedincode.bookshelf.tables.GenreTable
 import github.buriedincode.bookshelf.tables.PublisherTable
 import github.buriedincode.bookshelf.tables.ReadBookTable
 import github.buriedincode.bookshelf.tables.RoleTable
-import io.javalin.apibuilder.CrudHandler
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
@@ -39,51 +37,13 @@ import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
 import io.javalin.http.NotImplementedResponse
 import io.javalin.http.bodyValidator
-import io.javalin.openapi.HttpMethod
-import io.javalin.openapi.OpenApi
-import io.javalin.openapi.OpenApiContent
-import io.javalin.openapi.OpenApiParam
-import io.javalin.openapi.OpenApiRequestBody
-import io.javalin.openapi.OpenApiResponse
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
-import java.time.LocalDate
 
-object BookApiRouter : CrudHandler, Logging {
-    private fun getResource(resourceId: String): Book {
-        return resourceId.toLongOrNull()?.let {
-            Book.findById(id = it) ?: throw NotFoundResponse(message = "Book not found")
-        } ?: throw BadRequestResponse(message = "Invalid Book Id")
-    }
-
-    private fun Context.getBody(): BookInput =
-        this.bodyValidator<BookInput>()
-            .check({ it.title.isNotBlank() }, error = "Title must not be empty")
-            .check({ it.series.all { it.seriesId > 0 } }, error = "bookId must be greater than 0")
-            .get()
-
-    @OpenApi(
-        description = "List all Books",
-        methods = [HttpMethod.GET],
-        operationId = "listBooks",
-        path = "/books",
-        queryParams = [
-            OpenApiParam(name = "creator-id", type = Long::class),
-            OpenApiParam(name = "format", type = String::class),
-            OpenApiParam(name = "genre-id", type = Long::class),
-            OpenApiParam(name = "publisher-id", type = Long::class),
-            OpenApiParam(name = "series-id", type = Long::class),
-            OpenApiParam(name = "title", type = String::class),
-        ],
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(Array<BookEntry>::class)]),
-        ],
-        summary = "List all Books",
-        tags = ["Book"],
-    )
-    override fun getAll(ctx: Context): Unit =
+object BookApiRouter : Logging {
+    fun listEndpoint(ctx: Context): Unit =
         Utils.query {
             var books = Book.all().toList()
             val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let {
@@ -127,272 +87,212 @@ object BookApiRouter : CrudHandler, Logging {
             val title = ctx.queryParam("title")
             if (title != null) {
                 books = books.filter {
-                    (
-                        it.title.contains(title, ignoreCase = true) || title.contains(
-                            it.title,
-                            ignoreCase = true,
+                    it.title.contains(title, ignoreCase = true) ||
+                        title.contains(it.title, ignoreCase = true) ||
+                        (
+                            it.subtitle?.let {
+                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                            } ?: false
                         )
-                    ) || (
-                        it.subtitle?.let {
-                            it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                        } ?: false
-                    )
                 }
             }
             ctx.json(books.sorted().map { it.toJson() })
         }
 
-    @OpenApi(
-        description = "Create Book",
-        methods = [HttpMethod.POST],
-        operationId = "createBook",
-        path = "/books",
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookInput::class)], required = true),
-        responses = [
-            OpenApiResponse(status = "201", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Create Book",
-        tags = ["Book"],
-    )
-    override fun create(ctx: Context): Unit =
+    private fun Context.getInput(): BookInput =
+        this.bodyValidator<BookInput>()
+            .check({ it.title.isNotBlank() }, error = "Title must not be empty")
+            .check({ it.series.all { it.seriesId > 0 } }, error = "bookId must be greater than 0")
+            .get()
+
+    fun createEndpoint(ctx: Context): Unit =
         Utils.query {
-            val body = ctx.getBody()
+            val input = ctx.getInput()
             val exists = Book.find {
-                (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
+                (BookTable.titleCol eq input.title) and (BookTable.subtitleCol eq input.subtitle)
             }.firstOrNull()
             if (exists != null) {
                 throw ConflictResponse(message = "Book already exists")
             }
             val book = Book.new {
-                description = body.description
-                format = body.format
+                description = input.description
+                format = input.format
                 genres = SizedCollection(
-                    body.genreIds.map {
+                    input.genreIds.map {
                         Genre.findById(id = it)
-                            ?: throw NotFoundResponse(message = "Genre not found")
+                            ?: throw NotFoundResponse(message = "Unable to find Genre: `$it`")
                     },
                 )
-                goodreadsId = body.goodreadsId
-                googleBooksId = body.googleBooksId
-                imageUrl = body.imageUrl
-                isCollected = body.isCollected
-                isbn = body.isbn
-                libraryThingId = body.libraryThingId
-                openLibraryId = body.openLibraryId
-                publishDate = body.publishDate
-                publisher = body.publisherId?.let {
+                goodreadsId = input.goodreadsId
+                googleBooksId = input.googleBooksId
+                imageUrl = input.imageUrl
+                isCollected = input.isCollected
+                isbn = input.isbn
+                libraryThingId = input.libraryThingId
+                openLibraryId = input.openLibraryId
+                publishDate = input.publishDate
+                publisher = input.publisherId?.let {
                     Publisher.findById(id = it)
-                        ?: throw NotFoundResponse(message = "Publisher not found")
+                        ?: throw NotFoundResponse(message = "Unable to find Publisher: `$it`")
                 }
-                subtitle = body.subtitle
-                title = body.title
+                subtitle = input.subtitle
+                title = input.title
                 wishers = SizedCollection(
-                    body.wisherIds.map {
+                    input.wisherIds.map {
                         User.findById(id = it)
-                            ?: throw NotFoundResponse(message = "Wisher not found")
+                            ?: throw NotFoundResponse(message = "Unable to find User: `$it`")
                     },
                 )
             }
-            body.credits.forEach {
+            input.credits.forEach {
                 val creator = Creator.findById(id = it.creatorId)
-                    ?: throw NotFoundResponse(message = "Creator not found")
+                    ?: throw NotFoundResponse(message = "Unable to find Creator: `${it.creatorId}`")
                 val role = Role.findById(id = it.roleId)
-                    ?: throw NotFoundResponse(message = "Role not found")
-                BookCreatorRole.new {
+                    ?: throw NotFoundResponse(message = "Unable to find Role: `${it.roleId}`")
+                Credit.find {
+                    (CreditTable.bookCol eq book.id) and
+                        (CreditTable.creatorCol eq creator.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
                     this.book = book
                     this.creator = creator
                     this.role = role
                 }
             }
-            body.readers.forEach {
+            input.readers.forEach {
                 val user = User.findById(id = it.userId)
-                    ?: throw NotFoundResponse(message = "Reader not found")
-                ReadBook.new {
+                    ?: throw NotFoundResponse(message = "Unable to find User: `${it.userId}`")
+                val readBook = ReadBook.find {
+                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+                }.firstOrNull() ?: ReadBook.new {
                     this.book = book
                     this.user = user
                 }
+                readBook.readDate = it.readDate
             }
-            body.series.forEach {
+            input.series.forEach {
                 val series = Series.findById(id = it.seriesId)
-                    ?: throw NotFoundResponse(message = "Series not found")
-                BookSeries.new {
+                    ?: throw NotFoundResponse(message = "Unable to find Series: `${it.seriesId}`")
+                val bookSeries = BookSeries.find {
+                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
+                }.firstOrNull() ?: BookSeries.new {
                     this.book = book
                     this.series = series
-                    number = if (it.number == 0) null else it.number
                 }
+                bookSeries.number = if (it.number == 0) null else it.number
             }
 
             ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Get Book by id",
-        methods = [HttpMethod.GET],
-        operationId = "getBook",
-        path = "/books/{book-id}",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Get Book by id",
-        tags = ["Book"],
-    )
-    override fun getOne(
-        ctx: Context,
-        resourceId: String,
-    ): Unit =
+    private fun Context.getResource(): Book {
+        return this.pathParam("book-id").toLongOrNull()?.let {
+            Book.findById(id = it) ?: throw NotFoundResponse(message = "Unable to find Book: `$it`")
+        } ?: throw BadRequestResponse(message = "Unable to find Book: `${this.pathParam("book-id")}`")
+    }
+
+    fun getEndpoint(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = resourceId)
-            ctx.json(book.toJson(showAll = true))
+            val resource = ctx.getResource()
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Update Book",
-        methods = [HttpMethod.PATCH],
-        operationId = "updateBook",
-        path = "/books/{book-id}",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookInput::class)], required = true),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Update Book",
-        tags = ["Book"],
-    )
-    override fun update(
-        ctx: Context,
-        resourceId: String,
-    ): Unit =
+    fun updateEndpoint(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = resourceId)
-            val body = ctx.getBody()
+            val resource = ctx.getResource()
+            val input = ctx.getInput()
             val exists = Book.find {
-                (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
+                (BookTable.titleCol eq input.title) and (BookTable.subtitleCol eq input.subtitle)
             }.firstOrNull()
-            if (exists != null && exists != book) {
+            if (exists != null && exists != resource) {
                 throw ConflictResponse(message = "Book already exists")
             }
-            book.description = body.description
-            book.format = body.format
-            book.genres = SizedCollection(
-                body.genreIds.map {
+            resource.description = input.description
+            resource.format = input.format
+            resource.genres = SizedCollection(
+                input.genreIds.map {
                     Genre.findById(id = it)
-                        ?: throw NotFoundResponse(message = "Genre not found")
+                        ?: throw NotFoundResponse(message = "Unable to find Genre: `$it`")
                 },
             )
-            book.goodreadsId = body.goodreadsId
-            book.googleBooksId = body.googleBooksId
-            book.imageUrl = body.imageUrl
-            book.isCollected = body.isCollected
-            book.isbn = body.isbn
-            book.libraryThingId = body.libraryThingId
-            book.openLibraryId = body.openLibraryId
-            book.publishDate = body.publishDate
-            book.publisher = body.publisherId?.let {
+            resource.goodreadsId = input.goodreadsId
+            resource.googleBooksId = input.googleBooksId
+            resource.imageUrl = input.imageUrl
+            resource.isCollected = input.isCollected
+            resource.isbn = input.isbn
+            resource.libraryThingId = input.libraryThingId
+            resource.openLibraryId = input.openLibraryId
+            resource.publishDate = input.publishDate
+            resource.publisher = input.publisherId?.let {
                 Publisher.findById(id = it)
-                    ?: throw NotFoundResponse(message = "Publisher not found")
+                    ?: throw NotFoundResponse(message = "Unable to find Publisher: `$it`")
             }
-            book.subtitle = body.subtitle
-            book.title = body.title
-            book.wishers = SizedCollection(
-                body.wisherIds.map {
+            resource.subtitle = input.subtitle
+            resource.title = input.title
+            resource.wishers = SizedCollection(
+                input.wisherIds.map {
                     User.findById(id = it)
-                        ?: throw NotFoundResponse(message = "User not found")
+                        ?: throw NotFoundResponse(message = "Unable to find User: `$it`")
                 },
             )
-            body.credits.forEach {
+            input.credits.forEach {
                 val creator = Creator.findById(id = it.creatorId)
-                    ?: throw NotFoundResponse(message = "Creator not found")
+                    ?: throw NotFoundResponse(message = "Unable to find Creator: `${it.creatorId}`")
                 val role = Role.findById(id = it.roleId)
-                    ?: throw NotFoundResponse(message = "Role not found")
-                val bookCreatorRole = BookCreatorRole.find {
-                    (BookCreatorRoleTable.bookCol eq book.id) and
-                        (BookCreatorRoleTable.creatorCol eq creator.id) and
-                        (BookCreatorRoleTable.roleCol eq role.id)
-                }.firstOrNull()
-                if (bookCreatorRole == null) {
-                    BookCreatorRole.new {
-                        this.book = book
-                        this.creator = creator
-                        this.role = role
-                    }
+                    ?: throw NotFoundResponse(message = "Unable to find Role: `${it.roleId}`")
+                Credit.find {
+                    (CreditTable.bookCol eq resource.id) and
+                        (CreditTable.creatorCol eq creator.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
+                    this.book = resource
+                    this.creator = creator
+                    this.role = role
                 }
             }
-            body.readers.forEach {
+            input.readers.forEach {
                 val user = User.findById(id = it.userId)
-                    ?: throw NotFoundResponse(message = "Reader not found")
+                    ?: throw NotFoundResponse(message = "Unable to find User: `${it.userId}`")
                 val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
-                }.firstOrNull()
-                if (readBook == null) {
-                    ReadBook.new {
-                        this.book = book
-                        this.user = user
-                    }
+                    (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
+                }.firstOrNull() ?: ReadBook.new {
+                    this.book = resource
+                    this.user = user
                 }
+                readBook.readDate = it.readDate
             }
-            body.series.forEach {
+            input.series.forEach {
                 val series = Series.findById(id = it.seriesId)
-                    ?: throw NotFoundResponse(message = "Series not found")
+                    ?: throw NotFoundResponse(message = "Unable to find Series: `${it.seriesId}`")
                 val bookSeries = BookSeries.find {
-                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
-                }.firstOrNull()
-                if (bookSeries == null) {
-                    BookSeries.new {
-                        this.book = book
-                        this.series = series
-                        number = if (it.number == 0) null else it.number
-                    }
-                } else {
-                    bookSeries.number = if (it.number == 0) null else it.number
+                    (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
+                }.firstOrNull() ?: BookSeries.new {
+                    this.book = resource
+                    this.series = series
                 }
+                bookSeries.number = if (it.number == 0) null else it.number
             }
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Delete Book",
-        methods = [HttpMethod.DELETE],
-        operationId = "deleteBook",
-        path = "/books/{book-id}",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        responses = [
-            OpenApiResponse(status = "204"),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Delete Book",
-        tags = ["Book"],
-    )
-    override fun delete(
-        ctx: Context,
-        resourceId: String,
-    ): Unit =
+    fun deleteEndpoint(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = resourceId)
-            book.credits.forEach {
+            val resource = ctx.getResource()
+            resource.credits.forEach {
                 it.delete()
             }
-            book.readers.forEach {
+            resource.readers.forEach {
                 it.delete()
             }
-            book.series.forEach {
+            resource.series.forEach {
                 it.delete()
             }
-            book.delete()
+            resource.delete()
             ctx.status(HttpStatus.NO_CONTENT)
         }
 
-    private fun Context.getImportBody(): BookImport =
+    private fun Context.getImport(): BookImport =
         this.bodyValidator<BookImport>()
             .check(
                 {
@@ -406,31 +306,18 @@ object BookApiRouter : CrudHandler, Logging {
             )
             .get()
 
-    @OpenApi(
-        description = "Import Book",
-        methods = [HttpMethod.POST],
-        operationId = "importBook",
-        path = "/books/import",
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookImport::class)], required = true),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Import Book",
-        tags = ["Book"],
-    )
     fun importBook(ctx: Context): Unit =
         Utils.query {
-            val body = ctx.getImportBody()
+            val import = ctx.getImport()
 
             val edition: Edition
             val work: Work
-            if (body.openLibraryId != null) {
-                val temp = OpenLibrary.getBook(editionId = body.openLibraryId)
+            if (import.openLibraryId != null) {
+                val temp = OpenLibrary.getBook(editionId = import.openLibraryId)
                 edition = temp.first
                 work = temp.second
-            } else if (body.isbn != null) {
-                val temp = OpenLibrary.lookupBook(isbn = body.isbn)
+            } else if (import.isbn != null) {
+                val temp = OpenLibrary.lookupBook(isbn = import.isbn)
                 edition = temp.first
                 work = temp.second
             } else {
@@ -471,7 +358,7 @@ object BookApiRouter : CrudHandler, Logging {
                 googleBooksId = edition.identifiers.google.firstOrNull()
                 imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
                 isbn = edition.isbn
-                isCollected = body.isCollected
+                isCollected = import.isCollected
                 libraryThingId = edition.identifiers.librarything.firstOrNull()
                 openLibraryId = edition.editionId
                 publishDate = edition.publishDate
@@ -485,9 +372,9 @@ object BookApiRouter : CrudHandler, Logging {
                 subtitle = edition.subtitle
                 title = edition.title
                 wishers = SizedCollection(
-                    body.wisherIds.map {
+                    import.wisherIds.map {
                         User.findById(id = it)
-                            ?: throw NotFoundResponse(message = "User not found")
+                            ?: throw NotFoundResponse(message = "Unable to find User: `$it`")
                     },
                 )
             }
@@ -504,7 +391,7 @@ object BookApiRouter : CrudHandler, Logging {
                 }
                 creator
             }.forEach {
-                BookCreatorRole.new {
+                Credit.new {
                     this.book = book
                     creator = it
                     role = Role.find {
@@ -515,7 +402,7 @@ object BookApiRouter : CrudHandler, Logging {
                 }
             }
             edition.contributors.forEach {
-                BookCreatorRole.new {
+                Credit.new {
                     this.book = book
                     creator = Creator.find {
                         CreatorTable.nameCol eq it.name
@@ -532,32 +419,18 @@ object BookApiRouter : CrudHandler, Logging {
             ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Refresh Book",
-        methods = [HttpMethod.PUT],
-        operationId = "refreshBook",
-        path = "/books/{book-id}/refresh",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Refresh Book",
-        tags = ["Book"],
-    )
     fun refreshBook(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
+            val resource = ctx.getResource()
 
             val edition: Edition
             val work: Work
-            if (book.openLibraryId != null) {
-                val temp = OpenLibrary.getBook(editionId = book.openLibraryId!!)
+            if (resource.openLibraryId != null) {
+                val temp = OpenLibrary.getBook(editionId = resource.openLibraryId!!)
                 edition = temp.first
                 work = temp.second
-            } else if (book.isbn != null) {
-                val temp = OpenLibrary.lookupBook(isbn = book.isbn!!)
+            } else if (resource.isbn != null) {
+                val temp = OpenLibrary.lookupBook(isbn = resource.isbn!!)
                 edition = temp.first
                 work = temp.second
             } else {
@@ -578,13 +451,13 @@ object BookApiRouter : CrudHandler, Logging {
                     ) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
                 }.firstOrNull()
             }
-            if (exists != null && exists != book) {
+            if (exists != null && exists != resource) {
                 throw ConflictResponse(message = "This Book already exists in the database.")
             }
 
-            book.description = edition.description ?: work.description
+            resource.description = edition.description ?: work.description
             // book.format = Format.PAPERBACK
-            book.genres = SizedCollection(
+            resource.genres = SizedCollection(
                 edition.genres.map {
                     Genre.find {
                         GenreTable.titleCol eq it
@@ -593,22 +466,22 @@ object BookApiRouter : CrudHandler, Logging {
                     }
                 },
             )
-            book.goodreadsId = edition.identifiers.goodreads.firstOrNull()
-            book.googleBooksId = edition.identifiers.google.firstOrNull()
-            book.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
-            book.isbn = edition.isbn
-            book.libraryThingId = edition.identifiers.librarything.firstOrNull()
-            book.openLibraryId = edition.editionId
-            book.publishDate = edition.publishDate
+            resource.goodreadsId = edition.identifiers.goodreads.firstOrNull()
+            resource.googleBooksId = edition.identifiers.google.firstOrNull()
+            resource.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
+            resource.isbn = edition.isbn
+            resource.libraryThingId = edition.identifiers.librarything.firstOrNull()
+            resource.openLibraryId = edition.editionId
+            resource.publishDate = edition.publishDate
             edition.publishers.firstOrNull()?.let {
-                book.publisher = Publisher.find {
+                resource.publisher = Publisher.find {
                     PublisherTable.titleCol eq it
                 }.firstOrNull() ?: Publisher.new {
                     title = it
                 }
             }
-            book.subtitle = edition.subtitle
-            book.title = edition.title
+            resource.subtitle = edition.subtitle
+            resource.title = edition.title
             work.authors.map {
                 OpenLibrary.getAuthor(authorId = it.authorId)
             }.map {
@@ -627,13 +500,13 @@ object BookApiRouter : CrudHandler, Logging {
                 }.firstOrNull() ?: Role.new {
                     title = "Author"
                 }
-                BookCreatorRole.find {
-                    (BookCreatorRoleTable.bookCol eq book.id) and
-                        (BookCreatorRoleTable.creatorCol eq it.id) and
-                        (BookCreatorRoleTable.roleCol eq role.id)
-                }.firstOrNull() ?: BookCreatorRole.new {
-                    this.book = book
-                    creator = it
+                Credit.find {
+                    (CreditTable.bookCol eq resource.id) and
+                        (CreditTable.creatorCol eq it.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
+                    this.book = resource
+                    this.creator = it
                     this.role = role
                 }
             }
@@ -648,64 +521,61 @@ object BookApiRouter : CrudHandler, Logging {
                 }.firstOrNull() ?: Role.new {
                     title = it.role
                 }
-                BookCreatorRole.find {
-                    (BookCreatorRoleTable.bookCol eq book.id) and
-                        (BookCreatorRoleTable.creatorCol eq creator.id) and
-                        (BookCreatorRoleTable.roleCol eq role.id)
-                }.firstOrNull() ?: BookCreatorRole.new {
-                    this.book = book
+                Credit.find {
+                    (CreditTable.bookCol eq resource.id) and
+                        (CreditTable.creatorCol eq creator.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
+                    this.book = resource
                     this.creator = creator
                     this.role = role
                 }
             }
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Collect Book",
-        methods = [HttpMethod.PATCH],
-        operationId = "collectBook",
-        path = "/books/{book-id}/collect",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Collect Book",
-        tags = ["Book"],
-    )
     fun collectBook(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            book.isCollected = true
-            book.wishers = SizedCollection()
-            ctx.json(book.toJson(showAll = true))
+            val resource = ctx.getResource()
+            resource.isCollected = true
+            resource.wishers = SizedCollection()
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Discard Book",
-        methods = [HttpMethod.DELETE],
-        operationId = "discardBook",
-        path = "/books/{book-id}/collect",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Discard Book",
-        tags = ["Book"],
-    )
     fun discardBook(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            book.isCollected = false
-            book.readers.forEach {
+            val resource = ctx.getResource()
+            resource.isCollected = false
+            resource.readers.forEach {
                 it.delete()
             }
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
+        }
+
+    private fun Context.getReadInput(): BookReadInput =
+        this.bodyValidator<BookReadInput>()
+            .check({ it.userId > 0 }, error = "UserId must be greater than 0")
+            .get()
+
+    fun addReader(ctx: Context): Unit =
+        Utils.query {
+            val resource = ctx.getResource()
+            if (!resource.isCollected) {
+                throw BadRequestResponse(message = "Book hasn't been collected to be able to read")
+            }
+            val input = ctx.getReadInput()
+            val user = User.findById(id = input.userId)
+                ?: throw NotFoundResponse(message = "Unable to find User: `${input.userId}`")
+            val readBook = ReadBook.find {
+                (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
+            }.firstOrNull() ?: ReadBook.new {
+                this.book = resource
+                this.user = user
+            }
+            readBook.readDate = input.readDate
+
+            ctx.json(resource.toJson(showAll = true))
         }
 
     private fun Context.getIdValue(): IdValue =
@@ -713,355 +583,163 @@ object BookApiRouter : CrudHandler, Logging {
             .check({ it.id > 0 }, error = "Id must be greater than 0")
             .get()
 
-    @OpenApi(
-        description = "Add Reader to Book",
-        methods = [HttpMethod.PATCH],
-        operationId = "addReader",
-        path = "/books/{book-id}/read",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Add Reader to Book",
-        tags = ["Book"],
-    )
-    fun addReader(ctx: Context): Unit =
-        Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            if (!book.isCollected) {
-                throw BadRequestResponse(message = "Book hasn't been collected to be able to read")
-            }
-            val body = ctx.getIdValue()
-            val user = User.findById(id = body.id)
-                ?: throw NotFoundResponse(message = "User not found")
-            val exists = ReadBook.find {
-                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
-            }.firstOrNull()
-            if (exists != null) {
-                throw BadRequestResponse(message = "Book has already been read by User")
-            }
-            ReadBook.new {
-                this.book = book
-                this.user = user
-                readDate = LocalDate.now()
-            }
-
-            ctx.json(book.toJson(showAll = true))
-        }
-
-    @OpenApi(
-        description = "Remove Reader from Book",
-        methods = [HttpMethod.DELETE],
-        operationId = "removeReader",
-        path = "/books/{book-id}/read",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Remove Reader from Book",
-        tags = ["Book"],
-    )
     fun removeReader(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            if (!book.isCollected) {
+            val resource = ctx.getResource()
+            if (!resource.isCollected) {
                 throw BadRequestResponse(message = "Book hasn't been collected to be able to unread")
             }
-            val body = ctx.getIdValue()
-            val user = User.findById(id = body.id)
-                ?: throw NotFoundResponse(message = "User not found")
-            val exists = ReadBook.find {
-                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+            val input = ctx.getIdValue()
+            val user = User.findById(id = input.id)
+                ?: throw NotFoundResponse(message = "Unable to find User: `${input.id}`")
+            val readBook = ReadBook.find {
+                (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
             }.firstOrNull() ?: throw BadRequestResponse(message = "Book has not been read by this User.")
-            exists.delete()
+            readBook.delete()
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Add Wisher to Book",
-        methods = [HttpMethod.PATCH],
-        operationId = "addWisher",
-        path = "/books/{book-id}/wish",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Add Wisher to Book",
-        tags = ["Book"],
-    )
     fun addWisher(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            if (book.isCollected) {
+            val resource = ctx.getResource()
+            if (resource.isCollected) {
                 throw BadRequestResponse(message = "Book has already been collected")
             }
-            val body = ctx.getIdValue()
-            val user = User.findById(id = body.id)
-                ?: throw NotFoundResponse(message = "User not found")
-            if (user in book.wishers) {
-                throw BadRequestResponse(message = "Book has already been wished by User")
-            }
-            val temp = book.wishers.toMutableList()
+            val input = ctx.getIdValue()
+            val user = User.findById(id = input.id)
+                ?: throw NotFoundResponse(message = "Unable to find User: `${input.id}`")
+            val temp = resource.wishers.toMutableSet()
             temp.add(user)
-            book.wishers = SizedCollection(temp)
+            resource.wishers = SizedCollection(temp)
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Remove Wisher from Book",
-        methods = [HttpMethod.DELETE],
-        operationId = "removeWisher",
-        path = "/books/{book-id}/wish",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Remove Wisher from Book",
-        tags = ["Book"],
-    )
     fun removeWisher(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            if (book.isCollected) {
+            val resource = ctx.getResource()
+            if (resource.isCollected) {
                 throw BadRequestResponse(message = "Book has already been collected")
             }
-            val body = ctx.getIdValue()
-            val user = User.findById(id = body.id)
-                ?: throw NotFoundResponse(message = "User not found")
-            if (!book.wishers.contains(user)) {
+            val input = ctx.getIdValue()
+            val user = User.findById(id = input.id)
+                ?: throw NotFoundResponse(message = "Unable to find User: `${input.id}`")
+            if (!resource.wishers.contains(user)) {
                 throw BadRequestResponse(message = "Book hasn't been wished by User")
             }
-            val temp = book.wishers.toMutableList()
+            val temp = resource.wishers.toMutableList()
             temp.remove(user)
-            book.wishers = SizedCollection(temp)
+            resource.wishers = SizedCollection(temp)
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    private fun Context.getBookCreditBody(): BookCreditInput =
+    private fun Context.getCreditInput(): BookCreditInput =
         this.bodyValidator<BookCreditInput>()
             .get()
 
-    @OpenApi(
-        description = "Add Credit to Book",
-        methods = [HttpMethod.PATCH],
-        operationId = "addBookCredit",
-        path = "/books/{book-id}/credits",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookCreditInput::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Add Credit to Book",
-        tags = ["Book"],
-    )
     fun addCredit(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            val body = ctx.getBookCreditBody()
-            val creator = Creator.findById(id = body.creatorId)
-                ?: throw NotFoundResponse(message = "Creator not found")
-            val role = Role.findById(id = body.roleId)
-                ?: throw NotFoundResponse(message = "Role not found")
-            val credit = BookCreatorRole.find {
-                (BookCreatorRoleTable.bookCol eq book.id) and
-                    (BookCreatorRoleTable.creatorCol eq creator.id) and
-                    (BookCreatorRoleTable.roleCol eq role.id)
-            }.firstOrNull()
-            if (credit != null) {
-                throw ConflictResponse(message = "Book Creator already has this role")
-            } else {
-                BookCreatorRole.new {
-                    this.book = book
-                    this.creator = creator
-                    this.role = role
-                }
+            val resource = ctx.getResource()
+            val input = ctx.getCreditInput()
+            val creator = Creator.findById(id = input.creatorId)
+                ?: throw NotFoundResponse(message = "Unable to find Creator: `${input.creatorId}`")
+            val role = Role.findById(id = input.roleId)
+                ?: throw NotFoundResponse(message = "Unable to find Role: `${input.creatorId}`")
+            Credit.find {
+                (CreditTable.bookCol eq resource.id) and
+                    (CreditTable.creatorCol eq creator.id) and
+                    (CreditTable.roleCol eq role.id)
+            }.firstOrNull() ?: Credit.new {
+                this.book = resource
+                this.creator = creator
+                this.role = role
             }
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Remove Credit from Book",
-        methods = [HttpMethod.DELETE],
-        operationId = "removeBookCredit",
-        path = "/books/{book-id}/credits",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookCreditInput::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Remove Credit from Book",
-        tags = ["Book"],
-    )
     fun removeCredit(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            val body = ctx.getBookCreditBody()
-            val creator = Creator.findById(id = body.creatorId)
-                ?: throw NotFoundResponse(message = "Creator not found")
-            val role = Role.findById(id = body.roleId)
-                ?: throw NotFoundResponse(message = "Role not found")
-            val credit = BookCreatorRole.find {
-                (BookCreatorRoleTable.bookCol eq book.id) and
-                    (BookCreatorRoleTable.creatorCol eq creator.id) and
-                    (BookCreatorRoleTable.roleCol eq role.id)
+            val resource = ctx.getResource()
+            val input = ctx.getCreditInput()
+            val creator = Creator.findById(id = input.creatorId)
+                ?: throw NotFoundResponse(message = "Unable to find Creator: `${input.creatorId}`")
+            val role = Role.findById(id = input.roleId)
+                ?: throw NotFoundResponse(message = "Unable to find Role: `${input.creatorId}`")
+            val credit = Credit.find {
+                (CreditTable.bookCol eq resource.id) and
+                    (CreditTable.creatorCol eq creator.id) and
+                    (CreditTable.roleCol eq role.id)
             }.firstOrNull() ?: throw NotFoundResponse(message = "Unable to find Book Creator Role")
             credit.delete()
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Add Genre to Book",
-        methods = [HttpMethod.PATCH],
-        operationId = "addGereToBook",
-        path = "/books/{book-id}/genres",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Add Genre to Book",
-        tags = ["Book"],
-    )
     fun addGenre(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            val body = ctx.getIdValue()
-            val genre = Genre.findById(id = body.id)
-                ?: throw NotFoundResponse(message = "Genre not found")
-            if (genre in book.genres) {
-                throw ConflictResponse(message = "Genre is already linked to Book")
-            }
-            val temp = book.genres.toMutableList()
+            val resource = ctx.getResource()
+            val input = ctx.getIdValue()
+            val genre = Genre.findById(id = input.id)
+                ?: throw NotFoundResponse(message = "Unable to find Genre: `${input.id}`")
+            val temp = resource.genres.toMutableSet()
             temp.add(genre)
-            book.genres = SizedCollection(temp)
+            resource.genres = SizedCollection(temp)
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Remove Genre from Book",
-        methods = [HttpMethod.DELETE],
-        operationId = "removeGenreFromBook",
-        path = "/books/{book-id}/genres",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Remove Genre from Book",
-        tags = ["Book"],
-    )
     fun removeGenre(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            val body = ctx.getIdValue()
-            val genre = Genre.findById(id = body.id)
-                ?: throw NotFoundResponse(message = "Genre not found")
-            if (!book.genres.contains(genre)) {
+            val resource = ctx.getResource()
+            val input = ctx.getIdValue()
+            val genre = Genre.findById(id = input.id)
+                ?: throw NotFoundResponse(message = "Unable to find Genre: `${input.id}`")
+            if (!resource.genres.contains(genre)) {
                 throw BadRequestResponse(message = "Genre is already linked to Book")
             }
-            val temp = book.genres.toMutableList()
+            val temp = resource.genres.toMutableList()
             temp.remove(genre)
-            book.genres = SizedCollection(temp)
+            resource.genres = SizedCollection(temp)
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    private fun Context.getBookSeriesBody(): BookSeriesInput =
+    private fun Context.getSeriesInput(): BookSeriesInput =
         this.bodyValidator<BookSeriesInput>()
             .check({ it.seriesId > 0 }, error = "seriesId must be greater than 0")
             .get()
 
-    @OpenApi(
-        description = "Add Series to Book",
-        methods = [HttpMethod.PATCH],
-        operationId = "addSeriesToBook",
-        path = "/books/{book-id}/series",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(BookSeriesInput::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "409", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Add Series to Book",
-        tags = ["Book"],
-    )
     fun addSeries(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            val body = ctx.getBookSeriesBody()
-            val series = Series.findById(id = body.seriesId)
-                ?: throw NotFoundResponse(message = "Series not found")
+            val resource = ctx.getResource()
+            val input = ctx.getSeriesInput()
+            val series = Series.findById(id = input.seriesId)
+                ?: throw NotFoundResponse(message = "Unable to find Series: `${input.seriesId}`")
             val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
-            }.firstOrNull()
-            if (bookSeries != null) {
-                throw ConflictResponse(message = "Series already is linked to Series")
-            }
-            BookSeries.new {
-                this.book = book
+                (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
+            }.firstOrNull() ?: BookSeries.new {
+                this.book = resource
                 this.series = series
-                number = body.number
             }
+            bookSeries.number = if (input.number == 0) null else input.number
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 
-    @OpenApi(
-        description = "Remove Series from Book",
-        methods = [HttpMethod.DELETE],
-        operationId = "removeSeriesFromBook",
-        path = "/books/{book-id}/series",
-        pathParams = [OpenApiParam(name = "book-id", type = Long::class, required = true)],
-        requestBody = OpenApiRequestBody(content = [OpenApiContent(IdValue::class)]),
-        responses = [
-            OpenApiResponse(status = "200", content = [OpenApiContent(github.buriedincode.bookshelf.docs.Book::class)]),
-            OpenApiResponse(status = "400", content = [OpenApiContent(ErrorResponse::class)]),
-            OpenApiResponse(status = "404", content = [OpenApiContent(ErrorResponse::class)]),
-        ],
-        summary = "Remove Series from Book",
-        tags = ["Book"],
-    )
     fun removeSeries(ctx: Context): Unit =
         Utils.query {
-            val book = getResource(resourceId = ctx.pathParam("book-id"))
-            val body = ctx.getIdValue()
-            val series = Series.findById(id = body.id)
-                ?: throw NotFoundResponse(message = "Series not found")
+            val resource = ctx.getResource()
+            val input = ctx.getIdValue()
+            val series = Series.findById(id = input.id)
+                ?: throw NotFoundResponse(message = "Unable to find Series: `${input.id}`")
             val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
+                (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
             }.firstOrNull() ?: throw NotFoundResponse(message = "Book isn't linked to Series")
             bookSeries.delete()
 
-            ctx.json(book.toJson(showAll = true))
+            ctx.json(resource.toJson(showAll = true))
         }
 }

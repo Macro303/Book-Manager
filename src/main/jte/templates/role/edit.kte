@@ -150,7 +150,7 @@
 
     addLoading(caller);
     fetch("/api/roles/${resource.id.value}", {
-      method: "PATCH",
+      method: "PUT",
       headers: HEADERS,
       body: JSON.stringify({
         "credits": [@for(entry in ForSupport.of(resource.credits))

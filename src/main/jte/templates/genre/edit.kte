@@ -142,7 +142,7 @@
 
     addLoading(caller);
     fetch("/api/genres/${resource.id.value}", {
-      method: "PATCH",
+      method: "PUT",
       headers: HEADERS,
       body: JSON.stringify({
         "bookIds": ${resource.books.map{ it.id.value }.toList().toString()},

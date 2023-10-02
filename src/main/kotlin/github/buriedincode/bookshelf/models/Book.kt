@@ -1,10 +1,11 @@
 package github.buriedincode.bookshelf.models
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
-import github.buriedincode.bookshelf.tables.BookCreatorRoleTable
 import github.buriedincode.bookshelf.tables.BookGenreTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
+import github.buriedincode.bookshelf.tables.CreditTable
 import github.buriedincode.bookshelf.tables.ReadBookTable
 import github.buriedincode.bookshelf.tables.WishedTable
 import org.apache.logging.log4j.kotlin.Logging
@@ -21,7 +22,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             .thenBy(nullsFirst(), Book::subtitle)
     }
 
-    val credits by BookCreatorRole referrersOn BookCreatorRoleTable.bookCol
+    val credits by Credit referrersOn CreditTable.bookCol
     var description: String? by BookTable.descriptionCol
     var format: Format by BookTable.formatCol
     var genres by Genre via BookGenreTable
@@ -57,7 +58,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             "title" to title,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(compareBy<BookCreatorRole> { it.creator }.thenBy { it.role }).map {
+            output["credits"] = credits.sortedWith(compareBy<Credit> { it.creator }.thenBy { it.role }).map {
                 mapOf(
                     "creator" to it.creator.toJson(),
                     "role" to it.role.toJson(),
@@ -106,7 +107,7 @@ data class BookInput(
     val openLibraryId: String? = null,
     val publishDate: LocalDate? = null,
     val publisherId: Long? = null,
-    val readers: List<BookReaderInput> = ArrayList(),
+    val readers: List<BookReadInput> = ArrayList(),
     val series: List<BookSeriesInput> = ArrayList(),
     val subtitle: String? = null,
     val title: String,
@@ -118,8 +119,9 @@ data class BookCreditInput(
     val roleId: Long,
 )
 
-data class BookReaderInput(
+data class BookReadInput(
     val userId: Long,
+    @JsonDeserialize(using = LocalDateDeserializer::class)
     val readDate: LocalDate? = LocalDate.now(),
 )
 
