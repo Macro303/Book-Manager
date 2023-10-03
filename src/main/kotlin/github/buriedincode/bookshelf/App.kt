@@ -26,15 +26,6 @@ import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.http.BadRequestResponse
-import io.javalin.openapi.OpenApiContact
-import io.javalin.openapi.OpenApiLicense
-import io.javalin.openapi.OpenApiServer
-import io.javalin.openapi.plugin.OpenApiPlugin
-import io.javalin.openapi.plugin.OpenApiPluginConfiguration
-import io.javalin.openapi.plugin.redoc.ReDocConfiguration
-import io.javalin.openapi.plugin.redoc.ReDocPlugin
-import io.javalin.openapi.plugin.swagger.SwaggerConfiguration
-import io.javalin.openapi.plugin.swagger.SwaggerPlugin
 import io.javalin.rendering.template.JavalinJte
 import io.javalin.validation.ValidationException
 import org.apache.logging.log4j.Level
@@ -74,42 +65,6 @@ object App : Logging {
                 it.hostedPath = "/static"
                 it.directory = "/static"
             }
-            it.plugins.register(
-                OpenApiPlugin(
-                    configuration = OpenApiPluginConfiguration().apply {
-                        withDefinitionConfiguration { _, definition ->
-                            definition.withOpenApiInfo {
-                                it.title = "Bookshelf API"
-                                it.summary = "Lots and lots of well described and documented APIs."
-                                it.contact = OpenApiContact().apply {
-                                    name = "Jonah Jackson"
-                                    url = "https://github.com/Buried-In-Code/Bookshelf"
-                                    email = "BuriedInCode@tuta.io"
-                                }
-                                it.license = OpenApiLicense().apply {
-                                    name = "MIT License"
-                                    identifier = "MIT"
-                                }
-                                it.version = Utils.VERSION
-                            }
-                            definition.withServer {
-                                OpenApiServer().apply {
-                                    url = "http://${settings.website.host}:${settings.website.port}/api"
-                                    description = "Local DEV Server"
-                                }
-                            }
-                        }
-                    },
-                ),
-            )
-            it.plugins.register(
-                SwaggerPlugin(
-                    SwaggerConfiguration().apply {
-                        uiPath = "/docs"
-                    },
-                ),
-            )
-            it.plugins.register(ReDocPlugin(ReDocConfiguration()))
         }
         app.routes {
             path("/") {

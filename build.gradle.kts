@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm") version "1.9.0"
-    kotlin("kapt") version "1.9.10"
     application
     id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
     id("com.github.ben-manes.versions") version "0.48.0"
@@ -47,13 +46,8 @@ dependencies {
 
     // Javalin
     val javalinVersion = "5.6.2"
-    val javalinApiVersion = "5.6.2-2"
     implementation("io.javalin", "javalin", javalinVersion)
     implementation("io.javalin", "javalin-rendering", javalinVersion)
-    implementation("io.javalin.community.openapi", "javalin-openapi-plugin", javalinApiVersion)
-    implementation("io.javalin.community.openapi", "javalin-swagger-plugin", javalinApiVersion)
-    implementation("io.javalin.community.openapi", "javalin-redoc-plugin", javalinApiVersion)
-    kapt("io.javalin.community.openapi", "openapi-annotation-processor", javalinApiVersion)
 
     // Jte
     val jteVersion = "3.1.0"

@@ -131,7 +131,7 @@ object RoleApiRouter : Logging {
                 ?: throw NotFoundResponse(message = "Unable to find Book: `${input.bookId}`")
             val creator = Creator.findById(id = input.creatorId)
                 ?: throw NotFoundResponse(message = "Unable to find Creator: `${input.creatorId}`")
-            val credit = Credit.find {
+            Credit.find {
                 (CreditTable.bookCol eq book.id) and
                     (CreditTable.creatorCol eq creator.id) and
                     (CreditTable.roleCol eq resource.id)

@@ -59,7 +59,7 @@
             </tr>
             </thead>
             <tbody>
-            @for(entry in resource.credits.sortedWith(compareBy<BookCreatorRole> { it.role }.thenBy { it.creator }))
+            @for(entry in resource.credits.sortedWith(compareBy<Credit> { it.role }.thenBy { it.creator }))
               <tr>
                 <td>${entry.role.title}</td>
                 <td>${entry.creator.name}</td>
