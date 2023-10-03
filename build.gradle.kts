@@ -3,7 +3,7 @@ plugins {
     application
     id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
     id("com.github.ben-manes.versions") version "0.48.0"
-    id("gg.jte.gradle") version "3.1.0"
+    id("gg.jte.gradle") version "3.1.1"
 }
 
 group = "github.buriedincode"
@@ -50,7 +50,7 @@ dependencies {
     implementation("io.javalin", "javalin-rendering", javalinVersion)
 
     // Jte
-    val jteVersion = "3.1.0"
+    val jteVersion = "3.1.1"
     implementation("gg.jte", "jte", jteVersion)
     implementation("gg.jte", "jte-kotlin", jteVersion)
 
