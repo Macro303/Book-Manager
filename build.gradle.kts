@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
     application
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
-    id("com.github.ben-manes.versions") version "0.48.0"
-    id("gg.jte.gradle") version "3.1.1"
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
+    id("com.github.ben-manes.versions") version "0.49.0"
+    id("gg.jte.gradle") version "3.1.3"
 }
 
 group = "github.buriedincode"
@@ -21,10 +21,10 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.43.0.0")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.43.2.1")
 
     // Exposed
-    val exposedVersion = "0.44.0"
+    val exposedVersion = "0.44.1"
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
@@ -45,17 +45,17 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonVersion)
 
     // Javalin
-    val javalinVersion = "5.6.2"
+    val javalinVersion = "5.6.3"
     implementation("io.javalin", "javalin", javalinVersion)
-    implementation("io.javalin", "javalin-rendering", javalinVersion)
+    implementation("io.javalin", "javalin-rendering", "5.6.2")
 
     // Jte
-    val jteVersion = "3.1.1"
+    val jteVersion = "3.1.3"
     implementation("gg.jte", "jte", jteVersion)
     implementation("gg.jte", "jte-kotlin", jteVersion)
 
     // Log4j2
-    implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.2.0")
+    implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.3.0")
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.20.0")
 }
 
@@ -75,7 +75,7 @@ application {
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.0.0")
+    version.set("1.0.1")
 }
 
 jte {

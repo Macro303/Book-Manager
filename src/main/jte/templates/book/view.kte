@@ -319,7 +319,7 @@
       method: "PATCH",
       headers: HEADERS,
       body: JSON.stringify({
-        "id": ${session.id.value},
+        "userId": ${session.id.value},
       }),
     }).then((response) => {
       if (!response.ok)
