@@ -1,0 +1,113 @@
+@import java.time.LocalDate
+@import kotlin.collections.List
+@import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.Creator
+@import github.buriedincode.bookshelf.models.Format
+@import github.buriedincode.bookshelf.models.Genre
+@import github.buriedincode.bookshelf.models.Publisher
+@import github.buriedincode.bookshelf.models.Role
+@import github.buriedincode.bookshelf.models.Series
+@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+@param session: User
+@param creators: List<Creator>
+@param formats: List<Format>
+@param genres: List<Genre>
+@param publishers: List<Publisher>
+@param roles: List<Role>
+@param series: List<Series>
+
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Bookshelf</title>
+    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+    <link disabled href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/hero/vegeta.min.css" id="light-theme" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/villain/vegeta.min.css" id="dark-theme" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+</head>
+<body class="has-navbar-fixed-top">
+@template.components.navbar(session = session)
+<main class="section">
+    <div class="container">
+        <header class="block has-text-centered">
+            <h1 class="title is-1">Creating a Book</h1>
+        </header>
+        <div class="box">
+            <form id="create-book-form" onsubmit="return false;">
+                @template.components.forms.select.format(label = "Format", options = formats.sorted())
+                @template.components.forms.input(label = "Image Url", name = "image-url")
+                @template.components.forms.input_date(label = "Publish Date", name = "publish-date")
+                @template.components.forms.select.publisher(label = "Publisher", options = publishers.sorted())
+                @template.components.forms.input(label = "Subtitle", name = "subtitle")
+                @template.components.forms.textarea(label = "Summary", name = "summary")
+                @template.components.forms.input(label = "Title", name = "title")
+                <h3 class="subtitle is-3 has-text-centered">Identifiers</h3>
+                @template.components.forms.input(label = "Goodreads", name = "goodreads")
+                @template.components.forms.input(label = "Google Books", name = "google-books")
+                @template.components.forms.input(label = "Isbn", name = "isbn")
+                @template.components.forms.input(label = "LibraryThing", name = "library-thing")
+                @template.components.forms.input(label = "OpenLibrary", name = "open-library")
+            </form>
+        </div>
+        <div class="buttons is-centered">
+            <button class="button is-success" id="create-book-button" onclick="createBook()" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </span>
+                <span>Create</span>
+            </button>
+            <button class="button is-warning" onclick="history.back()">
+                <span class="icon">
+                    <i class="fa-solid fa-xmark"></i>
+                </span>
+                <span>Cancel</span>
+            </button>
+        </div>
+    </div>
+</main>
+@template.components.footer()
+<script src="/static/js/scripts.js" type="text/javascript"></script>
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+<script type="text/javascript">
+  async function createBook() {
+    const caller = "create-book-button";
+    const form = document.getElementById("create-book-form");
+    const formData = Object.fromEntries(new FormData(form));
+    const body = {
+      credits: [],
+      description: formData["summary"].trim() || null,
+      format: formData["format"] || "PAPERBACK",
+      genreIds: [],
+      goodreadsId: formData["goodreads"].trim() || null,
+      googleBooksId: formData["google-books"].trim() || null,
+      imageUrl: formData["image-url"].trim() || null,
+      isCollected: false,
+      isbn: formData["isbn"].trim() || null,
+      libraryThingId: formData["library-thing"].trim() || null,
+      openLibraryId: formData["open-library"].trim() || null,
+      publishDate: formData["publish-date"].trim() || null,
+      publisherId: formData["publisher-id"] || null,
+      readers: [],
+      series: [],
+      subtitle: formData["subtitle"].trim() || null,
+      title: formData["title"].trim(),
+      wisherIds: [],
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books", "POST", body);
+    if (response !== null) {
+      form.reset();
+      @raw
+        window.location = `/books/${response.id}`;
+      @endraw
+    }
+    removeLoading(caller);
+  }
+</script>
+</body>
+</html>

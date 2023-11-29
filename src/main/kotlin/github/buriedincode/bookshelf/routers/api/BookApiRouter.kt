@@ -392,7 +392,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
         }
 
-    fun refreshBook(ctx: Context): Unit =
+    fun pullBook(ctx: Context): Unit =
         Utils.query {
             val resource = ctx.getResource()
 

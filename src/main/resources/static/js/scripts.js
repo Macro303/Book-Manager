@@ -84,6 +84,6 @@ function signOut() {
     addLoading(caller);
 
     document.cookie = "bookshelf_session-id=0;path=/;max-age=0";
-    window.location = "/";
+    window.location.reload();
     removeLoading(caller);
 }

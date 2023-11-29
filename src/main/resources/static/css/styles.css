@@ -8,14 +8,6 @@ body > footer {
   margin-top: auto;
 }
 
-#navbar-banner {
-    background-color: transparent;
-}
-
-#navbar-banner img {
-    max-height: 3rem;
-}
-
 img.profile {
   height: 128px !important;
   object-fit: cover;
@@ -29,4 +21,8 @@ img.profile-large {
 .greyscale {
   -webkit-filter: grayscale(100%);
   filter: grayscale(100%);
+}
+
+a.is-sized {
+    width: 200px;
 }

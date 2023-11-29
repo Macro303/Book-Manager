@@ -42,10 +42,10 @@
                     <table class="table is-fullwidth">
                         <thead>
                             <tr>
-                                <th class="is-size-5 has-text-info">Role</th>
-                                <th class="is-size-5 has-text-info">Book Title</th>
-                                <th class="is-size-5 has-text-info">Book Subtitle</th>
-                                <th class="is-size-5 has-text-info">Action</th>
+                                <th class="has-text-info">Role</th>
+                                <th class="has-text-info">Book Title</th>
+                                <th class="has-text-info">Book Subtitle</th>
+                                <th class="has-text-info">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,12 +92,12 @@
                 </span>
                 <span>Update</span>
             </button>
-            <a class="button is-warning" href="/creators/${resource.id.value}">
+            <button class="button is-warning" onclick="history.back()">
                 <span class="icon">
                     <i class="fa-solid fa-xmark"></i>
                 </span>
                 <span>Cancel</span>
-            </a>
+            </button>
         </div>
     </div>
 </main>

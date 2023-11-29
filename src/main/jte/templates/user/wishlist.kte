@@ -63,7 +63,7 @@
                     <div class="level-right">
                         <p class="level-item">
                             @if(session != null)
-                                <a class="button is-success" disabled href="/books/create">
+                                <a class="button is-success" href="/books/create">
                                     <span class="icon">
                                         <i class="fa-solid fa-add"></i>
                                     </span>

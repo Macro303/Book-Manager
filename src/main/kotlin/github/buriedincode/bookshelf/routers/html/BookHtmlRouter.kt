@@ -78,6 +78,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                     model = mapOf(
                         "session" to session,
                         "creators" to Creator.all().toList(),
+                        "formats" to Format.entries.toList(),
                         "genres" to Genre.all().toList(),
                         "publishers" to Publisher.all().toList(),
                         "readers" to User.all().toList(),
@@ -123,6 +124,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                         "resource" to resource,
                         "session" to session,
                         "creators" to Creator.all().toList(),
+                        "formats" to Format.entries.toList(),
                         "genres" to Genre.all().toList().filterNot { it in resource.genres },
                         "publishers" to Publisher.all().toList().filterNot { it == resource.publisher },
                         "readers" to User.all().toList().filterNot { it in resource.readers.map { it.user } },

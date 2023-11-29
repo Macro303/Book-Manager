@@ -34,12 +34,12 @@
                 </span>
                 <span>Create</span>
             </button>
-            <a class="button is-warning" href="/publishers">
+            <button class="button is-warning" onclick="history.back()">
                 <span class="icon">
                     <i class="fa-solid fa-xmark"></i>
                 </span>
                 <span>Cancel</span>
-            </a>
+            </button>
         </div>
     </div>
 </main>

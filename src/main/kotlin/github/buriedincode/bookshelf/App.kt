@@ -153,7 +153,7 @@ object App : Logging {
                         get(BookApiRouter::getEndpoint)
                         put(BookApiRouter::updateEndpoint)
                         delete(BookApiRouter::deleteEndpoint)
-                        put("refresh", BookApiRouter::refreshBook)
+                        put("pull", BookApiRouter::pullBook)
                         path("wish") {
                             patch(BookApiRouter::addWisher)
                             delete(BookApiRouter::removeWisher)

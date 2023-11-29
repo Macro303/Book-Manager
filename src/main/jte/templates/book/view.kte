@@ -59,6 +59,25 @@
                                         <span>Discard</span>
                                     </button>
                                 </p>
+                                @if(session in resource.readers.map { it.user })
+                                    <p class="level-item">
+                                        <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-bookmark"></i>
+                                            </span>
+                                            <span>Unread</span>
+                                        </button>
+                                    </p>
+                                @else
+                                    <p class="level-item">
+                                        <button class="button is-success" id="read-book-button" onclick="readBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-regular fa-bookmark"></i>
+                                            </span>
+                                            <span>Read</span>
+                                        </button>
+                                    </p>
+                                @endif
                             @else
                                 <p class="level-item">
                                     <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
@@ -68,47 +87,25 @@
                                         <span>Collect</span>
                                     </button>
                                 </p>
-                            @endif
-                        @endif
-                        @if(resource.isCollected)
-                            @if(session in resource.readers.map { it.user })
-                                <p class="level-item">
-                                    <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-bookmark"></i>
-                                        </span>
-                                        <span>Unread</span>
-                                    </button>
-                                </p>
-                            @else
-                                <p class="level-item">
-                                    <button class="button is-success" id="read-book-button" onclick="readBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-regular fa-bookmark"></i>
-                                        </span>
-                                        <span>Read</span>
-                                    </button>
-                                </p>
-                            @endif
-                        @else
-                            @if(session in resource.wishers)
-                                <p class="level-item">
-                                    <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-star"></i>
-                                        </span>
-                                        <span>Unwish</span>
-                                    </button>
-                                </p>
-                            @else
-                                <p class="level-item">
-                                    <button class="button is-success" id="wish-book-button" onclick="wishBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-regular fa-star"></i>
-                                        </span>
-                                        <span>Wish</span>
-                                    </button>
-                                </p>
+                                @if(session in resource.wishers)
+                                    <p class="level-item">
+                                        <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-star"></i>
+                                            </span>
+                                            <span>Unwish</span>
+                                        </button>
+                                    </p>
+                                @else
+                                    <p class="level-item">
+                                        <button class="button is-success" id="wish-book-button" onclick="wishBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-regular fa-star"></i>
+                                            </span>
+                                            <span>Wish</span>
+                                        </button>
+                                    </p>
+                                @endif
                             @endif
                         @endif
                     </div>
@@ -143,13 +140,22 @@
                 </div>
                 <div class="box">
                     <div class="block">
-                        <p><strong class="has-text-info">Format:</strong> ${resource.format.titlecase()}</p>
+                        <p>
+                            <strong class="has-text-info">Format:</strong>
+                            ${resource.format.titlecase()}
+                        </p>
                     </div>
                     <div class="block">
-                        <p><strong class="has-text-info">Genres:</strong> @for(entry in ForSupport.of(resource.genres.sorted()))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
+                        <p>
+                            <strong class="has-text-info">Genres:</strong>
+                            @for(entry in ForSupport.of(resource.genres.sorted()))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor
+                        </p>
                     </div>
                     <div class="block">
-                        <p><strong class="has-text-info">Publish Date:</strong> ${resource.publishDate?.format(getHumanReadableDateFormatter(date=resource.publishDate!!))}</p>
+                        <p>
+                            <strong class="has-text-info">Publish Date:</strong>
+                            ${resource.publishDate?.format(getHumanReadableDateFormatter(date=resource.publishDate!!))}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -157,16 +163,13 @@
                 <div class="box">
                     <h3 class="title is-3 has-text-centered">Identifiers</h3>
                     <div class="block">
-                        <p><strong class="has-text-info">Isbn:</strong> ${resource.isbn}</p>
-                    </div>
-                    <div class="block">
                         @if(resource.goodreadsId != null)
                             <p>
                                 <strong class="has-text-info">Goodreads:</strong>
                                 <a class="is-family-primary has-text-link" href="https://goodreads.com/book/show/${resource.goodreadsId}" rel="noopener noreferrer" target="_blank">${resource.goodreadsId}</a>
                             </p>
                         @elseif(resource.isbn != null)
-                            <a class="button is-link" href="" rel="noopener noreferrer" target="_blank">
+                            <a class="button is-link is-sized" href="" rel="noopener noreferrer" target="_blank">
                                 <span class="icon">
                                     <i class="fa-brands fa-goodreads"></i>
                                 </span>
@@ -181,50 +184,62 @@
                                 <a class="is-family-primary has-text-link" href="https://books.google.com/books?id=${resource.googleBooksId}" rel="noopener noreferrer" target="_blank">${resource.googleBooksId}</a>
                             </p>
                         @elseif(resource.isbn != null)
-                            <a class="button is-link" href="https://books.google.com/books?vid=ISBN${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                            <a class="button is-link is-sized" href="https://books.google.com/books?vid=ISBN${resource.isbn}" rel="noopener noreferrer" target="_blank">
                                 <span class="icon">
                                     <i class="fa-brands fa-google"></i>
                                 </span>
-                                <span>Google Books</span>
+                                <span>Search Google Books</span>
                             </a>
                         @endif
                     </div>
                     <div class="block">
-                        <p><strong class="has-text-info">LibraryThing:</strong> <a class="is-family-primary has-text-link" href="https://librarything.com/work/${resource.libraryThingId}" rel="noopener noreferrer" target="_blank">${resource.libraryThingId}</a></p>
+                        <p>
+                            <strong class="has-text-info">Isbn:</strong>
+                            ${resource.isbn}
+                        </p>
                     </div>
                     <div class="block">
-                        <p><strong class="has-text-info">OpenLibrary:</strong> <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/${resource.openLibraryId}" rel="noopener noreferrer" target="_blank">${resource.openLibraryId}</a></p>
+                        @if(resource.libraryThingId != null)
+                            <p>
+                                <strong class="has-text-info">LibraryThing:</strong>
+                                <a class="is-family-primary has-text-link" href="https://librarything.com/work/${resource.libraryThingId}" rel="noopener noreferrer" target="_blank">${resource.libraryThingId}</a>
+                            </p>
+                        @elseif(resource.isbn != null)
+                            <a class="button is-link is-sized" href="https://librarything.com/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                <span class="icon">
+                                    <i class="fa-solid fa-link"></i>
+                                </span>
+                                <span>Search LibraryThing</span>
+                            </a>
+                        @endif
+                    </div>
+                    <div class="block">
+                        @if(resource.openLibraryId != null)
+                            <p>
+                                <strong class="has-text-info">OpenLibrary:</strong>
+                                <a class="is-family-primary has-text-link" href="https://openlibrary.org/edition/${resource.openLibraryId}" rel="noopener noreferrer" target="_blank">${resource.openLibraryId}</a>
+                            </p>
+                        @elseif(resource.isbn != null)
+                            <a class="button is-link is-sized" href="https://openlibrary.org/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                <span class="icon">
+                                    <i class="fa-solid fa-link"></i>
+                                </span>
+                                <span>Search OpenLibrary</span>
+                            </a>
+                        @endif
+                    </div>
+                    <div class="block">
+                        @if(resource.isbn != null)
+                            <a class="button is-link is-sized" href="https://blackwells.co.uk/bookshop/product/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                <span class="icon">
+                                    <i class="fa-solid fa-link"></i>
+                                </span>
+                                <span>Search Blackwells</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="buttons is-multiline is-centered">
-            @if(resource.isbn != null)
-                <a class="button is-link" href="https://blackwells.co.uk/bookshop/product/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                    <span class="icon">
-                        <i class="fa-solid fa-link"></i>
-                    </span>
-                    <span>Blackwells</span>
-                </a>
-                @if(resource.libraryThingId == null)
-                    <a class="button is-link" href="https://librarything.com/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                        <span class="icon">
-                            <i class="fa-solid fa-link"></i>
-                        </span>
-                        <span>LibraryThing</span>
-                    </a>
-                @endif
-                @if(resource.openLibraryId == null)
-                    <a class="button is-link" href="https://openlibrary.org/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                        <span class="icon">
-                            <i class="fa-solid fa-link"></i>
-                        </span>
-                        <span>OpenLibrary</span>
-                    </a>
-                @endif
-            @endif
-        </div>
-        <div class="buttons is-multiline is-centered">
         </div>
         <div class="columns">
             <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
