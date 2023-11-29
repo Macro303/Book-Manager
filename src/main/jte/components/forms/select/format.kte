@@ -1,9 +1,9 @@
 @import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Format
 @import github.buriedincode.bookshelf.Utils.titlecase
-@param label: String = "Select Format"
+@param label: String = "Format"
 @param name: String = "format"
-@param options: List<Format> = Format.entries.toList() as List<Format>
+@param options: List<Format>
 @param selected: Format? = null
 
 <div class="field">

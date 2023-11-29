@@ -1,0 +1,166 @@
+@import kotlin.collections.List
+@import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.BookSeries
+@import github.buriedincode.bookshelf.models.Series
+@import github.buriedincode.bookshelf.models.User
+@param resource: Series
+@param session: User
+@param books: List<Book>
+
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Bookshelf</title>
+    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+    <link disabled href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/hero/vegeta.min.css" id="light-theme" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/villain/vegeta.min.css" id="dark-theme" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+</head>
+<body class="has-navbar-fixed-top">
+@template.components.navbar(session = session)
+<main class="section">
+    <div class="container">
+        <header class="block has-text-centered">
+            <h1 class="title is-1">Updating ${resource.title}</h1>
+        </header>
+        <div class="box">
+            <form id="update-series-form" onsubmit="return false;">
+                @template.components.forms.input(label = "Image Url", name = "image-url")
+                @template.components.forms.textarea(label = "Summary", name = "summary")
+                @template.components.forms.input(label = "Title", name = "title", value = resource.title)
+            </form>
+        </div>
+        <div class="box">
+            <h3 class="title is-3 has-text-centered">Books</h3>
+            <div class="table-container">
+                <form id="add-book-form" onsubmit="return false;">
+                    <table class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th class="has-text-info">Book Title</th>
+                                <th class="has-text-info">Book Subtitle</th>
+                                <th class="has-text-info">Series Number</th>
+                                <th class="has-text-info">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for(entry in resource.books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }))
+                                <tr>
+                                    <td>${entry.book.title}</td>
+                                    <td>${entry.book.subtitle}</td>
+                                    <td>${entry.number}</td>
+                                    <td>
+                                        <div class="buttons is-centered">
+                                            <button class="button is-danger" id="remove-book-${entry.book.id.value}-button" onclick="removeBook(${entry.book.id.value})" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </span>
+                                                <span>Remove</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                            <tr>
+                                <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
+                                <td>@template.components.forms.input_number(label = "", name = "series-number")</td>
+                                <td>
+                                    <div class="buttons is-centered">
+                                        <button class="button is-success" id="add-book-button" onclick="addBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </span>
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div class="buttons is-centered">
+            <button class="button is-success" id="update-series-button" onclick="updateSeries()" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </span>
+                <span>Update</span>
+            </button>
+            <a class="button is-warning" href="/series/${resource.id.value}">
+                <span class="icon">
+                    <i class="fa-solid fa-xmark"></i>
+                </span>
+                <span>Cancel</span>
+            </a>
+        </div>
+    </div>
+</main>
+@template.components.footer()
+<script src="/static/js/scripts.js" type="text/javascript"></script>
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+<script type="text/javascript">
+  async function addBook() {
+    const caller = "add-book-button";
+    const form = document.getElementById("add-book-form");
+    const jsonData = Object.fromEntries(new FormData(form));
+    const body = {
+        bookId: jsonData["book-id"],
+        number: jsonData["series-number"] || null,
+    };
+    console.log(body);
+
+    addLoading(caller);
+    const response = await submitRequest("/api/series/${resource.id.value}/books", "PATCH", body);
+    if (response !== null) {
+      form.reset();
+      window.location.reload();
+    }
+    removeLoading(caller);
+  }
+
+  async function removeBook(bookId) {
+    @raw
+      const caller = `remove-book-${bookId}-button`;
+    @endraw
+    const body = {
+      id: bookId
+    };
+    console.log(body);
+
+    addLoading(caller);
+    const response = await submitRequest("/api/series/${resource.id.value}/books", "DELETE", body);
+    if (response !== null)
+      window.location.reload();
+    removeLoading(caller);
+  }
+
+  async function updateSeries() {
+    const caller = "update-series-button";
+    const form = document.getElementById("update-series-form");
+    const jsonData = Object.fromEntries(new FormData(form));
+    const body = {
+      books: [@for(entry in resource.books)
+        {
+          bookId: ${entry.book.id.value},
+          number: ${entry.number ?: 0},
+        },
+      @endfor],
+      title: jsonData["title"].trim(),
+    };
+    console.log(body);
+
+    addLoading(caller);
+    const response = await submitRequest("/api/series/${resource.id.value}", "PUT", body);
+    if (response !== null) {
+      form.reset();
+      window.location = "/series/${resource.id.value}";
+    }
+    removeLoading(caller);
+  }
+</script>
+</body>
+</html>

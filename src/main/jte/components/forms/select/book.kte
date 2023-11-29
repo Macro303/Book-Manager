@@ -1,6 +1,6 @@
 @import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
-@param label: String = "Select Book"
+@param label: String = "Book"
 @param name: String = "book-id"
 @param options: List<Book>
 @param selected: Book? = null

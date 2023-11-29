@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class Creator(id: EntityID<Long>) : LongEntity(id), Comparable<Creator> {
+class Creator(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Creator> {
     companion object : LongEntityClass<Creator>(CreatorTable), Logging {
         val comparator = compareBy(Creator::name)
     }
@@ -16,14 +16,16 @@ class Creator(id: EntityID<Long>) : LongEntity(id), Comparable<Creator> {
     var imageUrl: String? by CreatorTable.imageUrlCol
     var name: String by CreatorTable.nameCol
 
-    fun toJson(showAll: Boolean = false): Map<String, Any?> {
+    override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
-            "creatorId" to id.value,
+            "id" to id.value,
             "imageUrl" to imageUrl,
             "name" to name,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(compareBy<Credit> { it.book }.thenBy { it.role }).map {
+            output["credits"] = credits.sortedWith(
+                compareBy<Credit> { it.book }.thenBy { it.role },
+            ).map {
                 mapOf(
                     "book" to it.book.toJson(),
                     "role" to it.role.toJson(),
@@ -35,14 +37,3 @@ class Creator(id: EntityID<Long>) : LongEntity(id), Comparable<Creator> {
 
     override fun compareTo(other: Creator): Int = comparator.compare(this, other)
 }
-
-data class CreatorInput(
-    val credits: List<CreatorCreditInput> = ArrayList(),
-    val imageUrl: String? = null,
-    val name: String,
-)
-
-data class CreatorCreditInput(
-    val bookId: Long,
-    val roleId: Long,
-)

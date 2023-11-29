@@ -1,6 +1,5 @@
 package github.buriedincode.bookshelf.models
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 import github.buriedincode.bookshelf.tables.BookGenreTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
@@ -14,7 +13,7 @@ import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import java.time.LocalDate
 
-class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
+class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     companion object : LongEntityClass<Book>(BookTable), Logging {
         val comparator = compareBy<Book> { it.series.firstOrNull()?.series }
             .thenBy { it.series.firstOrNull()?.number ?: Int.MAX_VALUE }
@@ -41,9 +40,9 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
     var title: String by BookTable.titleCol
     var wishers by User via WishedTable
 
-    fun toJson(showAll: Boolean = false): Map<String, Any?> {
+    override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
-            "bookId" to id.value,
+            "id" to id.value,
             "description" to description,
             "format" to format.name,
             "goodreadsId" to goodreadsId,
@@ -58,7 +57,9 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             "title" to title,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(compareBy<Credit> { it.creator }.thenBy { it.role }).map {
+            output["credits"] = credits.sortedWith(
+                compareBy<Credit> { it.creator }.thenBy { it.role },
+            ).map {
                 mapOf(
                     "creator" to it.creator.toJson(),
                     "role" to it.role.toJson(),
@@ -67,8 +68,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
             output["genres"] = genres.sorted().map { it.toJson() }
             output["publisher"] = publisher?.toJson()
             output["readers"] = readers.sortedWith(
-                compareBy<ReadBook> { it.user }
-                    .thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
+                compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
             ).map {
                 mapOf(
                     "readDate" to it.readDate?.format(DATE_FORMATTER),
@@ -92,50 +92,3 @@ class Book(id: EntityID<Long>) : LongEntity(id), Comparable<Book> {
 
     override fun compareTo(other: Book): Int = comparator.compare(this, other)
 }
-
-data class BookInput(
-    val credits: List<BookCreditInput> = ArrayList(),
-    val description: String? = null,
-    val format: Format = Format.PAPERBACK,
-    val genreIds: List<Long> = ArrayList(),
-    val goodreadsId: String? = null,
-    val googleBooksId: String? = null,
-    val imageUrl: String? = null,
-    val isCollected: Boolean = false,
-    val isbn: String? = null,
-    val libraryThingId: String? = null,
-    val openLibraryId: String? = null,
-    val publishDate: LocalDate? = null,
-    val publisherId: Long? = null,
-    val readers: List<BookReadInput> = ArrayList(),
-    val series: List<BookSeriesInput> = ArrayList(),
-    val subtitle: String? = null,
-    val title: String,
-    val wisherIds: List<Long> = ArrayList(),
-)
-
-data class BookCreditInput(
-    val creatorId: Long,
-    val roleId: Long,
-)
-
-data class BookReadInput(
-    val userId: Long,
-    @JsonDeserialize(using = LocalDateDeserializer::class)
-    val readDate: LocalDate? = LocalDate.now(),
-)
-
-data class BookSeriesInput(
-    val seriesId: Long,
-    val number: Int? = null,
-)
-
-data class BookImport(
-    val goodreadsId: String? = null,
-    val googleBooksId: String? = null,
-    val isCollected: Boolean = false,
-    val isbn: String? = null,
-    val libraryThingId: String? = null,
-    val openLibraryId: String? = null,
-    val wisherIds: List<Long> = ArrayList(),
-)

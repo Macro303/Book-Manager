@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
+class Role(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Role> {
     companion object : LongEntityClass<Role>(RoleTable), Logging {
         val comparator = compareBy(Role::title)
     }
@@ -15,13 +15,15 @@ class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
     val credits by Credit referrersOn CreditTable.roleCol
     var title: String by RoleTable.titleCol
 
-    fun toJson(showAll: Boolean = false): Map<String, Any?> {
+    override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
-            "roleId" to id.value,
+            "id" to id.value,
             "title" to title,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(compareBy<Credit> { it.book }.thenBy { it.creator }).map {
+            output["credits"] = credits.sortedWith(
+                compareBy<Credit> { it.book }.thenBy { it.creator },
+            ).map {
                 mapOf(
                     "book" to it.book.toJson(),
                     "creator" to it.creator.toJson(),
@@ -33,13 +35,3 @@ class Role(id: EntityID<Long>) : LongEntity(id), Comparable<Role> {
 
     override fun compareTo(other: Role): Int = comparator.compare(this, other)
 }
-
-data class RoleInput(
-    val credits: List<RoleCreditInput> = ArrayList(),
-    val title: String,
-)
-
-data class RoleCreditInput(
-    val bookId: Long,
-    val creatorId: Long,
-)

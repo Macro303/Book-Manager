@@ -1,13 +1,3 @@
-img.profile {
-  height: 128px !important;
-  object-fit: cover;
-}
-
-img.profile-large {
-  height: 256px !important;
-  object-fit: cover;
-}
-
 html, body {
   min-height: 100vh;
   display: flex;
@@ -16,6 +6,24 @@ html, body {
 
 body > footer {
   margin-top: auto;
+}
+
+#navbar-banner {
+    background-color: transparent;
+}
+
+#navbar-banner img {
+    max-height: 3rem;
+}
+
+img.profile {
+  height: 128px !important;
+  object-fit: cover;
+}
+
+img.profile-large {
+  height: 256px !important;
+  object-fit: cover;
 }
 
 .greyscale {

@@ -1,109 +1,79 @@
 @import kotlin.collections.List
 @import kotlin.collections.Map
-@import github.buriedincode.bookshelf.models.*
+@import github.buriedincode.bookshelf.models.Genre
+@import github.buriedincode.bookshelf.models.User
 @param resources: List<Genre>
-@param session: User
+@param session: User?
 @param selected: Map<String, String>
 
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1" name="viewport">
-  <title>Bookshelf</title>
-  <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
-  <link href="https://cdn.rawgit.com/jenil/bulmaswatch/gh-pages/darkly/bulmaswatch.min.css" rel="stylesheet">
-  <link href="/static/css/styles.css" rel="stylesheet">
-  <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Bookshelf</title>
+    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+    <link disabled href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/hero/vegeta.min.css" id="light-theme" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/villain/vegeta.min.css" id="dark-theme" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
 <body class="has-navbar-fixed-top">
 @template.components.navbar(session = session)
 <main class="section">
-  <div class="container">
-    <header class="block has-text-centered">
-      <h1 class="title is-1">Genres</h1>
-    </header>
-    <div class="columns">
-      <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-        @template.components.settings_box()
-        <div class="box">
-          <h1 class="title is-5 has-text-info-light">Filter Genres</h1>
-          <form accept-charset="UTF-8" action="/genres" method="GET">
-            @template.components.forms.input(label="Title", name="title", value=selected["title"])
-            <div class="buttons is-centered">
-              <button class="button is-info">
-                <span class="icon">
-                  <i class="fa-solid fa-filter"></i>
-                </span>
-                <span>Filter</span>
-              </button>
+    <div class="container">
+        <header class="block has-text-centered">
+            <h1 class="title is-1">Genres</h1>
+        </header>
+        <div class="columns">
+            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+                @template.components.genre.filter(title=selected["title"], resetUrl="/genres")
+                @template.components.adjustable_columns()
             </div>
-          </form>
-        </div>
-        @if(session.role >= 1)
-          <div class="box">
-            <h5 class="title is-5 has-text-info-light">Create Genre</h5>
-            <form id="create-genre-form" onsubmit="return false;">
-              @template.components.forms.input(label="Title", name="title")
-              <div class="buttons is-centered">
-                <button class="button is-success" id="create-genre-button" onclick="createGenre()" type="button">
-                  <span class="icon">
-                    <i class="fa-solid fa-add"></i>
-                  </span>
-                  <span>Create</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        @endif
-      </div>
-      <div class="column">
-        <div class="columns is-multiline is-centered">
-          @for(entry in resources.sorted())
-            <div class="adjustable-column column">
-              @template.components.view_box.genre(entry=entry)
-            </div>
-          @else
             <div class="column">
-              <div class="box has-text-centered">
-                <h5 class="title is-5 has-text-danger-light">No Genres found.</h5>
-              </div>
+                <nav class="level is-mobile">
+                    <div class="level-left">
+                        <p class="level-item has-text-centered">
+                            @if(resources.size == 1)
+                                <span>1 Genre</span>
+                            @else
+                                <span>${resources.size} Genres</span>
+                            @endif
+                        </p>
+                    </div>
+                    <div class="level-right">
+                        @if(session != null && session.role >= 2)
+                            <p class="level-item">
+                                <a class="button is-success" href="/genres/create">
+                                    <span class="icon">
+                                        <i class="fa-solid fa-add"></i>
+                                    </span>
+                                    <span>Create</span>
+                                </a>
+                            </p>
+                        @endif
+                    </div>
+                </nav>
+                <div class="columns is-multiline is-centered">
+                    @for(entry in resources.sorted())
+                        <div class="adjustable-column column">
+                            @template.components.genre.view(entry=entry)
+                        </div>
+                    @else
+                        <div class="column">
+                            <div class="box has-text-centered">
+                                <h5 class="title is-5 has-text-danger">No Genres found.</h5>
+                            </div>
+                        </div>
+                   @endfor
+                </div>
             </div>
-          @endfor
         </div>
-      </div>
     </div>
-  </div>
 </main>
 @template.components.footer()
-<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 <script src="/static/js/scripts.js" type="text/javascript"></script>
-<script src="/static/js/settings-box.js" type="text/javascript"></script>
-<script type="text/javascript">
-  function createGenre() {
-    const caller = "create-genre-button";
-    let form = document.getElementById("create-genre-form");
-    let formData = Object.fromEntries(new FormData(form));
-    console.log(formData);
-
-    addLoading(caller);
-    fetch("/api/genres", {
-      method: "POST",
-      headers: HEADERS,
-      body: JSON.stringify({
-        "title": formData["title"].trim(),
-      }),
-    }).then((response) => {
-      if (!response.ok)
-        return Promise.reject(response);
-      form.reset();
-      window.location.reload();
-    }).catch((response) => response.json().then((msg) => {
-      @raw
-        alert(`${response.status} ${response.statusText} => ${msg.title}`);
-      @endraw
-    })).finally(() => removeLoading(caller));
-  }
-</script>
+<script src="/static/js/adjustable-columns.js" type="text/javascript"></script>
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 </body>
 </html>

@@ -1,0 +1,73 @@
+@import github.buriedincode.bookshelf.models.User
+@param session: User
+
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Bookshelf</title>
+    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+    <link disabled href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/hero/vegeta.min.css" id="light-theme" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/villain/vegeta.min.css" id="dark-theme" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+</head>
+<body class="has-navbar-fixed-top">
+@template.components.navbar(session = session)
+<main class="section">
+    <div class="container">
+        <header class="block has-text-centered">
+            <h1 class="title is-1">Creating a Creator</h1>
+        </header>
+        <div class="box">
+            <form id="create-creator-form" onsubmit="return false;">
+                @template.components.forms.input(label = "Image Url", name = "image-url")
+                @template.components.forms.input(label = "Name", name = "name")
+                @template.components.forms.textarea(label = "Summary", name = "summary")
+            </form>
+        </div>
+        <div class="buttons is-centered">
+            <button class="button is-success" id="create-creator-button" onclick="createCreator()" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </span>
+                <span>Create</span>
+            </button>
+            <a class="button is-warning" href="/creators">
+                <span class="icon">
+                    <i class="fa-solid fa-xmark"></i>
+                </span>
+                <span>Cancel</span>
+            </a>
+        </div>
+    </div>
+</main>
+@template.components.footer()
+<script src="/static/js/scripts.js" type="text/javascript"></script>
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+<script type="text/javascript">
+  async function createCreator() {
+    const caller = "create-creator-button";
+    const form = document.getElementById("create-creator-form");
+    const jsonData = Object.fromEntries(new FormData(form));
+    const body = {
+      credits: [],
+      imageUrl: jsonData["image-url"].trim() || null,
+      name: jsonData["name"].trim(),
+    };
+    console.log(body);
+
+    addLoading(caller);
+    const response = await submitRequest("/api/creators", "POST", body);
+    if (response !== null) {
+      form.reset();
+      @raw
+        window.location = `/creators/${response.id}`;
+      @endraw
+    }
+    removeLoading(caller);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+@param username: String? = null
+@param resetUrl: String
+
+<div class="box">
+    <h4 class="title is-4">Filter</h4>
+    <form accept-charset="UTF-8" method="GET">
+        @template.components.forms.input(label="Username", name="username", value=username)
+        <div class="buttons is-centered">
+            <button class="button is-info">
+                <span class="icon">
+                    <i class="fa-solid fa-filter"></i>
+                </span>
+                <span>Filter</span>
+            </button>
+            <button class="button is-warning" onclick="resetForm('${resetUrl}')" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-rotate"></i>
+                </span>
+                <span>Reset</span>
+            </button>
+        </div>
+    </form>
+</div>

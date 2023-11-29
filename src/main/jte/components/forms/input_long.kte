@@ -1,0 +1,16 @@
+@param label: String
+@param name: String
+@param value: Long? = null
+@param min: Int = 0
+@param max: Long = Long.MAX_VALUE
+
+<div class="field">
+    <label class="label has-text-info">${label}</label>
+    <div class="control is-expanded">
+        @if(value != null)
+            <input class="input" max="${max}" min="${min}" name="${name}" placeholder="${label}" type="number" value="${value}">
+        @else
+            <input class="input" max="${max}" min="${min}" name="${name}" placeholder="${label}" type="number">
+        @endif
+    </div>
+</div>

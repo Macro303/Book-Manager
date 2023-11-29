@@ -8,6 +8,8 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sksamuel.hoplite.Secret
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.DatabaseConfig
+import org.jetbrains.exposed.sql.ExperimentalKeywordApi
 import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -24,14 +26,69 @@ import kotlin.io.path.div
 
 object Utils : Logging {
     private val HOME_ROOT: Path = Paths.get(System.getProperty("user.home"))
-    private val DATABASE: Database by lazy {
-        Database.connect(url = "jdbc:sqlite:${Settings.load().database}", driver = "org.sqlite.JDBC")
-    }
+    private val XDG_CACHE: Path = System.getenv("XDG_CACHE_HOME")?.let {
+        Paths.get(it)
+    } ?: (HOME_ROOT / ".cache")
+    private val XDG_CONFIG: Path = System.getenv("XDG_CONFIG_HOME")?.let {
+        Paths.get(it)
+    } ?: (HOME_ROOT / ".config")
+    private val XDG_DATA: Path = System.getenv("XDG_DATA_HOME")?.let {
+        Paths.get(it)
+    } ?: (HOME_ROOT / ".local" / "share")
 
+    internal val CACHE_ROOT = XDG_CACHE / "bookshelf"
+    internal val CONFIG_ROOT = XDG_CONFIG / "bookshelf"
+    internal val DATA_ROOT = XDG_DATA / "bookshelf"
     internal const val VERSION = "0.1.0"
-    internal val CACHE_ROOT = HOME_ROOT / ".cache" / "bookshelf"
-    internal val CONFIG_ROOT = HOME_ROOT / ".config" / "bookshelf"
-    internal val DATA_ROOT = HOME_ROOT / ".local" / "share" / "bookshelf"
+
+    internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
+        .addModule(JavaTimeModule())
+        .addModule(
+            KotlinModule.Builder()
+                .withReflectionCacheSize(512)
+                .configure(KotlinFeature.NullToEmptyCollection, true)
+                .configure(KotlinFeature.NullToEmptyMap, true)
+                .configure(KotlinFeature.NullIsSameAsDefault, true)
+                .configure(KotlinFeature.SingletonSupport, false)
+                .configure(KotlinFeature.StrictNullChecks, true)
+                .build(),
+        )
+        .build()
+
+    private val DATABASE: Database by lazy {
+        val settings = Settings.load()
+        if (settings.database.source == Settings.Database.Source.MYSQL) {
+            return@lazy Database.connect(
+                url = settings.database.url,
+                driver = "com.mysql.cj.jdbc.Driver",
+                user = settings.database.user ?: "username",
+                password = settings.database.password ?: "password",
+                databaseConfig = DatabaseConfig {
+                    @OptIn(ExperimentalKeywordApi::class)
+                    preserveKeywordCasing = true
+                },
+            )
+        } else if (settings.database.source == Settings.Database.Source.POSTGRES) {
+            return@lazy Database.connect(
+                url = settings.database.url,
+                driver = "org.postgresql.Driver",
+                user = settings.database.user ?: "user",
+                password = settings.database.password ?: "password",
+                databaseConfig = DatabaseConfig {
+                    @OptIn(ExperimentalKeywordApi::class)
+                    preserveKeywordCasing = true
+                },
+            )
+        }
+        return@lazy Database.connect(
+            url = settings.database.url,
+            driver = "org.sqlite.JDBC",
+            databaseConfig = DatabaseConfig {
+                @OptIn(ExperimentalKeywordApi::class)
+                preserveKeywordCasing = true
+            },
+        )
+    }
 
     val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -60,20 +117,6 @@ object Utils : Logging {
             }
         }
     }
-
-    internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
-        .addModule(JavaTimeModule())
-        .addModule(
-            KotlinModule.Builder()
-                .withReflectionCacheSize(512)
-                .configure(KotlinFeature.NullToEmptyCollection, true)
-                .configure(KotlinFeature.NullToEmptyMap, true)
-                .configure(KotlinFeature.NullIsSameAsDefault, true)
-                .configure(KotlinFeature.SingletonSupport, false)
-                .configure(KotlinFeature.StrictNullChecks, true)
-                .build(),
-        )
-        .build()
 
     internal fun <T> query(block: () -> T): T {
         val startTime = LocalDateTime.now()
