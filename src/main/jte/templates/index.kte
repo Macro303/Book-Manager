@@ -55,7 +55,6 @@
     const params = {
       username: jsonData["username"].trim(),
     };
-    console.log(params);
 
     addLoading(caller);
     const response = await submitRequest("/api/users?" + new URLSearchParams(params), "GET");

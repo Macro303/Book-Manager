@@ -105,7 +105,6 @@
     const body = {
       id: jsonData["book-id"],
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/genres/${resource.id.value}/books", "PATCH", body);
@@ -123,7 +122,6 @@
     const body = {
       id: bookId,
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/genres/${resource.id.value}/books", "DELETE", body);
@@ -140,7 +138,6 @@
       bookIds: ${resource.books.map{ it.id.value }.toList().toString()},
       title: jsonData["title"].trim(),
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/genres/${resource.id.value}", "PUT", body);

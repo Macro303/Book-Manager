@@ -112,7 +112,6 @@
         bookId: jsonData["book-id"],
         creatorId: jsonData["creator-id"],
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/roles/${resource.id.value}/credits", "PATCH", body);
@@ -131,7 +130,6 @@
       bookId: bookId,
       creatorId: creatorId,
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/roles/${resource.id.value}/credits", "DELETE", body);
@@ -153,7 +151,6 @@
       @endfor],
       title: jsonData["title"].trim(),
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/roles/${resource.id.value}", "PUT", body);

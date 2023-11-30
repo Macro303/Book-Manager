@@ -1,7 +1,6 @@
 function changeColumnCount() {
   const settingsForm = document.getElementById("adjustable-columns-form");
   const formDetails = Object.fromEntries(new FormData(settingsForm));
-  console.log(formDetails);
 
   adjustColumns(formDetails["column-count"]);
 }
@@ -24,7 +23,6 @@ function adjustColumns(columnCount = getCookie("bookshelf_column-count") || 3) {
 
 ready(() => {
   adjustColumns();
-  console.log(window.innerWidth);
   if (window.innerWidth <= 768) {
     const sliderBox = document.getElementById("adjustable-columns");
     sliderBox?.parentNode?.removeChild(sliderBox);

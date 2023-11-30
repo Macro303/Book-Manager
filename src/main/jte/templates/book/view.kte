@@ -356,7 +356,6 @@
       const body = {
         userId: ${session.id.value},
       };
-      console.log(body);
 
       addLoading(caller);
       const response = await submitRequest("/api/books/${resource.id.value}/read", "PATCH", body);
@@ -370,7 +369,6 @@
       const body = {
         id: ${session.id.value},
       };
-      console.log(body);
 
       addLoading(caller);
       const response = await submitRequest("/api/books/${resource.id.value}/read", "DELETE", body);
@@ -384,7 +382,6 @@
       const body = {
         id: ${session.id.value},
       };
-      console.log(body);
 
       addLoading(caller);
       const response = await submitRequest("/api/books/${resource.id.value}/wish", "PATCH", body);
@@ -398,7 +395,6 @@
       const body = {
         id: ${session.id.value},
       };
-      console.log(body);
 
       addLoading(caller);
       const response = await submitRequest("/api/books/${resource.id.value}/wish", "DELETE", body);

@@ -231,7 +231,6 @@
       creatorId: jsonData["creator-id"],
       roleId: jsonData["role-id"],
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/books/${resource.id.value}/credits", "PATCH", body);
@@ -241,8 +240,8 @@
     }
     removeLoading(caller);
   }
-  
-  async removeCredit(creatorId, roleId) {
+
+  async function removeCredit(creatorId, roleId) {
     @raw
       const caller = `remove-credit-${creatorId}-${roleId}-button`;
     @endraw
@@ -250,14 +249,14 @@
       creatorId: creatorId,
       roleId: roleId,
     };
-    
+
     addLoading(caller);
     const response = await submitRequest("/api/books/${resource.id.value}/credits", "DELETE", body);
     if (response !== null)
       window.location();
     removeLoading(caller);
   }
-  
+
   async function addGenre() {
     const caller = "add-genre-button";
     const form = document.getElementById("add-genre-form");
@@ -265,7 +264,7 @@
     const body = {
       id: formData["genre-id"],
     };
-    
+
     addLoading(caller);
     const response = await submitRequest("/api/books/${resource.id.value}/genres", "PATCH", body);
     if (response !== null) {
@@ -274,7 +273,7 @@
     }
     removeLoading(caller);
   }
-  
+
   async function removeGenre(genreId) {
     @raw
       const caller = `remove-genre-${genreId}-button`
@@ -282,14 +281,14 @@
     const body = {
       id: genreId,
     };
-    
+
     addLoading(caller);
     const response = await submitRequest("/api/books/${resource.id.value}/genres", "DELETE", body);
     if (response !== null)
       window.location.reload();
     removeLoading(caller);
   }
-  
+
   async function addSeries() {
     const caller = "add-series-button";
     const form = document.getElementById("add-series-form");
@@ -307,7 +306,7 @@
     }
     removeLoading(caller);
   }
-  
+
   async function removeSeries(seriesId) {
     @raw
       const caller = `remove-series-${seriesId}-button`;
@@ -322,7 +321,7 @@
       window.location.reload();
     removeLoading(caller);
   }
-  
+
   async function updateBook() {
     const caller = "update-book-button";
     const form = document.getElementById("update-book-form");
@@ -371,7 +370,7 @@
     }
     removeLoading(caller);
   }
-  
+
   async function pullBook() {
     const caller = "pull-book-button";
 

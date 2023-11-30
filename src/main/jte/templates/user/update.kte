@@ -161,7 +161,6 @@
         bookId: jsonData["book-id"],
         readDate: jsonData["read-date"],
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/users/${resource.id.value}/read", "PATCH", body);
@@ -179,7 +178,6 @@
     const body = {
       id: bookId
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/users/${resource.id.value}/read", "DELETE", body);
@@ -195,7 +193,6 @@
     const body = {
         id: jsonData["book-id"],
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/users/${resource.id.value}/wished", "PATCH", body);
@@ -213,7 +210,6 @@
     const body = {
       id: bookId
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/users/${resource.id.value}/wished", "DELETE", body);
@@ -238,7 +234,6 @@
       username: jsonData["username"].trim(),
       wishedBookIds: ${resource.wishedBooks.map { it.id.value }.toString()},
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/users/${resource.id.value}", "PUT", body);

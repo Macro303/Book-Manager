@@ -111,7 +111,6 @@
         bookId: jsonData["book-id"],
         number: jsonData["series-number"] || null,
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/series/${resource.id.value}/books", "PATCH", body);
@@ -129,7 +128,6 @@
     const body = {
       id: bookId
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/series/${resource.id.value}/books", "DELETE", body);
@@ -151,7 +149,6 @@
       @endfor],
       title: jsonData["title"].trim(),
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/series/${resource.id.value}", "PUT", body);

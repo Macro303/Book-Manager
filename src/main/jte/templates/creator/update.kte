@@ -113,7 +113,6 @@
       bookId: jsonData["book-id"],
       roleId: jsonData["role-id"],
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/creators/${resource.id.value}/credits", "PATCH", body);
@@ -132,7 +131,6 @@
       bookId: bookId,
       roleId: roleId,
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/creators/${resource.id.value}/credits", "DELETE", body);
@@ -155,7 +153,6 @@
       imageUrl: jsonData["image-url"].trim() || null,
       name: jsonData["name"].trim(),
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/creators/${resource.id.value}", "PUT", body);

@@ -55,7 +55,6 @@
       books: [],
       title: jsonData["title"].trim(),
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/series", "POST", body);

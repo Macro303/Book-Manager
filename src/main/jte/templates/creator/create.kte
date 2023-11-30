@@ -56,7 +56,6 @@
       imageUrl: jsonData["image-url"].trim() || null,
       name: jsonData["name"].trim(),
     };
-    console.log(body);
 
     addLoading(caller);
     const response = await submitRequest("/api/creators", "POST", body);
