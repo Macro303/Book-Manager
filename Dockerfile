@@ -12,7 +12,7 @@ COPY src /app/src
 RUN gradle build
 
 # Use official OpenJDK image as base
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 # Set the working directory
 WORKDIR /app
