@@ -39,7 +39,7 @@ object Utils : Logging {
     internal val CACHE_ROOT = XDG_CACHE / "bookshelf"
     internal val CONFIG_ROOT = XDG_CONFIG / "bookshelf"
     internal val DATA_ROOT = XDG_DATA / "bookshelf"
-    internal const val VERSION = "0.1.0"
+    internal const val VERSION = "0.2.0"
 
     internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
         .addModule(JavaTimeModule())
