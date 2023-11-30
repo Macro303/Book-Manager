@@ -1,5 +1,5 @@
 @import java.time.LocalDate
-@import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+@import github.buriedincode.bookshelf.Utils.toString
 @param label: String
 @param name: String
 @param value: LocalDate? = null
@@ -7,6 +7,6 @@
 <div class="field">
     <label class="label has-text-info">${label}</label>
     <div class="control is-expanded">
-        <input class="input" name="${name}" placeholder="yyyy-mm-dd" type="date" value="${value?.format(DATE_FORMATTER)}">
+        <input class="input" name="${name}" placeholder="yyyy-mm-dd" type="date" value="${value?.toString("yyyy-MM-dd")}">
     </div>
 </div>

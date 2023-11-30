@@ -8,7 +8,6 @@
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
-@import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
 @param session: User
 @param creators: List<Creator>
 @param formats: List<Format>

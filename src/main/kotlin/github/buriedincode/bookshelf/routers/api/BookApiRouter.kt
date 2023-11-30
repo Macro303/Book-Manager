@@ -2,6 +2,7 @@ package github.buriedincode.bookshelf.routers.api
 
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.Utils.asEnumOrNull
+import github.buriedincode.bookshelf.Utils.toLocalDateOrNull
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.BookImport
 import github.buriedincode.bookshelf.models.BookInput
@@ -59,10 +60,55 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                     resources = resources.filter { genre in it.genres }
                 }
             }
+            ctx.queryParam("has-goodreads")?.lowercase()?.toBooleanStrictOrNull()?.let { goodreads ->
+                resources = resources.filter { it.goodreadsId != null == goodreads }
+            }
+            ctx.queryParam("goodreads-id")?.let { goodreads ->
+                resources = resources.filter { goodreads == it.goodreadsId }
+            }
+            ctx.queryParam("has-google-books")?.lowercase()?.toBooleanStrictOrNull()?.let { googleBooks ->
+                resources = resources.filter { it.googleBooksId != null == googleBooks }
+            }
+            ctx.queryParam("google-books-id")?.let { googleBooks ->
+                resources = resources.filter { googleBooks == it.googleBooksId }
+            }
+            ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
+                resources = resources.filter { it.imageUrl != null == image }
+            }
+            ctx.queryParam("has-isbn")?.lowercase()?.toBooleanStrictOrNull()?.let { isbn ->
+                resources = resources.filter { it.isbn != null == isbn }
+            }
+            ctx.queryParam("isbn")?.let { isbn ->
+                resources = resources.filter { isbn == it.isbn }
+            }
+            ctx.queryParam("is-collected")?.lowercase()?.toBooleanStrictOrNull()?.let { collected ->
+                resources = resources.filter { collected == it.isCollected }
+            }
+            ctx.queryParam("has-library-thing")?.lowercase()?.toBooleanStrictOrNull()?.let { libraryThing ->
+                resources = resources.filter { it.libraryThingId != null == libraryThing }
+            }
+            ctx.queryParam("library-thing-id")?.let { libraryThing ->
+                resources = resources.filter { libraryThing == it.libraryThingId }
+            }
+            ctx.queryParam("has-open-library")?.lowercase()?.toBooleanStrictOrNull()?.let { openLibrary ->
+                resources = resources.filter { it.openLibraryId != null == openLibrary }
+            }
+            ctx.queryParam("open-library-id")?.let { openLibrary ->
+                resources = resources.filter { openLibrary == it.openLibraryId }
+            }
+            ctx.queryParam("before-publish-date")?.toLocalDateOrNull("yyyy-MM-dd")?.let { publishDate ->
+                resources = resources.filter { it.publishDate?.isBefore(publishDate) ?: false }
+            }
+            ctx.queryParam("after-publish-date")?.toLocalDateOrNull("yyyy-MM-dd")?.let { publishDate ->
+                resources = resources.filter { it.publishDate?.isAfter(publishDate) ?: false }
+            }
             ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
                 Publisher.findById(it)?.let { publisher ->
                     resources = resources.filter { publisher == it.publisher }
                 }
+            }
+            ctx.queryParam("reader-id")?.toLongOrNull()?.let { readerId ->
+                resources = resources.filter { readerId in it.readers.map { it.user.id.value } }
             }
             ctx.queryParam("series-id")?.toLongOrNull()?.let {
                 Series.findById(it)?.let { series ->
@@ -79,6 +125,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                         } ?: false
                     )
                 }
+            }
+            ctx.queryParam("wisher-id")?.toLongOrNull()?.let { wisherId ->
+                resources = resources.filter { wisherId in it.wishers.map { it.id.value } }
             }
             ctx.json(resources.sorted().map { it.toJson() })
         }

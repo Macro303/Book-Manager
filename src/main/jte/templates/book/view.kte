@@ -7,7 +7,7 @@
 @import github.buriedincode.bookshelf.models.ReadBook
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.User
-@import github.buriedincode.bookshelf.Utils.getHumanReadableDateFormatter
+@import github.buriedincode.bookshelf.Utils.toHumanReadable
 @import github.buriedincode.bookshelf.Utils.titlecase
 @import gg.jte.support.ForSupport
 @param resource: Book
@@ -154,7 +154,7 @@
                     <div class="block">
                         <p>
                             <strong class="has-text-info">Publish Date:</strong>
-                            ${resource.publishDate?.format(getHumanReadableDateFormatter(date=resource.publishDate!!))}
+                            ${resource.publishDate?.toHumanReadable()}
                         </p>
                     </div>
                 </div>
@@ -175,6 +175,8 @@
                                 </span>
                                 <span>Search Goodreads</span>
                             </a>
+                        @else
+                            <p><strong class="has-text-info">Goodreads:</strong></p>
                         @endif
                     </div>
                     <div class="block">
@@ -190,6 +192,8 @@
                                 </span>
                                 <span>Search Google Books</span>
                             </a>
+                        @else
+                            <p><strong class="has-text-info">Google Books:</strong></p>
                         @endif
                     </div>
                     <div class="block">
@@ -211,6 +215,8 @@
                                 </span>
                                 <span>Search LibraryThing</span>
                             </a>
+                        @else
+                            <p><strong class="has-text-info">LibraryThing:</strong></p>
                         @endif
                     </div>
                     <div class="block">
@@ -226,6 +232,8 @@
                                 </span>
                                 <span>Search OpenLibrary</span>
                             </a>
+                        @else
+                            <p><strong class="has-text-info">OpenLibrary:</strong></p>
                         @endif
                     </div>
                     <div class="block">

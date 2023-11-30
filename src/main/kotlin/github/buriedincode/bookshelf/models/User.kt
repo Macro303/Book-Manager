@@ -1,6 +1,6 @@
 package github.buriedincode.bookshelf.models
 
-import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+import github.buriedincode.bookshelf.Utils.toString
 import github.buriedincode.bookshelf.tables.ReadBookTable
 import github.buriedincode.bookshelf.tables.UserTable
 import github.buriedincode.bookshelf.tables.WishedTable
@@ -34,7 +34,7 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
             ).map {
                 mapOf(
                     "book" to it.book.toJson(),
-                    "readDate" to it.readDate?.format(DATE_FORMATTER),
+                    "readDate" to it.readDate?.toString("yyyy-MM-dd"),
                 )
             }
             output["wished"] = wishedBooks.sorted().map { it.toJson() }

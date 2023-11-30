@@ -1,6 +1,6 @@
 package github.buriedincode.bookshelf.models
 
-import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+import github.buriedincode.bookshelf.Utils.toString
 import github.buriedincode.bookshelf.tables.BookGenreTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
@@ -52,7 +52,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
             "isCollected" to isCollected,
             "libraryThingId" to libraryThingId,
             "openLibraryId" to openLibraryId,
-            "publishDate" to publishDate?.format(DATE_FORMATTER),
+            "publishDate" to publishDate?.toString("yyyy-MM-dd"),
             "subtitle" to subtitle,
             "title" to title,
         )
@@ -71,7 +71,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
                 compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
             ).map {
                 mapOf(
-                    "readDate" to it.readDate?.format(DATE_FORMATTER),
+                    "readDate" to it.readDate?.toString("yyyy-MM-dd"),
                     "user" to it.user.toJson(),
                 )
             }

@@ -10,7 +10,7 @@
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
-@import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+@import github.buriedincode.bookshelf.Utils.toString
 @param resource: Book
 @param session: User
 @param creators: List<Creator>
@@ -347,7 +347,7 @@
       publisherId: formData["publisher-id"] || null,
       readers: [@for(entry in resource.readers)
         {
-          readDate: "${entry.readDate?.format(DATE_FORMATTER) ?: null}",
+          readDate: "${entry.readDate?.toString("yyyy-MM-dd") ?: "null"}",
           userId: ${entry.user.id.value},
         },
       @endfor],
