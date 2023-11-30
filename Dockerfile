@@ -23,8 +23,9 @@ COPY --from=builder /app/build/libs/Bookshelf-fatJar.jar /app/Bookshelf.jar
 # Create XDG directories for external configuration and data
 ENV XDG_CACHE_HOME /app/cache
 ENV XDG_CONFIG_HOME /app/config
+RUN mkdir -p $XDG_CONFIG_HOME/bookshelf
 ENV XDG_DATA_HOME /app/data
-RUN mkdir -p $XDG_CACHE_HOME/bookshelf && mkdir -p $XDG_CONFIG_HOME/bookshelf && mkdir -p $XDG_DATA_HOME/bookshelf
+RUN mkdir -p $XDG_DATA_HOME/bookshelf
 
 # Expose the port your web server will run on
 EXPOSE 25710
