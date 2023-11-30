@@ -1,6 +1,6 @@
 @import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Publisher
-@param label: String = "Select Publisher"
+@param label: String = "Publisher"
 @param name: String = "publisher-id"
 @param options: List<Publisher>
 @param selected: Publisher? = null

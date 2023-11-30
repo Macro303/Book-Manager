@@ -5,7 +5,6 @@ import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.BookSeries
 import github.buriedincode.bookshelf.models.IdValue
 import github.buriedincode.bookshelf.models.Series
-import github.buriedincode.bookshelf.models.SeriesBookInput
 import github.buriedincode.bookshelf.models.SeriesInput
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.SeriesTable
@@ -17,6 +16,7 @@ import io.javalin.http.NotFoundResponse
 import io.javalin.http.bodyValidator
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
+import github.buriedincode.bookshelf.models.SeriesInput.Book as BookInput
 
 object SeriesApiRouter : Logging {
     fun listEndpoint(ctx: Context): Unit =
@@ -112,8 +112,8 @@ object SeriesApiRouter : Logging {
             ctx.status(HttpStatus.NO_CONTENT)
         }
 
-    private fun Context.getBookInput(): SeriesBookInput =
-        this.bodyValidator<SeriesBookInput>()
+    private fun Context.getBookInput(): BookInput =
+        this.bodyValidator<BookInput>()
             .check({ it.bookId > 0 }, error = "bookId must be greater than 0")
             .get()
 

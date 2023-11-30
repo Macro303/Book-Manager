@@ -1,6 +1,6 @@
 @import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Series
-@param label: String = "Select Series"
+@param label: String = "Series"
 @param name: String = "series-id"
 @param options: List<Series>
 @param selected: Series? = null

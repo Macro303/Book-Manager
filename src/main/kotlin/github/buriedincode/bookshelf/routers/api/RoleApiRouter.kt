@@ -5,7 +5,6 @@ import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Role
-import github.buriedincode.bookshelf.models.RoleCreditInput
 import github.buriedincode.bookshelf.models.RoleInput
 import github.buriedincode.bookshelf.tables.CreditTable
 import github.buriedincode.bookshelf.tables.RoleTable
@@ -17,6 +16,7 @@ import io.javalin.http.NotFoundResponse
 import io.javalin.http.bodyValidator
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
+import github.buriedincode.bookshelf.models.RoleInput.Credit as CreditInput
 
 object RoleApiRouter : Logging {
     fun listEndpoint(ctx: Context): Unit =
@@ -119,8 +119,8 @@ object RoleApiRouter : Logging {
             ctx.status(HttpStatus.NO_CONTENT)
         }
 
-    private fun Context.getCreditInput(): RoleCreditInput =
-        this.bodyValidator<RoleCreditInput>()
+    private fun Context.getCreditInput(): CreditInput =
+        this.bodyValidator<CreditInput>()
             .get()
 
     fun addCredit(ctx: Context): Unit =

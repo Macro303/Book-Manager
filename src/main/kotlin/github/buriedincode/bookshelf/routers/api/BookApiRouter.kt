@@ -3,12 +3,9 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.Utils.asEnumOrNull
 import github.buriedincode.bookshelf.models.Book
-import github.buriedincode.bookshelf.models.BookCreditInput
 import github.buriedincode.bookshelf.models.BookImport
 import github.buriedincode.bookshelf.models.BookInput
-import github.buriedincode.bookshelf.models.BookReadInput
 import github.buriedincode.bookshelf.models.BookSeries
-import github.buriedincode.bookshelf.models.BookSeriesInput
 import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Format
@@ -41,71 +38,58 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
+import github.buriedincode.bookshelf.models.BookInput.Credit as CreditInput
+import github.buriedincode.bookshelf.models.BookInput.Reader as ReaderInput
+import github.buriedincode.bookshelf.models.BookInput.Series as SeriesInput
 
-object BookApiRouter : Logging {
-    fun listEndpoint(ctx: Context): Unit =
+object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
+    override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var books = Book.all().toList()
-            val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let {
-                Creator.findById(id = it)
-            }
-            if (creator != null) {
-                books = books.filter {
-                    creator in it.credits.map { it.creator }
+            var resources = entity.all().toList()
+            ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+                Creator.findById(it)?.let { creator ->
+                    resources = resources.filter { creator in it.credits.map { it.creator } }
                 }
             }
-            val format: Format? = ctx.queryParam("format")?.asEnumOrNull<Format>()
-            if (format != null) {
-                books = books.filter {
-                    it.format == format
+            ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { format ->
+                resources = resources.filter { format == it.format }
+            }
+            ctx.queryParam("genre-id")?.toLongOrNull()?.let {
+                Genre.findById(it)?.let { genre ->
+                    resources = resources.filter { genre in it.genres }
                 }
             }
-            val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let {
-                Genre.findById(id = it)
-            }
-            if (genre != null) {
-                books = books.filter {
-                    genre in it.genres
+            ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+                Publisher.findById(it)?.let { publisher ->
+                    resources = resources.filter { publisher == it.publisher }
                 }
             }
-            val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
-                Publisher.findById(id = it)
-            }
-            if (publisher != null) {
-                books = books.filter {
-                    it.publisher == publisher
+            ctx.queryParam("series-id")?.toLongOrNull()?.let {
+                Series.findById(it)?.let { series ->
+                    resources = resources.filter { series in it.series.map { it.series } }
                 }
             }
-            val series = ctx.queryParam("series-id")?.toLongOrNull()?.let {
-                Series.findById(id = it)
-            }
-            if (series != null) {
-                books = books.filter {
-                    series in it.series.map { it.series }
+            ctx.queryParam("title")?.let { title ->
+                resources = resources.filter {
+                    (
+                        it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
+                    ) || (
+                        it.subtitle?.let {
+                            it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                        } ?: false
+                    )
                 }
             }
-            val title = ctx.queryParam("title")
-            if (title != null) {
-                books = books.filter {
-                    it.title.contains(title, ignoreCase = true) ||
-                        title.contains(it.title, ignoreCase = true) ||
-                        (
-                            it.subtitle?.let {
-                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                            } ?: false
-                        )
-                }
-            }
-            ctx.json(books.sorted().map { it.toJson() })
+            ctx.json(resources.sorted().map { it.toJson() })
         }
+    }
 
     private fun Context.getInput(): BookInput =
         this.bodyValidator<BookInput>()
             .check({ it.title.isNotBlank() }, error = "Title must not be empty")
-            .check({ it.series.all { it.seriesId > 0 } }, error = "bookId must be greater than 0")
             .get()
 
-    fun createEndpoint(ctx: Context): Unit =
+    override fun createEndpoint(ctx: Context) {
         Utils.query {
             val input = ctx.getInput()
             val exists = Book.find {
@@ -184,20 +168,9 @@ object BookApiRouter : Logging {
 
             ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
         }
-
-    private fun Context.getResource(): Book {
-        return this.pathParam("book-id").toLongOrNull()?.let {
-            Book.findById(id = it) ?: throw NotFoundResponse(message = "Unable to find Book: `$it`")
-        } ?: throw BadRequestResponse(message = "Unable to find Book: `${this.pathParam("book-id")}`")
     }
 
-    fun getEndpoint(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            ctx.json(resource.toJson(showAll = true))
-        }
-
-    fun updateEndpoint(ctx: Context): Unit =
+    override fun updateEndpoint(ctx: Context): Unit =
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getInput()
@@ -276,7 +249,7 @@ object BookApiRouter : Logging {
             ctx.json(resource.toJson(showAll = true))
         }
 
-    fun deleteEndpoint(ctx: Context): Unit =
+    override fun deleteEndpoint(ctx: Context): Unit =
         Utils.query {
             val resource = ctx.getResource()
             resource.credits.forEach {
@@ -419,7 +392,7 @@ object BookApiRouter : Logging {
             ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
         }
 
-    fun refreshBook(ctx: Context): Unit =
+    fun pullBook(ctx: Context): Unit =
         Utils.query {
             val resource = ctx.getResource()
 
@@ -553,8 +526,8 @@ object BookApiRouter : Logging {
             ctx.json(resource.toJson(showAll = true))
         }
 
-    private fun Context.getReadInput(): BookReadInput =
-        this.bodyValidator<BookReadInput>()
+    private fun Context.getReadInput(): ReaderInput =
+        this.bodyValidator<ReaderInput>()
             .check({ it.userId > 0 }, error = "UserId must be greater than 0")
             .get()
 
@@ -635,8 +608,8 @@ object BookApiRouter : Logging {
             ctx.json(resource.toJson(showAll = true))
         }
 
-    private fun Context.getCreditInput(): BookCreditInput =
-        this.bodyValidator<BookCreditInput>()
+    private fun Context.getCreditInput(): CreditInput =
+        this.bodyValidator<CreditInput>()
             .get()
 
     fun addCredit(ctx: Context): Unit =
@@ -707,8 +680,8 @@ object BookApiRouter : Logging {
             ctx.json(resource.toJson(showAll = true))
         }
 
-    private fun Context.getSeriesInput(): BookSeriesInput =
-        this.bodyValidator<BookSeriesInput>()
+    private fun Context.getSeriesInput(): SeriesInput =
+        this.bodyValidator<SeriesInput>()
             .check({ it.seriesId > 0 }, error = "seriesId must be greater than 0")
             .get()
 

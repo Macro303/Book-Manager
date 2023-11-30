@@ -1,8 +1,0 @@
-@import github.buriedincode.bookshelf.models.Series
-@param entry: Series
-
-<a class="box has-text-centered" href="/series/${entry.id.value}">
-    <div class="block">
-        <h5 class="title is-5 has-text-info-light">${entry.title}</h5>
-    </div>
-</a>

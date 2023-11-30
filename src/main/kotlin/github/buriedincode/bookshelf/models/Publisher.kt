@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class Publisher(id: EntityID<Long>) : LongEntity(id), Comparable<Publisher> {
+class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publisher> {
     companion object : LongEntityClass<Publisher>(PublisherTable), Logging {
         val comparator = compareBy(Publisher::title)
     }
@@ -16,9 +16,9 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), Comparable<Publisher> {
 
     val books by Book optionalReferrersOn BookTable.publisherCol
 
-    fun toJson(showAll: Boolean = false): Map<String, Any?> {
+    override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
-            "publisherId" to id.value,
+            "id" to id.value,
             "title" to title,
         )
         if (showAll) {
@@ -29,7 +29,3 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), Comparable<Publisher> {
 
     override fun compareTo(other: Publisher): Int = comparator.compare(this, other)
 }
-
-data class PublisherInput(
-    val title: String,
-)

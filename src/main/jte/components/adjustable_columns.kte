@@ -1,0 +1,11 @@
+<div class="box" id="adjustable-columns">
+    <h4 class="title is-4">Columns</h4>
+    <form id="adjustable-columns-form" onsubmit="return false;">
+        <div class="field">
+            <label class="label has-text-info">Count</label>
+            <div class="control is-expanded">
+                <input class="input" id="column-count" max="5" min="1" name="column-count" onchange="changeColumnCount();" placeholder="Column Count" type="number" value="3">
+            </div>
+        </div>
+    </form>
+</div>

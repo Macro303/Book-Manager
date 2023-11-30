@@ -1,0 +1,385 @@
+@import java.time.LocalDate
+@import kotlin.collections.List
+@import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.BookSeries
+@import github.buriedincode.bookshelf.models.Creator
+@import github.buriedincode.bookshelf.models.Credit
+@import github.buriedincode.bookshelf.models.Format
+@import github.buriedincode.bookshelf.models.Genre
+@import github.buriedincode.bookshelf.models.Publisher
+@import github.buriedincode.bookshelf.models.Role
+@import github.buriedincode.bookshelf.models.Series
+@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+@param resource: Book
+@param session: User
+@param creators: List<Creator>
+@param formats: List<Format>
+@param genres: List<Genre>
+@param publishers: List<Publisher>
+@param roles: List<Role>
+@param series: List<Series>
+
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Bookshelf</title>
+    <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
+    <link disabled href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/hero/vegeta.min.css" id="light-theme" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/villain/vegeta.min.css" id="dark-theme" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
+</head>
+<body class="has-navbar-fixed-top">
+@template.components.navbar(session = session)
+<main class="section">
+    <div class="container">
+        <header class="block has-text-centered">
+            <h1 class="title is-1">Updating ${resource.title}</h1>
+        </header>
+        <div class="box">
+            <form id="update-book-form" onsubmit="return false;">
+                @template.components.forms.select.format(label = "Format", options = formats.sorted(), selected = resource.format)
+                @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl)
+                @template.components.forms.input_date(label = "Publish Date", name = "publish-date", value = resource.publishDate)
+                @template.components.forms.select.publisher(label = "Publisher", options = publishers.sorted(), selected = resource.publisher)
+                @template.components.forms.input(label = "Subtitle", name = "subtitle", value = resource.subtitle)
+                @template.components.forms.textarea(label = "Summary", name = "summary", value = resource.description)
+                @template.components.forms.input(label = "Title", name = "title", value = resource.title)
+                <h3 class="subtitle is-3 has-text-centered">Identifiers</h3>
+                @template.components.forms.input(label = "Goodreads", name = "goodreads", value = resource.goodreadsId)
+                @template.components.forms.input(label = "Google Books", name = "google-books", value = resource.googleBooksId)
+                @template.components.forms.input(label = "Isbn", name = "isbn", value = resource.isbn)
+                @template.components.forms.input(label = "LibraryThing", name = "library-thing", value = resource.libraryThingId)
+                @template.components.forms.input(label = "OpenLibrary", name = "open-library", value = resource.openLibraryId)
+            </form>
+        </div>
+        <div class="box">
+            <h3 class="title is-3 has-text-centered">Credits</h3>
+            <div class="table-container">
+                <form id="add-credit-form" onsubmit="return false;">
+                    <table class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th class="has-text-info">Role</th>
+                                <th class="has-text-info">Creator</th>
+                                <th class="has-text-info">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for(entry in resource.credits.sortedWith(compareBy<Credit> { it.role }.thenBy { it.creator }))
+                                <tr>
+                                    <td>${entry.role.title}</td>
+                                    <td>${entry.creator.name}</td>
+                                    <td>
+                                        <div class="buttons is-centered">
+                                            <button class="button is-danger" id="remove-credit-${entry.creator.id.value}-${entry.role.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.role.id.value})" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </span>
+                                                <span>Remove</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                            <tr>
+                                <td>@template.components.forms.select.role(label = "", options = roles.sorted())</td>
+                                <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
+                                <td>
+                                    <div class="buttons is-centered">
+                                        <button class="button is-success" id="add-credit-button" onclick="addCredit()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </span>
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div class="box">
+            <h3 class="title is-3 has-text-centered">Genres</h3>
+            <div class="table-container">
+                <form id="add-genre-form" onsubmit="return false;">
+                    <table class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th class="has-text-info">Genre Title</th>
+                                <th class="has-text-info">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for(entry in resource.genres.sorted())
+                                <tr>
+                                    <td>${entry.title}</td>
+                                    <td>
+                                        <div class="buttons is-centered">
+                                            <button class="button is-danger" id="remove-genre-${entry.id.value}-button" onclick="removeGenre(${entry.id.value})" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </span>
+                                                <span>Remove</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                            <tr>
+                                <td>@template.components.forms.select.genre(label = "", options = genres.sorted())</td>
+                                <td>
+                                    <div class="buttons is-centered">
+                                        <button class="button is-success" id="add-genre-button" onclick="addGenre()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </span>
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div class="box">
+            <h3 class="title is-3 has-text-centered">Series</h3>
+            <div class="table-container">
+                <form id="add-series-form" onsubmit="return false;">
+                    <table class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th class="has-text-info">Series Title</th>
+                                <th class="has-text-info">Series Number</th>
+                                <th class="has-text-info">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for(entry in resource.series.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.series }))
+                                <tr>
+                                    <td>${entry.series.title}</td>
+                                    <td>${entry.number}</td>
+                                    <td>
+                                        <div class="buttons is-centered">
+                                            <button class="button is-danger" id="remove-series-${entry.series.id.value}-button" onclick="removeSeries(${entry.series.id.value})" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </span>
+                                                <span>Remove</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                            <tr>
+                                <td>@template.components.forms.select.series(label = "", options = series.sorted())</td>
+                                <td>@template.components.forms.input_number(label = "", name = "number")</td>
+                                <td>
+                                    <div class="buttons is-centered">
+                                        <button class="button is-success" id="add-series-button" onclick="addSeries()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </span>
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div class="buttons is-centered">
+            <button class="button is-success" id="update-book-button" onclick="updateBook()" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </span>
+                <span>Update</span>
+            </button>
+            <button class="button is-warning" id="pull-book-button" onclick="pullBook()" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </span>
+                <span>Pull Details</span>
+            </button>
+            <button class="button is-warning" onclick="history.back()">
+                <span class="icon">
+                    <i class="fa-solid fa-xmark"></i>
+                </span>
+                <span>Cancel</span>
+            </button>
+        </div>
+    </div>
+</main>
+@template.components.footer()
+<script src="/static/js/scripts.js" type="text/javascript"></script>
+<script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
+<script type="text/javascript">
+  async function addCredit() {
+    const caller = "add-credit-button";
+    const form = document.getElementById("add-credit-form");
+    const jsonData = Object.fromEntries(new FormData(form));
+    const body = {
+      creatorId: jsonData["creator-id"],
+      roleId: jsonData["role-id"],
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}/credits", "PATCH", body);
+    if (response !== null) {
+      form.reset();
+      window.location.reload();
+    }
+    removeLoading(caller);
+  }
+
+  async function removeCredit(creatorId, roleId) {
+    @raw
+      const caller = `remove-credit-${creatorId}-${roleId}-button`;
+    @endraw
+    const body = {
+      creatorId: creatorId,
+      roleId: roleId,
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}/credits", "DELETE", body);
+    if (response !== null)
+      window.location();
+    removeLoading(caller);
+  }
+
+  async function addGenre() {
+    const caller = "add-genre-button";
+    const form = document.getElementById("add-genre-form");
+    const formData = Object.fromEntries(new FormData(form));
+    const body = {
+      id: formData["genre-id"],
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}/genres", "PATCH", body);
+    if (response !== null) {
+      form.reset();
+      window.location.reload();
+    }
+    removeLoading(caller);
+  }
+
+  async function removeGenre(genreId) {
+    @raw
+      const caller = `remove-genre-${genreId}-button`
+    @endraw
+    const body = {
+      id: genreId,
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}/genres", "DELETE", body);
+    if (response !== null)
+      window.location.reload();
+    removeLoading(caller);
+  }
+
+  async function addSeries() {
+    const caller = "add-series-button";
+    const form = document.getElementById("add-series-form");
+    const formData = Object.fromEntries(new FormData(form));
+    const body = {
+      seriesId: formData["series-id"],
+      number: formData["number"] || null,
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}/series", "PATCH", body);
+    if (response !== null) {
+      form.reset();
+      window.location.reload();
+    }
+    removeLoading(caller);
+  }
+
+  async function removeSeries(seriesId) {
+    @raw
+      const caller = `remove-series-${seriesId}-button`;
+    @endraw
+    const body = {
+      id: seriesId,
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}/series", "DELETE", body);
+    if (response !== null)
+      window.location.reload();
+    removeLoading(caller);
+  }
+
+  async function updateBook() {
+    const caller = "update-book-button";
+    const form = document.getElementById("update-book-form");
+    const formData = Object.fromEntries(new FormData(form));
+    const body = {
+      credits: [@for(entry in resource.credits)
+        {
+          creatorId: ${entry.creator.id.value},
+          roleId: ${entry.role.id.value},
+        },
+      @endfor],
+      description: formData["summary"].trim() || null,
+      format: formData["format"] || "PAPERBACK",
+      genreIds: ${resource.genres.map { it.id.value }.toList().toString()},
+      goodreadsId: formData["goodreads"].trim() || null,
+      googleBooksId: formData["google-books"].trim() || null,
+      imageUrl: formData["image-url"].trim() || null,
+      isCollected: ${resource.isCollected},
+      isbn: formData["isbn"].trim() || null,
+      libraryThingId: formData["library-thing"].trim() || null,
+      openLibraryId: formData["open-library"].trim() || null,
+      publishDate: formData["publish-date"].trim() || null,
+      publisherId: formData["publisher-id"] || null,
+      readers: [@for(entry in resource.readers)
+        {
+          readDate: "${entry.readDate?.format(DATE_FORMATTER) ?: null}",
+          userId: ${entry.user.id.value},
+        },
+      @endfor],
+      series: [@for(entry in resource.series)
+        {
+          number: ${entry.number ?: 0},
+          seriesId: ${entry.series.id.value},
+        },
+      @endfor],
+      subtitle: formData["subtitle"].trim() || null,
+      title: formData["title"].trim(),
+      wisherIds: ${resource.wishers.map { it.id.value }.toList().toString()},
+    };
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}", "PUT", body);
+    if (response !== null) {
+      form.reset();
+      window.location = "/books/${resource.id.value}";
+    }
+    removeLoading(caller);
+  }
+
+  async function pullBook() {
+    const caller = "pull-book-button";
+
+    addLoading(caller);
+    const response = await submitRequest("/api/books/${resource.id.value}/pull", PUT);
+    if (response !== null)
+      window.location = "/books/${resource.id.value}";
+    removeLoading(caller);
+  }
+</script>
+</body>
+</html>

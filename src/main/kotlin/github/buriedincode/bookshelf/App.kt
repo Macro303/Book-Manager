@@ -4,13 +4,6 @@ import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
 import github.buriedincode.bookshelf.models.User
-import github.buriedincode.bookshelf.routers.BookHtmlRouter
-import github.buriedincode.bookshelf.routers.CreatorHtmlRouter
-import github.buriedincode.bookshelf.routers.GenreHtmlRouter
-import github.buriedincode.bookshelf.routers.PublisherHtmlRouter
-import github.buriedincode.bookshelf.routers.RoleHtmlRouter
-import github.buriedincode.bookshelf.routers.SeriesHtmlRouter
-import github.buriedincode.bookshelf.routers.UserHtmlRouter
 import github.buriedincode.bookshelf.routers.api.BookApiRouter
 import github.buriedincode.bookshelf.routers.api.CreatorApiRouter
 import github.buriedincode.bookshelf.routers.api.GenreApiRouter
@@ -18,6 +11,13 @@ import github.buriedincode.bookshelf.routers.api.PublisherApiRouter
 import github.buriedincode.bookshelf.routers.api.RoleApiRouter
 import github.buriedincode.bookshelf.routers.api.SeriesApiRouter
 import github.buriedincode.bookshelf.routers.api.UserApiRouter
+import github.buriedincode.bookshelf.routers.html.BookHtmlRouter
+import github.buriedincode.bookshelf.routers.html.CreatorHtmlRouter
+import github.buriedincode.bookshelf.routers.html.GenreHtmlRouter
+import github.buriedincode.bookshelf.routers.html.PublisherHtmlRouter
+import github.buriedincode.bookshelf.routers.html.RoleHtmlRouter
+import github.buriedincode.bookshelf.routers.html.SeriesHtmlRouter
+import github.buriedincode.bookshelf.routers.html.UserHtmlRouter
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.delete
 import io.javalin.apibuilder.ApiBuilder.get
@@ -43,89 +43,103 @@ object App : Logging {
         }
     }
 
-    fun start(settings: Settings) {
-        val engine = createTemplateEngine(environment = settings.environment)
-        // engine.setTrimControlStructures = true
-        JavalinJte.init(templateEngine = engine)
-        val app = Javalin.create {
+    private fun createJavalinApp(): Javalin {
+        return Javalin.create {
             it.http.prefer405over404 = true
             it.requestLogger.http { ctx, ms ->
                 val level = when {
-                    ctx.statusCode() in (100 until 200) -> Level.WARN
-                    ctx.statusCode() in (200 until 300) -> Level.INFO
-                    ctx.statusCode() in (300 until 400) -> Level.INFO
-                    ctx.statusCode() in (400 until 500) -> Level.WARN
+                    ctx.statusCode() in (100..<200) -> Level.WARN
+                    ctx.statusCode() in (200..<300) -> Level.INFO
+                    ctx.statusCode() in (300..<400) -> Level.INFO
+                    ctx.statusCode() in (400..<500) -> Level.WARN
                     else -> Level.ERROR
                 }
                 logger.log(level, "${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${Utils.toHumanReadable(ms)}")
             }
             it.routing.ignoreTrailingSlashes = true
             it.routing.treatMultipleSlashesAsSingleSlash = true
+            it.routing.caseInsensitiveRoutes = true
             it.staticFiles.add {
                 it.hostedPath = "/static"
                 it.directory = "/static"
             }
         }
+    }
+
+    fun start(settings: Settings) {
+        val engine = createTemplateEngine(environment = settings.environment)
+        engine.setTrimControlStructures(true)
+        JavalinJte.init(templateEngine = engine)
+
+        val app = createJavalinApp()
         app.routes {
             path("/") {
                 get { ctx ->
                     Utils.query {
                         val cookie = ctx.cookie("bookshelf_session-id")?.toLongOrNull() ?: -1L
                         val session = User.findById(id = cookie)
-                        if (session == null) {
-                            ctx.render("templates/index.kte")
-                        } else {
-                            ctx.redirect("/users/${session.id.value}")
-                        }
+                        ctx.render(
+                            filePath = "templates/index.kte",
+                            model = mapOf(
+                                "session" to session,
+                            ),
+                        )
                     }
                 }
                 path("books") {
                     get(BookHtmlRouter::listEndpoint)
+                    get("create", BookHtmlRouter::createEndpoint)
                     path("{book-id}") {
                         get(BookHtmlRouter::viewEndpoint)
-                        get("edit", BookHtmlRouter::editEndpoint)
+                        get("update", BookHtmlRouter::updateEndpoint)
                     }
                 }
                 path("creators") {
                     get(CreatorHtmlRouter::listEndpoint)
+                    get("create", CreatorHtmlRouter::createEndpoint)
                     path("{creator-id}") {
                         get(CreatorHtmlRouter::viewEndpoint)
-                        get("edit", CreatorHtmlRouter::editEndpoint)
+                        get("update", CreatorHtmlRouter::updateEndpoint)
                     }
                 }
                 path("genres") {
                     get(GenreHtmlRouter::listEndpoint)
+                    get("create", GenreHtmlRouter::createEndpoint)
                     path("{genre-id}") {
                         get(GenreHtmlRouter::viewEndpoint)
-                        get("edit", GenreHtmlRouter::editEndpoint)
+                        get("update", GenreHtmlRouter::updateEndpoint)
                     }
                 }
                 path("publishers") {
                     get(PublisherHtmlRouter::listEndpoint)
+                    get("create", PublisherHtmlRouter::createEndpoint)
                     path("{publisher-id}") {
                         get(PublisherHtmlRouter::viewEndpoint)
-                        get("edit", PublisherHtmlRouter::editEndpoint)
+                        get("update", PublisherHtmlRouter::updateEndpoint)
                     }
                 }
                 path("roles") {
                     get(RoleHtmlRouter::listEndpoint)
+                    get("create", RoleHtmlRouter::createEndpoint)
                     path("{role-id}") {
                         get(RoleHtmlRouter::viewEndpoint)
-                        get("edit", RoleHtmlRouter::editEndpoint)
+                        get("update", RoleHtmlRouter::updateEndpoint)
                     }
                 }
                 path("series") {
                     get(SeriesHtmlRouter::listEndpoint)
+                    get("create", SeriesHtmlRouter::createEndpoint)
                     path("{series-id}") {
                         get(SeriesHtmlRouter::viewEndpoint)
-                        get("edit", SeriesHtmlRouter::editEndpoint)
+                        get("update", SeriesHtmlRouter::updateEndpoint)
                     }
                 }
                 path("users") {
                     get(UserHtmlRouter::listEndpoint)
+                    get("create", UserHtmlRouter::createEndpoint)
                     path("{user-id}") {
                         get(UserHtmlRouter::viewEndpoint)
-                        get("edit", UserHtmlRouter::editEndpoint)
+                        get("update", UserHtmlRouter::updateEndpoint)
                         get("wishlist", UserHtmlRouter::wishlistEndpoint)
                     }
                 }
@@ -139,7 +153,7 @@ object App : Logging {
                         get(BookApiRouter::getEndpoint)
                         put(BookApiRouter::updateEndpoint)
                         delete(BookApiRouter::deleteEndpoint)
-                        put("refresh", BookApiRouter::refreshBook)
+                        put("pull", BookApiRouter::pullBook)
                         path("wish") {
                             patch(BookApiRouter::addWisher)
                             delete(BookApiRouter::removeWisher)
@@ -269,7 +283,9 @@ fun main(
     println("Kotlin v${KotlinVersion.CURRENT}")
     println("Java v${System.getProperty("java.version")}")
     println("Arch: ${System.getProperty("os.arch")}")
+
     val settings = Settings.load()
-    println(settings.toString())
+    println(settings)
+
     App.start(settings = settings)
 }

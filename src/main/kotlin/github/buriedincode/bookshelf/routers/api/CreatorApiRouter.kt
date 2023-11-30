@@ -3,7 +3,6 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Creator
-import github.buriedincode.bookshelf.models.CreatorCreditInput
 import github.buriedincode.bookshelf.models.CreatorInput
 import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Role
@@ -17,6 +16,7 @@ import io.javalin.http.NotFoundResponse
 import io.javalin.http.bodyValidator
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
+import github.buriedincode.bookshelf.models.CreatorInput.Credit as CreditInput
 
 object CreatorApiRouter : Logging {
     fun listEndpoint(ctx: Context): Unit =
@@ -106,8 +106,8 @@ object CreatorApiRouter : Logging {
             ctx.status(HttpStatus.NO_CONTENT)
         }
 
-    private fun Context.getCreditInput(): CreatorCreditInput =
-        this.bodyValidator<CreatorCreditInput>()
+    private fun Context.getCreditInput(): CreditInput =
+        this.bodyValidator<CreditInput>()
             .get()
 
     fun addCredit(ctx: Context): Unit =

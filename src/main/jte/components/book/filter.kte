@@ -1,0 +1,44 @@
+@import kotlin.collections.List
+@import github.buriedincode.bookshelf.models.Creator
+@import github.buriedincode.bookshelf.models.Format
+@import github.buriedincode.bookshelf.models.Genre
+@import github.buriedincode.bookshelf.models.Publisher
+@import github.buriedincode.bookshelf.models.Series
+@param creators: List<Creator>
+@param creatorSelected: Creator? = null
+@param formats: List<Format>
+@param formatSelected: Format? = null
+@param genres: List<Genre>
+@param genreSelected: Genre? = null
+@param publishers: List<Publisher>
+@param publisherSelected: Publisher? = null
+@param series: List<Series>
+@param seriesSelected: Series? = null
+@param title: String? = null
+@param resetUrl: String
+
+<div class="box">
+    <h4 class="title is-4">Filter</h4>
+    <form accept-charset="UTF-8" method="GET">
+        @template.components.forms.select.creator(options=creators, selected=creatorSelected)
+        @template.components.forms.select.format(options=formats, selected=formatSelected)
+        @template.components.forms.select.genre(options=genres, selected=genreSelected)
+        @template.components.forms.select.publisher(options=publishers, selected=publisherSelected)
+        @template.components.forms.select.series(options=series, selected=seriesSelected)
+        @template.components.forms.input(label="Title", name="title", value=title)
+        <div class="buttons is-centered">
+            <button class="button is-info">
+                <span class="icon">
+                    <i class="fa-solid fa-filter"></i>
+                </span>
+                <span>Filter</span>
+            </button>
+            <button class="button is-warning" onclick="resetForm('${resetUrl}')" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-rotate"></i>
+                </span>
+                <span>Reset</span>
+            </button>
+        </div>
+    </form>
+</div>

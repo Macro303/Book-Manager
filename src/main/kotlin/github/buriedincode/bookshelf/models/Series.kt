@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class Series(id: EntityID<Long>) : LongEntity(id), Comparable<Series> {
+class Series(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Series> {
     companion object : LongEntityClass<Series>(SeriesTable), Logging {
         val comparator = compareBy(Series::title)
     }
@@ -15,32 +15,23 @@ class Series(id: EntityID<Long>) : LongEntity(id), Comparable<Series> {
     val books by BookSeries referrersOn BookSeriesTable.seriesCol
     var title: String by SeriesTable.titleCol
 
-    fun toJson(showAll: Boolean = false): Map<String, Any?> {
+    override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
-            "seriesId" to id.value,
+            "id" to id.value,
             "title" to title,
         )
         if (showAll) {
-            output["books"] = books.sortedWith(compareBy<BookSeries> { it.number ?: Int.MAX_VALUE }.thenBy { it.book })
-                .map {
-                    mapOf(
-                        "book" to it.book.toJson(),
-                        "number" to it.number,
-                    )
-                }
+            output["books"] = books.sortedWith(
+                compareBy<BookSeries> { it.number ?: Int.MAX_VALUE }.thenBy { it.book },
+            ).map {
+                mapOf(
+                    "book" to it.book.toJson(),
+                    "number" to it.number,
+                )
+            }
         }
         return output.toSortedMap()
     }
 
     override fun compareTo(other: Series): Int = comparator.compare(this, other)
 }
-
-data class SeriesInput(
-    val books: List<SeriesBookInput> = ArrayList(),
-    val title: String,
-)
-
-data class SeriesBookInput(
-    val bookId: Long,
-    val number: Int? = null,
-)

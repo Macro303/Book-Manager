@@ -1,6 +1,6 @@
 @import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Role
-@param label: String = "Select Role"
+@param label: String = "Role"
 @param name: String = "role-id"
 @param options: List<Role>
 @param selected: Role? = null
