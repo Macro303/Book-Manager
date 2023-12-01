@@ -2,10 +2,11 @@ package github.buriedincode.bookshelf.routers.html
 
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.Publisher
+import github.buriedincode.bookshelf.models.User
 import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
-object PublisherHtmlRouter : BaseHtmlRouter<Publisher>(entity = Publisher, plural = "publishers"), Logging {
+object PublisherHtmlRouter : BaseHtmlRouter<Publisher>(entity = Publisher), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
             var resources = entity.all().toList()
@@ -19,7 +20,7 @@ object PublisherHtmlRouter : BaseHtmlRouter<Publisher>(entity = Publisher, plura
                 filePath = "templates/$name/list.kte",
                 model = mapOf(
                     "resources" to resources,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "selected" to mapOf(
                         "title" to title,
                     ),

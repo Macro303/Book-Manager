@@ -9,7 +9,7 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 
-abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityClass<T>, protected val plural: String) {
+abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityClass<T>) {
     protected val name: String = entity::class.java.declaringClass.simpleName.lowercase()
     protected val paramName: String = "$name-id"
     protected val title: String = name.replaceFirstChar(Char::uppercaseChar)
@@ -22,26 +22,16 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
         } ?: throw BadRequestResponse(message = "Invalid $title Id")
     }
 
-    protected fun Context.getSession(): User? {
-        val cookie = this.cookie(name = "bookshelf_session-id")?.toLongOrNull() ?: -1L
-        return User.findById(id = cookie)
-    }
-
     abstract fun listEndpoint(ctx: Context)
 
     open fun createEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/create.kte",
-                    model = mapOf(
-                        "session" to session,
-                    ),
-                )
-            }
+            ctx.render(
+                filePath = "templates/$name/create.kte",
+                model = mapOf(
+                    "session" to ctx.attribute<User>("session")!!,
+                ),
+            )
         }
     }
 
@@ -51,7 +41,7 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
                     "resource" to ctx.getResource(),
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                 ),
             )
         }
@@ -59,18 +49,13 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
 
     open fun updateEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/update.kte",
-                    model = mapOf(
-                        "resource" to ctx.getResource(),
-                        "session" to session,
-                    ),
-                )
-            }
+            ctx.render(
+                filePath = "templates/$name/update.kte",
+                model = mapOf(
+                    "resource" to ctx.getResource(),
+                    "session" to ctx.attribute<User>("session"),
+                ),
+            )
         }
     }
 }

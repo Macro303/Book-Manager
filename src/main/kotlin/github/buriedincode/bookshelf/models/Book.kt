@@ -22,12 +22,11 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     }
 
     val credits by Credit referrersOn CreditTable.bookCol
-    var description: String? by BookTable.descriptionCol
     var format: Format by BookTable.formatCol
     var genres by Genre via BookGenreTable
     var goodreadsId: String? by BookTable.goodreadsCol
     var googleBooksId: String? by BookTable.googleBooksCol
-    var imageUrl: String? by BookTable.imageUrlCol
+    var image: String? by BookTable.imageCol
     var isbn: String? by BookTable.isbnCol
     var isCollected: Boolean by BookTable.isCollectedCol
     var libraryThingId: String? by BookTable.libraryThingCol
@@ -37,25 +36,28 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     val readers by ReadBook referrersOn ReadBookTable.bookCol
     val series by BookSeries referrersOn BookSeriesTable.bookCol
     var subtitle: String? by BookTable.subtitleCol
+    var summary: String? by BookTable.summaryCol
     var title: String by BookTable.titleCol
     var wishers by User via WishedTable
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
-            "description" to description,
             "format" to format.name,
             "goodreadsId" to goodreadsId,
             "googleBooksId" to googleBooksId,
-            "imageUrl" to imageUrl,
             "isbn" to isbn,
             "isCollected" to isCollected,
             "libraryThingId" to libraryThingId,
             "openLibraryId" to openLibraryId,
             "publishDate" to publishDate?.toString("yyyy-MM-dd"),
             "subtitle" to subtitle,
+            "summary" to summary,
             "title" to title,
         )
+        output["image"] = image?.let {
+            if (it.startsWith("http")) it else "/uploads/books/$it"
+        }
         if (showAll) {
             output["credits"] = credits.sortedWith(
                 compareBy<Credit> { it.creator }.thenBy { it.role },

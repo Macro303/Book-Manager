@@ -4,10 +4,11 @@ import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Role
+import github.buriedincode.bookshelf.models.User
 import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
-object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role, plural = "roles"), Logging {
+object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
             var resources = entity.all().toList()
@@ -21,7 +22,7 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role, plural = "roles"), L
                 filePath = "templates/$name/list.kte",
                 model = mapOf(
                     "resources" to resources,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "selected" to mapOf(
                         "title" to title,
                     ),
@@ -32,19 +33,14 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role, plural = "roles"), L
 
     override fun createEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/create.kte",
-                    model = mapOf(
-                        "session" to session,
-                        "books" to Book.all().toList(),
-                        "creators" to Creator.all().toList(),
-                    ),
-                )
-            }
+            ctx.render(
+                filePath = "templates/$name/create.kte",
+                model = mapOf(
+                    "session" to ctx.attribute<User>("session")!!,
+                    "books" to Book.all().toList(),
+                    "creators" to Creator.all().toList(),
+                ),
+            )
         }
     }
 
@@ -61,7 +57,7 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role, plural = "roles"), L
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
                     "resource" to resource,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "credits" to credits,
                 ),
             )
@@ -70,21 +66,16 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role, plural = "roles"), L
 
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
-            } else {
-                val resource = ctx.getResource()
-                ctx.render(
-                    filePath = "templates/$name/update.kte",
-                    model = mapOf(
-                        "resource" to resource,
-                        "session" to session,
-                        "books" to Book.all().toList(),
-                        "creators" to Creator.all().toList(),
-                    ),
-                )
-            }
+            val resource = ctx.getResource()
+            ctx.render(
+                filePath = "templates/$name/update.kte",
+                model = mapOf(
+                    "resource" to resource,
+                    "session" to ctx.attribute<User>("session")!!,
+                    "books" to Book.all().toList(),
+                    "creators" to Creator.all().toList(),
+                ),
+            )
         }
     }
 }

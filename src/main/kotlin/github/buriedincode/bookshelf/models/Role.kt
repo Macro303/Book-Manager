@@ -13,11 +13,13 @@ class Role(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Role> {
     }
 
     val credits by Credit referrersOn CreditTable.roleCol
+    var summary: String? by RoleTable.summaryCol
     var title: String by RoleTable.titleCol
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
+            "summary" to summary,
             "title" to title,
         )
         if (showAll) {

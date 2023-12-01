@@ -12,6 +12,8 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
         val comparator = compareBy(Publisher::title)
     }
 
+    var image: String? by PublisherTable.imageCol
+    var summary: String? by PublisherTable.summaryCol
     var title: String by PublisherTable.titleCol
 
     val books by Book optionalReferrersOn BookTable.publisherCol
@@ -19,8 +21,12 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
+            "summary" to summary,
             "title" to title,
         )
+        output["image"] = image?.let {
+            if (it.startsWith("http")) it else "/uploads/publishers/$it"
+        }
         if (showAll) {
             output["books"] = books.sorted().map { it.toJson() }
         }

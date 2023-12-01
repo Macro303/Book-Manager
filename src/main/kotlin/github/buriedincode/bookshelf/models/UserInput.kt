@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 
 data class UserInput(
-    val imageUrl: String? = null,
+    val image: String? = null,
     val readBooks: List<ReadBook> = ArrayList(),
-    val role: Short = 0,
+    val role: UserRole = UserRole.GUEST,
     val username: String,
     val wishedBookIds: List<Long> = ArrayList(),
 ) {

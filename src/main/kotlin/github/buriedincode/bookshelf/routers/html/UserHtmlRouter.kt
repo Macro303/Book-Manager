@@ -9,10 +9,12 @@ import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
+import github.buriedincode.bookshelf.models.UserRole
 import io.javalin.http.Context
+import io.javalin.http.UnauthorizedResponse
 import org.apache.logging.log4j.kotlin.Logging
 
-object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), Logging {
+object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
             var resources = entity.all().toList()
@@ -26,7 +28,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                 filePath = "templates/$name/list.kte",
                 model = mapOf(
                     "resources" to resources,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "selected" to mapOf(
                         "username" to username,
                     ),
@@ -40,7 +42,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
             ctx.render(
                 filePath = "templates/$name/create.kte",
                 model = mapOf(
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                 ),
             )
         }
@@ -54,7 +56,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
                     "resource" to resource,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "stats" to mapOf(
                         "wishlist" to Book.all().count { !it.isCollected && resource in it.wishers },
                         "shared" to Book.all().count { !it.isCollected && it.wishers.empty() },
@@ -68,13 +70,9 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
 
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.getSession()
+            val session = ctx.attribute<User>("session")!!
             val resource = ctx.getResource()
-            if (session == null) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
-            } else if (session != resource && (session.role < 2 || session.role < resource.role)) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
-            } else {
+            if (session == resource || (session.role >= UserRole.MODERATOR && session.role > resource.role)) {
                 val readBooks = Book.all().toList()
                     .filter { it.isCollected }
                     .filterNot { it in resource.readBooks.map { it.book } }
@@ -90,6 +88,8 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                         "wishedBooks" to wishedBooks,
                     ),
                 )
+            } else {
+                throw UnauthorizedResponse()
             }
         }
     }
@@ -136,7 +136,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                 filePath = "templates/$name/wishlist.kte",
                 model = mapOf(
                     "resource" to resource,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "books" to books,
                     "selected" to mapOf(
                         "creator" to creator,

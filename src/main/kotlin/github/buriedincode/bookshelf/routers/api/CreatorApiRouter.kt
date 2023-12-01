@@ -8,7 +8,6 @@ import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.tables.CreatorTable
 import github.buriedincode.bookshelf.tables.CreditTable
-import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
@@ -16,27 +15,37 @@ import io.javalin.http.NotFoundResponse
 import io.javalin.http.bodyValidator
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
-import github.buriedincode.bookshelf.models.CreatorInput.Credit as CreditInput
 
-object CreatorApiRouter : Logging {
-    fun listEndpoint(ctx: Context): Unit =
+object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
+    override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var creators = Creator.all().toList()
-            val name = ctx.queryParam("name")
-            if (name != null) {
-                creators = creators.filter {
-                    it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true)
+            var resources = Creator.all().toList()
+            ctx.queryParam("book-id")?.toLongOrNull()?.let {
+                Book.findById(it)?.let { book ->
+                    resources = resources.filter { book in it.credits.map { it.book } }
                 }
             }
-            ctx.json(creators.sorted().map { it.toJson() })
+            ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
+                resources = resources.filter { it.image != null == image }
+            }
+            ctx.queryParam("name")?.let { name ->
+                resources = resources.filter { it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true) }
+            }
+            ctx.queryParam("role-id")?.toLongOrNull()?.let {
+                Role.findById(it)?.let { role ->
+                    resources = resources.filter { role in it.credits.map { it.role } }
+                }
+            }
+            ctx.json(resources.sorted().map { it.toJson() })
         }
+    }
 
     private fun Context.getInput(): CreatorInput =
         this.bodyValidator<CreatorInput>()
             .check({ it.name.isNotBlank() }, error = "Name must not be empty")
             .get()
 
-    fun createEndpoint(ctx: Context): Unit =
+    override fun createEndpoint(ctx: Context) {
         Utils.query {
             val input = ctx.getInput()
             val exists = Creator.find {
@@ -46,8 +55,9 @@ object CreatorApiRouter : Logging {
                 throw ConflictResponse(message = "Creator already exists")
             }
             val creator = Creator.new {
-                imageUrl = input.imageUrl
+                image = input.image
                 name = input.name
+                summary = input.summary
             }
             input.credits.forEach {
                 val book = Book.findById(id = it.bookId)
@@ -67,20 +77,9 @@ object CreatorApiRouter : Logging {
 
             ctx.status(HttpStatus.CREATED).json(creator.toJson(showAll = true))
         }
-
-    private fun Context.getResource(): Creator {
-        return this.pathParam("creator-id").toLongOrNull()?.let {
-            Creator.findById(id = it) ?: throw NotFoundResponse(message = "Unable to find Creator: `$it`")
-        } ?: throw BadRequestResponse(message = "Unable to find Creator: `${this.pathParam("creator-id")}`")
     }
 
-    fun getEndpoint(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            ctx.json(resource.toJson(showAll = true))
-        }
-
-    fun updateEndpoint(ctx: Context): Unit =
+    override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getInput()
@@ -90,62 +89,26 @@ object CreatorApiRouter : Logging {
             if (exists != null && exists != resource) {
                 throw ConflictResponse(message = "Creator already exists")
             }
-            resource.imageUrl = input.imageUrl
+            resource.image = input.image
             resource.name = input.name
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-
-    fun deleteEndpoint(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            resource.credits.forEach {
-                it.delete()
-            }
-            resource.delete()
-            ctx.status(HttpStatus.NO_CONTENT)
-        }
-
-    private fun Context.getCreditInput(): CreditInput =
-        this.bodyValidator<CreditInput>()
-            .get()
-
-    fun addCredit(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            val input = ctx.getCreditInput()
-            val book = Book.findById(id = input.bookId)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.bookId}`")
-            val role = Role.findById(id = input.roleId)
-                ?: throw NotFoundResponse(message = "Unable to find Role: `${input.roleId}`")
-            Credit.find {
-                (CreditTable.bookCol eq book.id) and
-                    (CreditTable.creatorCol eq resource.id) and
-                    (CreditTable.roleCol eq role.id)
-            }.firstOrNull() ?: Credit.new {
-                this.book = book
-                this.creator = resource
-                this.role = role
+            resource.summary = input.summary
+            input.credits.forEach {
+                val book = Book.findById(it.bookId)
+                    ?: throw NotFoundResponse("Unable to find Book: `${it.bookId}`")
+                val role = Role.findById(it.roleId)
+                    ?: throw NotFoundResponse("Unable to find Role: `${it.roleId}`")
+                Credit.find {
+                    (CreditTable.bookCol eq book.id) and
+                        (CreditTable.creatorCol eq resource.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
+                    this.book = book
+                    this.creator = resource
+                    this.role = role
+                }
             }
 
             ctx.json(resource.toJson(showAll = true))
         }
-
-    fun removeCredit(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            val input = ctx.getCreditInput()
-            val book = Book.findById(id = input.bookId)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.bookId}`")
-            val role = Role.findById(id = input.roleId)
-                ?: throw NotFoundResponse(message = "Unable to find Role: `${input.roleId}`")
-            val credit = Credit.find {
-                (CreditTable.bookCol eq book.id) and
-                    (CreditTable.creatorCol eq resource.id) and
-                    (CreditTable.roleCol eq role.id)
-            }.firstOrNull() ?: throw BadRequestResponse(message = "Book Creator does not have this role")
-            credit.delete()
-
-            ctx.json(resource.toJson(showAll = true))
-        }
+    }
 }

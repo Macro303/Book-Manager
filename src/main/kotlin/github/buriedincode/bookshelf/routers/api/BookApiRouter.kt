@@ -4,7 +4,6 @@ import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.Utils.asEnumOrNull
 import github.buriedincode.bookshelf.Utils.toLocalDateOrNull
 import github.buriedincode.bookshelf.models.Book
-import github.buriedincode.bookshelf.models.BookImport
 import github.buriedincode.bookshelf.models.BookInput
 import github.buriedincode.bookshelf.models.BookSeries
 import github.buriedincode.bookshelf.models.Creator
@@ -73,7 +72,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 resources = resources.filter { googleBooks == it.googleBooksId }
             }
             ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
-                resources = resources.filter { it.imageUrl != null == image }
+                resources = resources.filter { it.image != null == image }
             }
             ctx.queryParam("has-isbn")?.lowercase()?.toBooleanStrictOrNull()?.let { isbn ->
                 resources = resources.filter { it.isbn != null == isbn }
@@ -148,7 +147,6 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 throw ConflictResponse(message = "Book already exists")
             }
             val book = Book.new {
-                description = input.description
                 format = input.format
                 genres = SizedCollection(
                     input.genreIds.map {
@@ -158,7 +156,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 )
                 goodreadsId = input.goodreadsId
                 googleBooksId = input.googleBooksId
-                imageUrl = input.imageUrl
+                image = input.image
                 isCollected = input.isCollected
                 isbn = input.isbn
                 libraryThingId = input.libraryThingId
@@ -169,6 +167,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                         ?: throw NotFoundResponse(message = "Unable to find Publisher: `$it`")
                 }
                 subtitle = input.subtitle
+                summary = input.summary
                 title = input.title
                 wishers = SizedCollection(
                     input.wisherIds.map {
@@ -219,7 +218,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    override fun updateEndpoint(ctx: Context): Unit =
+    override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getInput()
@@ -229,7 +228,6 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             if (exists != null && exists != resource) {
                 throw ConflictResponse(message = "Book already exists")
             }
-            resource.description = input.description
             resource.format = input.format
             resource.genres = SizedCollection(
                 input.genreIds.map {
@@ -239,7 +237,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             )
             resource.goodreadsId = input.goodreadsId
             resource.googleBooksId = input.googleBooksId
-            resource.imageUrl = input.imageUrl
+            resource.image = input.image
             resource.isCollected = input.isCollected
             resource.isbn = input.isbn
             resource.libraryThingId = input.libraryThingId
@@ -250,6 +248,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                     ?: throw NotFoundResponse(message = "Unable to find Publisher: `$it`")
             }
             resource.subtitle = input.subtitle
+            resource.summary = input.summary
             resource.title = input.title
             resource.wishers = SizedCollection(
                 input.wisherIds.map {
@@ -297,8 +296,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    override fun deleteEndpoint(ctx: Context): Unit =
+    override fun deleteEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.credits.forEach {
@@ -313,135 +313,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             resource.delete()
             ctx.status(HttpStatus.NO_CONTENT)
         }
+    }
 
-    private fun Context.getImport(): BookImport =
-        this.bodyValidator<BookImport>()
-            .check(
-                {
-                    !it.goodreadsId.isNullOrBlank() ||
-                        !it.googleBooksId.isNullOrBlank() ||
-                        !it.isbn.isNullOrBlank() ||
-                        !it.libraryThingId.isNullOrBlank() ||
-                        !it.openLibraryId.isNullOrBlank()
-                },
-                error = "At least 1 id to import must be specified",
-            )
-            .get()
-
-    fun importBook(ctx: Context): Unit =
-        Utils.query {
-            val import = ctx.getImport()
-
-            val edition: Edition
-            val work: Work
-            if (import.openLibraryId != null) {
-                val temp = OpenLibrary.getBook(editionId = import.openLibraryId)
-                edition = temp.first
-                work = temp.second
-            } else if (import.isbn != null) {
-                val temp = OpenLibrary.lookupBook(isbn = import.isbn)
-                edition = temp.first
-                work = temp.second
-            } else {
-                throw NotImplementedResponse(message = "Only import via OpenLibrary edition id or Isbn currently supported.")
-            }
-            val exists = if (edition.isbn == null) {
-                Book.find {
-                    (
-                        (BookTable.titleCol eq edition.title) and
-                            (BookTable.subtitleCol eq edition.subtitle)
-                    ) or (BookTable.openLibraryCol eq edition.editionId)
-                }.firstOrNull()
-            } else {
-                Book.find {
-                    (
-                        (BookTable.titleCol eq edition.title) and
-                            (BookTable.subtitleCol eq edition.subtitle)
-                    ) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
-                }.firstOrNull()
-            }
-            if (exists != null) {
-                throw ConflictResponse(message = "This Book already exists in the database.")
-            }
-
-            val book = Book.new {
-                description = edition.description ?: work.description
-                format = Format.PAPERBACK // TODO
-                genres = SizedCollection(
-                    edition.genres.map {
-                        Genre.find {
-                            GenreTable.titleCol eq it
-                        }.firstOrNull() ?: Genre.new {
-                            title = it
-                        }
-                    },
-                )
-                goodreadsId = edition.identifiers.goodreads.firstOrNull()
-                googleBooksId = edition.identifiers.google.firstOrNull()
-                imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
-                isbn = edition.isbn
-                isCollected = import.isCollected
-                libraryThingId = edition.identifiers.librarything.firstOrNull()
-                openLibraryId = edition.editionId
-                publishDate = edition.publishDate
-                edition.publishers.firstOrNull()?.let {
-                    publisher = Publisher.find {
-                        PublisherTable.titleCol eq it
-                    }.firstOrNull() ?: Publisher.new {
-                        title = it
-                    }
-                }
-                subtitle = edition.subtitle
-                title = edition.title
-                wishers = SizedCollection(
-                    import.wisherIds.map {
-                        User.findById(id = it)
-                            ?: throw NotFoundResponse(message = "Unable to find User: `$it`")
-                    },
-                )
-            }
-            work.authors.map {
-                OpenLibrary.getAuthor(authorId = it.authorId)
-            }.map {
-                val creator = Creator.find {
-                    CreatorTable.nameCol eq it.name
-                }.firstOrNull() ?: Creator.new {
-                    name = it.name
-                }
-                it.photos.firstOrNull()?.let {
-                    creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
-                }
-                creator
-            }.forEach {
-                Credit.new {
-                    this.book = book
-                    creator = it
-                    role = Role.find {
-                        RoleTable.titleCol eq "Author"
-                    }.firstOrNull() ?: Role.new {
-                        title = "Author"
-                    }
-                }
-            }
-            edition.contributors.forEach {
-                Credit.new {
-                    this.book = book
-                    creator = Creator.find {
-                        CreatorTable.nameCol eq it.name
-                    }.firstOrNull() ?: Creator.new {
-                        name = it.name
-                    }
-                    role = Role.find {
-                        RoleTable.titleCol eq it.role
-                    }.firstOrNull() ?: Role.new {
-                        title = it.role
-                    }
-                }
-            }
-            ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
-        }
-
-    fun pullBook(ctx: Context): Unit =
+    fun pullBook(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
 
@@ -477,7 +351,6 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 throw ConflictResponse(message = "This Book already exists in the database.")
             }
 
-            resource.description = edition.description ?: work.description
             // book.format = Format.PAPERBACK
             resource.genres = SizedCollection(
                 edition.genres.map {
@@ -490,7 +363,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             )
             resource.goodreadsId = edition.identifiers.goodreads.firstOrNull()
             resource.googleBooksId = edition.identifiers.google.firstOrNull()
-            resource.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
+            resource.image = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
             resource.isbn = edition.isbn
             resource.libraryThingId = edition.identifiers.librarything.firstOrNull()
             resource.openLibraryId = edition.editionId
@@ -503,6 +376,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 }
             }
             resource.subtitle = edition.subtitle
+            resource.summary = edition.description ?: work.description
             resource.title = edition.title
             work.authors.map {
                 OpenLibrary.getAuthor(authorId = it.authorId)
@@ -513,7 +387,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                     name = it.name
                 }
                 it.photos.firstOrNull()?.let {
-                    creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
+                    creator.image = "https://covers.openlibrary.org/a/id/$it-L.jpg"
                 }
                 creator
             }.forEach {
@@ -556,16 +430,18 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun collectBook(ctx: Context): Unit =
+    fun collectBook(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.isCollected = true
             resource.wishers = SizedCollection()
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun discardBook(ctx: Context): Unit =
+    fun discardBook(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.isCollected = false
@@ -574,13 +450,14 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             }
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
     private fun Context.getReadInput(): ReaderInput =
         this.bodyValidator<ReaderInput>()
             .check({ it.userId > 0 }, error = "UserId must be greater than 0")
             .get()
 
-    fun addReader(ctx: Context): Unit =
+    fun addReader(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             if (!resource.isCollected) {
@@ -599,13 +476,14 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
     private fun Context.getIdValue(): IdValue =
         this.bodyValidator<IdValue>()
             .check({ it.id > 0 }, error = "Id must be greater than 0")
             .get()
 
-    fun removeReader(ctx: Context): Unit =
+    fun removeReader(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             if (!resource.isCollected) {
@@ -621,8 +499,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun addWisher(ctx: Context): Unit =
+    fun addWisher(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             if (resource.isCollected) {
@@ -637,8 +516,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun removeWisher(ctx: Context): Unit =
+    fun removeWisher(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             if (resource.isCollected) {
@@ -656,12 +536,13 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
     private fun Context.getCreditInput(): CreditInput =
         this.bodyValidator<CreditInput>()
             .get()
 
-    fun addCredit(ctx: Context): Unit =
+    fun addCredit(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getCreditInput()
@@ -681,8 +562,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun removeCredit(ctx: Context): Unit =
+    fun removeCredit(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getCreditInput()
@@ -699,8 +581,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun addGenre(ctx: Context): Unit =
+    fun addGenre(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getIdValue()
@@ -712,8 +595,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun removeGenre(ctx: Context): Unit =
+    fun removeGenre(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getIdValue()
@@ -728,13 +612,14 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
     private fun Context.getSeriesInput(): SeriesInput =
         this.bodyValidator<SeriesInput>()
             .check({ it.seriesId > 0 }, error = "seriesId must be greater than 0")
             .get()
 
-    fun addSeries(ctx: Context): Unit =
+    fun addSeries(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getSeriesInput()
@@ -750,8 +635,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun removeSeries(ctx: Context): Unit =
+    fun removeSeries(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getIdValue()
@@ -764,4 +650,5 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 }

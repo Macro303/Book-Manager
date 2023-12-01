@@ -3,12 +3,10 @@ package github.buriedincode.bookshelf.routers.api
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.BookSeries
-import github.buriedincode.bookshelf.models.IdValue
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.SeriesInput
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.SeriesTable
-import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
@@ -16,20 +14,22 @@ import io.javalin.http.NotFoundResponse
 import io.javalin.http.bodyValidator
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
-import github.buriedincode.bookshelf.models.SeriesInput.Book as BookInput
 
-object SeriesApiRouter : Logging {
-    fun listEndpoint(ctx: Context): Unit =
+object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
+    override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var series = Series.all().toList()
-            val title = ctx.queryParam("title")
-            if (title != null) {
-                series = series.filter {
-                    it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
+            var resources = entity.all().toList()
+            ctx.queryParam("book-id")?.toLongOrNull()?.let {
+                Book.findById(it)?.let { book ->
+                    resources = resources.filter { book in it.books.map { it.book } }
                 }
             }
-            ctx.json(series.sorted().map { it.toJson() })
+            ctx.queryParam("title")?.let { title ->
+                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            }
+            ctx.json(resources.sorted().map { it.toJson() })
         }
+    }
 
     private fun Context.getInput(): SeriesInput =
         this.bodyValidator<SeriesInput>()
@@ -37,7 +37,7 @@ object SeriesApiRouter : Logging {
             .check({ it.books.all { it.bookId > 0 } }, error = "bookId must be greater than 0")
             .get()
 
-    fun createEndpoint(ctx: Context): Unit =
+    override fun createEndpoint(ctx: Context) {
         Utils.query {
             val input = ctx.getInput()
             val exists = Series.find {
@@ -47,6 +47,7 @@ object SeriesApiRouter : Logging {
                 throw ConflictResponse(message = "Series already exists")
             }
             val series = Series.new {
+                summary = input.summary
                 title = input.title
             }
             input.books.forEach {
@@ -63,20 +64,9 @@ object SeriesApiRouter : Logging {
 
             ctx.status(HttpStatus.CREATED).json(series.toJson(showAll = true))
         }
-
-    private fun Context.getResource(): Series {
-        return this.pathParam("series-id").toLongOrNull()?.let {
-            Series.findById(id = it) ?: throw NotFoundResponse(message = "Unable to find Series: `$it`")
-        } ?: throw BadRequestResponse(message = "Unable to find Series: `${this.pathParam("series-id")}`")
     }
 
-    fun getEndpoint(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            ctx.json(resource.toJson(showAll = true))
-        }
-
-    fun updateEndpoint(ctx: Context): Unit =
+    override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val input = ctx.getInput()
@@ -86,6 +76,7 @@ object SeriesApiRouter : Logging {
             if (exists != null && exists != resource) {
                 throw ConflictResponse(message = "Series already exists")
             }
+            resource.summary = input.summary
             resource.title = input.title
             input.books.forEach {
                 val book = Book.findById(id = it.bookId)
@@ -101,8 +92,9 @@ object SeriesApiRouter : Logging {
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun deleteEndpoint(ctx: Context): Unit =
+    override fun deleteEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.books.forEach {
@@ -111,45 +103,5 @@ object SeriesApiRouter : Logging {
             resource.delete()
             ctx.status(HttpStatus.NO_CONTENT)
         }
-
-    private fun Context.getBookInput(): BookInput =
-        this.bodyValidator<BookInput>()
-            .check({ it.bookId > 0 }, error = "bookId must be greater than 0")
-            .get()
-
-    fun addBook(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            val input = ctx.getBookInput()
-            val book = Book.findById(id = input.bookId)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.bookId}`")
-            val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-            }.firstOrNull() ?: BookSeries.new {
-                this.book = book
-                this.series = resource
-            }
-            bookSeries.number = if (input.number == 0) null else input.number
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-
-    private fun Context.getIdValue(): IdValue =
-        this.bodyValidator<IdValue>()
-            .check({ it.id > 0 }, error = "Id must be greater than 0")
-            .get()
-
-    fun removeBook(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            val input = ctx.getIdValue()
-            val book = Book.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.id}`")
-            val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-            }.firstOrNull() ?: throw BadRequestResponse(message = "Book is not part of the Series")
-            bookSeries.delete()
-
-            ctx.json(resource.toJson(showAll = true))
-        }
+    }
 }

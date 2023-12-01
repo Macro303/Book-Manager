@@ -13,7 +13,7 @@ import github.buriedincode.bookshelf.models.User
 import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
-object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), Logging {
+object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
             var resources = entity.all().toList().filter { it.isCollected }
@@ -53,7 +53,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                 filePath = "templates/$name/list.kte",
                 model = mapOf(
                     "resources" to resources,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "selected" to mapOf(
                         "creator" to creator,
                         "format" to format,
@@ -69,25 +69,20 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
 
     override fun createEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/create.kte",
-                    model = mapOf(
-                        "session" to session,
-                        "creators" to Creator.all().toList(),
-                        "formats" to Format.entries.toList(),
-                        "genres" to Genre.all().toList(),
-                        "publishers" to Publisher.all().toList(),
-                        "readers" to User.all().toList(),
-                        "roles" to Role.all().toList(),
-                        "series" to Series.all().toList(),
-                        "wishers" to User.all().toList(),
-                    ),
-                )
-            }
+            ctx.render(
+                filePath = "templates/$name/create.kte",
+                model = mapOf(
+                    "session" to ctx.attribute<User>("session")!!,
+                    "creators" to Creator.all().toList(),
+                    "formats" to Format.entries.toList(),
+                    "genres" to Genre.all().toList(),
+                    "publishers" to Publisher.all().toList(),
+                    "readers" to User.all().toList(),
+                    "roles" to Role.all().toList(),
+                    "series" to Series.all().toList(),
+                    "wishers" to User.all().toList(),
+                ),
+            )
         }
     }
 
@@ -104,7 +99,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
                     "resource" to resource,
-                    "session" to ctx.getSession(),
+                    "session" to ctx.attribute<User>("session"),
                     "credits" to credits,
                 ),
             )
@@ -113,27 +108,22 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
 
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
-            } else {
-                val resource = ctx.getResource()
-                ctx.render(
-                    filePath = "templates/$name/update.kte",
-                    model = mapOf(
-                        "resource" to resource,
-                        "session" to session,
-                        "creators" to Creator.all().toList(),
-                        "formats" to Format.entries.toList(),
-                        "genres" to Genre.all().toList().filterNot { it in resource.genres },
-                        "publishers" to Publisher.all().toList().filterNot { it == resource.publisher },
-                        "readers" to User.all().toList().filterNot { it in resource.readers.map { it.user } },
-                        "roles" to Role.all().toList(),
-                        "series" to Series.all().toList().filterNot { it in resource.series.map { it.series } },
-                        "wishers" to User.all().toList().filterNot { it in resource.wishers },
-                    ),
-                )
-            }
+            val resource = ctx.getResource()
+            ctx.render(
+                filePath = "templates/$name/update.kte",
+                model = mapOf(
+                    "resource" to resource,
+                    "session" to ctx.attribute<User>("session"),
+                    "creators" to Creator.all().toList(),
+                    "formats" to Format.entries.toList(),
+                    "genres" to Genre.all().toList().filterNot { it in resource.genres },
+                    "publishers" to Publisher.all().toList().filterNot { it == resource.publisher },
+                    "readers" to User.all().toList().filterNot { it in resource.readers.map { it.user } },
+                    "roles" to Role.all().toList(),
+                    "series" to Series.all().toList().filterNot { it in resource.series.map { it.series } },
+                    "wishers" to User.all().toList().filterNot { it in resource.wishers },
+                ),
+            )
         }
     }
 }

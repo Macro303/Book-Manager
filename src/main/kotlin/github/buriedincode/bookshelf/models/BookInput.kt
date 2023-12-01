@@ -5,12 +5,11 @@ import java.time.LocalDate
 
 data class BookInput(
     val credits: List<Credit> = ArrayList(),
-    val description: String? = null,
     val format: Format = Format.PAPERBACK,
     val genreIds: List<Long> = ArrayList(),
     val goodreadsId: String? = null,
     val googleBooksId: String? = null,
-    val imageUrl: String? = null,
+    val image: String? = null,
     val isCollected: Boolean = false,
     val isbn: String? = null,
     val libraryThingId: String? = null,
@@ -20,6 +19,7 @@ data class BookInput(
     val readers: List<Reader> = ArrayList(),
     val series: List<Series> = ArrayList(),
     val subtitle: String? = null,
+    val summary: String? = null,
     val title: String,
     val wisherIds: List<Long> = ArrayList(),
 ) {

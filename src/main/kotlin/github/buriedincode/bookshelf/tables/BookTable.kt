@@ -12,15 +12,15 @@ import org.jetbrains.exposed.sql.javatime.date
 import java.time.LocalDate
 
 object BookTable : LongIdTable(name = "books"), Logging {
-    val descriptionCol: Column<String?> = text(name = "description").nullable()
+    val summaryCol: Column<String?> = text(name = "summary").nullable()
     val formatCol: Column<Format> = enumerationByName(
         name = "format",
-        length = 24,
+        length = 16,
         klass = Format::class,
     ).default(defaultValue = Format.PAPERBACK)
     val goodreadsCol: Column<String?> = text(name = "goodreads_id").nullable()
     val googleBooksCol: Column<String?> = text(name = "google_books_id").nullable()
-    val imageUrlCol: Column<String?> = text(name = "image_url").nullable()
+    val imageCol: Column<String?> = text(name = "image").nullable()
     val isCollectedCol: Column<Boolean> = bool(name = "is_collected").default(defaultValue = false)
     val isbnCol: Column<String?> = text(name = "isbn").nullable().uniqueIndex()
     val libraryThingCol: Column<String?> = text(name = "library_thing_id").nullable()
