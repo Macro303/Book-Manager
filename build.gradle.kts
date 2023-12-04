@@ -6,7 +6,7 @@ plugins {
     id("gg.jte.gradle") version "3.1.5"
     id("com.github.ben-manes.versions") version "0.50.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
+    id("org.jlleitschuh.gradle.ktlint") version "12.0.2"
 }
 
 group = "github.buriedincode"
