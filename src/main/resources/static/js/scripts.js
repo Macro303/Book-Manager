@@ -79,6 +79,23 @@ async function submitRequest(endpoint, method, body = {}) {
   }
 }
 
+async function submitFile(endpoint, key, file) {
+  const formData = new FormData();
+  formData.append(key, file);
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok)
+      throw response;
+    return true;
+  } catch(error) {
+    alert(`${error.status} ${error.statusText}: ${await error.text()}`);
+    return false;
+  }
+}
+
 function signOut() {
     const caller = "sign-out-button";
     addLoading(caller);

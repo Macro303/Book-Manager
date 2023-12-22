@@ -1,5 +1,5 @@
 package github.buriedincode.bookshelf.models
 
-data class IdValue(
+data class IdInput(
     val id: Long,
 )

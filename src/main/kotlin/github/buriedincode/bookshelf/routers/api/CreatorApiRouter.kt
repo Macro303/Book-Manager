@@ -8,11 +8,12 @@ import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.tables.CreatorTable
 import github.buriedincode.bookshelf.tables.CreditTable
+import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
-import io.javalin.http.bodyValidator
+import io.javalin.http.bodyAsClass
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
 
@@ -40,30 +41,23 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
         }
     }
 
-    private fun Context.getInput(): CreatorInput =
-        this.bodyValidator<CreatorInput>()
-            .check({ it.name.isNotBlank() }, error = "Name must not be empty")
-            .get()
-
     override fun createEndpoint(ctx: Context) {
         Utils.query {
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<CreatorInput>()
             val exists = Creator.find {
-                CreatorTable.nameCol eq input.name
+                CreatorTable.nameCol eq body.name
             }.firstOrNull()
             if (exists != null) {
-                throw ConflictResponse(message = "Creator already exists")
+                throw ConflictResponse("Creator already exists")
             }
             val creator = Creator.new {
-                image = input.image
-                name = input.name
-                summary = input.summary
+                image = body.image
+                name = body.name
+                summary = body.summary
             }
-            input.credits.forEach {
-                val book = Book.findById(id = it.bookId)
-                    ?: throw NotFoundResponse(message = "Unable to find Book: `${it.bookId}`")
-                val role = Role.findById(id = it.roleId)
-                    ?: throw NotFoundResponse(message = "Unable to find Role: `${it.roleId}`")
+            body.credits.forEach {
+                val book = Book.findById(it.bookId) ?: throw NotFoundResponse("Book not found.")
+                val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
                 Credit.find {
                     (CreditTable.bookCol eq book.id) and
                         (CreditTable.creatorCol eq creator.id) and
@@ -82,21 +76,19 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<CreatorInput>()
             val exists = Creator.find {
-                CreatorTable.nameCol eq input.name
+                CreatorTable.nameCol eq body.name
             }.firstOrNull()
             if (exists != null && exists != resource) {
-                throw ConflictResponse(message = "Creator already exists")
+                throw ConflictResponse("Creator already exists")
             }
-            resource.image = input.image
-            resource.name = input.name
-            resource.summary = input.summary
-            input.credits.forEach {
-                val book = Book.findById(it.bookId)
-                    ?: throw NotFoundResponse("Unable to find Book: `${it.bookId}`")
-                val role = Role.findById(it.roleId)
-                    ?: throw NotFoundResponse("Unable to find Role: `${it.roleId}`")
+            resource.image = body.image
+            resource.name = body.name
+            resource.summary = body.summary
+            body.credits.forEach {
+                val book = Book.findById(it.bookId) ?: throw NotFoundResponse("Book not found.")
+                val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
                 Credit.find {
                     (CreditTable.bookCol eq book.id) and
                         (CreditTable.creatorCol eq resource.id) and
@@ -109,6 +101,45 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
             }
 
             ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun addCredit(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            val body = ctx.bodyAsClass<CreatorInput.Credit>()
+
+            val book = Book.findById(body.bookId) ?: throw NotFoundResponse("Book not found.")
+            val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
+            Credit.find {
+                (CreditTable.bookCol eq book.id) and
+                    (CreditTable.creatorCol eq resource.id) and
+                    (CreditTable.roleCol eq role.id)
+            }.firstOrNull() ?: Credit.new {
+                this.book = book
+                this.creator = resource
+                this.role = role
+            }
+
+            ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun removeCredit(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            val body = ctx.bodyAsClass<CreatorInput.Credit>()
+
+            val book = Book.findById(body.bookId) ?: throw NotFoundResponse("Book not found.")
+            val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
+            val credit = Credit.find {
+                (CreditTable.bookCol eq book.id) and
+                    (CreditTable.creatorCol eq resource.id) and
+                    (CreditTable.roleCol eq role.id)
+            }.firstOrNull() ?: throw BadRequestResponse("Unable to find Credit")
+            credit.delete()
+
+            ctx.status(HttpStatus.NO_CONTENT)
         }
     }
 }

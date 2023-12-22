@@ -8,11 +8,12 @@ import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.models.RoleInput
 import github.buriedincode.bookshelf.tables.CreditTable
 import github.buriedincode.bookshelf.tables.RoleTable
+import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
-import io.javalin.http.bodyValidator
+import io.javalin.http.bodyAsClass
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
 
@@ -37,61 +38,56 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
         }
     }
 
-    private fun Context.getInput(): RoleInput =
-        this.bodyValidator<RoleInput>()
-            .check({ it.title.isNotBlank() }, error = "Title must not be empty")
-            .get()
-
     override fun createEndpoint(ctx: Context) {
         Utils.query {
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<RoleInput>()
             val exists = Role.find {
-                RoleTable.titleCol eq input.title
+                RoleTable.titleCol eq body.title
             }.firstOrNull()
             if (exists != null) {
-                throw ConflictResponse(message = "Role already exists")
+                throw ConflictResponse("Role already exists")
             }
-            val role = Role.new {
-                summary = input.summary
-                title = input.title
+            val resource = Role.new {
+                this.summary = body.summary
+                this.title = body.title
             }
-            input.credits.forEach {
-                val book = Book.findById(id = it.bookId)
-                    ?: throw NotFoundResponse(message = "Unable to find Book: `${it.bookId}`")
-                val creator = Creator.findById(id = it.creatorId)
-                    ?: throw NotFoundResponse(message = "Unable to find Creator: `${it.creatorId}`")
+            body.credits.forEach {
+                val book = Book.findById(it.bookId)
+                    ?: throw NotFoundResponse("No Book found.")
+                val creator = Creator.findById(it.creatorId)
+                    ?: throw NotFoundResponse("No Creator found.")
                 Credit.find {
                     (CreditTable.bookCol eq book.id) and
                         (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq role.id)
+                        (CreditTable.roleCol eq resource.id)
                 }.firstOrNull() ?: Credit.new {
                     this.book = book
                     this.creator = creator
-                    this.role = role
+                    this.role = resource
                 }
             }
 
-            ctx.status(HttpStatus.CREATED).json(role.toJson(showAll = true))
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
     }
 
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<RoleInput>()
             val exists = Role.find {
-                RoleTable.titleCol eq input.title
+                RoleTable.titleCol eq body.title
             }.firstOrNull()
             if (exists != null && exists != resource) {
-                throw ConflictResponse(message = "Role already exists")
+                throw ConflictResponse("Role already exists")
             }
-            resource.summary = input.summary
-            resource.title = input.title
-            input.credits.forEach {
-                val book = Book.findById(id = it.bookId)
-                    ?: throw NotFoundResponse(message = "Unable to find Book: `${it.bookId}`")
-                val creator = Creator.findById(id = it.creatorId)
-                    ?: throw NotFoundResponse(message = "Unable to find Creator: `${it.creatorId}`")
+            resource.summary = body.summary
+            resource.title = body.title
+            body.credits.forEach {
+                val book = Book.findById(it.bookId)
+                    ?: throw NotFoundResponse("No Book found.")
+                val creator = Creator.findById(it.creatorId)
+                    ?: throw NotFoundResponse("No Creator found.")
                 Credit.find {
                     (CreditTable.bookCol eq book.id) and
                         (CreditTable.creatorCol eq creator.id) and
@@ -114,6 +110,47 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
                 it.delete()
             }
             resource.delete()
+            ctx.status(HttpStatus.NO_CONTENT)
+        }
+    }
+
+    fun addCredit(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            val body = ctx.bodyAsClass<RoleInput.Credit>()
+            val book = Book.findById(body.bookId)
+                ?: throw NotFoundResponse("No Book found.")
+            val creator = Creator.findById(body.creatorId)
+                ?: throw NotFoundResponse("No Creator found.")
+            Credit.find {
+                (CreditTable.bookCol eq book.id) and
+                    (CreditTable.creatorCol eq creator.id) and
+                    (CreditTable.roleCol eq resource.id)
+            }.firstOrNull() ?: Credit.new {
+                this.book = book
+                this.creator = creator
+                this.role = resource
+            }
+
+            ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun removeCredit(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            val body = ctx.bodyAsClass<RoleInput.Credit>()
+            val book = Book.findById(body.bookId)
+                ?: throw NotFoundResponse("No Book found.")
+            val creator = Book.findById(body.creatorId)
+                ?: throw NotFoundResponse("No Creator found.")
+            val credit = Credit.find {
+                (CreditTable.bookCol eq book.id) and
+                    (CreditTable.creatorCol eq creator.id) and
+                    (CreditTable.roleCol eq resource.id)
+            }.firstOrNull() ?: throw BadRequestResponse("Credit not found.")
+            credit.delete()
+
             ctx.status(HttpStatus.NO_CONTENT)
         }
     }

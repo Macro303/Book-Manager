@@ -37,3 +37,14 @@ class Role(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Role> {
 
     override fun compareTo(other: Role): Int = comparator.compare(this, other)
 }
+
+data class RoleInput(
+    val credits: List<Credit> = ArrayList(),
+    val summary: String? = null,
+    val title: String,
+) {
+    data class Credit(
+        val bookId: Long,
+        val creatorId: Long,
+    )
+}

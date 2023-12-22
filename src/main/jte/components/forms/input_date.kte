@@ -1,12 +1,17 @@
-@import java.time.LocalDate
 @import github.buriedincode.bookshelf.Utils.toString
+@import java.time.LocalDate
 @param label: String
 @param name: String
 @param value: LocalDate? = null
+@param disabled: Boolean = false
 
 <div class="field">
-    <label class="label has-text-info">${label}</label>
-    <div class="control is-expanded">
-        <input class="input" name="${name}" placeholder="yyyy-mm-dd" type="date" value="${value?.toString("yyyy-MM-dd")}">
+    <label class="label has-text-info" for="${name}">${label}</label>
+    <div class="control is-expanded has-icons-left">
+        <input class="input" disabled="${disabled}" id="${name}" name="${name}" placeholder="yyyy-MM-dd" type="date" value="${value?.toString("yyyy-MM-dd")}">
+        <div class="icon is-left">
+            <i class="fa-solid fa-calendar"></i>
+        </div>
     </div>
+    <p class="help is-danger" id="${name}-error"></p>
 </div>

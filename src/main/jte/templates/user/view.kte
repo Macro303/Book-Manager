@@ -1,8 +1,8 @@
-@import java.time.LocalDate
-@import kotlin.collections.Map
+@import gg.jte.support.ForSupport
 @import github.buriedincode.bookshelf.models.ReadBook
 @import github.buriedincode.bookshelf.models.User
-@import gg.jte.support.ForSupport
+@import java.time.LocalDate
+@import kotlin.collections.Map
 @param resource: User
 @param session: User?
 @param stats: Map<String, Int>
@@ -29,10 +29,10 @@
         <div class="columns">
             <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
                 <figure class="image is-256x256 is-inline-block">
-                    @if(resource.imageUrl == null)
-                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="/static/img/logo.png"/>
+                    @if(resource.image != null)
+                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="${resource.image}"/>
                     @else
-                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="${resource.imageUrl}"/>
+                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="https://via.placeholder.com/512x512"/>
                     @endif
                 </figure>
             </div>
@@ -49,7 +49,7 @@
                         </p>
                     </div>
                     <div class="level-right">
-                        @if(session != null && (session == resource || (session.role >= 2 && session.role > resource.role)))
+                        @if(session != null)
                             <p class="level-item">
                                 <a class="button is-warning" href="/users/${resource.id.value}/update">
                                     <span class="icon">
@@ -58,10 +58,8 @@
                                     <span>Update</span>
                                 </a>
                             </p>
-                        @endif
-                        @if(session != null && (session == resource || (session.role >= 3 && session.role >= resource.role)))
                             <p class="level-item">
-                                <button class="button is-danger" id="delete-user-button" onclick="deleteUser()" type="button">
+                                <button class="button is-danger" id="delete-button" onclick="submitDelete(${resource.id.value})" type="button">
                                     <span class="icon">
                                         <i class="fa-solid fa-trash"></i>
                                     </span>
@@ -92,7 +90,20 @@
                 @template.components.adjustable_columns()
             </div>
             <div class="column">
-                <h3 class="title is-3">Last Read Books</h3>
+                <nav class="level is-mobile">
+                    <div class="level-left level-item has-text-centered">
+                        <div>
+                            <p class="title">Last Read Books</p>
+                            <p class="heading">
+                                @if(resource.readBooks.count() == 1L)
+                                    <span>1 Book</span>
+                                @else
+                                    <span>${resource.readBooks.count()} Books</span>
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                </nav>
                 <div class="columns is-multiline is-centered">
                     @if(resource.readBooks.empty())
                         <div class="column">
@@ -119,18 +130,6 @@
 <script src="/static/js/scripts.js" type="text/javascript"></script>
 <script src="/static/js/adjustable-columns.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
-<script type="text/javascript">
-  @if(session != null)
-    async function deleteUser() {
-      const caller = "delete-user-button";
-
-      addLoading(caller);
-      const response = await submitRequest("/api/users/${resource.id.value}", "DELETE");
-      if (response !== null)
-        window.location = "/users";
-      removeLoading(caller);
-    }
-  @endif
-</script>
+<script src="/static/js/user.js" type="text/javascript"></script>
 </body>
 </html>

@@ -1,10 +1,10 @@
-@import kotlin.collections.List
-@import kotlin.collections.Map
 @import github.buriedincode.bookshelf.models.Publisher
 @import github.buriedincode.bookshelf.models.User
+@import kotlin.collections.List
+@import kotlin.collections.Map
 @param resources: List<Publisher>
 @param session: User?
-@param selected: Map<String, String>
+@param selected: Map<String, Any?>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -27,7 +27,10 @@
         </header>
         <div class="columns">
             <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                @template.components.publisher.filter(title=selected["title"], resetUrl="/publishers")
+                @template.components.publisher.filter(
+                    title=selected["title"] as String?,
+                    resetUrl="/publishers"
+                )
                 @template.components.adjustable_columns()
             </div>
             <div class="column">
@@ -42,7 +45,7 @@
                         </p>
                     </div>
                     <div class="level-right">
-                        @if(session != null && session.role >= 2)
+                        @if(session != null)
                             <p class="level-item">
                                 <a class="button is-success" href="/publishers/create">
                                     <span class="icon">

@@ -1,10 +1,10 @@
-@import java.time.LocalDate
-@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.ReadBook
 @import github.buriedincode.bookshelf.models.User
 @import github.buriedincode.bookshelf.Utils.toString
 @import github.buriedincode.bookshelf.Utils.toHumanReadable
+@import java.time.LocalDate
+@import kotlin.collections.List
 @param resource: User
 @param session: User
 @param readBooks: List<Book>
@@ -30,10 +30,9 @@
             <h1 class="title is-1">Updating ${resource.username}</h1>
         </header>
         <div class="box">
-            <form id="update-user-form" onsubmit="return false;">
-                @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl)
-                @template.components.forms.input_int(label = "Role", max = resource.role.toInt(), name = "role", value = resource.role.toInt())
-                @template.components.forms.input(label = "Username", name = "username", value = resource.username)
+            <form id="update-form" onsubmit="return false;">
+                @template.components.forms.input(label = "Image Url", name = "image", value = resource.image, icon = "fa-solid fa-image")
+                @template.components.forms.input(label = "Username", name = "username", value = resource.username, icon = "fa-solid fa-user")
             </form>
         </div>
         <div class="box">
@@ -126,13 +125,13 @@
             </div>
         </div>
         <div class="buttons is-centered">
-            <button class="button is-success" id="update-user-button" onclick="updateUser()" type="button">
+            <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">
                 <span class="icon">
                     <i class="fa-solid fa-floppy-disk"></i>
                 </span>
                 <span>Update</span>
             </button>
-            <button class="button is-warning" onclick="history.back()">
+            <button class="button is-warning" onclick="window.location = document.referrer;" type="button">
                 <span class="icon">
                     <i class="fa-solid fa-xmark"></i>
                 </span>
@@ -142,9 +141,11 @@
     </div>
 </main>
 @template.components.footer()
+<script src="https://cdn.jsdelivr.net/npm/moment@^2.29" type="text/javascript"></script>
 <script src="/static/js/scripts.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@^2.29" type="text/javascript"></script>
+<script src="/static/js/validate.js" type="text/javascript"></script>
+<script src="/static/js/user.js" type="text/javascript"></script>
 <script type="text/javascript">
   ready(() => {
     const today = moment().format('YYYY-MM-DD');
@@ -156,14 +157,14 @@
   async function addReadBook() {
     const caller = "add-read-book-button";
     const form = document.getElementById("add-read-book-form");
-    const jsonData = Object.fromEntries(new FormData(form));
+    const formData = Object.fromEntries(new FormData(form));
     const body = {
-        bookId: jsonData["book-id"],
-        readDate: jsonData["read-date"],
+        bookId: formData["book-id"],
+        readDate: formData["read-date"],
     };
 
     addLoading(caller);
-    const response = await submitRequest("/api/users/${resource.id.value}/read", "PATCH", body);
+    const response = await submitRequest("/api/users/${resource.id.value}/read", "POST", body);
     if (response !== null) {
       form.reset();
       window.location.reload();
@@ -189,13 +190,13 @@
   async function addWishedBook() {
     const caller = "add-wished-book-button";
     const form = document.getElementById("add-wished-book-form");
-    const jsonData = Object.fromEntries(new FormData(form));
+    const formData = Object.fromEntries(new FormData(form));
     const body = {
-        id: jsonData["book-id"],
+        id: formData["book-id"],
     };
 
     addLoading(caller);
-    const response = await submitRequest("/api/users/${resource.id.value}/wished", "PATCH", body);
+    const response = await submitRequest("/api/users/${resource.id.value}/wished", "POST", body);
     if (response !== null) {
       form.reset();
       window.location.reload();
@@ -218,29 +219,31 @@
     removeLoading(caller);
   }
 
-  async function updateUser() {
-    const caller = "update-user-button";
-    const form = document.getElementById("update-user-form");
-    const jsonData = Object.fromEntries(new FormData(form));
-    const body = {
-      imageUrl: jsonData["image-url"].trim() || null,
-      readBooks: [@for(entry in resource.readBooks)
-        {
-          bookId: ${entry.book.id.value},
-          readDate: "${entry.readDate?.toString("yyyy-MM-dd") ?: "null"}",
-        },
-      @endfor],
-      role: jsonData["role"] || null,
-      username: jsonData["username"].trim(),
-      wishedBookIds: ${resource.wishedBooks.map { it.id.value }.toString()},
-    };
-
+  async function submitUpdate() {
+    const caller = "update-button";
     addLoading(caller);
-    const response = await submitRequest("/api/users/${resource.id.value}", "PUT", body);
-    if (response !== null) {
-      form.reset();
-      window.location = "/users/${resource.id.value}";
+
+    if (await validate()) {
+      const form = document.getElementById("update-form");
+      const formData = Object.fromEntries(new FormData(form));
+      const body = {
+        image: formData["image"].trim() || null,
+        readBooks: [@for(entry in resource.readBooks)
+          {
+            bookId: ${entry.book.id.value},
+            readDate: "${entry.readDate?.toString("yyyy-MM-dd") ?: "null"}",
+          },
+        @endfor],
+        username: formData["username"].trim(),
+        wishedBookIds: ${resource.wishedBooks.map { it.id.value }.toString()},
+      };
+      const response = await submitRequest("/api/users/${resource.id.value}", "PUT", body);
+      if (response !== null) {
+        form.reset();
+        window.location = document.referrer;
+      }
     }
+
     removeLoading(caller);
   }
 </script>

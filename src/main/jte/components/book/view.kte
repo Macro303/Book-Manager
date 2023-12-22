@@ -11,16 +11,16 @@
         <div class="column is-one-third">
             <figure class="image is-2by3">
                 @if(entry.publishDate?.isBefore(LocalDate.now()) == true)
-                    @if(entry.imageUrl == null)
-                        <img alt="${entry.title} cover image" loading="lazy" src="https://via.placeholder.com/750x500"/>
+                    @if(entry.imageFile != null)
+                        <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageFile}"/>
                     @else
-                        <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl}"/>
+                        <img alt="${entry.title} cover image" loading="lazy" src="https://via.placeholder.com/750x500"/>
                     @endif
                 @else
-                    @if(entry.imageUrl == null)
-                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="https://via.placeholder.com/750x500"/>
+                    @if(entry.imageFile != null)
+                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageFile}"/>
                     @else
-                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageUrl}"/>
+                        <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="https://via.placeholder.com/750x500"/>
                     @endif
                 @endif
             </figure>

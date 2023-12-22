@@ -1,5 +1,6 @@
 package github.buriedincode.bookshelf.models
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import github.buriedincode.bookshelf.Utils.toString
 import github.buriedincode.bookshelf.tables.BookGenreTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
@@ -46,6 +47,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
             "format" to format.name,
             "goodreadsId" to goodreadsId,
             "googleBooksId" to googleBooksId,
+            "image" to image,
             "isbn" to isbn,
             "isCollected" to isCollected,
             "libraryThingId" to libraryThingId,
@@ -55,9 +57,6 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
             "summary" to summary,
             "title" to title,
         )
-        output["image"] = image?.let {
-            if (it.startsWith("http")) it else "/uploads/books/$it"
-        }
         if (showAll) {
             output["credits"] = credits.sortedWith(
                 compareBy<Credit> { it.creator }.thenBy { it.role },
@@ -93,4 +92,41 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     }
 
     override fun compareTo(other: Book): Int = comparator.compare(this, other)
+}
+
+data class BookInput(
+    val credits: List<Credit> = ArrayList(),
+    val format: Format = Format.PAPERBACK,
+    val genreIds: List<Long> = ArrayList(),
+    val goodreadsId: String? = null,
+    val googleBooksId: String? = null,
+    val image: String? = null,
+    val isCollected: Boolean = false,
+    val isbn: String? = null,
+    val libraryThingId: String? = null,
+    val openLibraryId: String? = null,
+    val publishDate: LocalDate? = null,
+    val publisherId: Long? = null,
+    val readers: List<Reader> = ArrayList(),
+    val series: List<Series> = ArrayList(),
+    val subtitle: String? = null,
+    val summary: String? = null,
+    val title: String,
+    val wisherIds: List<Long> = ArrayList(),
+) {
+    data class Credit(
+        val creatorId: Long,
+        val roleId: Long,
+    )
+
+    data class Reader(
+        val userId: Long,
+        @JsonDeserialize(using = LocalDateDeserializer::class)
+        val readDate: LocalDate? = LocalDate.now(),
+    )
+
+    data class Series(
+        val seriesId: Long,
+        val number: Int? = null,
+    )
 }

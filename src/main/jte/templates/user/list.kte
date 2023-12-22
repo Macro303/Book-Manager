@@ -1,9 +1,9 @@
+@import github.buriedincode.bookshelf.models.User
 @import kotlin.collections.List
 @import kotlin.collections.Map
-@import github.buriedincode.bookshelf.models.User
 @param resources: List<User>
 @param session: User?
-@param selected: Map<String, String>
+@param selected: Map<String, Any?>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -26,7 +26,10 @@
         </header>
         <div class="columns">
             <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                @template.components.user.filter(username=selected["username"], resetUrl="/users")
+                @template.components.user.filter(
+                    username=selected["username"] as String?,
+                    resetUrl="/users"
+                )
                 @template.components.adjustable_columns()
             </div>
             <div class="column">

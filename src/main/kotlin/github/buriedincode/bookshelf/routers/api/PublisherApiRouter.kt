@@ -2,13 +2,15 @@ package github.buriedincode.bookshelf.routers.api
 
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.IdInput
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.PublisherInput
 import github.buriedincode.bookshelf.tables.PublisherTable
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
-import io.javalin.http.bodyValidator
+import io.javalin.http.NotFoundResponse
+import io.javalin.http.bodyAsClass
 import org.apache.logging.log4j.kotlin.Logging
 
 object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Logging {
@@ -30,45 +32,74 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
         }
     }
 
-    private fun Context.getInput(): PublisherInput =
-        this.bodyValidator<PublisherInput>()
-            .check({ it.title.isNotBlank() }, error = "Title must not be empty")
-            .get()
-
     override fun createEndpoint(ctx: Context) {
         Utils.query {
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<PublisherInput>()
             val exists = Publisher.find {
-                PublisherTable.titleCol eq input.title
+                PublisherTable.titleCol eq body.title
             }.firstOrNull()
             if (exists != null) {
-                throw ConflictResponse(message = "Publisher already exists")
+                throw ConflictResponse("Publisher already exists")
             }
-            val publisher = Publisher.new {
-                image = input.image
-                summary = input.summary
-                title = input.title
+            val resource = Publisher.new {
+                this.image = body.image
+                this.summary = body.summary
+                this.title = body.title
+            }
+            body.bookIds.map {
+                Book.findById(it) ?: throw NotFoundResponse("No Book found.")
+            }.forEach {
+                it.publisher = resource
             }
 
-            ctx.status(HttpStatus.CREATED).json(publisher.toJson(showAll = true))
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
     }
 
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<PublisherInput>()
             val exists = Publisher.find {
-                PublisherTable.titleCol eq input.title
+                PublisherTable.titleCol eq body.title
             }.firstOrNull()
             if (exists != null && exists != resource) {
-                throw ConflictResponse(message = "Publisher already exists")
+                throw ConflictResponse("Publisher already exists")
             }
-            resource.image = input.image
-            resource.summary = input.summary
-            resource.title = input.title
+            resource.image = body.image
+            resource.summary = body.summary
+            resource.title = body.title
+            body.bookIds.map {
+                Book.findById(it) ?: throw NotFoundResponse("No Book found.")
+            }.forEach {
+                it.publisher = resource
+            }
 
             ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun addBook(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            val body = ctx.bodyAsClass<IdInput>()
+            val book = Book.findById(body.id)
+                ?: throw NotFoundResponse("No Book found.")
+            book.publisher = resource
+
+            ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun removeBook(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            val body = ctx.bodyAsClass<IdInput>()
+            val book = Book.findById(body.id)
+                ?: throw NotFoundResponse("No Book found.")
+            book.publisher = null
+
+            ctx.status(HttpStatus.NO_CONTENT)
         }
     }
 }

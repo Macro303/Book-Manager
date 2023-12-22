@@ -16,18 +16,16 @@ class Series(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Series> {
     var summary: String? by SeriesTable.summaryCol
     var title: String by SeriesTable.titleCol
 
-    private val firstBook: BookSeries?
+    val firstBook: BookSeries?
         get() = books.sortedWith(compareBy<BookSeries> { it.number ?: Int.MAX_VALUE }.thenBy { it.book }).firstOrNull()
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
+            "image" to firstBook?.book?.imageFile,
             "summary" to summary,
             "title" to title,
         )
-        output["image"] = firstBook?.book?.image?.let {
-            if (it.startsWith("http")) it else "/uploads/books/$it"
-        }
         if (showAll) {
             output["books"] = books.sortedWith(
                 compareBy<BookSeries> { it.number ?: Int.MAX_VALUE }.thenBy { it.book },
@@ -42,4 +40,15 @@ class Series(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Series> {
     }
 
     override fun compareTo(other: Series): Int = comparator.compare(this, other)
+}
+
+data class SeriesInput(
+    val books: List<Book> = ArrayList(),
+    val summary: String? = null,
+    val title: String,
+) {
+    data class Book(
+        val bookId: Long,
+        val number: Int? = null,
+    )
 }

@@ -9,17 +9,15 @@ import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
-import github.buriedincode.bookshelf.models.UserRole
 import io.javalin.http.Context
-import io.javalin.http.UnauthorizedResponse
 import org.apache.logging.log4j.kotlin.Logging
 
-object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
+object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var resources = entity.all().toList()
+            var resources = User.all().toList()
             val username = ctx.queryParam(key = "username")
-            username?.let {
+            if (username != null) {
                 resources = resources.filter {
                     it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true)
                 }
@@ -27,8 +25,8 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
             ctx.render(
                 filePath = "templates/$name/list.kte",
                 model = mapOf(
+                    "session" to ctx.getSession(),
                     "resources" to resources,
-                    "session" to ctx.attribute<User>("session"),
                     "selected" to mapOf(
                         "username" to username,
                     ),
@@ -42,7 +40,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
             ctx.render(
                 filePath = "templates/$name/create.kte",
                 model = mapOf(
-                    "session" to ctx.attribute<User>("session"),
+                    "session" to ctx.getSession(),
                 ),
             )
         }
@@ -51,17 +49,16 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
     override fun viewEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val readListSize = resource.readBooks.count()
             ctx.render(
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
+                    "session" to ctx.getSession(),
                     "resource" to resource,
-                    "session" to ctx.attribute<User>("session"),
                     "stats" to mapOf(
                         "wishlist" to Book.all().count { !it.isCollected && resource in it.wishers },
                         "shared" to Book.all().count { !it.isCollected && it.wishers.empty() },
-                        "unread" to Book.all().count { it.isCollected } - readListSize,
-                        "read" to readListSize,
+                        "unread" to Book.all().count { it.isCollected } - resource.readBooks.count(),
+                        "read" to resource.readBooks.count(),
                     ),
                 ),
             )
@@ -70,9 +67,11 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
 
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
-            val session = ctx.attribute<User>("session")!!
+            val session = ctx.getSession()
             val resource = ctx.getResource()
-            if (session == resource || (session.role >= UserRole.MODERATOR && session.role > resource.role)) {
+            if (session == null) {
+                ctx.redirect("/$plural/${resource.id.value}")
+            } else {
                 val readBooks = Book.all().toList()
                     .filter { it.isCollected }
                     .filterNot { it in resource.readBooks.map { it.book } }
@@ -82,14 +81,12 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
-                        "resource" to resource,
                         "session" to session,
+                        "resource" to resource,
                         "readBooks" to readBooks,
                         "wishedBooks" to wishedBooks,
                     ),
                 )
-            } else {
-                throw UnauthorizedResponse()
             }
         }
     }
@@ -135,8 +132,8 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User), Logging {
             ctx.render(
                 filePath = "templates/$name/wishlist.kte",
                 model = mapOf(
+                    "session" to ctx.getSession(),
                     "resource" to resource,
-                    "session" to ctx.attribute<User>("session"),
                     "books" to books,
                     "selected" to mapOf(
                         "creator" to creator,

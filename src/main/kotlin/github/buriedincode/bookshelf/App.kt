@@ -1,11 +1,8 @@
 package github.buriedincode.bookshelf
 
-import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
-import github.buriedincode.bookshelf.App.authenticateUser
 import github.buriedincode.bookshelf.models.User
-import github.buriedincode.bookshelf.models.UserRole
 import github.buriedincode.bookshelf.routers.api.BookApiRouter
 import github.buriedincode.bookshelf.routers.api.CreatorApiRouter
 import github.buriedincode.bookshelf.routers.api.GenreApiRouter
@@ -20,61 +17,34 @@ import github.buriedincode.bookshelf.routers.html.PublisherHtmlRouter
 import github.buriedincode.bookshelf.routers.html.RoleHtmlRouter
 import github.buriedincode.bookshelf.routers.html.SeriesHtmlRouter
 import github.buriedincode.bookshelf.routers.html.UserHtmlRouter
-import github.buriedincode.bookshelf.tables.UserTable
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.delete
 import io.javalin.apibuilder.ApiBuilder.get
-import io.javalin.apibuilder.ApiBuilder.patch
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
-import io.javalin.http.BadRequestResponse
-import io.javalin.http.Context
-import io.javalin.http.UnauthorizedResponse
+import io.javalin.http.ContentType
 import io.javalin.rendering.template.JavalinJte
-import io.javalin.validation.ValidationException
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.kotlin.Logging
 import java.nio.file.Path
 import kotlin.io.path.div
+import gg.jte.ContentType as JteType
 
 object App : Logging {
     private fun createTemplateEngine(environment: Settings.Environment): TemplateEngine {
         return if (environment == Settings.Environment.DEV) {
             val codeResolver = DirectoryCodeResolver(Path.of("src") / "main" / "jte")
-            TemplateEngine.create(codeResolver, ContentType.Html)
+            TemplateEngine.create(codeResolver, JteType.Html)
         } else {
-            TemplateEngine.createPrecompiled(Path.of("jte-classes"), ContentType.Html)
-        }
-    }
-
-    private fun Context.authenticateUser(): User? {
-        val credentials = basicAuthCredentials()
-        if (credentials != null) {
-            return Utils.query {
-                val user = User.find {
-                    (UserTable.usernameCol eq credentials.username)
-                }.firstOrNull()
-                if (user != null) {
-                    this.attribute("session", user)
-                }
-                return@query user
-            }
-        }
-        return null
-    }
-
-    private fun Context.redirectUnauthorized() {
-        val resourceType = this.path().split("/")[1]
-        when (val endPath = this.path().split("/")[2]) {
-            "create" -> this.redirect(resourceType)
-            else -> this.redirect("$resourceType/$endPath")
+            TemplateEngine.createPrecompiled(Path.of("jte-classes"), JteType.Html)
         }
     }
 
     private fun createJavalinApp(): Javalin {
         return Javalin.create {
             it.http.prefer405over404 = true
+            it.http.defaultContentType = ContentType.JSON
             it.requestLogger.http { ctx, ms ->
                 val level = when {
                     ctx.statusCode() in (100..<200) -> Level.WARN
@@ -92,17 +62,6 @@ object App : Logging {
                 it.hostedPath = "/static"
                 it.directory = "/static"
             }
-            it.accessManager { handler, ctx, minRequiredRoles ->
-                val user = ctx.authenticateUser()
-                val userRoles = user?.let { setOf(it.role) } ?: emptySet()
-                if (userRoles.intersect(minRequiredRoles).isNotEmpty()) {
-                    handler.handle(ctx)
-                } else if (ctx.path().startsWith("/api") || ctx.path().startsWith("/uploads")) {
-                    throw UnauthorizedResponse()
-                } else {
-                    ctx.redirectUnauthorized()
-                }
-            }
         }
     }
 
@@ -114,176 +73,195 @@ object App : Logging {
         val app = createJavalinApp()
         app.routes {
             path("/") {
-                get({ ctx ->
+                get { ctx ->
                     Utils.query {
                         ctx.render(
                             filePath = "templates/index.kte",
                             model = mapOf(
-                                "session" to ctx.attribute<User>("session"),
+                                "session" to ctx.cookie("bookshelf_session-id")?.toLongOrNull()?.let {
+                                    User.findById(it)
+                                },
+                                "users" to User.all().toList(),
                             ),
                         )
                     }
-                }, UserRole.GUEST)
+                }
                 path("books") {
-                    get(BookHtmlRouter::listEndpoint, UserRole.GUEST)
-                    get("create", BookHtmlRouter::createEndpoint, UserRole.MODERATOR)
+                    get(BookHtmlRouter::listEndpoint)
+                    get("create", BookHtmlRouter::createEndpoint)
                     path("{book-id}") {
-                        get(BookHtmlRouter::viewEndpoint, UserRole.GUEST)
-                        get("update", BookHtmlRouter::updateEndpoint, UserRole.MODERATOR)
+                        get(BookHtmlRouter::viewEndpoint)
+                        get("update", BookHtmlRouter::updateEndpoint)
                     }
                 }
                 path("creators") {
-                    get(CreatorHtmlRouter::listEndpoint, UserRole.GUEST)
-                    get("create", CreatorHtmlRouter::createEndpoint, UserRole.MODERATOR)
+                    get(CreatorHtmlRouter::listEndpoint)
+                    get("create", CreatorHtmlRouter::createEndpoint)
                     path("{creator-id}") {
-                        get(CreatorHtmlRouter::viewEndpoint, UserRole.GUEST)
-                        get("update", CreatorHtmlRouter::updateEndpoint, UserRole.MODERATOR)
+                        get(CreatorHtmlRouter::viewEndpoint)
+                        get("update", CreatorHtmlRouter::updateEndpoint)
                     }
                 }
                 path("genres") {
-                    get(GenreHtmlRouter::listEndpoint, UserRole.GUEST)
-                    get("create", GenreHtmlRouter::createEndpoint, UserRole.MODERATOR)
+                    get(GenreHtmlRouter::listEndpoint)
+                    get("create", GenreHtmlRouter::createEndpoint)
                     path("{genre-id}") {
-                        get(GenreHtmlRouter::viewEndpoint, UserRole.GUEST)
-                        get("update", GenreHtmlRouter::updateEndpoint, UserRole.MODERATOR)
+                        get(GenreHtmlRouter::viewEndpoint)
+                        get("update", GenreHtmlRouter::updateEndpoint)
                     }
                 }
                 path("publishers") {
-                    get(PublisherHtmlRouter::listEndpoint, UserRole.GUEST)
-                    get("create", PublisherHtmlRouter::createEndpoint, UserRole.MODERATOR)
+                    get(PublisherHtmlRouter::listEndpoint)
+                    get("create", PublisherHtmlRouter::createEndpoint)
                     path("{publisher-id}") {
-                        get(PublisherHtmlRouter::viewEndpoint, UserRole.GUEST)
-                        get("update", PublisherHtmlRouter::updateEndpoint, UserRole.MODERATOR)
+                        get(PublisherHtmlRouter::viewEndpoint)
+                        get("update", PublisherHtmlRouter::updateEndpoint)
                     }
                 }
                 path("roles") {
-                    get(RoleHtmlRouter::listEndpoint, UserRole.GUEST)
-                    get("create", RoleHtmlRouter::createEndpoint, UserRole.MODERATOR)
+                    get(RoleHtmlRouter::listEndpoint)
+                    get("create", RoleHtmlRouter::createEndpoint)
                     path("{role-id}") {
-                        get(RoleHtmlRouter::viewEndpoint, UserRole.GUEST)
-                        get("update", RoleHtmlRouter::updateEndpoint, UserRole.MODERATOR)
+                        get(RoleHtmlRouter::viewEndpoint)
+                        get("update", RoleHtmlRouter::updateEndpoint)
                     }
                 }
                 path("series") {
-                    get(SeriesHtmlRouter::listEndpoint, UserRole.GUEST)
-                    get("create", SeriesHtmlRouter::createEndpoint, UserRole.MODERATOR)
+                    get(SeriesHtmlRouter::listEndpoint)
+                    get("create", SeriesHtmlRouter::createEndpoint)
                     path("{series-id}") {
-                        get(SeriesHtmlRouter::viewEndpoint, UserRole.GUEST)
-                        get("update", SeriesHtmlRouter::updateEndpoint, UserRole.MODERATOR)
+                        get(SeriesHtmlRouter::viewEndpoint)
+                        get("update", SeriesHtmlRouter::updateEndpoint)
                     }
                 }
                 path("users") {
-                    get(UserHtmlRouter::listEndpoint, UserRole.GUEST)
-                    get("create", UserHtmlRouter::createEndpoint, UserRole.GUEST)
+                    get(UserHtmlRouter::listEndpoint)
+                    get("create", UserHtmlRouter::createEndpoint)
                     path("{user-id}") {
-                        get(UserHtmlRouter::viewEndpoint, UserRole.GUEST)
-                        get("update", UserHtmlRouter::updateEndpoint, UserRole.USER)
-                        get("wishlist", UserHtmlRouter::wishlistEndpoint, UserRole.GUEST)
+                        get(UserHtmlRouter::viewEndpoint)
+                        get("update", UserHtmlRouter::updateEndpoint)
+                        get("wishlist", UserHtmlRouter::wishlistEndpoint)
                     }
                 }
             }
             path("api") {
                 path("books") {
-                    get(BookApiRouter::listEndpoint, UserRole.GUEST)
-                    post(BookApiRouter::createEndpoint, UserRole.MODERATOR)
+                    get(BookApiRouter::listEndpoint)
+                    post(BookApiRouter::createEndpoint)
                     path("{book-id}") {
-                        get(BookApiRouter::getEndpoint, UserRole.GUEST)
-                        put(BookApiRouter::updateEndpoint, UserRole.MODERATOR)
-                        delete(BookApiRouter::deleteEndpoint, UserRole.ADMIN)
-                        put("pull", BookApiRouter::pullBook, UserRole.MODERATOR)
-                        path("wish") {
-                            patch(BookApiRouter::addWisher, UserRole.USER)
-                            delete(BookApiRouter::removeWisher, UserRole.USER)
-                        }
+                        get(BookApiRouter::getEndpoint)
+                        put(BookApiRouter::updateEndpoint)
+                        delete(BookApiRouter::deleteEndpoint)
+                        put("pull", BookApiRouter::pullBook)
                         path("collect") {
-                            patch(BookApiRouter::collectBook, UserRole.USER)
-                            delete(BookApiRouter::discardBook, UserRole.USER)
+                            post(BookApiRouter::collectBook)
+                            delete(BookApiRouter::discardBook)
+                        }
+                        path("wish") {
+                            post(BookApiRouter::addWisher)
+                            delete(BookApiRouter::removeWisher)
                         }
                         path("read") {
-                            patch(BookApiRouter::addReader, UserRole.USER)
-                            delete(BookApiRouter::removeReader, UserRole.USER)
+                            post(BookApiRouter::addReader)
+                            delete(BookApiRouter::removeReader)
                         }
                         path("credits") {
-                            patch(BookApiRouter::addCredit, UserRole.MODERATOR)
-                            delete(BookApiRouter::removeCredit, UserRole.MODERATOR)
+                            post(BookApiRouter::addCredit)
+                            delete(BookApiRouter::removeCredit)
                         }
                         path("genres") {
-                            patch(BookApiRouter::addGenre, UserRole.MODERATOR)
-                            delete(BookApiRouter::removeGenre, UserRole.MODERATOR)
+                            post(BookApiRouter::addGenre)
+                            delete(BookApiRouter::removeGenre)
                         }
                         path("series") {
-                            patch(BookApiRouter::addSeries, UserRole.MODERATOR)
-                            delete(BookApiRouter::removeSeries, UserRole.MODERATOR)
+                            post(BookApiRouter::addSeries)
+                            delete(BookApiRouter::removeSeries)
                         }
                     }
                 }
                 path("creators") {
-                    get(CreatorApiRouter::listEndpoint, UserRole.GUEST)
-                    post(CreatorApiRouter::createEndpoint, UserRole.MODERATOR)
+                    get(CreatorApiRouter::listEndpoint)
+                    post(CreatorApiRouter::createEndpoint)
                     path("{creator-id}") {
-                        get(CreatorApiRouter::getEndpoint, UserRole.GUEST)
-                        put(CreatorApiRouter::updateEndpoint, UserRole.MODERATOR)
-                        delete(CreatorApiRouter::deleteEndpoint, UserRole.ADMIN)
+                        get(CreatorApiRouter::getEndpoint)
+                        put(CreatorApiRouter::updateEndpoint)
+                        delete(CreatorApiRouter::deleteEndpoint)
+                        path("credits") {
+                            post(CreatorApiRouter::addCredit)
+                            delete(CreatorApiRouter::removeCredit)
+                        }
                     }
                 }
                 path("genres") {
-                    get(GenreApiRouter::listEndpoint, UserRole.GUEST)
-                    post(GenreApiRouter::createEndpoint, UserRole.MODERATOR)
+                    get(GenreApiRouter::listEndpoint)
+                    post(GenreApiRouter::createEndpoint)
                     path("{genre-id}") {
-                        get(GenreApiRouter::getEndpoint, UserRole.GUEST)
-                        put(GenreApiRouter::updateEndpoint, UserRole.MODERATOR)
-                        delete(GenreApiRouter::deleteEndpoint, UserRole.ADMIN)
+                        get(GenreApiRouter::getEndpoint)
+                        put(GenreApiRouter::updateEndpoint)
+                        delete(GenreApiRouter::deleteEndpoint)
+                        path("books") {
+                            post(GenreApiRouter::addBook)
+                            delete(GenreApiRouter::removeBook)
+                        }
                     }
                 }
                 path("publishers") {
-                    get(PublisherApiRouter::listEndpoint, UserRole.GUEST)
-                    post(PublisherApiRouter::createEndpoint, UserRole.MODERATOR)
+                    get(PublisherApiRouter::listEndpoint)
+                    post(PublisherApiRouter::createEndpoint)
                     path("{publisher-id}") {
-                        get(PublisherApiRouter::getEndpoint, UserRole.GUEST)
-                        put(PublisherApiRouter::updateEndpoint, UserRole.MODERATOR)
-                        delete(PublisherApiRouter::deleteEndpoint, UserRole.ADMIN)
+                        get(PublisherApiRouter::getEndpoint)
+                        put(PublisherApiRouter::updateEndpoint)
+                        delete(PublisherApiRouter::deleteEndpoint)
+                        path("books") {
+                            post(PublisherApiRouter::addBook)
+                            delete(PublisherApiRouter::removeBook)
+                        }
                     }
                 }
                 path("roles") {
-                    get(RoleApiRouter::listEndpoint, UserRole.GUEST)
-                    post(RoleApiRouter::createEndpoint, UserRole.MODERATOR)
+                    get(RoleApiRouter::listEndpoint)
+                    post(RoleApiRouter::createEndpoint)
                     path("{role-id}") {
-                        get(RoleApiRouter::getEndpoint, UserRole.GUEST)
-                        put(RoleApiRouter::updateEndpoint, UserRole.MODERATOR)
-                        delete(RoleApiRouter::deleteEndpoint, UserRole.ADMIN)
+                        get(RoleApiRouter::getEndpoint)
+                        put(RoleApiRouter::updateEndpoint)
+                        delete(RoleApiRouter::deleteEndpoint)
+                        path("credits") {
+                            post(RoleApiRouter::addCredit)
+                            delete(RoleApiRouter::removeCredit)
+                        }
                     }
                 }
                 path("series") {
-                    get(SeriesApiRouter::listEndpoint, UserRole.GUEST)
-                    post(SeriesApiRouter::createEndpoint, UserRole.MODERATOR)
+                    get(SeriesApiRouter::listEndpoint)
+                    post(SeriesApiRouter::createEndpoint)
                     path("{series-id}") {
-                        get(SeriesApiRouter::getEndpoint, UserRole.GUEST)
-                        put(SeriesApiRouter::updateEndpoint, UserRole.MODERATOR)
-                        delete(SeriesApiRouter::deleteEndpoint, UserRole.ADMIN)
+                        get(SeriesApiRouter::getEndpoint)
+                        put(SeriesApiRouter::updateEndpoint)
+                        delete(SeriesApiRouter::deleteEndpoint)
+                        path("books") {
+                            post(SeriesApiRouter::addBook)
+                            delete(SeriesApiRouter::removeBook)
+                        }
                     }
                 }
                 path("users") {
-                    get(UserApiRouter::listEndpoint, UserRole.GUEST)
-                    post(UserApiRouter::createEndpoint, UserRole.GUEST)
+                    get(UserApiRouter::listEndpoint)
+                    post(UserApiRouter::createEndpoint)
                     path("{user-id}") {
-                        get(UserApiRouter::getEndpoint, UserRole.GUEST)
-                        put(UserApiRouter::updateEndpoint, UserRole.USER)
-                        delete(UserApiRouter::deleteEndpoint, UserRole.USER)
+                        get(UserApiRouter::getEndpoint)
+                        put(UserApiRouter::updateEndpoint)
+                        delete(UserApiRouter::deleteEndpoint)
+                        path("read") {
+                            post(UserApiRouter::addReadBook)
+                            delete(UserApiRouter::removeReadBook)
+                        }
+                        path("wished") {
+                            post(UserApiRouter::addWishedBook)
+                            delete(UserApiRouter::removeWishedBook)
+                        }
                     }
                 }
             }
-        }
-        app.exception(ValidationException::class.java) { e, _ ->
-            val details = HashMap<String, List<String>>()
-            e.errors.forEach { (key, value) ->
-                var entry = details.getOrDefault(key, ArrayList())
-                entry = entry.plus(value.map { it.message })
-                details[key] = entry
-            }
-            throw BadRequestResponse(
-                message = "Validation Error",
-                details = details.mapValues { it.value.joinToString(", ") },
-            )
         }
         app.start(settings.website.host, settings.website.port)
     }

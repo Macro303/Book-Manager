@@ -21,19 +21,19 @@
             <h1 class="title is-1">Creating a Genre</h1>
         </header>
         <div class="box">
-            <form id="create-genre-form" onsubmit="return false;">
+            <form id="create-form" onsubmit="return false;">
                 @template.components.forms.textarea(label = "Summary", name = "summary")
-                @template.components.forms.input(label = "Title", name = "title")
+                @template.components.forms.input(label = "Title", name = "title", icon = "fa-solid fa-heading")
             </form>
         </div>
         <div class="buttons is-centered">
-            <button class="button is-success" id="create-genre-button" onclick="createGenre()" type="button">
+            <button class="button is-success" id="create-button" onclick="validate()" type="submit">
                 <span class="icon">
                     <i class="fa-solid fa-floppy-disk"></i>
                 </span>
                 <span>Create</span>
             </button>
-            <button class="button is-warning" onclick="history.back()">
+            <button class="button is-warning" onclick="history.back()" type="button">
                 <span class="icon">
                     <i class="fa-solid fa-xmark"></i>
                 </span>

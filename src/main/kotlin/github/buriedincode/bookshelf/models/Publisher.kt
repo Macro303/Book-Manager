@@ -21,12 +21,10 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
+            "image" to image,
             "summary" to summary,
             "title" to title,
         )
-        output["image"] = image?.let {
-            if (it.startsWith("http")) it else "/uploads/publishers/$it"
-        }
         if (showAll) {
             output["books"] = books.sorted().map { it.toJson() }
         }
@@ -35,3 +33,10 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
 
     override fun compareTo(other: Publisher): Int = comparator.compare(this, other)
 }
+
+data class PublisherInput(
+    val bookIds: List<Long> = emptyList(),
+    val image: String? = null,
+    val summary: String? = null,
+    val title: String,
+)

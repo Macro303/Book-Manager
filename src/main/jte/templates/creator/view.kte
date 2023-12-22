@@ -4,6 +4,7 @@
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.models.UserRole
 @param resource: Creator
 @param session: User?
 @param credits: Map<Role, List<Book>>
@@ -41,7 +42,7 @@
                 <nav class="level is-mobile">
                     <div class="level-left"></div>
                     <div class="level-right">
-                        @if(session != null && session.role >= 2)
+                        @if(session != null && session.role >= UserRole.MODERATOR)
                             <p class="level-item">
                                 <a class="button is-warning" href="/creators/${resource.id.value}/update">
                                     <span class="icon">
@@ -51,7 +52,7 @@
                                 </a>
                             </p>
                         @endif
-                        @if(session != null && session.role >= 3)
+                        @if(session != null && session.role >= UserRole.ADMIN)
                             <p class="level-item">
                                 <button class="button is-danger" id="delete-creator-button" onclick="deleteCreator()" type="button">
                                     <span class="icon">
@@ -112,7 +113,7 @@
 <script src="/static/js/adjustable-columns.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 <script type="text/javascript">
-  @if(session != null && session.role >= 3)
+  @if(session != null && session.role >= UserRole.ADMIN)
     async function deleteCreator() {
       const caller = "delete-creator-button";
 

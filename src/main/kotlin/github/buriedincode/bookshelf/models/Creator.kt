@@ -20,12 +20,10 @@ class Creator(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Creator> {
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
+            "image" to image,
             "name" to name,
             "summary" to summary,
         )
-        output["image"] = image?.let {
-            if (it.startsWith("http")) it else "/uploads/creators/$it"
-        }
         if (showAll) {
             output["credits"] = credits.sortedWith(
                 compareBy<Credit> { it.book }.thenBy { it.role },
@@ -40,4 +38,16 @@ class Creator(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Creator> {
     }
 
     override fun compareTo(other: Creator): Int = comparator.compare(this, other)
+}
+
+data class CreatorInput(
+    val credits: List<Credit> = ArrayList(),
+    val image: String? = null,
+    val name: String,
+    val summary: String? = null,
+) {
+    data class Credit(
+        val bookId: Long,
+        val roleId: Long,
+    )
 }

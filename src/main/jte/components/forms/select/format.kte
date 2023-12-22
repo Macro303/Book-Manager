@@ -7,22 +7,19 @@
 @param selected: Format? = null
 
 <div class="field">
-    <label class="label has-text-info">${label}</label>
-    <div class="control is-expanded">
+    <label class="label has-text-info" for="${name}">${label}</label>
+    <div class="control is-expanded has-icons-left">
         <div class="select is-fullwidth">
-            <select name="${name}">
-                @if(selected == null)
-                    <option disabled selected value="">Select Format</option>
-                @else
-                    <option selected value="${selected.name}">${selected.titlecase()}</option>
-                @endif
+            <select class="input" id="${name}" name="${name}">
+                <option disabled selected="${selected == null}" value="">Select Format</option>
                 @for(entry in options)
-                    @if(entry == selected)
-                        !{continue}
-                    @endif
-                    <option value="${entry.name}">${entry.titlecase()}</option>
+                    <option selected="${selected == null}" value="${entry.name}">${entry.titlecase()}</option>
                 @endfor
             </select>
         </div>
+        <div class="icon is-left">
+            <i class="fa-solid fa-scroll"></i>
+        </div>
     </div>
+    <p class="help is-danger" id="${name}-error"></p>
 </div>

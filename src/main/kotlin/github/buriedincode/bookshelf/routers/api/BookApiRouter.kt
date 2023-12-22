@@ -10,7 +10,7 @@ import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Format
 import github.buriedincode.bookshelf.models.Genre
-import github.buriedincode.bookshelf.models.IdValue
+import github.buriedincode.bookshelf.models.IdInput
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.ReadBook
 import github.buriedincode.bookshelf.models.Role
@@ -33,19 +33,16 @@ import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
 import io.javalin.http.NotImplementedResponse
-import io.javalin.http.bodyValidator
+import io.javalin.http.bodyAsClass
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
-import github.buriedincode.bookshelf.models.BookInput.Credit as CreditInput
-import github.buriedincode.bookshelf.models.BookInput.Reader as ReaderInput
-import github.buriedincode.bookshelf.models.BookInput.Series as SeriesInput
 
 object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var resources = entity.all().toList()
+            var resources = Book.all().toList()
             ctx.queryParam("creator-id")?.toLongOrNull()?.let {
                 Creator.findById(it)?.let { creator ->
                     resources = resources.filter { creator in it.credits.map { it.creator } }
@@ -132,57 +129,47 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    private fun Context.getInput(): BookInput =
-        this.bodyValidator<BookInput>()
-            .check({ it.title.isNotBlank() }, error = "Title must not be empty")
-            .get()
-
     override fun createEndpoint(ctx: Context) {
         Utils.query {
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<BookInput>()
             val exists = Book.find {
-                (BookTable.titleCol eq input.title) and (BookTable.subtitleCol eq input.subtitle)
+                (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
             }.firstOrNull()
             if (exists != null) {
-                throw ConflictResponse(message = "Book already exists")
+                throw ConflictResponse("Book already exists")
             }
-            val book = Book.new {
-                format = input.format
+            val resource = Book.new {
+                format = body.format
                 genres = SizedCollection(
-                    input.genreIds.map {
-                        Genre.findById(id = it)
-                            ?: throw NotFoundResponse(message = "Unable to find Genre: `$it`")
+                    body.genreIds.map {
+                        Genre.findById(it) ?: throw NotFoundResponse("Genre not found.")
                     },
                 )
-                goodreadsId = input.goodreadsId
-                googleBooksId = input.googleBooksId
-                image = input.image
-                isCollected = input.isCollected
-                isbn = input.isbn
-                libraryThingId = input.libraryThingId
-                openLibraryId = input.openLibraryId
-                publishDate = input.publishDate
-                publisher = input.publisherId?.let {
-                    Publisher.findById(id = it)
-                        ?: throw NotFoundResponse(message = "Unable to find Publisher: `$it`")
+                goodreadsId = body.goodreadsId
+                googleBooksId = body.googleBooksId
+                image = body.image
+                isCollected = body.isCollected
+                isbn = body.isbn
+                libraryThingId = body.libraryThingId
+                openLibraryId = body.openLibraryId
+                publishDate = body.publishDate
+                publisher = body.publisherId?.let {
+                    Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
                 }
-                subtitle = input.subtitle
-                summary = input.summary
-                title = input.title
+                subtitle = body.subtitle
+                summary = body.summary
+                title = body.title
                 wishers = SizedCollection(
-                    input.wisherIds.map {
-                        User.findById(id = it)
-                            ?: throw NotFoundResponse(message = "Unable to find User: `$it`")
+                    body.wisherIds.map {
+                        User.findById(it) ?: throw NotFoundResponse("User not found.")
                     },
                 )
             }
-            input.credits.forEach {
-                val creator = Creator.findById(id = it.creatorId)
-                    ?: throw NotFoundResponse(message = "Unable to find Creator: `${it.creatorId}`")
-                val role = Role.findById(id = it.roleId)
-                    ?: throw NotFoundResponse(message = "Unable to find Role: `${it.roleId}`")
+            body.credits.forEach {
+                val creator = Creator.findById(it.creatorId) ?: throw NotFoundResponse("Creator not found.")
+                val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
                 Credit.find {
-                    (CreditTable.bookCol eq book.id) and
+                    (CreditTable.bookCol eq resource.id) and
                         (CreditTable.creatorCol eq creator.id) and
                         (CreditTable.roleCol eq role.id)
                 }.firstOrNull() ?: Credit.new {
@@ -191,22 +178,20 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                     this.role = role
                 }
             }
-            input.readers.forEach {
-                val user = User.findById(id = it.userId)
-                    ?: throw NotFoundResponse(message = "Unable to find User: `${it.userId}`")
+            body.readers.forEach {
+                val user = User.findById(it.userId) ?: throw NotFoundResponse("User not found.")
                 val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
+                    (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
                 }.firstOrNull() ?: ReadBook.new {
                     this.book = book
                     this.user = user
                 }
                 readBook.readDate = it.readDate
             }
-            input.series.forEach {
-                val series = Series.findById(id = it.seriesId)
-                    ?: throw NotFoundResponse(message = "Unable to find Series: `${it.seriesId}`")
+            body.series.forEach {
+                val series = Series.findById(it.seriesId) ?: throw NotFoundResponse("Series not found.")
                 val bookSeries = BookSeries.find {
-                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id)
+                    (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
                 }.firstOrNull() ?: BookSeries.new {
                     this.book = book
                     this.series = series
@@ -214,53 +199,48 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 bookSeries.number = if (it.number == 0) null else it.number
             }
 
-            ctx.status(HttpStatus.CREATED).json(book.toJson(showAll = true))
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
     }
 
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<BookInput>()
             val exists = Book.find {
-                (BookTable.titleCol eq input.title) and (BookTable.subtitleCol eq input.subtitle)
+                (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
             }.firstOrNull()
             if (exists != null && exists != resource) {
-                throw ConflictResponse(message = "Book already exists")
+                throw ConflictResponse("Book already exists")
             }
-            resource.format = input.format
+            resource.format = body.format
             resource.genres = SizedCollection(
-                input.genreIds.map {
-                    Genre.findById(id = it)
-                        ?: throw NotFoundResponse(message = "Unable to find Genre: `$it`")
+                body.genreIds.map {
+                    Genre.findById(it) ?: throw NotFoundResponse("Genre not found.")
                 },
             )
-            resource.goodreadsId = input.goodreadsId
-            resource.googleBooksId = input.googleBooksId
-            resource.image = input.image
-            resource.isCollected = input.isCollected
-            resource.isbn = input.isbn
-            resource.libraryThingId = input.libraryThingId
-            resource.openLibraryId = input.openLibraryId
-            resource.publishDate = input.publishDate
-            resource.publisher = input.publisherId?.let {
-                Publisher.findById(id = it)
-                    ?: throw NotFoundResponse(message = "Unable to find Publisher: `$it`")
+            resource.goodreadsId = body.goodreadsId
+            resource.googleBooksId = body.googleBooksId
+            resource.image = body.image
+            resource.isCollected = body.isCollected
+            resource.isbn = body.isbn
+            resource.libraryThingId = body.libraryThingId
+            resource.openLibraryId = body.openLibraryId
+            resource.publishDate = body.publishDate
+            resource.publisher = body.publisherId?.let {
+                Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
             }
-            resource.subtitle = input.subtitle
-            resource.summary = input.summary
-            resource.title = input.title
+            resource.subtitle = body.subtitle
+            resource.summary = body.summary
+            resource.title = body.title
             resource.wishers = SizedCollection(
-                input.wisherIds.map {
-                    User.findById(id = it)
-                        ?: throw NotFoundResponse(message = "Unable to find User: `$it`")
+                body.wisherIds.map {
+                    User.findById(it) ?: throw NotFoundResponse("User not found.")
                 },
             )
-            input.credits.forEach {
-                val creator = Creator.findById(id = it.creatorId)
-                    ?: throw NotFoundResponse(message = "Unable to find Creator: `${it.creatorId}`")
-                val role = Role.findById(id = it.roleId)
-                    ?: throw NotFoundResponse(message = "Unable to find Role: `${it.roleId}`")
+            body.credits.forEach {
+                val creator = Creator.findById(it.creatorId) ?: throw NotFoundResponse("Creator not found.")
+                val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
                 Credit.find {
                     (CreditTable.bookCol eq resource.id) and
                         (CreditTable.creatorCol eq creator.id) and
@@ -271,9 +251,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                     this.role = role
                 }
             }
-            input.readers.forEach {
-                val user = User.findById(id = it.userId)
-                    ?: throw NotFoundResponse(message = "Unable to find User: `${it.userId}`")
+            body.readers.forEach {
+                val user = User.findById(it.userId) ?: throw NotFoundResponse("User not found.")
                 val readBook = ReadBook.find {
                     (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
                 }.firstOrNull() ?: ReadBook.new {
@@ -282,9 +261,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 }
                 readBook.readDate = it.readDate
             }
-            input.series.forEach {
-                val series = Series.findById(id = it.seriesId)
-                    ?: throw NotFoundResponse(message = "Unable to find Series: `${it.seriesId}`")
+            body.series.forEach {
+                val series = Series.findById(it.seriesId) ?: throw NotFoundResponse("Series not found.")
                 val bookSeries = BookSeries.find {
                     (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
                 }.firstOrNull() ?: BookSeries.new {
@@ -363,7 +341,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             )
             resource.goodreadsId = edition.identifiers.goodreads.firstOrNull()
             resource.googleBooksId = edition.identifiers.google.firstOrNull()
-            resource.image = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
+//            resource.imageFile = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
             resource.isbn = edition.isbn
             resource.libraryThingId = edition.identifiers.librarything.firstOrNull()
             resource.openLibraryId = edition.editionId
@@ -387,7 +365,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                     name = it.name
                 }
                 it.photos.firstOrNull()?.let {
-                    creator.image = "https://covers.openlibrary.org/a/id/$it-L.jpg"
+//                    creator.imageFile = "https://covers.openlibrary.org/a/id/$it-L.jpg"
                 }
                 creator
             }.forEach {
@@ -452,36 +430,25 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    private fun Context.getReadInput(): ReaderInput =
-        this.bodyValidator<ReaderInput>()
-            .check({ it.userId > 0 }, error = "UserId must be greater than 0")
-            .get()
-
     fun addReader(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             if (!resource.isCollected) {
                 throw BadRequestResponse(message = "Book hasn't been collected to be able to read")
             }
-            val input = ctx.getReadInput()
-            val user = User.findById(id = input.userId)
-                ?: throw NotFoundResponse(message = "Unable to find User: `${input.userId}`")
+            val body = ctx.bodyAsClass<BookInput.Reader>()
+            val user = User.findById(body.userId) ?: throw NotFoundResponse("User not found.")
             val readBook = ReadBook.find {
                 (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
             }.firstOrNull() ?: ReadBook.new {
                 this.book = resource
                 this.user = user
             }
-            readBook.readDate = input.readDate
+            readBook.readDate = body.readDate
 
             ctx.json(resource.toJson(showAll = true))
         }
     }
-
-    private fun Context.getIdValue(): IdValue =
-        this.bodyValidator<IdValue>()
-            .check({ it.id > 0 }, error = "Id must be greater than 0")
-            .get()
 
     fun removeReader(ctx: Context) {
         Utils.query {
@@ -489,9 +456,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             if (!resource.isCollected) {
                 throw BadRequestResponse(message = "Book hasn't been collected to be able to unread")
             }
-            val input = ctx.getIdValue()
-            val user = User.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find User: `${input.id}`")
+            val body = ctx.bodyAsClass<IdInput>()
+            val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
             val readBook = ReadBook.find {
                 (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
             }.firstOrNull() ?: throw BadRequestResponse(message = "Book has not been read by this User.")
@@ -507,9 +473,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             if (resource.isCollected) {
                 throw BadRequestResponse(message = "Book has already been collected")
             }
-            val input = ctx.getIdValue()
-            val user = User.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find User: `${input.id}`")
+            val body = ctx.bodyAsClass<IdInput>()
+            val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
             val temp = resource.wishers.toMutableSet()
             temp.add(user)
             resource.wishers = SizedCollection(temp)
@@ -524,9 +489,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             if (resource.isCollected) {
                 throw BadRequestResponse(message = "Book has already been collected")
             }
-            val input = ctx.getIdValue()
-            val user = User.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find User: `${input.id}`")
+            val body = ctx.bodyAsClass<IdInput>()
+            val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
             if (!resource.wishers.contains(user)) {
                 throw BadRequestResponse(message = "Book hasn't been wished by User")
             }
@@ -538,18 +502,12 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    private fun Context.getCreditInput(): CreditInput =
-        this.bodyValidator<CreditInput>()
-            .get()
-
     fun addCredit(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getCreditInput()
-            val creator = Creator.findById(id = input.creatorId)
-                ?: throw NotFoundResponse(message = "Unable to find Creator: `${input.creatorId}`")
-            val role = Role.findById(id = input.roleId)
-                ?: throw NotFoundResponse(message = "Unable to find Role: `${input.creatorId}`")
+            val body = ctx.bodyAsClass<BookInput.Credit>()
+            val creator = Creator.findById(body.creatorId) ?: throw NotFoundResponse("Creator not found.")
+            val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
             Credit.find {
                 (CreditTable.bookCol eq resource.id) and
                     (CreditTable.creatorCol eq creator.id) and
@@ -567,11 +525,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
     fun removeCredit(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getCreditInput()
-            val creator = Creator.findById(id = input.creatorId)
-                ?: throw NotFoundResponse(message = "Unable to find Creator: `${input.creatorId}`")
-            val role = Role.findById(id = input.roleId)
-                ?: throw NotFoundResponse(message = "Unable to find Role: `${input.creatorId}`")
+            val body = ctx.bodyAsClass<BookInput.Credit>()
+            val creator = Creator.findById(body.creatorId) ?: throw NotFoundResponse("Creator not found.")
+            val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
             val credit = Credit.find {
                 (CreditTable.bookCol eq resource.id) and
                     (CreditTable.creatorCol eq creator.id) and
@@ -586,9 +542,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
     fun addGenre(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getIdValue()
-            val genre = Genre.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find Genre: `${input.id}`")
+            val body = ctx.bodyAsClass<IdInput>()
+            val genre = Genre.findById(body.id) ?: throw NotFoundResponse("Genre not found.")
             val temp = resource.genres.toMutableSet()
             temp.add(genre)
             resource.genres = SizedCollection(temp)
@@ -600,9 +555,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
     fun removeGenre(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getIdValue()
-            val genre = Genre.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find Genre: `${input.id}`")
+            val body = ctx.bodyAsClass<IdInput>()
+            val genre = Genre.findById(body.id) ?: throw NotFoundResponse("Genre not found.")
             if (!resource.genres.contains(genre)) {
                 throw BadRequestResponse(message = "Genre is already linked to Book")
             }
@@ -614,24 +568,18 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    private fun Context.getSeriesInput(): SeriesInput =
-        this.bodyValidator<SeriesInput>()
-            .check({ it.seriesId > 0 }, error = "seriesId must be greater than 0")
-            .get()
-
     fun addSeries(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getSeriesInput()
-            val series = Series.findById(id = input.seriesId)
-                ?: throw NotFoundResponse(message = "Unable to find Series: `${input.seriesId}`")
+            val body = ctx.bodyAsClass<BookInput.Series>()
+            val series = Series.findById(body.seriesId) ?: throw NotFoundResponse("Series not found.")
             val bookSeries = BookSeries.find {
                 (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
             }.firstOrNull() ?: BookSeries.new {
                 this.book = resource
                 this.series = series
             }
-            bookSeries.number = if (input.number == 0) null else input.number
+            bookSeries.number = if (body.number == 0) null else body.number
 
             ctx.json(resource.toJson(showAll = true))
         }
@@ -640,9 +588,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
     fun removeSeries(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getIdValue()
-            val series = Series.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find Series: `${input.id}`")
+            val body = ctx.bodyAsClass<IdInput>()
+            val series = Series.findById(body.id) ?: throw NotFoundResponse("Series not found.")
             val bookSeries = BookSeries.find {
                 (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
             }.firstOrNull() ?: throw NotFoundResponse(message = "Book isn't linked to Series")

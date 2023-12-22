@@ -30,3 +30,9 @@ class Genre(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Genre> {
 
     override fun compareTo(other: Genre): Int = comparator.compare(this, other)
 }
+
+data class GenreInput(
+    val bookIds: List<Long> = ArrayList(),
+    val summary: String? = null,
+    val title: String,
+)

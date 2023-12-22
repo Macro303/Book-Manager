@@ -21,14 +21,14 @@ Tool for tracking books on your bookshelf or books you wish were on it.
 
 ### via Github
 
-1. Make sure you have a supported version of [Java](https://www.python.org/) installed: `java --version`
+1. Make sure you have a supported version of [Java](https://adoptium.net/temurin/releases/) installed: `java --version`
 2. Clone the repo: `git clone https://github.com/Buried-In-Code/Bookshelf`
 3. Build using: `./gradlew build`
 4. Run using: `java -jar /app/build/libs/Bookshelf-fatJar.jar`
 
 ### via Gradle
 
-1. Make sure you have a supported version of [Java](https://www.python.org/) installed: `java --version`
+1. Make sure you have a supported version of [Java](https://adoptium.net/temurin/releases/) installed: `java --version`
 2. Clone the repo: `git clone https://github.com/Buried-In-Code/Bookshelf`
 3. Run using: `./gradlew build run`
 
