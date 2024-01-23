@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.21"
     application
     id("gg.jte.gradle") version "3.1.5"
-    id("com.github.ben-manes.versions") version "0.50.0"
+    id("com.github.ben-manes.versions") version "0.51.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
