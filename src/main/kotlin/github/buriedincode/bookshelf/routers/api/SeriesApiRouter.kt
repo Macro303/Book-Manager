@@ -43,19 +43,8 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
                 throw ConflictResponse("Series already exists")
             }
             val resource = Series.new {
-                summary = body.summary
-                title = body.title
-            }
-            body.books.forEach {
-                val book = Book.findById(it.bookId)
-                    ?: throw NotFoundResponse("No Book found.")
-                val bookSeries = BookSeries.find {
-                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-                }.firstOrNull() ?: BookSeries.new {
-                    this.book = book
-                    this.series = resource
-                }
-                bookSeries.number = if (it.number == 0) null else it.number
+                this.summary = body.summary
+                this.title = body.title
             }
 
             ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
@@ -74,17 +63,6 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
             }
             resource.summary = body.summary
             resource.title = body.title
-            body.books.forEach {
-                val book = Book.findById(it.bookId)
-                    ?: throw NotFoundResponse("No Book found.")
-                val bookSeries = BookSeries.find {
-                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-                }.firstOrNull() ?: BookSeries.new {
-                    this.book = book
-                    this.series = resource
-                }
-                bookSeries.number = if (it.number == 0) null else it.number
-            }
 
             ctx.json(resource.toJson(showAll = true))
         }

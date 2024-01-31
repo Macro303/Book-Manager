@@ -33,9 +33,9 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null)
+            if (session == null) {
                 ctx.redirect("/$plural")
-            else
+            } else {
                 ctx.render(
                     filePath = "templates/$name/create.kte",
                     model = mapOf(
@@ -44,6 +44,7 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
                         "roles" to Role.all().toList(),
                     ),
                 )
+            }
         }
     }
 
@@ -71,9 +72,9 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
         Utils.query {
             val session = ctx.getSession()
             val resource = ctx.getResource()
-            if (session == null)
+            if (session == null) {
                 ctx.redirect("/$plural/${resource.id.value}")
-            else
+            } else {
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
@@ -83,6 +84,7 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
                         "roles" to Role.all().toList(),
                     ),
                 )
+            }
         }
     }
 }

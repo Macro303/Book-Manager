@@ -2,7 +2,6 @@ package github.buriedincode.bookshelf.routers.api
 
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.IJson
-import github.buriedincode.bookshelf.models.User
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus

@@ -5,8 +5,8 @@
     <div class="columns is-mobile">
         <div class="column is-one-third">
             <figure class="image is-2by3">
-                @if(entry.image != null)
-                    <img alt="${entry.title} cover image" loading="lazy" src="${entry.image}"/>
+                @if(entry.imageUrl != null)
+                    <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl}"/>
                 @else
                     <img alt="${entry.title} cover image" loading="lazy" src="https://via.placeholder.com/750x500"/>
                 @endif

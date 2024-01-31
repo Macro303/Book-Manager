@@ -6,6 +6,7 @@ import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.CreatorInput
 import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Role
+import github.buriedincode.bookshelf.routers.api.BookApiRouter.getResource
 import github.buriedincode.bookshelf.tables.CreatorTable
 import github.buriedincode.bookshelf.tables.CreditTable
 import io.javalin.http.BadRequestResponse
@@ -27,7 +28,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
                 }
             }
             ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
-                resources = resources.filter { it.image != null == image }
+                resources = resources.filter { it.imageUrl != null == image }
             }
             ctx.queryParam("name")?.let { name ->
                 resources = resources.filter { it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true) }
@@ -51,7 +52,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
                 throw ConflictResponse("Creator already exists")
             }
             val creator = Creator.new {
-                image = body.image
+                imageUrl = body.imageUrl
                 name = body.name
                 summary = body.summary
             }
@@ -83,7 +84,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Creator already exists")
             }
-            resource.image = body.image
+            resource.imageUrl = body.imageUrl
             resource.name = body.name
             resource.summary = body.summary
             body.credits.forEach {
@@ -101,6 +102,17 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
             }
 
             ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    override fun deleteEndpoint(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            resource.credits.forEach {
+                it.delete()
+            }
+            resource.delete()
+            ctx.status(HttpStatus.NO_CONTENT)
         }
     }
 

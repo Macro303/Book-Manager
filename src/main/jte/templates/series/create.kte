@@ -20,13 +20,23 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Creating a Series</h1>
         </header>
-        <div class="box">
-            <form id="create-form" onsubmit="return false;">
-                @template.components.forms.textarea(label = "Summary", name = "summary")
-                @template.components.forms.input(label = "Title", name = "title", icon = "fa-solid fa-heading")
-            </form>
-        </div>
-        <div class="buttons is-centered">
+        <form id="create-form" onsubmit="return false;">
+            <div class="columns is-multiline is-centered is-desktop">
+                <div class="column is-half-desktop">
+                    <div class="box">
+                        <h3 class="title is-3">Details</h3>
+                        @template.components.forms.input(label = "Title", name = "title", icon = "fa-solid fa-heading")
+                    </div>
+                </div>
+                <div class="column is-half-desktop">
+                    <div class="box">
+                        <h3 class="title is-3">Summary</h3>
+                        @template.components.forms.textarea(label = "Summary", name = "summary")
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="buttons is-multiline is-centered mt-4">
             <button class="button is-success" id="create-button" onclick="submitCreate()" type="submit">
                 <span class="icon">
                     <i class="fa-solid fa-floppy-disk"></i>

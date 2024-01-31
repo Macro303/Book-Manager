@@ -22,7 +22,7 @@ class Series(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Series> {
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
-            "image" to firstBook?.book?.imageFile,
+            "imageUrl" to firstBook?.book?.imageUrl,
             "summary" to summary,
             "title" to title,
         )
@@ -43,7 +43,6 @@ class Series(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Series> {
 }
 
 data class SeriesInput(
-    val books: List<Book> = ArrayList(),
     val summary: String? = null,
     val title: String,
 ) {

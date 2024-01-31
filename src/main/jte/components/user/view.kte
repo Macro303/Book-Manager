@@ -8,8 +8,8 @@
     <div class="columns is-mobile">
         <div class="column is-one-third">
             <figure class="image is-128x128">
-                @if(entry.image != null)
-                    <img alt="${entry.username} profile image" class="profile is-rounded" loading="lazy" src="${entry.image}"/>
+                @if(entry.imageUrl != null)
+                    <img alt="${entry.username} profile image" class="profile is-rounded" loading="lazy" src="${entry.imageUrl}"/>
                 @else
                     <img alt="${entry.username} profile image" class="profile is-rounded" loading="lazy" src="https://via.placeholder.com/256x256"/>
                 @endif

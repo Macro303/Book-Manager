@@ -9,6 +9,7 @@ import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
+import github.buriedincode.bookshelf.routers.html.BookHtmlRouter.getSession
 import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -91,7 +92,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
         }
     }
 
-    fun wishlistEndpoint(ctx: Context) {
+    fun wishlist(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             var books = Book.all().toList().filter {
@@ -145,6 +146,44 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                     ),
                 ),
             )
+        }
+    }
+
+    fun createBook(ctx: Context) {
+        Utils.query {
+            val session = ctx.getSession()
+            val resource = ctx.getResource()
+            if (session == null) {
+                ctx.redirect("/$plural/${resource.id.value}/wishlist")
+            } else {
+                ctx.render(
+                    filePath = "templates/$name/create_book.kte",
+                    model = mapOf(
+                        "session" to session,
+                        "resource" to resource,
+                        "formats" to Format.entries.toList(),
+                        "publishers" to Publisher.all().toList(),
+                    ),
+                )
+            }
+        }
+    }
+
+    fun importBook(ctx: Context) {
+        Utils.query {
+            val session = ctx.getSession()
+            val resource = ctx.getResource()
+            if (session == null) {
+                ctx.redirect("/$plural/${resource.id.value}/wishlist")
+            } else {
+                ctx.render(
+                    filePath = "templates/$name/import_book.kte",
+                    model = mapOf(
+                        "session" to session,
+                        "resource" to resource,
+                    ),
+                )
+            }
         }
     }
 }

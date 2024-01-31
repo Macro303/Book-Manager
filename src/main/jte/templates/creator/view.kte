@@ -1,10 +1,9 @@
-@import kotlin.collections.List
-@import kotlin.collections.Map
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.User
-@import github.buriedincode.bookshelf.models.UserRole
+@import kotlin.collections.List
+@import kotlin.collections.Map
 @param resource: Creator
 @param session: User?
 @param credits: Map<Role, List<Book>>
@@ -29,10 +28,10 @@
             <h1 class="title is-1">${resource.name}</h1>
         </header>
         <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
+            <div class="column is-one-third-tablet is-one-quarter-fullhd has-text-centered">
                 <figure class="image is-256x256 is-inline-block">
                     @if(resource.imageUrl == null)
-                        <img alt="${resource.name} profile image" class="profile-large" loading="lazy" src="/static/img/logo.png"/>
+                        <img alt="Missing profile image" class="profile-large" loading="lazy" src="https://via.placeholder.com/512x512"/>
                     @else
                         <img alt="${resource.name} profile image" class="profile-large" loading="lazy" src="${resource.imageUrl}"/>
                     @endif
@@ -42,88 +41,97 @@
                 <nav class="level is-mobile">
                     <div class="level-left"></div>
                     <div class="level-right">
-                        @if(session != null && session.role >= UserRole.MODERATOR)
-                            <p class="level-item">
-                                <a class="button is-warning" href="/creators/${resource.id.value}/update">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-pencil"></i>
-                                    </span>
-                                    <span>Update</span>
-                                </a>
-                            </p>
-                        @endif
-                        @if(session != null && session.role >= UserRole.ADMIN)
-                            <p class="level-item">
-                                <button class="button is-danger" id="delete-creator-button" onclick="deleteCreator()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </span>
-                                    <span>Delete</span>
-                                </button>
-                            </p>
+                        @if(session != null)
+                            <a class="button is-warning" href="/creators/${resource.id.value}/update">
+                                <span class="icon">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </span>
+                                <span>Update</span>
+                            </a>
                         @endif
                     </div>
                 </nav>
-                <div class="box">
-                    <h3 class="title is-3">Summary</h3>
-                    <div class="block">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <div class="columns is-desktop">
+                    <div class="column">
+                        @if(resource.summary != null)
+                            <div class="box">
+                                <h3 class="title is-3 has-text-centered">Summary</h3>
+                                <div class="block">
+                                    <p>${resource.summary}</p>
+                                </div>
+                            </div>
+                        @endif
                     </div>
-                </div>
-            </div>
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                <div class="box">
-                    <h3 class="title is-3 has-text-centered">Stats</h3>
-                    <div class="block">
-                        <p><strong class="has-text-info">Roles:</strong> ${credits.size}</p>
-                    </div>
-                    <div class="block">
-                        <p><strong class="has-text-info">Books:</strong> ${credits.flatMap { it.value }.size} (${credits.flatMap { it.value }.distinct().size} Unique)</p>
+                    <div class="column is-one-third-desktop is-one-quarter-fullhd">
+                        <div class="box">
+                            <h3 class="title is-3 has-text-centered">Identifiers</h3>
+                            <div class="block">
+                                <p><strong class="has-text-info">Bookshelf:</strong> ${resource.id.value}</p>
+                            </div>
+                        </div>
+                        <div class="box">
+                            <h3 class="title is-3 has-text-centered">Stats</h3>
+                            <div class="block">
+                                <p><strong class="has-text-info">Roles:</strong> ${credits.size}</p>
+                            </div>
+                            <div class="block">
+                                <p><strong class="has-text-info">Books:</strong> ${credits.flatMap { it.value }.size} (${credits.flatMap { it.value }.distinct().size} Unique)</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                @template.components.adjustable_columns()
+        @for(role in credits.keys.sorted())
+            <nav class="level is-mobile">
+                <div class="level-left level-item has-text-centered">
+                    <div>
+                        <p class="title">${role.title}</p>
+                        @if(credits[role]!!.count() == 1)
+                            <p class="heading">1 Book</p>
+                        @else
+                            <p class="heading">${credits[role]!!.count()} Books</p>
+                        @endif
+                    </div>
+                </div>
+            </nav>
+            <div class="columns is-multiline is-centered">
+                @for(book in credits[role]!!.sorted())
+                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
+                        @template.components.book.view(entry = book)
+                    </div>
+                @else
+                    <div class="column">
+                        <div class="box has-text-centered">
+                            <h5 class="title is-5 has-text-danger">No Books found.</h5>
+                        </div>
+                    </div>
+                @endfor
             </div>
-            <div class="column">
-                @if(credits.isEmpty())
+        @else
+            <nav class="level is-mobile">
+                <div class="level-left level-item has-text-centered">
+                    <div>
+                        <p class="title">Credit</p>
+                        <p class="heading">0 Credits</p>
+                    </div>
+                </div>
+            </nav>
+            <div class="columns is-multiline is-centered">
+                <div class="column">
                     <div class="box has-text-centered">
                         <h5 class="title is-5 has-text-danger">No Credits found.</h5>
                     </div>
-                @else
-                    @for(role in credits.keys.sorted())
-                        <h3 class="title is-3">${role.title}</h3>
-                        <div class="columns is-multiline is-centered">
-                            @for(book in credits[role]!!.sorted())
-                                <div class="adjustable-column column">
-                                    @template.components.book.view(entry = book)
-                                </div>
-                            @endfor
-                        </div>
-                    @endfor
-                @endif
+                </div>
             </div>
+        @endfor
+        <div class="block has-text-centered">
+            <p><small><em>Last Updated at </em></small></p>
         </div>
     </div>
 </main>
 @template.components.footer()
 <script src="/static/js/scripts.js" type="text/javascript"></script>
-<script src="/static/js/adjustable-columns.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
-<script type="text/javascript">
-  @if(session != null && session.role >= UserRole.ADMIN)
-    async function deleteCreator() {
-      const caller = "delete-creator-button";
-
-      addLoading(caller);
-      const response = await submitRequest("/api/creators/${resource.id.value}", "DELETE");
-      if (response !== null)
-        window.location = "/creators";
-      removeLoading(caller);
-    }
-  @endif
-</script>
 </body>
 </html>

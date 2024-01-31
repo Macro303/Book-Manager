@@ -27,109 +27,90 @@
             <h1 class="title is-1">${resource.username}</h1>
         </header>
         <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd has-text-centered">
+            <div class="column is-one-third-tablet is-one-quarter-fullhd has-text-centered">
                 <figure class="image is-256x256 is-inline-block">
-                    @if(resource.image != null)
-                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="${resource.image}"/>
+                    @if(resource.imageUrl == null)
+                        <img alt="Missing profile image" class="profile-large" loading="lazy" src="https://via.placeholder.com/512x512"/>
                     @else
-                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="https://via.placeholder.com/512x512"/>
+                        <img alt="${resource.username} profile image" class="profile-large" loading="lazy" src="${resource.imageUrl}"/>
                     @endif
                 </figure>
             </div>
             <div class="column">
                 <nav class="level is-mobile">
                     <div class="level-left">
-                        <p class="level-item">
-                            <a class="button is-info" href="/users/${resource.id.value}/wishlist">
-                                <span class="icon">
-                                    <i class="fa-solid fa-star"></i>
-                                </span>
-                                <span>Wishlist</span>
-                            </a>
-                        </p>
+                        <a class="button is-info" href="/users/${resource.id.value}/wishlist">
+                            <span class="icon">
+                                <i class="fa-solid fa-star"></i>
+                            </span>
+                            <span>Wishlist</span>
+                        </a>
                     </div>
                     <div class="level-right">
                         @if(session != null)
-                            <p class="level-item">
-                                <a class="button is-warning" href="/users/${resource.id.value}/update">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-pencil"></i>
-                                    </span>
-                                    <span>Update</span>
-                                </a>
-                            </p>
-                            <p class="level-item">
-                                <button class="button is-danger" id="delete-button" onclick="submitDelete(${resource.id.value})" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </span>
-                                    <span>Delete</span>
-                                </button>
-                            </p>
+                            <a class="button is-warning" href="/users/${resource.id.value}/update">
+                                <span class="icon">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </span>
+                                <span>Update</span>
+                            </a>
                         @endif
                     </div>
                 </nav>
-            </div>
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                <div class="box">
-                    <h3 class="title is-3 has-text-centered">Stats</h3>
-                    <div class="block">
-                        <p><strong class="has-text-info">Wishlist:</strong> ${stats["wishlist"]}@if(stats["shared"]!! > 0) + ${stats["shared"]}@endif</p>
-                    </div>
-                    <div class="block">
-                        <p><strong class="has-text-info">Unread:</strong> ${stats["unread"]}</p>
-                    </div>
-                    <div class="block">
-                        <p><strong class="has-text-info">Read:</strong> ${stats["read"]}</p>
+                <div class="columns is-desktop">
+                    <div class="column"></div>
+                    <div class="column is-one-third-desktop is-one-quarter-fullhd">
+                        <div class="box">
+                            <h3 class="title is-3 has-text-centered">Stats</h3>
+                            <div class="block">
+                                <p><strong class="has-text-info">Wishlist:</strong> ${stats["wishlist"]}@if(stats["shared"]!! > 0) + ${stats["shared"]}@endif</p>
+                            </div>
+                            <div class="block">
+                                <p><strong class="has-text-info">Unread:</strong> ${stats["unread"]}</p>
+                            </div>
+                            <div class="block">
+                                <p><strong class="has-text-info">Read:</strong> ${stats["read"]}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                @template.components.adjustable_columns()
-            </div>
-            <div class="column">
-                <nav class="level is-mobile">
-                    <div class="level-left level-item has-text-centered">
-                        <div>
-                            <p class="title">Last Read Books</p>
-                            <p class="heading">
-                                @if(resource.readBooks.count() == 1L)
-                                    <span>1 Book</span>
-                                @else
-                                    <span>${resource.readBooks.count()} Books</span>
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                </nav>
-                <div class="columns is-multiline is-centered">
-                    @if(resource.readBooks.empty())
-                        <div class="column">
-                            <div class="box has-text-centered">
-                                <h5 class="title is-5 has-text-danger">No Books found.</h5>
-                            </div>
-                        </div>
+        <nav class="level is-mobile">
+            <div class="level-left level-item has-text-centered">
+                <div>
+                    <p class="title">Last Read Books</p>
+                    @if(resource.readBooks.count() == 1L)
+                        <p class="heading">1 Book</p>
                     @else
-                        @for(entry in ForSupport.of(resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.reversed().thenBy{ it.book })))
-                            @if(entry.index >= 5)
-                                !{break}
-                            @endif
-                            <div class="adjustable-column column">
-                                @template.components.book.view(entry = entry.get().book, readDate = entry.get().readDate)
-                            </div>
-                        @endfor
+                        <p class="heading">${resource.readBooks.count()} Books</p>
                     @endif
                 </div>
             </div>
+        </nav>
+        <div class="columns is-multiline is-centered">
+            @for(entry in ForSupport.of(resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.reversed().thenBy{ it.book })))
+                @if(entry.index >= 5)
+                    !{break}
+                @endif
+                <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
+                    @template.components.book.view(entry = entry.get().book, readDate = entry.get().readDate)
+                </div>
+            @else
+                <div class="column">
+                    <div class="box has-text-centered">
+                        <h5 class="title is-5 has-text-danger">No Books found.</h5>
+                    </div>
+                </div>
+            @endfor
+        </div>
+        <div class="block has-text-centered">
+            <p><small><em>Last Updated at </em></small></p>
         </div>
     </div>
 </main>
 @template.components.footer()
 <script src="/static/js/scripts.js" type="text/javascript"></script>
-<script src="/static/js/adjustable-columns.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
-<script src="/static/js/user.js" type="text/javascript"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
         val comparator = compareBy(User::username)
     }
 
-    var image: String? by UserTable.imageCol
+    var imageUrl: String? by UserTable.imageUrlCol
     val readBooks by ReadBook referrersOn ReadBookTable.userCol
     var username: String by UserTable.usernameCol
     var wishedBooks by Book via WishedTable
@@ -24,7 +24,7 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
-            "image" to image,
+            "imageUrl" to imageUrl,
             "username" to username,
         )
         if (showAll) {
@@ -45,10 +45,8 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
 }
 
 data class UserInput(
-    val image: String? = null,
-    val readBooks: List<ReadBook> = ArrayList(),
+    val imageUrl: String? = null,
     val username: String,
-    val wishedBookIds: List<Long> = ArrayList(),
 ) {
     data class ReadBook(
         val bookId: Long,

@@ -1,6 +1,6 @@
 async function validate() {
   return (
-    validateText("title", "Please enter a Title.")
+    validateText("name", "Please enter a Name.")
   )
 }
 
@@ -12,21 +12,22 @@ async function submitCreate() {
     const form = document.getElementById("create-form");
     const formData = Object.fromEntries(new FormData(form));
     const body = {
+      imageUrl: formData["image-url"].trim() || null,
       summary: formData["summary"].trim() || null,
-      title: formData["title"].trim(),
+      name: formData["name"].trim(),
     };
 
-    const response = await submitRequest("/api/series", "POST", body);
+    const response = await submitRequest("/api/creators", "POST", body);
     if (response !== null) {
       form.reset();
-      window.location = `/series/${response.body.id}`;
+      window.location = `/creators/${response.body.id}`;
     }
   }
 
   removeLoading(caller);
 }
 
-async function submitUpdate(seriesId) {
+async function submitUpdate(creatorId) {
   const caller = "update-button";
   addLoading(caller);
 
@@ -34,27 +35,28 @@ async function submitUpdate(seriesId) {
     const form = document.getElementById("update-form");
     const formData = Object.fromEntries(new FormData(form));
     const body = {
+      imageUrl: formData["image-url"].trim() || null,
       summary: formData["summary"].trim() || null,
-      title: formData["title"].trim(),
+      name: formData["name"].trim(),
     };
 
-    const response = await submitRequest(`/api/series/${seriesId}`, "PUT", body);
+    const response = await submitRequest(`/api/creators/${creatorId}`, "PUT", body);
     if (response !== null) {
       form.reset();
-      window.location = `/series/${seriesId}`;
+      window.location = `/creators/${creatorId}`;
     }
   }
 
   removeLoading(caller);
 }
 
-async function submitDelete(seriesId) {
+async function submitDelete(creatorId) {
   const caller = "delete-button";
   addLoading(caller);
 
-  const response = await submitRequest(`/api/series/${seriesId}`, "DELETE");
+  const response = await submitRequest(`/api/creators/${creatorId}`, "DELETE");
   if (response !== null)
-    window.location = "/series";
+    window.location = "/creators";
 
   removeLoading(caller);
 }

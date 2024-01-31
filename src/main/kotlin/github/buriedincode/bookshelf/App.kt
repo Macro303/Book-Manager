@@ -24,6 +24,7 @@ import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.http.ContentType
+import io.javalin.rendering.FileRenderer
 import io.javalin.rendering.template.JavalinJte
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.kotlin.Logging
@@ -41,8 +42,9 @@ object App : Logging {
         }
     }
 
-    private fun createJavalinApp(): Javalin {
+    private fun createJavalinApp(renderer: FileRenderer): Javalin {
         return Javalin.create {
+            it.fileRenderer(fileRenderer = renderer)
             it.http.prefer405over404 = true
             it.http.defaultContentType = ContentType.JSON
             it.requestLogger.http { ctx, ms ->
@@ -55,9 +57,207 @@ object App : Logging {
                 }
                 logger.log(level, "${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${Utils.toHumanReadable(ms)}")
             }
-            it.routing.ignoreTrailingSlashes = true
-            it.routing.treatMultipleSlashesAsSingleSlash = true
-            it.routing.caseInsensitiveRoutes = true
+            it.router.ignoreTrailingSlashes = true
+            it.router.treatMultipleSlashesAsSingleSlash = true
+            it.router.caseInsensitiveRoutes = true
+            it.router.apiBuilder {
+                path("/") {
+                    get { ctx ->
+                        Utils.query {
+                            ctx.render(
+                                filePath = "templates/index.kte",
+                                model = mapOf(
+                                    "session" to ctx.cookie("bookshelf_session-id")?.toLongOrNull()?.let {
+                                        User.findById(it)
+                                    },
+                                    "users" to User.all().toList(),
+                                ),
+                            )
+                        }
+                    }
+                    path("books") {
+                        get(BookHtmlRouter::listEndpoint)
+                        get("create", BookHtmlRouter::createEndpoint)
+                        get("import", BookHtmlRouter::import)
+                        path("{book-id}") {
+                            get(BookHtmlRouter::viewEndpoint)
+                            get("update", BookHtmlRouter::updateEndpoint)
+                        }
+                    }
+                    path("creators") {
+                        get(CreatorHtmlRouter::listEndpoint)
+                        get("create", CreatorHtmlRouter::createEndpoint)
+                        path("{creator-id}") {
+                            get(CreatorHtmlRouter::viewEndpoint)
+                            get("update", CreatorHtmlRouter::updateEndpoint)
+                        }
+                    }
+                    path("genres") {
+                        get(GenreHtmlRouter::listEndpoint)
+                        get("create", GenreHtmlRouter::createEndpoint)
+                        path("{genre-id}") {
+                            get(GenreHtmlRouter::viewEndpoint)
+                            get("update", GenreHtmlRouter::updateEndpoint)
+                        }
+                    }
+                    path("publishers") {
+                        get(PublisherHtmlRouter::listEndpoint)
+                        get("create", PublisherHtmlRouter::createEndpoint)
+                        path("{publisher-id}") {
+                            get(PublisherHtmlRouter::viewEndpoint)
+                            get("update", PublisherHtmlRouter::updateEndpoint)
+                        }
+                    }
+                    path("roles") {
+                        get(RoleHtmlRouter::listEndpoint)
+                        get("create", RoleHtmlRouter::createEndpoint)
+                        path("{role-id}") {
+                            get(RoleHtmlRouter::viewEndpoint)
+                            get("update", RoleHtmlRouter::updateEndpoint)
+                        }
+                    }
+                    path("series") {
+                        get(SeriesHtmlRouter::listEndpoint)
+                        get("create", SeriesHtmlRouter::createEndpoint)
+                        path("{series-id}") {
+                            get(SeriesHtmlRouter::viewEndpoint)
+                            get("update", SeriesHtmlRouter::updateEndpoint)
+                        }
+                    }
+                    path("users") {
+                        get(UserHtmlRouter::listEndpoint)
+                        get("create", UserHtmlRouter::createEndpoint)
+                        path("{user-id}") {
+                            get(UserHtmlRouter::viewEndpoint)
+                            get("update", UserHtmlRouter::updateEndpoint)
+                            path("wishlist") {
+                                get(UserHtmlRouter::wishlist)
+                                get("create", UserHtmlRouter::createBook)
+                                get("import", UserHtmlRouter::importBook)
+                            }
+                        }
+                    }
+                }
+                path("api") {
+                    path("books") {
+                        get(BookApiRouter::listEndpoint)
+                        post(BookApiRouter::createEndpoint)
+                        post("import", BookApiRouter::import)
+                        path("{book-id}") {
+                            get(BookApiRouter::getEndpoint)
+                            put(BookApiRouter::updateEndpoint)
+                            delete(BookApiRouter::deleteEndpoint)
+                            put("pull", BookApiRouter::pull)
+                            path("collect") {
+                                post(BookApiRouter::collectBook)
+                                delete(BookApiRouter::discardBook)
+                            }
+                            path("wish") {
+                                post(BookApiRouter::addWisher)
+                                delete(BookApiRouter::removeWisher)
+                            }
+                            path("read") {
+                                post(BookApiRouter::addReader)
+                                delete(BookApiRouter::removeReader)
+                            }
+                            path("credits") {
+                                post(BookApiRouter::addCredit)
+                                delete(BookApiRouter::removeCredit)
+                            }
+                            path("genres") {
+                                post(BookApiRouter::addGenre)
+                                delete(BookApiRouter::removeGenre)
+                            }
+                            path("series") {
+                                post(BookApiRouter::addSeries)
+                                delete(BookApiRouter::removeSeries)
+                            }
+                        }
+                    }
+                    path("creators") {
+                        get(CreatorApiRouter::listEndpoint)
+                        post(CreatorApiRouter::createEndpoint)
+                        path("{creator-id}") {
+                            get(CreatorApiRouter::getEndpoint)
+                            put(CreatorApiRouter::updateEndpoint)
+                            delete(CreatorApiRouter::deleteEndpoint)
+                            path("credits") {
+                                post(CreatorApiRouter::addCredit)
+                                delete(CreatorApiRouter::removeCredit)
+                            }
+                        }
+                    }
+                    path("genres") {
+                        get(GenreApiRouter::listEndpoint)
+                        post(GenreApiRouter::createEndpoint)
+                        path("{genre-id}") {
+                            get(GenreApiRouter::getEndpoint)
+                            put(GenreApiRouter::updateEndpoint)
+                            delete(GenreApiRouter::deleteEndpoint)
+                            path("books") {
+                                post(GenreApiRouter::addBook)
+                                delete(GenreApiRouter::removeBook)
+                            }
+                        }
+                    }
+                    path("publishers") {
+                        get(PublisherApiRouter::listEndpoint)
+                        post(PublisherApiRouter::createEndpoint)
+                        path("{publisher-id}") {
+                            get(PublisherApiRouter::getEndpoint)
+                            put(PublisherApiRouter::updateEndpoint)
+                            delete(PublisherApiRouter::deleteEndpoint)
+                            path("books") {
+                                post(PublisherApiRouter::addBook)
+                                delete(PublisherApiRouter::removeBook)
+                            }
+                        }
+                    }
+                    path("roles") {
+                        get(RoleApiRouter::listEndpoint)
+                        post(RoleApiRouter::createEndpoint)
+                        path("{role-id}") {
+                            get(RoleApiRouter::getEndpoint)
+                            put(RoleApiRouter::updateEndpoint)
+                            delete(RoleApiRouter::deleteEndpoint)
+                            path("credits") {
+                                post(RoleApiRouter::addCredit)
+                                delete(RoleApiRouter::removeCredit)
+                            }
+                        }
+                    }
+                    path("series") {
+                        get(SeriesApiRouter::listEndpoint)
+                        post(SeriesApiRouter::createEndpoint)
+                        path("{series-id}") {
+                            get(SeriesApiRouter::getEndpoint)
+                            put(SeriesApiRouter::updateEndpoint)
+                            delete(SeriesApiRouter::deleteEndpoint)
+                            path("books") {
+                                post(SeriesApiRouter::addBook)
+                                delete(SeriesApiRouter::removeBook)
+                            }
+                        }
+                    }
+                    path("users") {
+                        get(UserApiRouter::listEndpoint)
+                        post(UserApiRouter::createEndpoint)
+                        path("{user-id}") {
+                            get(UserApiRouter::getEndpoint)
+                            put(UserApiRouter::updateEndpoint)
+                            delete(UserApiRouter::deleteEndpoint)
+                            path("read") {
+                                post(UserApiRouter::addReadBook)
+                                delete(UserApiRouter::removeReadBook)
+                            }
+                            path("wished") {
+                                post(UserApiRouter::addWishedBook)
+                                delete(UserApiRouter::removeWishedBook)
+                            }
+                        }
+                    }
+                }
+            }
             it.staticFiles.add {
                 it.hostedPath = "/static"
                 it.directory = "/static"
@@ -68,201 +268,9 @@ object App : Logging {
     fun start(settings: Settings) {
         val engine = createTemplateEngine(environment = settings.environment)
         engine.setTrimControlStructures(true)
-        JavalinJte.init(templateEngine = engine)
+        val renderer = JavalinJte(templateEngine = engine)
 
-        val app = createJavalinApp()
-        app.routes {
-            path("/") {
-                get { ctx ->
-                    Utils.query {
-                        ctx.render(
-                            filePath = "templates/index.kte",
-                            model = mapOf(
-                                "session" to ctx.cookie("bookshelf_session-id")?.toLongOrNull()?.let {
-                                    User.findById(it)
-                                },
-                                "users" to User.all().toList(),
-                            ),
-                        )
-                    }
-                }
-                path("books") {
-                    get(BookHtmlRouter::listEndpoint)
-                    get("create", BookHtmlRouter::createEndpoint)
-                    path("{book-id}") {
-                        get(BookHtmlRouter::viewEndpoint)
-                        get("update", BookHtmlRouter::updateEndpoint)
-                    }
-                }
-                path("creators") {
-                    get(CreatorHtmlRouter::listEndpoint)
-                    get("create", CreatorHtmlRouter::createEndpoint)
-                    path("{creator-id}") {
-                        get(CreatorHtmlRouter::viewEndpoint)
-                        get("update", CreatorHtmlRouter::updateEndpoint)
-                    }
-                }
-                path("genres") {
-                    get(GenreHtmlRouter::listEndpoint)
-                    get("create", GenreHtmlRouter::createEndpoint)
-                    path("{genre-id}") {
-                        get(GenreHtmlRouter::viewEndpoint)
-                        get("update", GenreHtmlRouter::updateEndpoint)
-                    }
-                }
-                path("publishers") {
-                    get(PublisherHtmlRouter::listEndpoint)
-                    get("create", PublisherHtmlRouter::createEndpoint)
-                    path("{publisher-id}") {
-                        get(PublisherHtmlRouter::viewEndpoint)
-                        get("update", PublisherHtmlRouter::updateEndpoint)
-                    }
-                }
-                path("roles") {
-                    get(RoleHtmlRouter::listEndpoint)
-                    get("create", RoleHtmlRouter::createEndpoint)
-                    path("{role-id}") {
-                        get(RoleHtmlRouter::viewEndpoint)
-                        get("update", RoleHtmlRouter::updateEndpoint)
-                    }
-                }
-                path("series") {
-                    get(SeriesHtmlRouter::listEndpoint)
-                    get("create", SeriesHtmlRouter::createEndpoint)
-                    path("{series-id}") {
-                        get(SeriesHtmlRouter::viewEndpoint)
-                        get("update", SeriesHtmlRouter::updateEndpoint)
-                    }
-                }
-                path("users") {
-                    get(UserHtmlRouter::listEndpoint)
-                    get("create", UserHtmlRouter::createEndpoint)
-                    path("{user-id}") {
-                        get(UserHtmlRouter::viewEndpoint)
-                        get("update", UserHtmlRouter::updateEndpoint)
-                        get("wishlist", UserHtmlRouter::wishlistEndpoint)
-                    }
-                }
-            }
-            path("api") {
-                path("books") {
-                    get(BookApiRouter::listEndpoint)
-                    post(BookApiRouter::createEndpoint)
-                    path("{book-id}") {
-                        get(BookApiRouter::getEndpoint)
-                        put(BookApiRouter::updateEndpoint)
-                        delete(BookApiRouter::deleteEndpoint)
-                        put("pull", BookApiRouter::pullBook)
-                        path("collect") {
-                            post(BookApiRouter::collectBook)
-                            delete(BookApiRouter::discardBook)
-                        }
-                        path("wish") {
-                            post(BookApiRouter::addWisher)
-                            delete(BookApiRouter::removeWisher)
-                        }
-                        path("read") {
-                            post(BookApiRouter::addReader)
-                            delete(BookApiRouter::removeReader)
-                        }
-                        path("credits") {
-                            post(BookApiRouter::addCredit)
-                            delete(BookApiRouter::removeCredit)
-                        }
-                        path("genres") {
-                            post(BookApiRouter::addGenre)
-                            delete(BookApiRouter::removeGenre)
-                        }
-                        path("series") {
-                            post(BookApiRouter::addSeries)
-                            delete(BookApiRouter::removeSeries)
-                        }
-                    }
-                }
-                path("creators") {
-                    get(CreatorApiRouter::listEndpoint)
-                    post(CreatorApiRouter::createEndpoint)
-                    path("{creator-id}") {
-                        get(CreatorApiRouter::getEndpoint)
-                        put(CreatorApiRouter::updateEndpoint)
-                        delete(CreatorApiRouter::deleteEndpoint)
-                        path("credits") {
-                            post(CreatorApiRouter::addCredit)
-                            delete(CreatorApiRouter::removeCredit)
-                        }
-                    }
-                }
-                path("genres") {
-                    get(GenreApiRouter::listEndpoint)
-                    post(GenreApiRouter::createEndpoint)
-                    path("{genre-id}") {
-                        get(GenreApiRouter::getEndpoint)
-                        put(GenreApiRouter::updateEndpoint)
-                        delete(GenreApiRouter::deleteEndpoint)
-                        path("books") {
-                            post(GenreApiRouter::addBook)
-                            delete(GenreApiRouter::removeBook)
-                        }
-                    }
-                }
-                path("publishers") {
-                    get(PublisherApiRouter::listEndpoint)
-                    post(PublisherApiRouter::createEndpoint)
-                    path("{publisher-id}") {
-                        get(PublisherApiRouter::getEndpoint)
-                        put(PublisherApiRouter::updateEndpoint)
-                        delete(PublisherApiRouter::deleteEndpoint)
-                        path("books") {
-                            post(PublisherApiRouter::addBook)
-                            delete(PublisherApiRouter::removeBook)
-                        }
-                    }
-                }
-                path("roles") {
-                    get(RoleApiRouter::listEndpoint)
-                    post(RoleApiRouter::createEndpoint)
-                    path("{role-id}") {
-                        get(RoleApiRouter::getEndpoint)
-                        put(RoleApiRouter::updateEndpoint)
-                        delete(RoleApiRouter::deleteEndpoint)
-                        path("credits") {
-                            post(RoleApiRouter::addCredit)
-                            delete(RoleApiRouter::removeCredit)
-                        }
-                    }
-                }
-                path("series") {
-                    get(SeriesApiRouter::listEndpoint)
-                    post(SeriesApiRouter::createEndpoint)
-                    path("{series-id}") {
-                        get(SeriesApiRouter::getEndpoint)
-                        put(SeriesApiRouter::updateEndpoint)
-                        delete(SeriesApiRouter::deleteEndpoint)
-                        path("books") {
-                            post(SeriesApiRouter::addBook)
-                            delete(SeriesApiRouter::removeBook)
-                        }
-                    }
-                }
-                path("users") {
-                    get(UserApiRouter::listEndpoint)
-                    post(UserApiRouter::createEndpoint)
-                    path("{user-id}") {
-                        get(UserApiRouter::getEndpoint)
-                        put(UserApiRouter::updateEndpoint)
-                        delete(UserApiRouter::deleteEndpoint)
-                        path("read") {
-                            post(UserApiRouter::addReadBook)
-                            delete(UserApiRouter::removeReadBook)
-                        }
-                        path("wished") {
-                            post(UserApiRouter::addWishedBook)
-                            delete(UserApiRouter::removeWishedBook)
-                        }
-                    }
-                }
-            }
-        }
+        val app = createJavalinApp(renderer = renderer)
         app.start(settings.website.host, settings.website.port)
     }
 }

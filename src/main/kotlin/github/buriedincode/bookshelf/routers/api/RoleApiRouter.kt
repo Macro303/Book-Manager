@@ -51,21 +51,6 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
                 this.summary = body.summary
                 this.title = body.title
             }
-            body.credits.forEach {
-                val book = Book.findById(it.bookId)
-                    ?: throw NotFoundResponse("No Book found.")
-                val creator = Creator.findById(it.creatorId)
-                    ?: throw NotFoundResponse("No Creator found.")
-                Credit.find {
-                    (CreditTable.bookCol eq book.id) and
-                        (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq resource.id)
-                }.firstOrNull() ?: Credit.new {
-                    this.book = book
-                    this.creator = creator
-                    this.role = resource
-                }
-            }
 
             ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
@@ -83,21 +68,6 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
             }
             resource.summary = body.summary
             resource.title = body.title
-            body.credits.forEach {
-                val book = Book.findById(it.bookId)
-                    ?: throw NotFoundResponse("No Book found.")
-                val creator = Creator.findById(it.creatorId)
-                    ?: throw NotFoundResponse("No Creator found.")
-                Credit.find {
-                    (CreditTable.bookCol eq book.id) and
-                        (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq resource.id)
-                }.firstOrNull() ?: Credit.new {
-                    this.book = book
-                    this.creator = creator
-                    this.role = resource
-                }
-            }
 
             ctx.json(resource.toJson(showAll = true))
         }

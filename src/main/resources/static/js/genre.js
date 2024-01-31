@@ -16,17 +16,17 @@ async function submitCreate() {
       title: formData["title"].trim(),
     };
 
-    const response = await submitRequest("/api/series", "POST", body);
+    const response = await submitRequest("/api/genres", "POST", body);
     if (response !== null) {
       form.reset();
-      window.location = `/series/${response.body.id}`;
+      window.location = `/genres/${response.body.id}`;
     }
   }
 
   removeLoading(caller);
 }
 
-async function submitUpdate(seriesId) {
+async function submitUpdate(genreId) {
   const caller = "update-button";
   addLoading(caller);
 
@@ -38,23 +38,23 @@ async function submitUpdate(seriesId) {
       title: formData["title"].trim(),
     };
 
-    const response = await submitRequest(`/api/series/${seriesId}`, "PUT", body);
+    const response = await submitRequest(`/api/genres/${genreId}`, "PUT", body);
     if (response !== null) {
       form.reset();
-      window.location = `/series/${seriesId}`;
+      window.location = `/genres/${genreId}`;
     }
   }
 
   removeLoading(caller);
 }
 
-async function submitDelete(seriesId) {
+async function submitDelete(genreId) {
   const caller = "delete-button";
   addLoading(caller);
 
-  const response = await submitRequest(`/api/series/${seriesId}`, "DELETE");
+  const response = await submitRequest(`/api/genres/${genreId}`, "DELETE");
   if (response !== null)
-    window.location = "/series";
+    window.location = "/genres";
 
   removeLoading(caller);
 }

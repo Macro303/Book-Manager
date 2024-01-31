@@ -1,8 +1,8 @@
-@import kotlin.collections.List
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.BookSeries
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
+@import kotlin.collections.List
 @param resource: Series
 @param session: User
 @param books: List<Book>
@@ -26,68 +26,88 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Updating ${resource.title}</h1>
         </header>
-        <div class="box">
-            <form id="update-form" onsubmit="return false;">
-                @template.components.forms.textarea(label = "Summary", name = "summary", value = resource.summary)
-                @template.components.forms.input(label = "Title", name = "title", value = resource.title, icon = "fa-solid fa-heading")
-            </form>
-        </div>
-        <div class="box">
-            <h3 class="title is-3 has-text-centered">Books</h3>
-            <div class="table-container">
+        <form id="update-form" onsubmit="return false;">
+            <div class="columns is-multiline is-centered is-desktop">
+                <div class="column is-half-desktop">
+                    <div class="box">
+                        <h3 class="title is-3">Details</h3>
+                        @template.components.forms.input(label = "Title", name = "title", value = resource.title, icon = "fa-solid fa-heading")
+                    </div>
+                </div>
+                <div class="column is-half-desktop">
+                    <div class="box">
+                        <h3 class="title is-3">Summary</h3>
+                        @template.components.forms.textarea(label = "Summary", name = "summary", value = resource.summary)
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="columns is-multiline is-centered is-desktop">
+            <div class="column is-half-desktop">
                 <form id="add-book-form" onsubmit="return false;">
-                    <table class="table is-fullwidth">
-                        <thead>
-                            <tr>
-                                <th class="has-text-info">Book Title</th>
-                                <th class="has-text-info">Book Subtitle</th>
-                                <th class="has-text-info">Series Number</th>
-                                <th class="has-text-info">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for(entry in resource.books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }))
-                                <tr>
-                                    <td>${entry.book.title}</td>
-                                    <td>${entry.book.subtitle}</td>
-                                    <td>${entry.number}</td>
-                                    <td>
-                                        <div class="buttons is-centered">
-                                            <button class="button is-danger" id="remove-book-${entry.book.id.value}-button" onclick="removeBook(${entry.book.id.value})" type="button">
-                                                <span class="icon">
-                                                    <i class="fa-solid fa-minus"></i>
-                                                </span>
-                                                <span>Remove</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endfor
-                            <tr>
-                                <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
-                                <td>@template.components.forms.input_int(label = "", name = "number", value = 0)</td>
-                                <td>
-                                    <div class="buttons is-centered">
-                                        <button class="button is-success" id="add-book-button" onclick="addBook()" type="button">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-plus"></i>
-                                            </span>
-                                            <span>Add</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="box">
+                        <h3 class="title is-3 has-text-centered">Books</h3>
+                        <div class="table-container">
+                            <table class="table is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th class="has-text-info">Book Title</th>
+                                        <th class="has-text-info">Book Subtitle</th>
+                                        <th class="has-text-info">Series Number</th>
+                                        <th class="has-text-info">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for(entry in resource.books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }))
+                                        <tr>
+                                            <td>${entry.book.title}</td>
+                                            <td>${entry.book.subtitle}</td>
+                                            <td>${entry.number}</td>
+                                            <td>
+                                                <div class="buttons is-centered">
+                                                    <button class="button is-danger" id="remove-book-${entry.book.id.value}-button" onclick="removeBook(${entry.book.id.value})" type="button">
+                                                        <span class="icon">
+                                                            <i class="fa-solid fa-minus"></i>
+                                                        </span>
+                                                        <span>Remove</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endfor
+                                    <tr>
+                                        <td colspan="2">@template.components.forms.select.book(label = "", options = books.sorted())</td>
+                                        <td>@template.components.forms.input_int(label = "", name = "number", value = 0)</td>
+                                        <td>
+                                            <div class="buttons is-centered">
+                                                <button class="button is-success" id="add-book-button" onclick="addBook()" type="button">
+                                                    <span class="icon">
+                                                        <i class="fa-solid fa-plus"></i>
+                                                    </span>
+                                                    <span>Add</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
-        <div class="buttons is-centered">
-            <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">
+        <div class="buttons is-multiline is-centered mt-4">
+            <button class="button is-success" id="update-button" onclick="submitUpdate(${resource.id.value})" type="submit">
                 <span class="icon">
                     <i class="fa-solid fa-floppy-disk"></i>
                 </span>
                 <span>Update</span>
+            </button>
+            <button class="button is-danger" id="delete-button" onclick="submitDelete(${resource.id.value})" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-trash"></i>
+                </span>
+                <span>Delete</span>
             </button>
             <button class="button is-warning" onclick="window.location = document.referrer;" type="button">
                 <span class="icon">
@@ -134,33 +154,6 @@
     const response = await submitRequest("/api/series/${resource.id.value}/books", "DELETE", body);
     if (response !== null)
       window.location.reload();
-    removeLoading(caller);
-  }
-
-  async function submitUpdate() {
-    const caller = "update-button";
-    addLoading(caller);
-
-    if (await validate()) {
-      const form = document.getElementById("update-form");
-      const formData = Object.fromEntries(new FormData(form));
-      const body = {
-        books: [@for(entry in resource.books)
-          {
-            bookId: ${entry.book.id.value},
-            number: ${entry.number ?: 0},
-          },
-        @endfor],
-        summary: formData["summary"].trim() || null,
-        title: formData["title"].trim(),
-      };
-      const response = await submitRequest("/api/series/${resource.id.value}", "PUT", body);
-      if (response !== null) {
-        form.reset();
-        window.location = document.referrer;
-      }
-    }
-
     removeLoading(caller);
   }
 </script>

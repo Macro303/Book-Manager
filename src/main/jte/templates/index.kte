@@ -27,7 +27,7 @@
         </header>
         @if (session == null)
             <div class="columns is-centered">
-                <div class="column is-one-quarter">
+                <div class="column is-half-tablet is-two-fifths-desktop is-one-third-fullhd">
                     <div class="box">
                         <form id="sign-in-form" onsubmit="return false;">
                             @template.components.forms.select.user(label = "", options = users)

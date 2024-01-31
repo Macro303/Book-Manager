@@ -23,7 +23,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
         Utils.query {
             var resources = User.all().toList()
             ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
-                resources = resources.filter { it.image != null == image }
+                resources = resources.filter { it.imageUrl != null == image }
             }
             ctx.queryParam("read-id")?.toLongOrNull()?.let {
                 Book.findById(it)?.let { book ->
@@ -54,24 +54,8 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
                 throw ConflictResponse("User already exists")
             }
             val resource = User.new {
-                image = body.image
+                imageUrl = body.imageUrl
                 username = body.username
-                wishedBooks = SizedCollection(
-                    body.wishedBookIds.map {
-                        Book.findById(it) ?: throw NotFoundResponse("No Book found.")
-                    },
-                )
-            }
-            body.readBooks.forEach {
-                val book = Book.findById(it.bookId)
-                    ?: throw NotFoundResponse("No Book found.")
-                val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
-                }.firstOrNull() ?: ReadBook.new {
-                    this.book = book
-                    this.user = user
-                }
-                readBook.readDate = it.readDate
             }
 
             ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
@@ -88,24 +72,8 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
             if (exists != null && exists != resource) {
                 throw ConflictResponse("User already exists")
             }
-            resource.image = body.image
+            resource.imageUrl = body.imageUrl
             resource.username = body.username
-            resource.wishedBooks = SizedCollection(
-                body.wishedBookIds.map {
-                    Book.findById(it) ?: throw NotFoundResponse("No Book found.")
-                },
-            )
-            body.readBooks.forEach {
-                val book = Book.findById(it.bookId)
-                    ?: throw NotFoundResponse("No Book found.")
-                val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
-                }.firstOrNull() ?: ReadBook.new {
-                    this.book = book
-                    this.user = resource
-                }
-                readBook.readDate = it.readDate
-            }
 
             ctx.json(resource.toJson(showAll = true))
         }

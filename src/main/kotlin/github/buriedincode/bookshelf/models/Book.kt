@@ -27,7 +27,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     var genres by Genre via BookGenreTable
     var goodreadsId: String? by BookTable.goodreadsCol
     var googleBooksId: String? by BookTable.googleBooksCol
-    var image: String? by BookTable.imageCol
+    var imageUrl: String? by BookTable.imageUrlCol
     var isbn: String? by BookTable.isbnCol
     var isCollected: Boolean by BookTable.isCollectedCol
     var libraryThingId: String? by BookTable.libraryThingCol
@@ -47,7 +47,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
             "format" to format.name,
             "goodreadsId" to goodreadsId,
             "googleBooksId" to googleBooksId,
-            "image" to image,
+            "imageUrl" to imageUrl,
             "isbn" to isbn,
             "isCollected" to isCollected,
             "libraryThingId" to libraryThingId,
@@ -95,24 +95,19 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
 }
 
 data class BookInput(
-    val credits: List<Credit> = ArrayList(),
     val format: Format = Format.PAPERBACK,
-    val genreIds: List<Long> = ArrayList(),
     val goodreadsId: String? = null,
     val googleBooksId: String? = null,
-    val image: String? = null,
+    val imageUrl: String? = null,
     val isCollected: Boolean = false,
     val isbn: String? = null,
     val libraryThingId: String? = null,
     val openLibraryId: String? = null,
     val publishDate: LocalDate? = null,
     val publisherId: Long? = null,
-    val readers: List<Reader> = ArrayList(),
-    val series: List<Series> = ArrayList(),
     val subtitle: String? = null,
     val summary: String? = null,
     val title: String,
-    val wisherIds: List<Long> = ArrayList(),
 ) {
     data class Credit(
         val creatorId: Long,

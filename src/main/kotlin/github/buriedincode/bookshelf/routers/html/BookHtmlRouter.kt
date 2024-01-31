@@ -70,9 +70,9 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null)
+            if (session == null) {
                 ctx.redirect("/$plural")
-            else
+            } else {
                 ctx.render(
                     filePath = "templates/$name/create.kte",
                     model = mapOf(
@@ -87,6 +87,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                         "wishers" to User.all().toList(),
                     ),
                 )
+            }
         }
     }
 
@@ -114,9 +115,9 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
         Utils.query {
             val session = ctx.getSession()
             val resource = ctx.getResource()
-            if (session == null)
+            if (session == null) {
                 ctx.redirect("/$plural/${resource.id.value}")
-            else
+            } else {
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
@@ -132,6 +133,21 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                         "wishers" to User.all().toList().filterNot { it in resource.wishers },
                     ),
                 )
+            }
+        }
+    }
+
+    fun import(ctx: Context) {
+        Utils.query {
+            val session = ctx.getSession()
+            if (session == null) {
+                ctx.redirect("/$plural")
+            } else {
+                ctx.render(
+                    filePath = "templates/$name/import.kte",
+                    model = mapOf("session" to session),
+                )
+            }
         }
     }
 }

@@ -39,7 +39,6 @@ class Role(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Role> {
 }
 
 data class RoleInput(
-    val credits: List<Credit> = ArrayList(),
     val summary: String? = null,
     val title: String,
 ) {

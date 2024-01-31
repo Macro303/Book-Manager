@@ -11,6 +11,7 @@ import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Format
 import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.IdInput
+import github.buriedincode.bookshelf.models.ImportBook
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.ReadBook
 import github.buriedincode.bookshelf.models.Role
@@ -69,7 +70,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 resources = resources.filter { googleBooks == it.googleBooksId }
             }
             ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
-                resources = resources.filter { it.image != null == image }
+                resources = resources.filter { it.imageUrl != null == image }
             }
             ctx.queryParam("has-isbn")?.lowercase()?.toBooleanStrictOrNull()?.let { isbn ->
                 resources = resources.filter { it.isbn != null == isbn }
@@ -140,14 +141,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             }
             val resource = Book.new {
                 format = body.format
-                genres = SizedCollection(
-                    body.genreIds.map {
-                        Genre.findById(it) ?: throw NotFoundResponse("Genre not found.")
-                    },
-                )
                 goodreadsId = body.goodreadsId
                 googleBooksId = body.googleBooksId
-                image = body.image
+                imageUrl = body.imageUrl
                 isCollected = body.isCollected
                 isbn = body.isbn
                 libraryThingId = body.libraryThingId
@@ -159,44 +155,6 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 subtitle = body.subtitle
                 summary = body.summary
                 title = body.title
-                wishers = SizedCollection(
-                    body.wisherIds.map {
-                        User.findById(it) ?: throw NotFoundResponse("User not found.")
-                    },
-                )
-            }
-            body.credits.forEach {
-                val creator = Creator.findById(it.creatorId) ?: throw NotFoundResponse("Creator not found.")
-                val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
-                Credit.find {
-                    (CreditTable.bookCol eq resource.id) and
-                        (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq role.id)
-                }.firstOrNull() ?: Credit.new {
-                    this.book = book
-                    this.creator = creator
-                    this.role = role
-                }
-            }
-            body.readers.forEach {
-                val user = User.findById(it.userId) ?: throw NotFoundResponse("User not found.")
-                val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
-                }.firstOrNull() ?: ReadBook.new {
-                    this.book = book
-                    this.user = user
-                }
-                readBook.readDate = it.readDate
-            }
-            body.series.forEach {
-                val series = Series.findById(it.seriesId) ?: throw NotFoundResponse("Series not found.")
-                val bookSeries = BookSeries.find {
-                    (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
-                }.firstOrNull() ?: BookSeries.new {
-                    this.book = book
-                    this.series = series
-                }
-                bookSeries.number = if (it.number == 0) null else it.number
             }
 
             ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
@@ -214,15 +172,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 throw ConflictResponse("Book already exists")
             }
             resource.format = body.format
-            resource.genres = SizedCollection(
-                body.genreIds.map {
-                    Genre.findById(it) ?: throw NotFoundResponse("Genre not found.")
-                },
-            )
             resource.goodreadsId = body.goodreadsId
             resource.googleBooksId = body.googleBooksId
-            resource.image = body.image
-            resource.isCollected = body.isCollected
+            resource.imageUrl = body.imageUrl
             resource.isbn = body.isbn
             resource.libraryThingId = body.libraryThingId
             resource.openLibraryId = body.openLibraryId
@@ -233,44 +185,6 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             resource.subtitle = body.subtitle
             resource.summary = body.summary
             resource.title = body.title
-            resource.wishers = SizedCollection(
-                body.wisherIds.map {
-                    User.findById(it) ?: throw NotFoundResponse("User not found.")
-                },
-            )
-            body.credits.forEach {
-                val creator = Creator.findById(it.creatorId) ?: throw NotFoundResponse("Creator not found.")
-                val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
-                Credit.find {
-                    (CreditTable.bookCol eq resource.id) and
-                        (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq role.id)
-                }.firstOrNull() ?: Credit.new {
-                    this.book = resource
-                    this.creator = creator
-                    this.role = role
-                }
-            }
-            body.readers.forEach {
-                val user = User.findById(it.userId) ?: throw NotFoundResponse("User not found.")
-                val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
-                }.firstOrNull() ?: ReadBook.new {
-                    this.book = resource
-                    this.user = user
-                }
-                readBook.readDate = it.readDate
-            }
-            body.series.forEach {
-                val series = Series.findById(it.seriesId) ?: throw NotFoundResponse("Series not found.")
-                val bookSeries = BookSeries.find {
-                    (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
-                }.firstOrNull() ?: BookSeries.new {
-                    this.book = resource
-                    this.series = series
-                }
-                bookSeries.number = if (it.number == 0) null else it.number
-            }
 
             ctx.json(resource.toJson(showAll = true))
         }
@@ -293,23 +207,128 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    fun pullBook(ctx: Context) {
+    fun import(ctx: Context) {
+        Utils.query {
+            val body = ctx.bodyAsClass<ImportBook>()
+
+            val (edition: Edition, work: Work) = body.openLibraryId?.let {
+                OpenLibrary.getBook(editionId = it)
+            } ?: body.isbn?.let {
+                OpenLibrary.lookupBook(isbn = it)
+            } ?: throw NotImplementedResponse(message = "Import only available via OpenLibrary editionId or isbn currently.")
+
+            val exists = if (edition.isbn == null) {
+                Book.find {
+                    (
+                        (BookTable.titleCol eq edition.title) and
+                            (BookTable.subtitleCol eq edition.subtitle)
+                    ) or (BookTable.openLibraryCol eq edition.editionId)
+                }.firstOrNull()
+            } else {
+                Book.find {
+                    (
+                        (BookTable.titleCol eq edition.title) and
+                            (BookTable.subtitleCol eq edition.subtitle)
+                    ) or (BookTable.openLibraryCol eq edition.editionId) or (BookTable.isbnCol eq edition.isbn)
+                }.firstOrNull()
+            }
+            if (exists != null) {
+                throw ConflictResponse("Book already exists")
+            }
+
+            val resource = Book.new {
+                this.format = Format.PAPERBACK
+                this.genres = SizedCollection(
+                    edition.genres.map {
+                        Genre.find {
+                            GenreTable.titleCol eq it
+                        }.firstOrNull() ?: Genre.new {
+                            this.title = it
+                        }
+                    },
+                )
+                this.goodreadsId = edition.identifiers.goodreads.firstOrNull()
+                this.googleBooksId = edition.identifiers.google.firstOrNull()
+                this.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
+                this.isbn = edition.isbn
+                this.libraryThingId = edition.identifiers.librarything.firstOrNull()
+                this.openLibraryId = edition.editionId
+                this.publishDate = edition.publishDate
+                this.publisher = edition.publishers.firstOrNull()?.let {
+                    Publisher.find {
+                        PublisherTable.titleCol eq it
+                    }.firstOrNull() ?: Publisher.new {
+                        this.title = it
+                    }
+                }
+                this.subtitle = edition.subtitle
+                this.summary = edition.description ?: work.description
+                this.title = edition.title
+            }
+            work.authors.map {
+                OpenLibrary.getAuthor(authorId = it.authorId)
+            }.map {
+                val creator = Creator.find {
+                    CreatorTable.nameCol eq it.name
+                }.firstOrNull() ?: Creator.new {
+                    this.name = it.name
+                }
+                it.photos.firstOrNull()?.let {
+                    creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
+                }
+                creator
+            }.forEach {
+                val role = Role.find {
+                    RoleTable.titleCol eq "Author"
+                }.firstOrNull() ?: Role.new {
+                    this.title = "Author"
+                }
+                Credit.find {
+                    (CreditTable.bookCol eq resource.id) and
+                        (CreditTable.creatorCol eq it.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
+                    this.book = resource
+                    this.creator = it
+                    this.role = role
+                }
+            }
+            edition.contributors.forEach {
+                val creator = Creator.find {
+                    CreatorTable.nameCol eq it.name
+                }.firstOrNull() ?: Creator.new {
+                    this.name = it.name
+                }
+                val role = Role.find {
+                    RoleTable.titleCol eq it.role
+                }.firstOrNull() ?: Role.new {
+                    this.title = it.role
+                }
+                Credit.find {
+                    (CreditTable.bookCol eq resource.id) and
+                        (CreditTable.creatorCol eq creator.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
+                    this.book = resource
+                    this.creator = creator
+                    this.role = role
+                }
+            }
+
+            ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun pull(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
 
-            val edition: Edition
-            val work: Work
-            if (resource.openLibraryId != null) {
-                val temp = OpenLibrary.getBook(editionId = resource.openLibraryId!!)
-                edition = temp.first
-                work = temp.second
-            } else if (resource.isbn != null) {
-                val temp = OpenLibrary.lookupBook(isbn = resource.isbn!!)
-                edition = temp.first
-                work = temp.second
-            } else {
-                throw NotImplementedResponse(message = "Only refresh via OpenLibrary edition id or Isbn currently supported.")
-            }
+            val (edition: Edition, work: Work) = resource.openLibraryId?.let {
+                OpenLibrary.getBook(editionId = it)
+            } ?: resource.isbn?.let {
+                OpenLibrary.lookupBook(isbn = it)
+            } ?: throw NotImplementedResponse(message = "Pull only available via OpenLibrary editionId or isbn currently.")
+
             val exists = if (edition.isbn == null) {
                 Book.find {
                     (
@@ -326,7 +345,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 }.firstOrNull()
             }
             if (exists != null && exists != resource) {
-                throw ConflictResponse(message = "This Book already exists in the database.")
+                throw ConflictResponse("Book already exists")
             }
 
             // book.format = Format.PAPERBACK
@@ -341,7 +360,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             )
             resource.goodreadsId = edition.identifiers.goodreads.firstOrNull()
             resource.googleBooksId = edition.identifiers.google.firstOrNull()
-//            resource.imageFile = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
+            resource.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
             resource.isbn = edition.isbn
             resource.libraryThingId = edition.identifiers.librarything.firstOrNull()
             resource.openLibraryId = edition.editionId
@@ -365,7 +384,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                     name = it.name
                 }
                 it.photos.firstOrNull()?.let {
-//                    creator.imageFile = "https://covers.openlibrary.org/a/id/$it-L.jpg"
+                    creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
                 }
                 creator
             }.forEach {

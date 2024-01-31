@@ -40,11 +40,6 @@ object GenreApiRouter : BaseApiRouter<Genre>(entity = Genre), Logging {
                 throw ConflictResponse("Genre already exists")
             }
             val resource = Genre.new {
-                books = SizedCollection(
-                    body.bookIds.map {
-                        Book.findById(it) ?: throw NotFoundResponse("No Book found.")
-                    },
-                )
                 summary = body.summary
                 title = body.title
             }
@@ -63,11 +58,6 @@ object GenreApiRouter : BaseApiRouter<Genre>(entity = Genre), Logging {
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Genre already exists")
             }
-            resource.books = SizedCollection(
-                body.bookIds.map {
-                    Book.findById(it) ?: throw NotFoundResponse("No Book found.")
-                },
-            )
             resource.summary = body.summary
             resource.title = body.title
 

@@ -29,107 +29,122 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Updating ${resource.username}</h1>
         </header>
-        <div class="box">
-            <form id="update-form" onsubmit="return false;">
-                @template.components.forms.input(label = "Image Url", name = "image", value = resource.image, icon = "fa-solid fa-image")
-                @template.components.forms.input(label = "Username", name = "username", value = resource.username, icon = "fa-solid fa-user")
-            </form>
-        </div>
-        <div class="box">
-            <h3 class="title is-3 has-text-centered">Read Books</h3>
-            <div class="table-container">
+        <div class="columns is-multiline is-centered is-desktop">
+            <div class="column is-half-desktop">
+                <form id="update-form" onsubmit="return false;">
+                    <div class="box">
+                        <h3 class="title is-3">Details</h3>
+                        @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl, icon = "fa-solid fa-image")
+                        @template.components.forms.input(label = "Username", name = "username", value = resource.username, icon = "fa-solid fa-user")
+                    </div>
+                </form>
+            </div>
+            <div class="column is-half-desktop">
                 <form id="add-read-book-form" onsubmit="return false;">
-                    <table class="table is-fullwidth">
-                        <thead>
-                            <tr>
-                                <th class="has-text-info">Read Date</th>
-                                <th class="has-text-info">Book Title</th>
-                                <th class="has-text-info">Book Subtitle</th>
-                                <th class="has-text-info">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for(entry in resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.thenBy{ it.book }))
-                                <tr>
-                                    <td>${entry.readDate?.toHumanReadable()}</td>
-                                    <td>${entry.book.title}</td>
-                                    <td>${entry.book.subtitle}</td>
-                                    <td>
-                                        <button class="button is-danger" id="remove-read-book-${entry.book.id.value}-button" onclick="removeReadBook(${entry.book.id.value})" type="button">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-minus"></i>
-                                            </span>
-                                            <span>Remove</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endfor
-                            <tr>
-                                <td>@template.components.forms.input_date(label = "", name="read-date")</td>
-                                <td colspan="2">@template.components.forms.select.book(label = "", options = readBooks.sorted())</td>
-                                <td>
-                                    <button class="button is-success" id="add-read-book-button" onclick="addReadBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </span>
-                                        <span>Add</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="box">
+                        <h3 class="title is-3 has-text-centered">Read Books</h3>
+                        <div class="table-container">
+                            <table class="table is-fullwidth is-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="has-text-info">Read Date</th>
+                                        <th class="has-text-info">Book Title</th>
+                                        <th class="has-text-info">Book Subtitle</th>
+                                        <th class="has-text-info">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for(entry in resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.thenBy{ it.book }))
+                                        <tr>
+                                            <td>${entry.readDate?.toHumanReadable()}</td>
+                                            <td>${entry.book.title}</td>
+                                            <td>${entry.book.subtitle}</td>
+                                            <td>
+                                                <button class="button is-danger" id="remove-read-book-${entry.book.id.value}-button" onclick="removeReadBook(${entry.book.id.value})" type="button">
+                                                    <span class="icon">
+                                                        <i class="fa-solid fa-minus"></i>
+                                                    </span>
+                                                    <span>Remove</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endfor
+                                    <tr>
+                                        <td>@template.components.forms.input_date(label = "", name="read-date")</td>
+                                        <td colspan="2">@template.components.forms.select.book(label = "", options = readBooks.sorted())</td>
+                                        <td>
+                                            <button class="button is-success" id="add-read-book-button" onclick="addReadBook()" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </span>
+                                                <span>Add</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </form>
             </div>
-        </div>
-        <div class="box">
-            <h3 class="title is-3 has-text-centered">Wished Books</h3>
-            <div class="table-container">
+            <div class="column is-half-desktop">
                 <form id="add-wished-book-form" onsubmit="return false;">
-                    <table class="table is-fullwidth">
-                        <thead>
-                            <tr>
-                                <th class="has-text-info">Book Title</th>
-                                <th class="has-text-info">Book Subtitle</th>
-                                <th class="has-text-info">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for(entry in resource.wishedBooks.sorted())
-                                <tr>
-                                    <td>${entry.title}</td>
-                                    <td>${entry.subtitle}</td>
-                                    <td>
-                                        <button class="button is-danger" id="remove-wished-book-${entry.id.value}-button" onclick="removeWishedBook(${entry.id.value})" type="button">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-minus"></i>
-                                            </span>
-                                            <span>Remove</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endfor
-                            <tr>
-                                <td colspan="2">@template.components.forms.select.book(label = "", options = wishedBooks.sorted())</td>
-                                <td>
-                                    <button class="button is-success" id="add-wished-book-button" onclick="addWishedBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </span>
-                                        <span>Add</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="box">
+                        <h3 class="title is-3 has-text-centered">Wished Books</h3>
+                        <div class="table-container">
+                            <table class="table is-fullwidth is-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="has-text-info">Book Title</th>
+                                        <th class="has-text-info">Book Subtitle</th>
+                                        <th class="has-text-info">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for(entry in resource.wishedBooks.sorted())
+                                        <tr>
+                                            <td>${entry.title}</td>
+                                            <td>${entry.subtitle}</td>
+                                            <td>
+                                                <button class="button is-danger" id="remove-wished-book-${entry.id.value}-button" onclick="removeWishedBook(${entry.id.value})" type="button">
+                                                    <span class="icon">
+                                                        <i class="fa-solid fa-minus"></i>
+                                                    </span>
+                                                    <span>Remove</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endfor
+                                    <tr>
+                                        <td colspan="2">@template.components.forms.select.book(label = "", options = wishedBooks.sorted())</td>
+                                        <td>
+                                            <button class="button is-success" id="add-wished-book-button" onclick="addWishedBook()" type="button">
+                                                <span class="icon">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </span>
+                                                <span>Add</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
-        <div class="buttons is-centered">
-            <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">
+        <div class="buttons is-multiline is-centered mt-4">
+            <button class="button is-success" id="update-button" onclick="submitUpdate(${resource.id.value})" type="submit">
                 <span class="icon">
                     <i class="fa-solid fa-floppy-disk"></i>
                 </span>
                 <span>Update</span>
+            </button>
+            <button class="button is-danger" id="delete-button" onclick="submitDelete(${resource.id.value})" type="button">
+                <span class="icon">
+                    <i class="fa-solid fa-trash"></i>
+                </span>
+                <span>Delete</span>
             </button>
             <button class="button is-warning" onclick="window.location = document.referrer;" type="button">
                 <span class="icon">
@@ -216,34 +231,6 @@
     const response = await submitRequest("/api/users/${resource.id.value}/wished", "DELETE", body);
     if (response !== null)
       window.location.reload();
-    removeLoading(caller);
-  }
-
-  async function submitUpdate() {
-    const caller = "update-button";
-    addLoading(caller);
-
-    if (await validate()) {
-      const form = document.getElementById("update-form");
-      const formData = Object.fromEntries(new FormData(form));
-      const body = {
-        image: formData["image"].trim() || null,
-        readBooks: [@for(entry in resource.readBooks)
-          {
-            bookId: ${entry.book.id.value},
-            readDate: "${entry.readDate?.toString("yyyy-MM-dd") ?: "null"}",
-          },
-        @endfor],
-        username: formData["username"].trim(),
-        wishedBookIds: ${resource.wishedBooks.map { it.id.value }.toString()},
-      };
-      const response = await submitRequest("/api/users/${resource.id.value}", "PUT", body);
-      if (response !== null) {
-        form.reset();
-        window.location = document.referrer;
-      }
-    }
-
     removeLoading(caller);
   }
 </script>

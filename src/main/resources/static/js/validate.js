@@ -52,3 +52,10 @@ function validateInt(name, errorText, allowZero) {
 function validateSelect(name, errorText) {
   return validateField(name, errorText, "text");
 }
+
+function validateAny(options) {
+  return options.some((element, index, array) => {
+    const field = document.getElementById(element);
+    return field.value !== "";
+  });
+}

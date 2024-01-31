@@ -23,7 +23,7 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
                 }
             }
             ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
-                resources = resources.filter { it.image != null == image }
+                resources = resources.filter { it.imageUrl != null == image }
             }
             ctx.queryParam("title")?.let { title ->
                 resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
@@ -42,14 +42,9 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
                 throw ConflictResponse("Publisher already exists")
             }
             val resource = Publisher.new {
-                this.image = body.image
+                this.imageUrl = body.imageUrl
                 this.summary = body.summary
                 this.title = body.title
-            }
-            body.bookIds.map {
-                Book.findById(it) ?: throw NotFoundResponse("No Book found.")
-            }.forEach {
-                it.publisher = resource
             }
 
             ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
@@ -66,14 +61,9 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Publisher already exists")
             }
-            resource.image = body.image
+            resource.imageUrl = body.imageUrl
             resource.summary = body.summary
             resource.title = body.title
-            body.bookIds.map {
-                Book.findById(it) ?: throw NotFoundResponse("No Book found.")
-            }.forEach {
-                it.publisher = resource
-            }
 
             ctx.json(resource.toJson(showAll = true))
         }

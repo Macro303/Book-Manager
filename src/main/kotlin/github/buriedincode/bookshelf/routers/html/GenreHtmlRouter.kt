@@ -33,17 +33,18 @@ object GenreHtmlRouter : BaseHtmlRouter<Genre>(entity = Genre, plural = "genres"
         Utils.query {
             val session = ctx.getSession()
             val resource = ctx.getResource()
-            if (session == null)
+            if (session == null) {
                 ctx.redirect("/$plural/${resource.id.value}")
-            else
+            } else {
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
                         "session" to session,
-                        "resources" to resource,
+                        "resource" to resource,
                         "books" to Book.all().toList().filterNot { it in resource.books },
                     ),
                 )
+            }
         }
     }
 }

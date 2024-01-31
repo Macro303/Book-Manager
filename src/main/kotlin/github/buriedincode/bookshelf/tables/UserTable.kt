@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SchemaUtils
 
 object UserTable : LongIdTable(name = "users"), Logging {
-    val imageCol: Column<String?> = text(name = "image").nullable()
+    val imageUrlCol: Column<String?> = text(name = "image").nullable()
     val usernameCol: Column<String> = text(name = "username").uniqueIndex()
 
     init {

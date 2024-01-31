@@ -26,17 +26,16 @@
             <h1 class="title is-1">Publishers</h1>
         </header>
         <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
+            <div class="column is-two-fifths-tablet is-one-quarter-desktop is-one-fifth-fullhd">
                 @template.components.publisher.filter(
-                    title=selected["title"] as String?,
-                    resetUrl="/publishers"
+                    title = selected["title"] as String?,
+                    resetUrl = "/publishers"
                 )
-                @template.components.adjustable_columns()
             </div>
             <div class="column">
                 <nav class="level is-mobile">
                     <div class="level-left">
-                        <p class="level-item has-text-centered">
+                        <p class="has-text-centered">
                             @if(resources.size == 1)
                                 <span>1 Publisher</span>
                             @else
@@ -46,21 +45,19 @@
                     </div>
                     <div class="level-right">
                         @if(session != null)
-                            <p class="level-item">
-                                <a class="button is-success" href="/publishers/create">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-add"></i>
-                                    </span>
-                                    <span>Create</span>
-                                </a>
-                            </p>
+                            <a class="button is-success" href="/publishers/create">
+                                <span class="icon">
+                                    <i class="fa-solid fa-add"></i>
+                                </span>
+                                <span>Create</span>
+                            </a>
                         @endif
                     </div>
                 </nav>
-                <div class="columns is-multiline is-centered">
+                <div class="columns is-multiline is-centered is-desktop">
                     @for(entry in resources.sorted())
-                        <div class="adjustable-column column">
-                            @template.components.publisher.view(entry=entry)
+                        <div class="column is-half-desktop is-one-third-fullhd">
+                            @template.components.publisher.view(entry = entry)
                         </div>
                     @else
                         <div class="column">
@@ -76,7 +73,6 @@
 </main>
 @template.components.footer()
 <script src="/static/js/scripts.js" type="text/javascript"></script>
-<script src="/static/js/adjustable-columns.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 </body>
 </html>
