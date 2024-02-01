@@ -13,11 +13,13 @@ class Genre(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Genre> {
     }
 
     var books by Book via BookGenreTable
+    var summary: String? by GenreTable.summaryCol
     var title: String by GenreTable.titleCol
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
+            "summary" to summary,
             "title" to title,
         )
         if (showAll) {
@@ -28,3 +30,8 @@ class Genre(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Genre> {
 
     override fun compareTo(other: Genre): Int = comparator.compare(this, other)
 }
+
+data class GenreInput(
+    val summary: String? = null,
+    val title: String,
+)

@@ -18,14 +18,14 @@
 @param resetUrl: String
 
 <div class="box">
-    <h4 class="title is-4">Filter</h4>
+    <h4 class="title is-4">Filter Books</h4>
     <form accept-charset="UTF-8" method="GET">
-        @template.components.forms.select.creator(options=creators, selected=creatorSelected)
-        @template.components.forms.select.format(options=formats, selected=formatSelected)
-        @template.components.forms.select.genre(options=genres, selected=genreSelected)
-        @template.components.forms.select.publisher(options=publishers, selected=publisherSelected)
-        @template.components.forms.select.series(options=series, selected=seriesSelected)
-        @template.components.forms.input(label="Title", name="title", value=title)
+        @template.components.forms.select.creator(options = creators, selected = creatorSelected)
+        @template.components.forms.select.format(options = formats, selected = formatSelected)
+        @template.components.forms.select.genre(options = genres, selected = genreSelected)
+        @template.components.forms.select.publisher(options = publishers, selected = publisherSelected)
+        @template.components.forms.select.series(options = series, selected = seriesSelected)
+        @template.components.forms.input(label = "Title", name = "title", value = title, icon = "fa-solid fa-heading")
         <div class="buttons is-centered">
             <button class="button is-info">
                 <span class="icon">

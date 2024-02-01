@@ -2,7 +2,7 @@ package github.buriedincode.bookshelf.routers.api
 
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.Book
-import github.buriedincode.bookshelf.models.IdValue
+import github.buriedincode.bookshelf.models.IdInput
 import github.buriedincode.bookshelf.models.ReadBook
 import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.models.UserInput
@@ -13,113 +13,73 @@ import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
-import io.javalin.http.bodyValidator
+import io.javalin.http.bodyAsClass
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
-import github.buriedincode.bookshelf.models.UserInput.ReadBook as ReadBookInput
 
-object UserApiRouter : Logging {
-    fun listEndpoint(ctx: Context): Unit =
+object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
+    override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var users = User.all().toList()
-            val username = ctx.queryParam(key = "username")
-            if (username != null) {
-                users = users.filter {
+            var resources = User.all().toList()
+            ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
+                resources = resources.filter { it.imageUrl != null == image }
+            }
+            ctx.queryParam("read-id")?.toLongOrNull()?.let {
+                Book.findById(it)?.let { book ->
+                    resources = resources.filter { book in it.readBooks.map { it.book } }
+                }
+            }
+            ctx.queryParam("username")?.let { username ->
+                resources = resources.filter {
                     it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true)
                 }
             }
-            ctx.json(users.sorted().map { it.toJson() })
-        }
-
-    private fun Context.getInput(): UserInput =
-        this.bodyValidator<UserInput>()
-            .check({ it.role >= 0 }, error = "Role must be greater than or equal to 0")
-            .check({ it.username.isNotBlank() }, error = "Username must not be empty")
-            .get()
-
-    fun createEndpoint(ctx: Context): Unit =
-        Utils.query {
-            val input = ctx.getInput()
-            val exists = User.find {
-                UserTable.usernameCol eq input.username
-            }.firstOrNull()
-            if (exists != null) {
-                throw ConflictResponse(message = "User already exists")
-            }
-            val user = User.new {
-                imageUrl = input.imageUrl
-                role = input.role
-                username = input.username
-                wishedBooks = SizedCollection(
-                    input.wishedBookIds.map {
-                        Book.findById(id = it)
-                            ?: throw NotFoundResponse(message = "Unable to find Book: `$it`")
-                    },
-                )
-            }
-            input.readBooks.forEach {
-                val book = Book.findById(id = it.bookId)
-                    ?: throw NotFoundResponse(message = "Unable to find Book: `${it.bookId}`")
-                val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id)
-                }.firstOrNull() ?: ReadBook.new {
-                    this.book = book
-                    this.user = user
+            ctx.queryParam("wished-id")?.toLongOrNull()?.let {
+                Book.findById(it)?.let { book ->
+                    resources = resources.filter { book in it.wishedBooks }
                 }
-                readBook.readDate = it.readDate
             }
-
-            ctx.status(HttpStatus.CREATED).json(user.toJson(showAll = true))
+            ctx.json(resources.sorted().map { it.toJson() })
         }
-
-    private fun Context.getResource(): User {
-        return this.pathParam("user-id").toLongOrNull()?.let {
-            User.findById(id = it) ?: throw NotFoundResponse(message = "Unable to find User: `$it`")
-        } ?: throw BadRequestResponse(message = "Unable to find User: `${this.pathParam("user-id")}`")
     }
 
-    fun getEndpoint(ctx: Context): Unit =
+    override fun createEndpoint(ctx: Context) {
         Utils.query {
-            val resource = ctx.getResource()
-            ctx.json(resource.toJson(showAll = true))
-        }
-
-    fun updateEndpoint(ctx: Context): Unit =
-        Utils.query {
-            val resource = ctx.getResource()
-            val input = ctx.getInput()
+            val body = ctx.bodyAsClass<UserInput>()
             val exists = User.find {
-                UserTable.usernameCol eq input.username
+                UserTable.usernameCol eq body.username
+            }.firstOrNull()
+            if (exists != null) {
+                throw ConflictResponse("User already exists")
+            }
+            val resource = User.new {
+                imageUrl = body.imageUrl
+                username = body.username
+            }
+
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
+        }
+    }
+
+    override fun updateEndpoint(ctx: Context) {
+        Utils.query {
+            val resource = ctx.getResource()
+            val body = ctx.bodyAsClass<UserInput>()
+            val exists = User.find {
+                UserTable.usernameCol eq body.username
             }.firstOrNull()
             if (exists != null && exists != resource) {
-                throw ConflictResponse(message = "User already exists")
+                throw ConflictResponse("User already exists")
             }
-            resource.imageUrl = input.imageUrl
-            input.readBooks.forEach {
-                val book = Book.findById(id = it.bookId)
-                    ?: throw NotFoundResponse(message = "Unable to find Book: `${it.bookId}`")
-                val readBook = ReadBook.find {
-                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
-                }.firstOrNull() ?: ReadBook.new {
-                    this.book = book
-                    this.user = resource
-                }
-                readBook.readDate = it.readDate
-            }
-            resource.role = input.role
-            resource.username = input.username
-            resource.wishedBooks = SizedCollection(
-                input.wishedBookIds.map {
-                    Book.findById(id = it)
-                        ?: throw NotFoundResponse(message = "Unable to find Book: `$it`")
-                },
-            )
+            resource.imageUrl = body.imageUrl
+            resource.username = body.username
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun deleteEndpoint(ctx: Context): Unit =
+    override fun deleteEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.readBooks.forEach {
@@ -128,74 +88,66 @@ object UserApiRouter : Logging {
             resource.delete()
             ctx.status(HttpStatus.NO_CONTENT)
         }
+    }
 
-    private fun Context.getReadInput(): ReadBookInput =
-        this.bodyValidator<ReadBookInput>()
-            .check({ it.bookId > 0 }, error = "BookId must be greater than 0")
-            .get()
-
-    fun addReadBook(ctx: Context): Unit =
+    fun addReadBook(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getReadInput()
-            val book = Book.findById(id = input.bookId)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.bookId}`")
+            val body = ctx.bodyAsClass<UserInput.ReadBook>()
+            val book = Book.findById(body.bookId)
+                ?: throw NotFoundResponse("No Book found.")
             val readBook = ReadBook.find {
                 (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
             }.firstOrNull() ?: ReadBook.new {
                 this.book = book
                 this.user = resource
             }
-            readBook.readDate = input.readDate
+            readBook.readDate = body.readDate
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    private fun Context.getIdValue(): IdValue =
-        this.bodyValidator<IdValue>()
-            .check({ it.id > 0 }, error = "Id must be greater than 0")
-            .get()
-
-    fun removeReadBook(ctx: Context): Unit =
+    fun removeReadBook(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getIdValue()
-            val book = Book.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.id}`")
-            val exists = ReadBook.find {
+            val body = ctx.bodyAsClass<IdInput>()
+            val book = Book.findById(body.id)
+                ?: throw NotFoundResponse("No Book found.")
+            val readBook = ReadBook.find {
                 (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
-            }.firstOrNull() ?: throw BadRequestResponse(message = "User has not read this Book")
-            exists.delete()
+            }.firstOrNull() ?: throw BadRequestResponse("Read Book not found.")
+            readBook.delete()
 
-            ctx.json(resource.toJson(showAll = true))
+            ctx.status(HttpStatus.NO_CONTENT)
         }
+    }
 
-    fun addWishedBook(ctx: Context): Unit =
+    fun addWishedBook(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getIdValue()
-            val book = Book.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.id}`")
+            val body = ctx.bodyAsClass<IdInput>()
+            val book = Book.findById(body.id)
+                ?: throw NotFoundResponse("No Book found.")
             val temp = resource.wishedBooks.toMutableSet()
             temp.add(book)
             resource.wishedBooks = SizedCollection(temp)
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 
-    fun removeWishedBook(ctx: Context): Unit =
+    fun removeWishedBook(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
-            val input = ctx.getIdValue()
-            val book = Book.findById(id = input.id)
-                ?: throw NotFoundResponse(message = "Unable to find Book: `${input.id}`")
-            if (!resource.wishedBooks.contains(book)) {
-                throw NotFoundResponse(message = "User has not wished for this Book")
-            }
+            val body = ctx.bodyAsClass<IdInput>()
+            val book = Book.findById(body.id)
+                ?: throw NotFoundResponse("No Book found.")
             val temp = resource.wishedBooks.toMutableSet()
             temp.remove(book)
             resource.wishedBooks = SizedCollection(temp)
 
             ctx.json(resource.toJson(showAll = true))
         }
+    }
 }

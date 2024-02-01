@@ -23,8 +23,9 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
     }
 
     protected fun Context.getSession(): User? {
-        val cookie = this.cookie(name = "bookshelf_session-id")?.toLongOrNull() ?: -1L
-        return User.findById(id = cookie)
+        return this.cookie("bookshelf_session-id")?.toLongOrNull()?.let {
+            User.findById(it)
+        }
     }
 
     abstract fun listEndpoint(ctx: Context)
@@ -32,8 +33,8 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
     open fun createEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural")
+            if (session == null) {
+                ctx.redirect("/$plural")
             } else {
                 ctx.render(
                     filePath = "templates/$name/create.kte",
@@ -50,8 +51,8 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
             ctx.render(
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
-                    "resource" to ctx.getResource(),
                     "session" to ctx.getSession(),
+                    "resource" to ctx.getResource(),
                 ),
             )
         }
@@ -60,14 +61,15 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
     open fun updateEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
+            val resource = ctx.getResource()
+            if (session == null) {
+                ctx.redirect("/$plural/${resource.id.value}")
             } else {
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
-                        "resource" to ctx.getResource(),
                         "session" to session,
+                        "resource" to resource,
                     ),
                 )
             }

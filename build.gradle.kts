@@ -1,16 +1,16 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
-    kotlin("jvm") version "1.9.21"
+    kotlin("jvm") version "1.9.22"
     application
-    id("gg.jte.gradle") version "3.1.5"
-    id("com.github.ben-manes.versions") version "0.50.0"
+    id("gg.jte.gradle") version "3.1.9"
+    id("com.github.ben-manes.versions") version "0.51.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
 group = "github.buriedincode"
-version = "0.2.0"
+version = "0.2.2"
 
 println("Bookshelf v$version")
 println("Kotlin v${KotlinVersion.CURRENT}")
@@ -24,44 +24,37 @@ repositories {
 }
 
 dependencies {
-    implementation("org.postgresql", "postgresql", "42.7.0")
-    implementation("mysql", "mysql-connector-java", "8.0.33")
+    implementation("com.sksamuel.hoplite", "hoplite-core", "2.7.5")
+    runtimeOnly("org.postgresql", "postgresql", "42.7.1")
+    runtimeOnly("mysql", "mysql-connector-java", "8.0.33")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.44.1.0")
 
     // Exposed
-    val exposedVersion = "0.45.0"
+    val exposedVersion = "0.47.0"
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-java-time", exposedVersion)
 
-    // Hoplite
-    val hopliteVersion = "2.7.5"
-    implementation("com.sksamuel.hoplite", "hoplite-core", hopliteVersion)
-    implementation("com.sksamuel.hoplite", "hoplite-hocon", hopliteVersion)
-    implementation("com.sksamuel.hoplite", "hoplite-json", hopliteVersion)
-    implementation("com.sksamuel.hoplite", "hoplite-toml", hopliteVersion)
-    implementation("com.sksamuel.hoplite", "hoplite-yaml", hopliteVersion)
-
     // Jackson
-    val jacksonVersion = "2.16.0"
+    val jacksonVersion = "2.16.1"
     implementation("com.fasterxml.jackson.core", "jackson-databind", jacksonVersion)
     implementation("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonVersion)
 
     // Javalin
-    val javalinVersion = "5.6.3"
+    val javalinVersion = "6.0.0"
     implementation("io.javalin", "javalin", javalinVersion)
-    implementation("io.javalin", "javalin-rendering", "5.6.2")
+    implementation("io.javalin", "javalin-rendering", javalinVersion)
 
     // Jte
-    val jteVersion = "3.1.5"
+    val jteVersion = "3.1.9"
     implementation("gg.jte", "jte", jteVersion)
     implementation("gg.jte", "jte-kotlin", jteVersion)
 
     // Log4j2
-    implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.3.0")
-    runtimeOnly("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.22.0")
+    implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.4.0")
+    runtimeOnly("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.22.1")
 }
 
 kotlin {
@@ -80,7 +73,7 @@ application {
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.0.1")
+    version.set("1.1.1")
 }
 
 jte {
