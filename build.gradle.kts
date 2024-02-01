@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "github.buriedincode"
-version = "0.2.1"
+version = "0.2.2"
 
 println("Bookshelf v$version")
 println("Kotlin v${KotlinVersion.CURRENT}")
