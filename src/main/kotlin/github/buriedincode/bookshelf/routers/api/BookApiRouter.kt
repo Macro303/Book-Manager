@@ -140,21 +140,21 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 throw ConflictResponse("Book already exists")
             }
             val resource = Book.new {
-                format = body.format
-                goodreadsId = body.goodreadsId
-                googleBooksId = body.googleBooksId
-                imageUrl = body.imageUrl
-                isCollected = body.isCollected
-                isbn = body.isbn
-                libraryThingId = body.libraryThingId
-                openLibraryId = body.openLibraryId
-                publishDate = body.publishDate
-                publisher = body.publisherId?.let {
+                this.format = body.format
+                this.goodreadsId = body.goodreadsId
+                this.googleBooksId = body.googleBooksId
+                this.imageUrl = body.imageUrl
+                this.isCollected = body.isCollected
+                this.isbn = body.isbn
+                this.libraryThingId = body.libraryThingId
+                this.openLibraryId = body.openLibraryId
+                this.publishDate = body.publishDate
+                this.publisher = body.publisherId?.let {
                     Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
                 }
-                subtitle = body.subtitle
-                summary = body.summary
-                title = body.title
+                this.subtitle = body.subtitle
+                this.summary = body.summary
+                this.title = body.title
             }
 
             ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
@@ -251,6 +251,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 this.googleBooksId = edition.identifiers.google.firstOrNull()
                 this.imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.editionId}-L.jpg"
                 this.isbn = edition.isbn
+                this.isCollected = body.isCollected
                 this.libraryThingId = edition.identifiers.librarything.firstOrNull()
                 this.openLibraryId = edition.editionId
                 this.publishDate = edition.publishDate
