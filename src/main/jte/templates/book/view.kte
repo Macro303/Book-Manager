@@ -122,14 +122,12 @@
                                 <p><strong class="has-text-info">Publish Date:</strong> ${resource.publishDate?.toHumanReadable()}</p>
                             </div>
                         </div>
-                        @if(resource.summary != null)
-                            <div class="box">
-                                <h3 class="title is-3 has-text-centered">Summary</h3>
-                                <div class="block">
-                                    <p>${resource.summary}</p>
-                                </div>
+                        <div class="box">
+                            <h3 class="title is-3 has-text-centered">Summary</h3>
+                            <div class="block">
+                                <p>${resource.summary}</p>
                             </div>
-                        @endif
+                        </div>
                     </div>
                     <div class="column is-one-third-desktop is-one-quarter-fullhd">
                         <div class="box">

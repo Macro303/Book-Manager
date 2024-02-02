@@ -48,29 +48,14 @@
                 </nav>
                 <div class="columns is-desktop">
                     <div class="column">
-                        @if(resource.summary != null)
-                            <div class="box">
-                                <h3 class="title is-3 has-text-centered">Summary</h3>
-                                <div class="block">
-                                    <p>${resource.summary}</p>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="column is-one-third-desktop is-one-quarter-fullhd">
                         <div class="box">
-                            <h3 class="title is-3 has-text-centered">Identifiers</h3>
+                            <h3 class="title is-3 has-text-centered">Summary</h3>
                             <div class="block">
-                                <p><strong class="has-text-info">Bookshelf:</strong> ${resource.id.value}</p>
-                            </div>
-                        </div>
-                        <div class="box">
-                            <h3 class="title is-3 has-text-centered">Stats</h3>
-                            <div class="block">
-                                <p><strong class="has-text-info">Books:</strong> ${resource.books.count()}</p>
+                                <p>${resource.summary}</p>
                             </div>
                         </div>
                     </div>
+                    <div class="column is-one-third-desktop is-one-quarter-fullhd"></div>
                 </div>
             </div>
         </div>
