@@ -30,6 +30,7 @@ async function submitCreate() {
       publishDate: formData["publish-date"].trim() || null,
       publisherId: formData["publisher-id"] || null,
       subtitle: formData["subtitle"].trim() || null,
+      summary: formData["summary"].trim() || null,
       title: formData["title"].trim(),
     };
 
@@ -61,6 +62,7 @@ async function submitUpdate(bookId) {
       publishDate: formData["publish-date"].trim() || null,
       publisherId: formData["publisher-id"] || null,
       subtitle: formData["subtitle"].trim() || null,
+      summary: formData["summary"].trim() || null,
       title: formData["title"].trim(),
     };
 
