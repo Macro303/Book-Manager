@@ -1,9 +1,9 @@
+@import github.buriedincode.bookshelf.models.User
 @import kotlin.collections.List
 @import kotlin.collections.Map
-@import github.buriedincode.bookshelf.models.User
 @param resources: List<User>
 @param session: User?
-@param selected: Map<String, String>
+@param selected: Map<String, Any?>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -25,14 +25,16 @@
             <h1 class="title is-1">Users</h1>
         </header>
         <div class="columns">
-            <div class="column is-one-quarter-tablet is-one-fifth-fullhd">
-                @template.components.user.filter(username=selected["username"], resetUrl="/users")
-                @template.components.adjustable_columns()
+            <div class="column is-two-fifths-tablet is-one-quarter-desktop is-one-fifth-fullhd">
+                @template.components.user.filter(
+                    username = selected["username"] as String?,
+                    resetUrl = "/users"
+                )
             </div>
             <div class="column">
                 <nav class="level is-mobile">
                     <div class="level-left">
-                        <p class="level-item has-text-centered">
+                        <p class="has-text-centered">
                             @if(resources.size == 1)
                                 <span>1 User</span>
                             @else
@@ -41,20 +43,18 @@
                         </p>
                     </div>
                     <div class="level-right">
-                        <p class="level-item">
-                            <a class="button is-success" href="/users/create">
-                                <span class="icon">
-                                    <i class="fa-solid fa-add"></i>
-                                </span>
-                                <span>Create</span>
-                            </a>
-                        </p>
+                        <a class="button is-success" href="/users/create">
+                            <span class="icon">
+                                <i class="fa-solid fa-add"></i>
+                            </span>
+                            <span>Create</span>
+                        </a>
                     </div>
                 </nav>
-                <div class="columns is-multiline is-centered">
+                <div class="columns is-multiline is-centered is-desktop">
                     @for(entry in resources.sorted())
-                        <div class="adjustable-column column">
-                            @template.components.user.view(entry=entry)
+                        <div class="column is-half-desktop is-one-third-fullhd">
+                            @template.components.user.view(entry = entry)
                         </div>
                     @else
                         <div class="column">
@@ -70,7 +70,6 @@
 </main>
 @template.components.footer()
 <script src="/static/js/scripts.js" type="text/javascript"></script>
-<script src="/static/js/adjustable-columns.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 </body>
 </html>

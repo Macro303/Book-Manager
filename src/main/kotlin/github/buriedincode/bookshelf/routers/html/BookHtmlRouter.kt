@@ -16,7 +16,7 @@ import org.apache.logging.log4j.kotlin.Logging
 object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var resources = entity.all().toList().filter { it.isCollected }
+            var resources = Book.all().toList().filter { it.isCollected }
             val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let { Creator.findById(it) }
             creator?.let {
                 resources = resources.filter { creator in it.credits.map { it.creator } }
@@ -52,8 +52,8 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
             ctx.render(
                 filePath = "templates/$name/list.kte",
                 model = mapOf(
-                    "resources" to resources,
                     "session" to ctx.getSession(),
+                    "resources" to resources,
                     "selected" to mapOf(
                         "creator" to creator,
                         "format" to format,
@@ -70,8 +70,8 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural")
+            if (session == null) {
+                ctx.redirect("/$plural")
             } else {
                 ctx.render(
                     filePath = "templates/$name/create.kte",
@@ -103,8 +103,8 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
             ctx.render(
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
-                    "resource" to resource,
                     "session" to ctx.getSession(),
+                    "resource" to resource,
                     "credits" to credits,
                 ),
             )
@@ -114,15 +114,15 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
+            val resource = ctx.getResource()
+            if (session == null) {
+                ctx.redirect("/$plural/${resource.id.value}")
             } else {
-                val resource = ctx.getResource()
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
-                        "resource" to resource,
                         "session" to session,
+                        "resource" to resource,
                         "creators" to Creator.all().toList(),
                         "formats" to Format.entries.toList(),
                         "genres" to Genre.all().toList().filterNot { it in resource.genres },
@@ -132,6 +132,20 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                         "series" to Series.all().toList().filterNot { it in resource.series.map { it.series } },
                         "wishers" to User.all().toList().filterNot { it in resource.wishers },
                     ),
+                )
+            }
+        }
+    }
+
+    fun import(ctx: Context) {
+        Utils.query {
+            val session = ctx.getSession()
+            if (session == null) {
+                ctx.redirect("/$plural")
+            } else {
+                ctx.render(
+                    filePath = "templates/$name/import.kte",
+                    model = mapOf("session" to session),
                 )
             }
         }

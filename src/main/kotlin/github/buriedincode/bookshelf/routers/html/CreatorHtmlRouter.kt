@@ -20,8 +20,8 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
             ctx.render(
                 filePath = "templates/${super.name}/list.kte",
                 model = mapOf(
-                    "resources" to resources,
                     "session" to ctx.getSession(),
+                    "resources" to resources,
                     "selected" to mapOf(
                         "name" to name,
                     ),
@@ -33,8 +33,8 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural")
+            if (session == null) {
+                ctx.redirect("/$plural")
             } else {
                 ctx.render(
                     filePath = "templates/$name/create.kte",
@@ -60,8 +60,8 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
             ctx.render(
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
-                    "resource" to resource,
                     "session" to ctx.getSession(),
+                    "resource" to resource,
                     "credits" to credits,
                 ),
             )
@@ -71,14 +71,15 @@ object CreatorHtmlRouter : BaseHtmlRouter<Creator>(entity = Creator, plural = "c
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
+            val resource = ctx.getResource()
+            if (session == null) {
+                ctx.redirect("/$plural/${resource.id.value}")
             } else {
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
-                        "resource" to ctx.getResource(),
                         "session" to session,
+                        "resource" to resource,
                         "books" to Book.all().toList(),
                         "roles" to Role.all().toList(),
                     ),

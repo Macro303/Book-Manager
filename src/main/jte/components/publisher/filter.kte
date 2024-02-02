@@ -2,9 +2,9 @@
 @param resetUrl: String
 
 <div class="box">
-    <h4 class="title is-4">Filter</h4>
+    <h4 class="title is-4">Filter Publishers</h4>
     <form accept-charset="UTF-8" method="GET">
-        @template.components.forms.input(label="Title", name="title", value=title)
+        @template.components.forms.input(label = "Title", name = "title", value = title, icon = "fa-solid fa-heading")
         <div class="buttons is-centered">
             <button class="button is-info">
                 <span class="icon">

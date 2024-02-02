@@ -9,9 +9,9 @@ import org.apache.logging.log4j.kotlin.Logging
 object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series, plural = "series"), Logging {
     override fun listEndpoint(ctx: Context) {
         Utils.query {
-            var resources = entity.all().toList()
+            var resources = Series.all().toList()
             val title = ctx.queryParam(key = "title")
-            title?.let {
+            if (title != null) {
                 resources = resources.filter {
                     it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
                 }
@@ -19,8 +19,8 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series, plural = "seri
             ctx.render(
                 filePath = "templates/$name/list.kte",
                 model = mapOf(
-                    "resources" to resources,
                     "session" to ctx.getSession(),
+                    "resources" to resources,
                     "selected" to mapOf(
                         "title" to title,
                     ),
@@ -32,8 +32,8 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series, plural = "seri
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural")
+            if (session == null) {
+                ctx.redirect("/$plural")
             } else {
                 ctx.render(
                     filePath = "templates/$name/create.kte",
@@ -49,15 +49,15 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series, plural = "seri
     override fun updateEndpoint(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
-            if (session == null || session.role < 2) {
-                ctx.redirect(location = "/$plural/${ctx.pathParam(paramName)}")
+            val resource = ctx.getResource()
+            if (session == null) {
+                ctx.redirect("/$plural/${resource.id.value}")
             } else {
-                val resource = ctx.getResource()
                 ctx.render(
                     filePath = "templates/$name/update.kte",
                     model = mapOf(
-                        "resource" to resource,
                         "session" to session,
+                        "resource" to resource,
                         "books" to Book.all().toList().filterNot { it in resource.books.map { it.book } },
                     ),
                 )

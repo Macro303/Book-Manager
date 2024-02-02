@@ -21,7 +21,9 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import kotlin.io.path.div
 
 object Utils : Logging {
@@ -39,7 +41,7 @@ object Utils : Logging {
     internal val CACHE_ROOT = XDG_CACHE / "bookshelf"
     internal val CONFIG_ROOT = XDG_CONFIG / "bookshelf"
     internal val DATA_ROOT = XDG_DATA / "bookshelf"
-    internal const val VERSION = "0.2.0"
+    internal const val VERSION = "0.2.2"
 
     internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
         .addModule(JavaTimeModule())
@@ -90,9 +92,6 @@ object Utils : Logging {
         )
     }
 
-    val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-
     init {
         if (!Files.exists(CACHE_ROOT)) {
             CACHE_ROOT.toFile().mkdirs()
@@ -102,19 +101,6 @@ object Utils : Logging {
         }
         if (!Files.exists(DATA_ROOT)) {
             DATA_ROOT.toFile().mkdirs()
-        }
-    }
-
-    private fun getDayNumberSuffix(day: Int): String {
-        return if (day in 11..13) {
-            "th"
-        } else {
-            when (day % 10) {
-                1 -> "st"
-                2 -> "nd"
-                3 -> "rd"
-                else -> "th"
-            }
         }
     }
 
@@ -153,10 +139,36 @@ object Utils : Logging {
         return "${duration.toMillis()}ms"
     }
 
-    fun getHumanReadableDateFormatter(date: LocalDate): DateTimeFormatter =
-        DateTimeFormatter.ofPattern(
-            "d'${getDayNumberSuffix(date.dayOfMonth)}' MMM yyyy",
-        )
-
     fun Secret?.isNullOrBlank(): Boolean = this?.value.isNullOrBlank()
+
+    fun String.toLocalDateOrNull(pattern: String): LocalDate? {
+        return try {
+            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)
+            LocalDate.parse(this, formatter)
+        } catch (dtpe: DateTimeParseException) {
+            null
+        }
+    }
+
+    private fun getDayNumberSuffix(day: Int): String {
+        return if (day in 11..13) {
+            "th"
+        } else {
+            when (day % 10) {
+                1 -> "st"
+                2 -> "nd"
+                3 -> "rd"
+                else -> "th"
+            }
+        }
+    }
+
+    fun LocalDate.toHumanReadable(): String {
+        val pattern = "d'${getDayNumberSuffix(this.dayOfMonth)}' MMM yyyy"
+        return this.toString(pattern)
+    }
+
+    fun LocalDate.toString(pattern: String): String {
+        return this.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH))
+    }
 }
