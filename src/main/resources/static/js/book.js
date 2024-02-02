@@ -106,7 +106,7 @@ async function submitImport() {
     const response = await submitRequest("/api/books/import", "POST", body);
     if (response !== null) {
       form.reset();
-      window.location = document.referrer;
+      window.location = `/books/${response.body.id}`;
     }
   } else {
     alert("Atleast 1 field must be filled.");

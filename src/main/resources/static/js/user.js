@@ -97,7 +97,7 @@ async function submitCreateBook(userId) {
     const response = await submitRequest("/api/books", "POST", body);
     if (response !== null) {
       form.reset();
-      window.location = document.referrer;
+      window.location = `/books/${response.body.id}`;
     }
   }
 
@@ -128,7 +128,7 @@ async function submitImportBook(userId) {
       response = await submitRequest(`/api/users/${userId}/wished`, "POST", body);
       if (response !== null) {
         form.reset();
-        window.location = document.referrer;
+        window.location = `/books/${response.body.id}`;
       }
     }
   } else {
