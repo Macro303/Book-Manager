@@ -375,9 +375,6 @@
                 @endfor
             </div>
         @endif
-        <div class="block has-text-centered">
-            <p><small><em>Last Updated at </em></small></p>
-        </div>
     </div>
 </main>
 @template.components.footer()
