@@ -1,6 +1,7 @@
 package github.buriedincode.bookshelf.models
 
-import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import github.buriedincode.bookshelf.Utils.toString
 import github.buriedincode.bookshelf.tables.BookGenreTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
@@ -22,7 +23,6 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     }
 
     val credits by Credit referrersOn CreditTable.bookCol
-    var description: String? by BookTable.descriptionCol
     var format: Format by BookTable.formatCol
     var genres by Genre via BookGenreTable
     var goodreadsId: String? by BookTable.goodreadsCol
@@ -37,13 +37,13 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     val readers by ReadBook referrersOn ReadBookTable.bookCol
     val series by BookSeries referrersOn BookSeriesTable.bookCol
     var subtitle: String? by BookTable.subtitleCol
+    var summary: String? by BookTable.summaryCol
     var title: String by BookTable.titleCol
     var wishers by User via WishedTable
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
-            "description" to description,
             "format" to format.name,
             "goodreadsId" to goodreadsId,
             "googleBooksId" to googleBooksId,
@@ -52,8 +52,9 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
             "isCollected" to isCollected,
             "libraryThingId" to libraryThingId,
             "openLibraryId" to openLibraryId,
-            "publishDate" to publishDate?.format(DATE_FORMATTER),
+            "publishDate" to publishDate?.toString("yyyy-MM-dd"),
             "subtitle" to subtitle,
+            "summary" to summary,
             "title" to title,
         )
         if (showAll) {
@@ -71,7 +72,7 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
                 compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
             ).map {
                 mapOf(
-                    "readDate" to it.readDate?.format(DATE_FORMATTER),
+                    "readDate" to it.readDate?.toString("yyyy-MM-dd"),
                     "user" to it.user.toJson(),
                 )
             }
@@ -91,4 +92,36 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     }
 
     override fun compareTo(other: Book): Int = comparator.compare(this, other)
+}
+
+data class BookInput(
+    val format: Format = Format.PAPERBACK,
+    val goodreadsId: String? = null,
+    val googleBooksId: String? = null,
+    val imageUrl: String? = null,
+    val isCollected: Boolean = false,
+    val isbn: String? = null,
+    val libraryThingId: String? = null,
+    val openLibraryId: String? = null,
+    val publishDate: LocalDate? = null,
+    val publisherId: Long? = null,
+    val subtitle: String? = null,
+    val summary: String? = null,
+    val title: String,
+) {
+    data class Credit(
+        val creatorId: Long,
+        val roleId: Long,
+    )
+
+    data class Reader(
+        val userId: Long,
+        @JsonDeserialize(using = LocalDateDeserializer::class)
+        val readDate: LocalDate? = LocalDate.now(),
+    )
+
+    data class Series(
+        val seriesId: Long,
+        val number: Int? = null,
+    )
 }

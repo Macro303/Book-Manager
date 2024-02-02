@@ -1,6 +1,7 @@
 package github.buriedincode.bookshelf.models
 
-import github.buriedincode.bookshelf.Utils.DATE_FORMATTER
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import github.buriedincode.bookshelf.Utils.toString
 import github.buriedincode.bookshelf.tables.ReadBookTable
 import github.buriedincode.bookshelf.tables.UserTable
 import github.buriedincode.bookshelf.tables.WishedTable
@@ -17,7 +18,6 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
 
     var imageUrl: String? by UserTable.imageUrlCol
     val readBooks by ReadBook referrersOn ReadBookTable.userCol
-    var role: Short by UserTable.roleCol
     var username: String by UserTable.usernameCol
     var wishedBooks by Book via WishedTable
 
@@ -25,7 +25,6 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
         val output = mutableMapOf<String, Any?>(
             "id" to id.value,
             "imageUrl" to imageUrl,
-            "role" to role,
             "username" to username,
         )
         if (showAll) {
@@ -34,7 +33,7 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
             ).map {
                 mapOf(
                     "book" to it.book.toJson(),
-                    "readDate" to it.readDate?.format(DATE_FORMATTER),
+                    "readDate" to it.readDate?.toString("yyyy-MM-dd"),
                 )
             }
             output["wished"] = wishedBooks.sorted().map { it.toJson() }
@@ -43,4 +42,15 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
     }
 
     override fun compareTo(other: User): Int = comparator.compare(this, other)
+}
+
+data class UserInput(
+    val imageUrl: String? = null,
+    val username: String,
+) {
+    data class ReadBook(
+        val bookId: Long,
+        @JsonDeserialize(using = LocalDateDeserializer::class)
+        val readDate: LocalDate? = LocalDate.now(),
+    )
 }

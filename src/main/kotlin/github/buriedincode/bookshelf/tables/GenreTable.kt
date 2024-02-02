@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SchemaUtils
 
 object GenreTable : LongIdTable(name = "genres"), Logging {
+    val summaryCol: Column<String?> = text(name = "summary").nullable()
     val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {

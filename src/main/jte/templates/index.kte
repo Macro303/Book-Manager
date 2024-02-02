@@ -1,5 +1,7 @@
 @import github.buriedincode.bookshelf.models.User
+@import kotlin.collections.List
 @param session: User? = null
+@param users: List<User>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -25,12 +27,12 @@
         </header>
         @if (session == null)
             <div class="columns is-centered">
-                <div class="column is-one-quarter">
+                <div class="column is-half-tablet is-two-fifths-desktop is-one-third-fullhd">
                     <div class="box">
                         <form id="sign-in-form" onsubmit="return false;">
-                            @template.components.forms.input(label="Username", name="username")
+                            @template.components.forms.select.user(label = "", options = users)
                             <div class="buttons is-centered">
-                                <button class="button is-primary" id="sign-in-button" type="submit" onclick="signIn()">
+                                <button class="button is-primary" id="sign-in-button" onclick="signIn()" type="submit">
                                     <span class="icon">
                                         <i class="fa-solid fa-right-to-bracket"></i>
                                     </span>
@@ -51,22 +53,16 @@
   async function signIn() {
     const caller = "sign-in-button";
     const form = document.getElementById("sign-in-form");
-    const jsonData = Object.fromEntries(new FormData(form));
-    const params = {
-      username: jsonData["username"].trim(),
-    };
+    const formData = Object.fromEntries(new FormData(form));
 
     addLoading(caller);
-    const response = await submitRequest("/api/users?" + new URLSearchParams(params), "GET");
-    if (response !== null) {
-      if (response.length === 1) {
-        @raw
-          document.cookie = `bookshelf_session-id=${response[0].id};path=/;max-age=${60*60*24*30};SameSite=Strict`;
-          window.location = `/users/${response[0].id}`;
-        @endraw
-      } else
-        alert('404 Not Found: ["User not found."]');
-    }
+    @raw
+      const response = await submitRequest(`/api/users/${formData["user-id"]}`, "GET");
+      if (response !== null) {
+        document.cookie = `bookshelf_session-id=${formData["user-id"]};path=/;max-age=${60*60*24*30};SameSite=Strict`;
+        window.location = `/users/${formData["user-id"]}`;
+      }
+    @endraw
     removeLoading(caller);
   }
 </script>

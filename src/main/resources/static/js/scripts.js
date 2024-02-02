@@ -72,9 +72,13 @@ async function submitRequest(endpoint, method, body = {}) {
 
     if (!response.ok)
       throw response;
-    return response.status !== 204 ? response.json() : "";
+    const responseBody = response.status !== 204 ? await response.json() : "";
+    return { status: response.status, body: responseBody }
   } catch(error) {
-    alert(`${error.status} ${error.statusText}: ${await error.text()}`);
+    if(typeof error.text === "function")
+      alert(`${error.status} ${error.statusText}: ${await error.text()}`);
+    else
+      alert(error);
     return null;
   }
 }

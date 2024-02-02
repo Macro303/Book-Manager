@@ -4,9 +4,9 @@
 <a class="box has-text-centered" href="/creators/${entry.id.value}">
     <div class="columns is-mobile">
         <div class="column is-one-third">
-            <figure class="image is-128x128">
+            <figure class="image is-128x128 is-inline-block">
                 @if(entry.imageUrl == null)
-                    <img alt="${entry.name} profile image" class="profile is-rounded" loading="lazy" src="/static/img/logo.png"/>
+                    <img alt="Missing profile image" class="profile is-rounded" loading="lazy" src="https://via.placeholder.com/256x256"/>
                 @else
                     <img alt="${entry.name} profile image" class="profile is-rounded" loading="lazy" src="${entry.imageUrl}"/>
                 @endif
