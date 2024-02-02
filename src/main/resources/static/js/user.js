@@ -33,7 +33,7 @@ async function submitCreate() {
     const response = await submitRequest("/api/users", "POST", body);
     if (response !== null) {
       form.reset();
-      window.location = `/users/${response.id}`;
+      window.location = `/users/${response.body.id}`;
     }
   }
 
