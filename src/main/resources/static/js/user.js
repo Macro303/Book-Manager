@@ -95,9 +95,16 @@ async function submitCreateBook(userId) {
     };
 
     const response = await submitRequest("/api/books", "POST", body);
-    if (response !== null) {
-      form.reset();
-      window.location = `/books/${response.body.id}`;
+    if (bookResponse !== null) {
+      body = {
+        id: bookResponse.body.id
+      };
+
+      const response = await submitRequest(`/api/users/${userId}/wished`, "POST", body);
+      if (response !== null) {
+        form.reset();
+        window.location = `/books/${bookResponse.body.id}`;
+      }
     }
   }
 
@@ -119,16 +126,16 @@ async function submitImportBook(userId) {
       openLibraryId: formData["open-library"].trim() || null,
     };
 
-    let response = await submitRequest("/api/books/import", "POST", body);
-    if (response !== null) {
+    const bookResponse = await submitRequest("/api/books/import", "POST", body);
+    if (bookResponse !== null) {
       body = {
-        id: response.body.id
+        id: bookResponse.body.id
       };
 
-      response = await submitRequest(`/api/users/${userId}/wished`, "POST", body);
+      const response = await submitRequest(`/api/users/${userId}/wished`, "POST", body);
       if (response !== null) {
         form.reset();
-        window.location = `/books/${response.body.id}`;
+        window.location = `/books/${bookResponse.body.id}`;
       }
     }
   } else {
