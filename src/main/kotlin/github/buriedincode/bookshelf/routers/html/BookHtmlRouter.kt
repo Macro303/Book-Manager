@@ -9,7 +9,6 @@ import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.models.Series
-import github.buriedincode.bookshelf.models.User
 import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
