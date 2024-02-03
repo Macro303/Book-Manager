@@ -81,10 +81,8 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                         "formats" to Format.entries.toList(),
                         "genres" to Genre.all().toList(),
                         "publishers" to Publisher.all().toList(),
-                        "readers" to User.all().toList(),
                         "roles" to Role.all().toList(),
                         "series" to Series.all().toList(),
-                        "wishers" to User.all().toList(),
                     ),
                 )
             }
@@ -126,11 +124,9 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                         "creators" to Creator.all().toList(),
                         "formats" to Format.entries.toList(),
                         "genres" to Genre.all().toList().filterNot { it in resource.genres },
-                        "publishers" to Publisher.all().toList().filterNot { it == resource.publisher },
-                        "readers" to User.all().toList().filterNot { it in resource.readers.map { it.user } },
+                        "publishers" to Publisher.all().toList(),
                         "roles" to Role.all().toList(),
                         "series" to Series.all().toList().filterNot { it in resource.series.map { it.series } },
-                        "wishers" to User.all().toList().filterNot { it in resource.wishers },
                     ),
                 )
             }
