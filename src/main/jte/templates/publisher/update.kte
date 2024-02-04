@@ -29,7 +29,6 @@
                 <div class="column is-half-desktop">
                     <div class="box">
                         <h3 class="title is-3">Details</h3>
-                        @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl, icon = "fa-solid fa-image")
                         @template.components.forms.input(label = "Title", name = "title", value = resource.title, icon = "fa-solid fa-heading")
                     </div>
                 </div>

@@ -49,53 +49,55 @@
             <div class="column">
                 <nav class="level is-mobile">
                     <div class="level-left">
-                        <div class="buttons is-multiline">
-                            @if(resource.isCollected)
-                                <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-rotate-left"></i>
-                                    </span>
-                                    <span>Discard</span>
-                                </button>
-                                @if(session in resource.readers.map { it.user })
-                                    <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
+                        @if(session != null)
+                            <div class="buttons is-multiline">
+                                @if(resource.isCollected)
+                                    <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
                                         <span class="icon">
-                                            <i class="fa-solid fa-bookmark"></i>
+                                            <i class="fa-solid fa-rotate-left"></i>
                                         </span>
-                                        <span>Unread</span>
+                                        <span>Discard</span>
                                     </button>
+                                    @if(session in resource.readers.map { it.user })
+                                        <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-bookmark"></i>
+                                            </span>
+                                            <span>Unread</span>
+                                        </button>
+                                    @else
+                                        <button class="button is-success" id="read-book-button" onclick="readBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-regular fa-bookmark"></i>
+                                            </span>
+                                            <span>Read</span>
+                                        </button>
+                                    @endif
                                 @else
-                                    <button class="button is-success" id="read-book-button" onclick="readBook()" type="button">
+                                    <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
                                         <span class="icon">
-                                            <i class="fa-regular fa-bookmark"></i>
+                                            <i class="fa-solid fa-box-archive"></i>
                                         </span>
-                                        <span>Read</span>
+                                        <span>Collect</span>
                                     </button>
+                                    @if(session in resource.wishers)
+                                        <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-star"></i>
+                                            </span>
+                                            <span>Unwish</span>
+                                        </button>
+                                    @else
+                                        <button class="button is-success" id="wish-book-button" onclick="wishBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-regular fa-star"></i>
+                                            </span>
+                                            <span>Wish</span>
+                                        </button>
+                                    @endif
                                 @endif
-                            @else
-                                <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-box-archive"></i>
-                                    </span>
-                                    <span>Collect</span>
-                                </button>
-                                @if(session in resource.wishers)
-                                    <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-star"></i>
-                                        </span>
-                                        <span>Unwish</span>
-                                    </button>
-                                @else
-                                    <button class="button is-success" id="wish-book-button" onclick="wishBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-regular fa-star"></i>
-                                        </span>
-                                        <span>Wish</span>
-                                    </button>
-                                @endif
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                     </div>
                     <div class="level-right">
                         @if(session != null)
@@ -120,6 +122,9 @@
                             </div>
                             <div class="block">
                                 <p><strong class="has-text-info">Publish Date:</strong> ${resource.publishDate?.toHumanReadable()}</p>
+                            </div>
+                            <div class="block">
+                                <p><strong class="has-text-info">Publisher:</strong> <a class="is-family-primary has-text-link" href="/publishers/${resource.publisher?.id?.value}">${resource.publisher?.title}</a></p>
                             </div>
                         </div>
                         <div class="box">
@@ -274,31 +279,6 @@
                 </div>
             </div>
         @endfor
-        <nav class="level is-mobile">
-            <div class="level-left level-item has-text-centered">
-                <div>
-                    <p class="title">Publisher</p>
-                    @if(resource.publisher == null)
-                        <p class="heading">0 Publishers</p>
-                    @else
-                        <p class="heading">1 Publisher</p>
-                    @endif
-                </div>
-            </div>
-        </nav>
-        <div class="columns is-multiline is-centered">
-            @if(resource.publisher == null)
-                <div class="column">
-                    <div class="box has-text-centered">
-                        <h5 class="title is-5 has-text-danger">No Publisher found.</h5>
-                    </div>
-                </div>
-            @else
-                <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                    @template.components.publisher.view(entry = resource.publisher!!)
-                </div>
-            @endif
-        </div>
         <nav class="level is-mobile">
             <div class="level-left level-item has-text-centered">
                 <div>

@@ -79,7 +79,7 @@
                 <div class="columns is-multiline is-centered is-desktop">
                     @for(entry in resources.sorted())
                         <div class="column is-half-desktop is-one-third-fullhd">
-                            @template.components.book.view(entry = entry)
+                            @template.components.book.view(entry = entry, session = session)
                         </div>
                     @else
                         <div class="column">

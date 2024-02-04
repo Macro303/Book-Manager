@@ -175,7 +175,7 @@
     const formData = Object.fromEntries(new FormData(form));
     const body = {
         bookId: formData["book-id"],
-        readDate: formData["read-date"],
+        readDate: formData["read-date"] || null,
     };
 
     addLoading(caller);

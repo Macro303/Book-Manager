@@ -80,11 +80,7 @@
             <div class="level-left level-item has-text-centered">
                 <div>
                     <p class="title">Last Read Books</p>
-                    @if(resource.readBooks.count() == 1L)
-                        <p class="heading">1 Book</p>
-                    @else
-                        <p class="heading">${resource.readBooks.count()} Books</p>
-                    @endif
+                    <p class="heading"></p>
                 </div>
             </div>
         </nav>
@@ -94,7 +90,7 @@
                     !{break}
                 @endif
                 <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                    @template.components.book.view(entry = entry.get().book, readDate = entry.get().readDate)
+                    @template.components.book.view(entry = entry.get().book, readDate = entry.get().readDate, session = session)
                 </div>
             @else
                 <div class="column">
