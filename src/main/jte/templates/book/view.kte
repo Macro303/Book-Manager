@@ -49,53 +49,55 @@
             <div class="column">
                 <nav class="level is-mobile">
                     <div class="level-left">
-                        <div class="buttons is-multiline">
-                            @if(resource.isCollected)
-                                <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-rotate-left"></i>
-                                    </span>
-                                    <span>Discard</span>
-                                </button>
-                                @if(session in resource.readers.map { it.user })
-                                    <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
+                        @if(session != null)
+                            <div class="buttons is-multiline">
+                                @if(resource.isCollected)
+                                    <button class="button is-warning" id="discard-book-button" onclick="discardBook()" type="button">
                                         <span class="icon">
-                                            <i class="fa-solid fa-bookmark"></i>
+                                            <i class="fa-solid fa-rotate-left"></i>
                                         </span>
-                                        <span>Unread</span>
+                                        <span>Discard</span>
                                     </button>
+                                    @if(session in resource.readers.map { it.user })
+                                        <button class="button is-warning" id="unread-book-button" onclick="unreadBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-bookmark"></i>
+                                            </span>
+                                            <span>Unread</span>
+                                        </button>
+                                    @else
+                                        <button class="button is-success" id="read-book-button" onclick="readBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-regular fa-bookmark"></i>
+                                            </span>
+                                            <span>Read</span>
+                                        </button>
+                                    @endif
                                 @else
-                                    <button class="button is-success" id="read-book-button" onclick="readBook()" type="button">
+                                    <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
                                         <span class="icon">
-                                            <i class="fa-regular fa-bookmark"></i>
+                                            <i class="fa-solid fa-box-archive"></i>
                                         </span>
-                                        <span>Read</span>
+                                        <span>Collect</span>
                                     </button>
+                                    @if(session in resource.wishers)
+                                        <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-star"></i>
+                                            </span>
+                                            <span>Unwish</span>
+                                        </button>
+                                    @else
+                                        <button class="button is-success" id="wish-book-button" onclick="wishBook()" type="button">
+                                            <span class="icon">
+                                                <i class="fa-regular fa-star"></i>
+                                            </span>
+                                            <span>Wish</span>
+                                        </button>
+                                    @endif
                                 @endif
-                            @else
-                                <button class="button is-success" id="collect-book-button" onclick="collectBook()" type="button">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-box-archive"></i>
-                                    </span>
-                                    <span>Collect</span>
-                                </button>
-                                @if(session in resource.wishers)
-                                    <button class="button is-warning" id="unwish-book-button" onclick="unwishBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-star"></i>
-                                        </span>
-                                        <span>Unwish</span>
-                                    </button>
-                                @else
-                                    <button class="button is-success" id="wish-book-button" onclick="wishBook()" type="button">
-                                        <span class="icon">
-                                            <i class="fa-regular fa-star"></i>
-                                        </span>
-                                        <span>Wish</span>
-                                    </button>
-                                @endif
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                     </div>
                     <div class="level-right">
                         @if(session != null)

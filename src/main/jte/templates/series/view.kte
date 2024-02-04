@@ -75,7 +75,7 @@
         <div class="columns is-multiline is-centered">
             @for(entry in resource.books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }))
                 <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                    @template.components.book.view(entry = entry.book, series = Pair(entry.series, entry.number))
+                    @template.components.book.view(entry = entry.book, series = Pair(entry.series, entry.number), session = session)
                 </div>
             @else
                 <div class="column">

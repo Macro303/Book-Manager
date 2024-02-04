@@ -82,7 +82,7 @@
             <div class="columns is-multiline is-centered">
                 @for(book in credits[creator]!!.sorted())
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                        @template.components.book.view(entry = book)
+                        @template.components.book.view(entry = book, session = session)
                     </div>
                 @else
                     <div class="column">
