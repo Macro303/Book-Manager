@@ -123,6 +123,9 @@
                             <div class="block">
                                 <p><strong class="has-text-info">Publish Date:</strong> ${resource.publishDate?.toHumanReadable()}</p>
                             </div>
+                            <div class="block">
+                                <p><strong class="has-text-info">Publisher:</strong> <a class="is-family-primary has-text-link" href="/publishers/${resource.publisher?.id?.value}">${resource.publisher?.title}</a></p>
+                            </div>
                         </div>
                         <div class="box">
                             <h3 class="title is-3 has-text-centered">Summary</h3>
@@ -276,31 +279,6 @@
                 </div>
             </div>
         @endfor
-        <nav class="level is-mobile">
-            <div class="level-left level-item has-text-centered">
-                <div>
-                    <p class="title">Publisher</p>
-                    @if(resource.publisher == null)
-                        <p class="heading">0 Publishers</p>
-                    @else
-                        <p class="heading">1 Publisher</p>
-                    @endif
-                </div>
-            </div>
-        </nav>
-        <div class="columns is-multiline is-centered">
-            @if(resource.publisher == null)
-                <div class="column">
-                    <div class="box has-text-centered">
-                        <h5 class="title is-5 has-text-danger">No Publisher found.</h5>
-                    </div>
-                </div>
-            @else
-                <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                    @template.components.publisher.view(entry = resource.publisher!!)
-                </div>
-            @endif
-        </div>
         <nav class="level is-mobile">
             <div class="level-left level-item has-text-centered">
                 <div>

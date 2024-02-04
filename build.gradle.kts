@@ -43,7 +43,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonVersion)
 
     // Javalin
-    val javalinVersion = "6.0.0"
+    val javalinVersion = "6.0.1"
     implementation("io.javalin", "javalin", javalinVersion)
     implementation("io.javalin", "javalin-rendering", javalinVersion)
 

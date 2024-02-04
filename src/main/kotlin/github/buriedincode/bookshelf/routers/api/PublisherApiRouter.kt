@@ -22,9 +22,6 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
                     resources = resources.filter { book in it.books }
                 }
             }
-            ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
-                resources = resources.filter { it.imageUrl != null == image }
-            }
             ctx.queryParam("title")?.let { title ->
                 resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
             }
@@ -42,7 +39,6 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
                 throw ConflictResponse("Publisher already exists")
             }
             val resource = Publisher.new {
-                this.imageUrl = body.imageUrl
                 this.summary = body.summary
                 this.title = body.title
             }
@@ -61,7 +57,6 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Publisher already exists")
             }
-            resource.imageUrl = body.imageUrl
             resource.summary = body.summary
             resource.title = body.title
 

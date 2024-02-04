@@ -20,7 +20,7 @@ object BookTable : LongIdTable(name = "books"), Logging {
     ).default(defaultValue = Format.PAPERBACK)
     val goodreadsCol: Column<String?> = text(name = "goodreads_id").nullable()
     val googleBooksCol: Column<String?> = text(name = "google_books_id").nullable()
-    val imageUrlCol: Column<String?> = text(name = "image").nullable()
+    val imageUrlCol: Column<String?> = text(name = "image_url").nullable()
     val isCollectedCol: Column<Boolean> = bool(name = "is_collected").default(defaultValue = false)
     val isbnCol: Column<String?> = text(name = "isbn").nullable().uniqueIndex()
     val libraryThingCol: Column<String?> = text(name = "library_thing_id").nullable()

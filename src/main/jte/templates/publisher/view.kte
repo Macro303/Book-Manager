@@ -23,15 +23,7 @@
             <h1 class="title is-1">${resource.title}</h1>
         </header>
         <div class="columns">
-            <div class="column is-one-third-tablet is-one-quarter-fullhd">
-                <figure class="image is-2by3">
-                    @if(resource.imageUrl == null)
-                        <img alt="Missing logo" loading="lazy" src="https://via.placeholder.com/1500x1000"/>
-                    @else
-                        <img alt="${resource.title} logo" loading="lazy" src="${resource.imageUrl}"/>
-                    @endif
-                </figure>
-            </div>
+            <div class="column is-one-third-tablet is-one-quarter-fullhd"></div>
             <div class="column">
                 <nav class="level is-mobile">
                     <div class="level-left"></div>

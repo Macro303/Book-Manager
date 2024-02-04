@@ -12,7 +12,6 @@ async function submitCreate() {
     const form = document.getElementById("create-form");
     const formData = Object.fromEntries(new FormData(form));
     const body = {
-      imageUrl: formData["image-url"].trim() || null,
       summary: formData["summary"].trim() || null,
       title: formData["title"].trim(),
     };
@@ -35,7 +34,6 @@ async function submitUpdate(publisherId) {
     const form = document.getElementById("update-form");
     const formData = Object.fromEntries(new FormData(form));
     const body = {
-      imageUrl: formData["image-url"].trim() || null,
       summary: formData["summary"].trim() || null,
       title: formData["title"].trim(),
     };
