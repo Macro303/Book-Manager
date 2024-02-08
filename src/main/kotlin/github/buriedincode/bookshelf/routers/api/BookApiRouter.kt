@@ -376,6 +376,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             resource.subtitle = edition.subtitle
             resource.summary = edition.description ?: work.description
             resource.title = edition.title
+            resource.credits.forEach {
+                it.delete()
+            }
             work.authors.map {
                 OpenLibrary.getAuthor(authorId = it.authorId)
             }.map {

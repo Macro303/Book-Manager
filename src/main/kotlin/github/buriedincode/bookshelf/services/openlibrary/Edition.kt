@@ -63,6 +63,7 @@ data class Edition(
                     "MMMM yyyy",
                     "MMM, yyyy",
                     "d MMMM yyyy",
+                    "dd/MM/yyyy",
                 )) {
                     try {
                         return LocalDate.parse(
