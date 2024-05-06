@@ -17,7 +17,6 @@ data class Settings(
 
     data class Database(val source: Source, val url: String, val user: String? = null, val password: String? = null) {
         enum class Source {
-            MYSQL,
             POSTGRES,
             SQLITE,
         }

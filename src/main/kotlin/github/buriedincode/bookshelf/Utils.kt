@@ -59,18 +59,7 @@ object Utils : Logging {
 
     private val DATABASE: Database by lazy {
         val settings = Settings.load()
-        if (settings.database.source == Settings.Database.Source.MYSQL) {
-            return@lazy Database.connect(
-                url = settings.database.url,
-                driver = "com.mysql.cj.jdbc.Driver",
-                user = settings.database.user ?: "username",
-                password = settings.database.password ?: "password",
-                databaseConfig = DatabaseConfig {
-                    @OptIn(ExperimentalKeywordApi::class)
-                    preserveKeywordCasing = true
-                },
-            )
-        } else if (settings.database.source == Settings.Database.Source.POSTGRES) {
+        if (settings.database.source == Settings.Database.Source.POSTGRES) {
             return@lazy Database.connect(
                 url = settings.database.url,
                 driver = "org.postgresql.Driver",

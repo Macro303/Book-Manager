@@ -1,9 +1,9 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "1.9.23"
     application
-    id("gg.jte.gradle") version "3.1.9"
+    id("gg.jte.gradle") version "3.1.10"
     id("com.github.ben-manes.versions") version "0.51.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
@@ -12,7 +12,6 @@ plugins {
 group = "github.buriedincode"
 version = "0.3.1"
 
-println("Bookshelf v$version")
 println("Kotlin v${KotlinVersion.CURRENT}")
 println("Java v${System.getProperty("java.version")}")
 println("Arch: ${System.getProperty("os.arch")}")
@@ -25,36 +24,35 @@ repositories {
 
 dependencies {
     implementation("com.sksamuel.hoplite", "hoplite-core", "2.7.5")
-    runtimeOnly("org.postgresql", "postgresql", "42.7.1")
-    runtimeOnly("mysql", "mysql-connector-java", "8.0.33")
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.44.1.0")
+    runtimeOnly("org.postgresql", "postgresql", "42.7.3")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.45.3.0")
 
     // Exposed
-    val exposedVersion = "0.47.0"
+    val exposedVersion = "0.50.0"
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-java-time", exposedVersion)
 
     // Jackson
-    val jacksonVersion = "2.16.1"
+    val jacksonVersion = "2.17.1"
     implementation("com.fasterxml.jackson.core", "jackson-databind", jacksonVersion)
     implementation("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jacksonVersion)
 
     // Javalin
-    val javalinVersion = "6.0.1"
+    val javalinVersion = "6.1.4"
     implementation("io.javalin", "javalin", javalinVersion)
     implementation("io.javalin", "javalin-rendering", javalinVersion)
 
     // Jte
-    val jteVersion = "3.1.9"
+    val jteVersion = "3.1.10"
     implementation("gg.jte", "jte", jteVersion)
     implementation("gg.jte", "jte-kotlin", jteVersion)
 
     // Log4j2
     implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.4.0")
-    runtimeOnly("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.22.1")
+    runtimeOnly("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.23.1")
 }
 
 kotlin {
@@ -73,7 +71,7 @@ application {
 }
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.1.1")
+    version.set("1.2.1")
 }
 
 jte {
@@ -114,6 +112,7 @@ fun isNonStable(version: String): Boolean {
 }
 
 tasks.withType<DependencyUpdatesTask> {
+    gradleReleaseChannel = "current"
     resolutionStrategy {
         componentSelection {
             all {

@@ -3,12 +3,12 @@
 # Bookshelf
 
 ![Java Version](https://img.shields.io/badge/Temurin-17-green?style=flat-square&logo=eclipse-adoptium)
-![Kotlin Version](https://img.shields.io/badge/Kotlin-1.9.22-green?style=flat-square&logo=kotlin)
+![Kotlin Version](https://img.shields.io/badge/Kotlin-1.9.23-green?style=flat-square&logo=kotlin)
 ![Status](https://img.shields.io/badge/Status-Beta-yellowgreen?style=flat-square)
 
-[![Gradle](https://img.shields.io/badge/Gradle-8.6-informational?style=flat-square&logo=gradle)](https://github.com/gradle/gradle)
-[![Ktlint](https://img.shields.io/badge/Ktlint-1.1.1-informational?style=flat-square)](https://github.com/pinterest/ktlint)
-[![Javalin](https://img.shields.io/badge/Javalin-6.0.1-informational?style=flat-square)](https://github.com/javalin/javalin)
+[![Gradle](https://img.shields.io/badge/Gradle-8.7-informational?style=flat-square&logo=gradle)](https://github.com/gradle/gradle)
+[![Ktlint](https://img.shields.io/badge/Ktlint-1.2.1-informational?style=flat-square)](https://github.com/pinterest/ktlint)
+[![Javalin](https://img.shields.io/badge/Javalin-6.1.4-informational?style=flat-square)](https://github.com/javalin/javalin)
 [![Bulma](https://img.shields.io/badge/Bulma-0.9.4-informational?style=flat-square)](https://github.com/jgthms/bulma)
 
 [![Github - Version](https://img.shields.io/github/v/tag/Buried-In-Code/Bookshelf?logo=Github&label=Version&style=flat-square)](https://github.com/Buried-In-Code/Bookshelf/tags)

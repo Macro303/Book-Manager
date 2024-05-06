@@ -27,16 +27,17 @@ object OpenLibrary : Logging {
 
     private fun encodeURI(
         endpoint: String,
-        params: MutableMap<String, String> = HashMap(),
+        params: Map<String, String> = HashMap(),
     ): URI {
-        val encodedUrl = if (params.isEmpty()) {
-            BASE_URL + endpoint
-        } else {
-            params.keys
+        var encodedUrl = "$BASE_API$endpoint"
+        if (params.isNotEmpty()) {
+            encodedUrl = params.keys
                 .stream()
                 .sorted()
-                .map { key: String -> key + "=" + URLEncoder.encode(params[key], StandardCharsets.UTF_8) }
-                .collect(Collectors.joining("&", "$BASE_URL$endpoint?", ""))
+                .map {
+                    "$it=${URLEncoder.encode(params[it], StandardCharsets.UTF_8)}"
+                }
+                .collect(Collectors.joining("&", "$encodedUrl?", ""))
         }
         return URI.create(encodedUrl)
     }
