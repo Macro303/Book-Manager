@@ -6,6 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sksamuel.hoplite.Secret
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNamingStrategy
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
@@ -57,6 +60,13 @@ object Utils : Logging {
         )
         .build()
 
+    @OptIn(ExperimentalSerializationApi::class)
+    internal val JSON: Json = Json {
+        prettyPrint = true
+        encodeDefaults = true
+        namingStrategy = JsonNamingStrategy.SnakeCase
+    }
+
     private val DATABASE: Database by lazy {
         val settings = Settings.load()
         if (settings.database.source == Settings.Database.Source.POSTGRES) {
@@ -96,7 +106,6 @@ object Utils : Logging {
     internal fun <T> query(block: () -> T): T {
         val startTime = LocalDateTime.now()
         val transaction = transaction(transactionIsolation = Connection.TRANSACTION_SERIALIZABLE, db = DATABASE) {
-            repetitionAttempts = 1
             addLogger(Slf4jSqlDebugLogger)
             block()
         }

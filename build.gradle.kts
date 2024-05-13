@@ -2,6 +2,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
     kotlin("jvm") version "1.9.23"
+    kotlin("plugin.serialization") version "1.9.23"
     application
     id("gg.jte.gradle") version "3.1.10"
     id("com.github.ben-manes.versions") version "0.51.0"
@@ -24,6 +25,8 @@ repositories {
 
 dependencies {
     implementation("com.sksamuel.hoplite", "hoplite-core", "2.7.5")
+    implementation("org.jetbrains.kotlinx", "kotlinx-datetime", "0.5.0")
+    implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json", "1.6.3")
     runtimeOnly("org.postgresql", "postgresql", "42.7.3")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.45.3.0")
 

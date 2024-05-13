@@ -18,8 +18,6 @@ import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.services.OpenLibrary
-import github.buriedincode.bookshelf.services.openlibrary.Edition
-import github.buriedincode.bookshelf.services.openlibrary.Work
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
 import github.buriedincode.bookshelf.tables.CreatorTable
@@ -211,11 +209,12 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         Utils.query {
             val body = ctx.bodyAsClass<ImportBook>()
 
-            val (edition: Edition, work: Work) = body.openLibraryId?.let {
-                OpenLibrary.getBook(editionId = it)
+            val edition = body.openLibraryId?.let {
+                OpenLibrary.getEdition(id = it)
             } ?: body.isbn?.let {
-                OpenLibrary.lookupBook(isbn = it)
+                OpenLibrary.getEditionByISBN(isbn = it)
             } ?: throw NotImplementedResponse(message = "Import only available via OpenLibrary editionId or isbn currently.")
+            val work = OpenLibrary.getWork(id = edition.works.first().key.split("/").last())
 
             val exists = if (edition.isbn == null) {
                 Book.find {
@@ -267,7 +266,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 this.title = edition.title
             }
             work.authors.map {
-                OpenLibrary.getAuthor(authorId = it.authorId)
+                OpenLibrary.getAuthor(id = it.authorId)
             }.map {
                 val creator = Creator.find {
                     CreatorTable.nameCol eq it.name
@@ -324,11 +323,12 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         Utils.query {
             val resource = ctx.getResource()
 
-            val (edition: Edition, work: Work) = resource.openLibraryId?.let {
-                OpenLibrary.getBook(editionId = it)
+            val edition = resource.openLibraryId?.let {
+                OpenLibrary.getEdition(id = it)
             } ?: resource.isbn?.let {
-                OpenLibrary.lookupBook(isbn = it)
+                OpenLibrary.getEditionByISBN(isbn = it)
             } ?: throw NotImplementedResponse(message = "Pull only available via OpenLibrary editionId or isbn currently.")
+            val work = OpenLibrary.getWork(id = edition.works.first().key.split("/").last())
 
             val exists = if (edition.isbn == null) {
                 Book.find {
@@ -380,7 +380,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
                 it.delete()
             }
             work.authors.map {
-                OpenLibrary.getAuthor(authorId = it.authorId)
+                OpenLibrary.getAuthor(id = it.authorId)
             }.map {
                 val creator = Creator.find {
                     CreatorTable.nameCol eq it.name
@@ -619,6 +619,14 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             bookSeries.delete()
 
             ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun search(ctx: Context) {
+        Utils.query {
+            val body = ctx.bodyAsClass<BookInput>()
+            val results = OpenLibrary.search(mapOf("q" to "title:${body.title}"))
+            ctx.json(results)
         }
     }
 }

@@ -75,6 +75,9 @@ object App : Logging {
                             )
                         }
                     }
+                    get("search") { ctx ->
+                        ctx.render(filePath = "templates/book/search.kte")
+                    }
                     path("books") {
                         get(BookHtmlRouter::listEndpoint)
                         get("create", BookHtmlRouter::createEndpoint)
@@ -140,6 +143,7 @@ object App : Logging {
                 }
                 path("api") {
                     path("books") {
+                        post("search", BookApiRouter::search)
                         get(BookApiRouter::listEndpoint)
                         post(BookApiRouter::createEndpoint)
                         post("import", BookApiRouter::import)
