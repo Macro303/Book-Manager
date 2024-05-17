@@ -2,8 +2,8 @@
 
 # Bookshelf
 
-![Java Version](https://img.shields.io/badge/Temurin-17-green?style=flat-square&logo=eclipse-adoptium)
-![Kotlin Version](https://img.shields.io/badge/Kotlin-1.9.23-green?style=flat-square&logo=kotlin)
+![Java Version](https://img.shields.io/badge/Temurin-21-green?style=flat-square&logo=eclipse-adoptium)
+![Kotlin Version](https://img.shields.io/badge/Kotlin-1.9.24-green?style=flat-square&logo=kotlin)
 ![Status](https://img.shields.io/badge/Status-Beta-yellowgreen?style=flat-square)
 
 [![Gradle](https://img.shields.io/badge/Gradle-8.7-informational?style=flat-square&logo=gradle)](https://github.com/gradle/gradle)

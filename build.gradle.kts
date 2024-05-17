@@ -1,13 +1,13 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
-    kotlin("jvm") version "1.9.23"
-    kotlin("plugin.serialization") version "1.9.23"
+    kotlin("jvm") version "1.9.24"
+    kotlin("plugin.serialization") version "1.9.24"
     application
-    id("gg.jte.gradle") version "3.1.10"
+    id("gg.jte.gradle") version "3.1.11"
     id("com.github.ben-manes.versions") version "0.51.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
 group = "github.buriedincode"
@@ -25,13 +25,13 @@ repositories {
 
 dependencies {
     implementation("com.sksamuel.hoplite", "hoplite-core", "2.7.5")
-    implementation("org.jetbrains.kotlinx", "kotlinx-datetime", "0.5.0")
+    implementation("org.jetbrains.kotlinx", "kotlinx-datetime", "0.6.0")
     implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json", "1.6.3")
     runtimeOnly("org.postgresql", "postgresql", "42.7.3")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.45.3.0")
 
     // Exposed
-    val exposedVersion = "0.50.0"
+    val exposedVersion = "0.50.1"
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
@@ -49,7 +49,7 @@ dependencies {
     implementation("io.javalin", "javalin-rendering", javalinVersion)
 
     // Jte
-    val jteVersion = "3.1.10"
+    val jteVersion = "3.1.11"
     implementation("gg.jte", "jte", jteVersion)
     implementation("gg.jte", "jte-kotlin", jteVersion)
 
@@ -59,12 +59,12 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
@@ -79,7 +79,7 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 
 jte {
     precompile()
-    kotlinCompileArgs.set(arrayOf("-jvm-target", "17"))
+    kotlinCompileArgs.set(arrayOf("-jvm-target", "21"))
 }
 
 tasks.jar {

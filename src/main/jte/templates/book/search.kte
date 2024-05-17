@@ -68,70 +68,81 @@
       title: formData["title"].trim()
     }
     const response = await submitRequest("/api/books/search", "POST", body);
-    
+
     if (response !== null) {
-      const results = document.getElementById("results");
-        
-        response.body.forEach(entry => {
-            const column = createColumn(entry);
-            results.appendChild(column);
-        });
+      const results = response.body.filter((entry) => {
+        return entry.editionKey.length > 0;
+      });
+      const count = document.getElementById("count");
+      const resultCount = results.length;
+      @raw
+        count.innerHTML = `${resultCount} Result${resultCount !== 1 ? 's' : ''}`;
+      @endraw
+      const resultColumns = document.getElementById("results");
+      resultColumns.innerHTML = "";
+      results.forEach(entry => {
+        const column = createColumn(entry);
+        resultColumns.appendChild(column);
+      });
     }
-    
+
     removeLoading(caller);
   }
 
   function createColumn(entry) {
     const column = document.createElement("div");
     column.className = "column is-half-desktop is-one-third-fullhd";
-    
-    const box = document.createElement("div");
+
+    const box = document.createElement("a");
     box.className = "box has-text-centered";
-    
+    @raw
+      box.href = `https://openlibrary.org${entry.key}`;
+    @endraw
+
     const boxColumns = document.createElement("div");
     boxColumns.className = "columns is-mobile";
-    
+
     const imageColumn = createImageColumn(entry);
     const textColumn = createTextColumn(entry);
-    
+
     boxColumns.appendChild(imageColumn);
     boxColumns.appendChild(textColumn);
-    
+
     box.appendChild(boxColumns);
     column.appendChild(box);
-    
+
     return column;
   }
 
   function createImageColumn(entry) {
     const imageColumn = document.createElement("div");
     imageColumn.className = "column is-one-third";
-    
+
     const imageFigure = document.createElement("figure");
     imageFigure.className = "image is-2by3";
-    
+
     const image = document.createElement("img");
     image.loading = "lazy";
     @raw
       image.src = entry.coverEditionKey ? `https://covers.openlibrary.org/b/olid/${entry.coverEditionKey.split("/").pop()}-L.jpg` : "https://via.placeholder.com/750x500";
     @endraw
-    
+
     imageFigure.appendChild(image);
     imageColumn.appendChild(imageFigure);
-    
+
     return imageColumn;
   }
 
   function createTextColumn(entry) {
     const textColumn = document.createElement("div");
     textColumn.className = "column content";
-    
+
     const title = document.createElement("h5");
     title.className = "title is-5";
     title.innerHTML = entry.title;
     textColumn.appendChild(title);
-    
-    entry.editionKey.forEach(edition => {
+
+    entry.editionKey.slice(0,5).forEach(edition => {
       const editionText = document.createElement("p");
       const editionLink = document.createElement("a");
       @raw
@@ -141,7 +152,7 @@
       editionText.appendChild(editionLink);
       textColumn.appendChild(editionText);
     });
-    
+
     return textColumn;
   }
 </script>
