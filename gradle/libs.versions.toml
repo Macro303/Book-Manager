@@ -1,0 +1,64 @@
+[versions]
+jte = "3.1.11"
+kotlin = "2.0.0"
+
+# Libraries
+exposed = "0.50.1"
+hoplite = "2.7.5"
+jackson = "2.17.1"
+javalin = "6.1.4"
+junit = "5.10.2"
+kotlinx-datetime = "0.6.0"
+kotlinx-serialization = "1.6.3"
+log4j2 = "2.23.1"
+log4j2-kotlin = "1.4.0"
+postgres = "42.7.3"
+sqlite-jdbc = "3.45.3.0"
+
+# Plugins
+ktlintPlugin = "12.1.1"
+shadowPlugin = "8.1.1"
+versionsPlugin = "0.51.0"
+
+[libraries]
+# Common
+log4j2-api-kotlin = { group = "org.apache.logging.log4j", name = "log4j-api-kotlin", version.ref = "log4j2-kotlin" }
+log4j2-slf4j2-impl = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j2" }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite-jdbc" }
+
+# App
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
+hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.ref = "hoplite" }
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
+javalin-core = { group = "io.javalin", name = "javalin", version.ref = "javalin"}
+javalin-rendering = { group = "io.javalin", name = "javalin-rendering", version.ref = "javalin" }
+jte-core = { group = "gg.jte", name = "jte", version.ref = "jte" }
+jte-kotlin = { group = "gg.jte", name = "jte-kotlin", version.ref = "jte" }
+postgres = { group = "org.postgresql", name = "postgresql", version.ref = "postgres" }
+
+# OpenLibrary
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+[bundles]
+exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-java-time"]
+jackson = ["jackson-databind", "jackson-module-kotlin", "jackson-datatype-jsr310"]
+javalin = ["javalin-core", "javalin-rendering"]
+jte = ["jte-core", "jte-kotlin"]
+kotlinx-serialization = ["kotlinx-serialization-json", "kotlinx-datetime"]
+
+[plugins]
+jte = { id = "gg.jte.gradle", version.ref = "jte" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadowPlugin" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "versionsPlugin" }

@@ -1,47 +1,49 @@
-package github.buriedincode.bookshelf.services.openlibrary
+package github.buriedincode.openlibrary.schemas
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoField
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
 data class Contributor(
     val name: String,
     val role: String,
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
 data class Identifiers(
-    val goodreads: List<String> = ArrayList(),
-    val google: List<String> = ArrayList(),
-    val librarything: List<String> = ArrayList(),
+    val goodreads: List<String> = emptyList(),
+    val google: List<String> = emptyList(),
+    val librarything: List<String> = emptyList(),
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
 data class Edition(
-    val contributors: List<Contributor> = ArrayList(),
-    @JsonDeserialize(using = DescriptionDeserializer::class)
+    val contributors: List<Contributor> = emptyList(),
     val description: String? = null,
-    @JsonProperty("physical_format")
+    @JsonNames("physical_format")
     val format: String? = null,
-    val genres: List<String> = ArrayList(),
+    val genres: List<String> = emptyList(),
     val identifiers: Identifiers = Identifiers(),
-    @JsonProperty("isbn_10")
-    val isbn10: List<String> = ArrayList(),
-    @JsonProperty("isbn_13")
-    val isbn13: List<String> = ArrayList(),
+    @JsonNames("isbn_10")
+    val isbn10: List<String> = emptyList(),
+    @JsonNames("isbn_13")
+    val isbn13: List<String> = emptyList(),
     val key: String,
-    @JsonProperty("publish_date")
+    @JsonNames("publish_date")
     val publishDateStr: String? = null,
-    val publishers: List<String> = ArrayList(),
+    val publishers: List<String> = emptyList(),
     val subtitle: String? = null,
     val title: String,
-    val works: List<Resource> = ArrayList(),
+    val works: List<Resource> = emptyList(),
 ) {
     val editionId: String
         get() = key.split("/").last()

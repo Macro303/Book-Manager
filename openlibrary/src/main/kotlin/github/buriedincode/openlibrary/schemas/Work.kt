@@ -1,4 +1,4 @@
-package github.buriedincode.bookshelf.services.openlibrary
+package github.buriedincode.openlibrary.schemas
 
 import kotlinx.serialization.Serializable
 
@@ -17,6 +17,6 @@ data class AuthorResource(
 
 @Serializable
 data class Work(
-    val authors: List<AuthorResource> = ArrayList(),
+    val authors: List<AuthorResource> = emptyList(),
     val description: String? = null,
 )

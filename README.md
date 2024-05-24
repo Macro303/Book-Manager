@@ -2,8 +2,8 @@
 
 # Bookshelf
 
-![Java Version](https://img.shields.io/badge/Temurin-21-green?style=flat-square&logo=eclipse-adoptium)
-![Kotlin Version](https://img.shields.io/badge/Kotlin-1.9.24-green?style=flat-square&logo=kotlin)
+![Java Version](https://img.shields.io/badge/Temurin-17-green?style=flat-square&logo=eclipse-adoptium)
+![Kotlin Version](https://img.shields.io/badge/Kotlin-2.0.0-green?style=flat-square&logo=kotlin)
 ![Status](https://img.shields.io/badge/Status-Beta-yellowgreen?style=flat-square)
 
 [![Gradle](https://img.shields.io/badge/Gradle-8.7-informational?style=flat-square&logo=gradle)](https://github.com/gradle/gradle)
@@ -24,7 +24,7 @@ Tool for tracking books on your bookshelf or books you wish were on it.
 1. Make sure you have a supported version of [Java](https://adoptium.net/temurin/releases/) installed: `java --version`
 2. Clone the repo: `git clone https://github.com/Buried-In-Code/Bookshelf`
 3. Build using: `./gradlew build`
-4. Run using: `java -jar /app/build/libs/Bookshelf-fatJar.jar`
+4. Run using: `java -jar /app/build/libs/Bookshelf-fat.jar`
 
 ### via Gradle
 

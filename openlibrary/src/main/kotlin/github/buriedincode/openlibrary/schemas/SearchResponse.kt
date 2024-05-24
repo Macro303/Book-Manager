@@ -1,4 +1,4 @@
-package github.buriedincode.bookshelf.services.openlibrary
+package github.buriedincode.openlibrary.schemas
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -19,8 +19,6 @@ data class SearchResponse<T>(
     @OptIn(ExperimentalSerializationApi::class)
     @Serializable
     data class Work(
-        @JsonNames("_version_")
-        val version: Long,
         val alreadyReadCount: Int? = null,
         val authorAlternativeName: List<String> = emptyList(),
         val authorFacet: List<String> = emptyList(),
@@ -80,7 +78,7 @@ data class SearchResponse<T>(
         val placeFacet: List<String> = emptyList(),
         val placeKey: List<String> = emptyList(),
         @JsonNames("printdisabled_s")
-        val printdisabled: String? = null,
+        val printDisabled: String? = null,
         @JsonNames("public_scan_b")
         val publicScan: Boolean,
         val publishDate: List<String> = emptyList(),
@@ -113,6 +111,27 @@ data class SearchResponse<T>(
         val titleSort: String,
         val titleSuggest: String,
         val type: String,
+        @JsonNames("_version_")
+        val version: Long,
         val wantToReadCount: Int? = null,
+    )
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Serializable
+    data class Author(
+        val alternativeNames: List<String> = emptyList(),
+        @JsonNames("birth_date")
+        val dateOfBirth: String,
+        val date: String,
+        @JsonNames("death_date")
+        val dateOfDeath: String,
+        val key: String,
+        val name: String,
+        val topSubjects: List<String> = emptyList(),
+        val topWork: String,
+        val type: String,
+        val workCount: Int,
+        @JsonNames("_version_")
+        val version: Long,
     )
 }

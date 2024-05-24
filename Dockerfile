@@ -7,11 +7,11 @@ COPY src /app/src
 
 RUN gradle build
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY --from=builder /app/build/libs/Bookshelf-fatJar.jar /app/Bookshelf.jar
+COPY --from=builder /app/build/libs/Bookshelf-fat.jar /app/Bookshelf.jar
 
 ENV XDG_CACHE_HOME /app/cache
 ENV XDG_CONFIG_HOME /app/config

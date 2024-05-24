@@ -33,6 +33,8 @@ ktlint_experimental = disabled
 ktlint_standard_string-template-indent = disabled
 ktlint_standard_multiline-expression-wrapping = disabled
 ktlint_function_signature_body_expression_wrapping = multiline
+ktlint_class_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than = unset
+ktlint_function_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than = unset
 max_line_length = 140
 
 [*.md]
