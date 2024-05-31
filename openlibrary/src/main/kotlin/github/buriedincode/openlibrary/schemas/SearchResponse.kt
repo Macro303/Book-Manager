@@ -7,14 +7,14 @@ import kotlinx.serialization.json.JsonNames
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class SearchResponse<T>(
+    val docs: List<T> = listOf(),
     @JsonNames("numFound")
     val numFound: Int,
     @JsonNames("numFoundExact")
     val numFoundExact: Boolean,
     val offset: Int? = null,
-    val q: String,
+    val q: String? = null,
     val start: Int,
-    val docs: List<T> = listOf(),
 ) {
     @OptIn(ExperimentalSerializationApi::class)
     @Serializable
@@ -119,16 +119,16 @@ data class SearchResponse<T>(
     @OptIn(ExperimentalSerializationApi::class)
     @Serializable
     data class Author(
-        val alternativeNames: List<String> = emptyList(),
+        val alternateNames: List<String> = emptyList(),
         @JsonNames("birth_date")
-        val dateOfBirth: String,
-        val date: String,
+        val dateOfBirth: String? = null,
+        val date: String? = null,
         @JsonNames("death_date")
-        val dateOfDeath: String,
+        val dateOfDeath: String? = null,
         val key: String,
         val name: String,
         val topSubjects: List<String> = emptyList(),
-        val topWork: String,
+        val topWork: String? = null,
         val type: String,
         val workCount: Int,
         @JsonNames("_version_")

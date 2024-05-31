@@ -1,19 +1,19 @@
 [versions]
-jte = "3.1.11"
+jte = "3.1.12"
 kotlin = "2.0.0"
 
 # Libraries
 exposed = "0.50.1"
 hoplite = "2.7.5"
 jackson = "2.17.1"
-javalin = "6.1.4"
+javalin = "6.1.6"
 junit = "5.10.2"
 kotlinx-datetime = "0.6.0"
 kotlinx-serialization = "1.6.3"
 log4j2 = "2.23.1"
 log4j2-kotlin = "1.4.0"
 postgres = "42.7.3"
-sqlite-jdbc = "3.45.3.0"
+sqlite-jdbc = "3.46.0.0"
 
 # Plugins
 ktlintPlugin = "12.1.1"
@@ -34,6 +34,7 @@ exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time
 hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.ref = "hoplite" }
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+jackson-datatype-jdk8 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jdk8", version.ref = "jackson" }
 jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
 javalin-core = { group = "io.javalin", name = "javalin", version.ref = "javalin"}
 javalin-rendering = { group = "io.javalin", name = "javalin-rendering", version.ref = "javalin" }
@@ -50,7 +51,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 [bundles]
 exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-java-time"]
-jackson = ["jackson-databind", "jackson-module-kotlin", "jackson-datatype-jsr310"]
+jackson = ["jackson-databind", "jackson-module-kotlin", "jackson-datatype-jdk8", "jackson-datatype-jsr310"]
 javalin = ["javalin-core", "javalin-rendering"]
 jte = ["jte-core", "jte-kotlin"]
 kotlinx-serialization = ["kotlinx-serialization-json", "kotlinx-datetime"]
