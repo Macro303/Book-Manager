@@ -3,9 +3,12 @@ package github.buriedincode.openlibrary.schemas
 import github.buriedincode.openlibrary.OpenLibrary
 import github.buriedincode.openlibrary.SQLiteCache
 import github.buriedincode.openlibrary.ServiceException
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -31,13 +34,14 @@ class EditionTest {
             assertNotNull(result)
             assertAll(
                 { assertEquals("/authors/OL2993106A", result.authors[0].key) },
+                { assertNotNull(result.byStatement) },
                 { assertEquals("Boichi, ill", result.contributions[0]) },
                 { assertEquals("Boichi", result.contributors[0].name) },
                 { assertEquals("Illustrator", result.contributors[0].role) },
                 { assertEquals(14577228, result.covers[0]) },
-                { assertEquals("/type/datetime", result.created.type) },
-                { assertEquals("2019-05-24T09:39:34.722874", result.created.value) },
+                { assertEquals(LocalDateTime(2019, 5, 24, 9, 39, 34, 722874), result.created) },
                 { assertEquals("741.5", result.deweyDecimalClass[0]) },
+                { assertNull(result.fullTitle) },
                 { assertTrue(result.identifiers.goodreads.isEmpty()) },
                 { assertTrue(result.identifiers.google.isEmpty()) },
                 { assertTrue(result.identifiers.librarything.isEmpty()) },
@@ -45,19 +49,19 @@ class EditionTest {
                 { assertEquals("9781974702619", result.isbn13[0]) },
                 { assertEquals("/books/OL26964454M", result.key) },
                 { assertEquals("/languages/eng", result.languages[0].key) },
-                { assertEquals("/type/datetime", result.lastModified.type) },
-                { assertEquals("2024-02-09T09:00:43.665775", result.lastModified.value) },
+                { assertEquals(LocalDateTime(2024, 2, 9, 9, 0, 43, 665775), result.lastModified) },
                 { assertEquals(10, result.latestRevision) },
                 { assertEquals("PN6790", result.lcClassifications[0]) },
                 { assertEquals("2018299499", result.lccn[0]) },
                 { assertEquals("urn:sfpl:31223111921111", result.localId[0]) },
+                { assertNotNull(result.notes) },
                 { assertEquals(200, result.numberOfPages) },
                 { assertEquals("1054104980", result.oclcNumbers[0]) },
                 { assertEquals("Stone world", result.otherTitles[0]) },
                 { assertEquals("1 v. (unpaged)", result.pagination) },
                 { assertEquals("Manga", result.physicalFormat) },
                 { assertEquals("cau", result.publishCountry) },
-                { assertEquals("2018-Sep-04", result.publishDate) },
+                { assertEquals(LocalDate(2018, 9, 4), result.publishDate) },
                 { assertEquals("SHONEN JUMP", result.publishers[0]) },
                 { assertEquals(10, result.revision) },
                 {
@@ -91,13 +95,14 @@ class EditionTest {
             assertNotNull(result)
             assertAll(
                 { assertEquals("/authors/OL2993106A", result.authors[0].key) },
+                { assertNotNull(result.byStatement) },
                 { assertEquals("Boichi, ill", result.contributions[0]) },
                 { assertEquals("Boichi", result.contributors[0].name) },
                 { assertEquals("Illustrator", result.contributors[0].role) },
                 { assertEquals(14577228, result.covers[0]) },
-                { assertEquals("/type/datetime", result.created.type) },
-                { assertEquals("2019-05-24T09:39:34.722874", result.created.value) },
+                { assertEquals(LocalDateTime(2019, 5, 24, 9, 39, 34, 722874), result.created) },
                 { assertEquals("741.5", result.deweyDecimalClass[0]) },
+                { assertNull(result.fullTitle) },
                 { assertTrue(result.identifiers.goodreads.isEmpty()) },
                 { assertTrue(result.identifiers.google.isEmpty()) },
                 { assertTrue(result.identifiers.librarything.isEmpty()) },
@@ -105,19 +110,19 @@ class EditionTest {
                 { assertEquals("9781974702619", result.isbn13[0]) },
                 { assertEquals("/books/OL26964454M", result.key) },
                 { assertEquals("/languages/eng", result.languages[0].key) },
-                { assertEquals("/type/datetime", result.lastModified.type) },
-                { assertEquals("2024-02-09T09:00:43.665775", result.lastModified.value) },
+                { assertEquals(LocalDateTime(2024, 2, 9, 9, 0, 43, 665775), result.lastModified) },
                 { assertEquals(10, result.latestRevision) },
                 { assertEquals("PN6790", result.lcClassifications[0]) },
                 { assertEquals("2018299499", result.lccn[0]) },
                 { assertEquals("urn:sfpl:31223111921111", result.localId[0]) },
+                { assertNotNull(result.notes) },
                 { assertEquals(200, result.numberOfPages) },
                 { assertEquals("1054104980", result.oclcNumbers[0]) },
                 { assertEquals("Stone world", result.otherTitles[0]) },
                 { assertEquals("1 v. (unpaged)", result.pagination) },
                 { assertEquals("Manga", result.physicalFormat) },
                 { assertEquals("cau", result.publishCountry) },
-                { assertEquals("2018-Sep-04", result.publishDate) },
+                { assertEquals(LocalDate(2018, 9, 4), result.publishDate) },
                 { assertEquals("SHONEN JUMP", result.publishers[0]) },
                 { assertEquals(10, result.revision) },
                 {

@@ -32,7 +32,8 @@ class OpenLibrary(
     private val cache: SQLiteCache? = null,
     timeout: Duration = Duration.ofSeconds(30),
 ) {
-    private val client: HttpClient = HttpClient.newBuilder()
+    private val client: HttpClient = HttpClient
+        .newBuilder()
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .connectTimeout(timeout)
         .build()
@@ -47,8 +48,9 @@ class OpenLibrary(
     @Throws(ServiceException::class)
     private fun performGetRequest(uri: URI): String {
         try {
-            @Suppress("ktlint")
-            val request = HttpRequest.newBuilder()
+            @Suppress("ktlint:standard:max-line-length", "ktlint:standard:argument-list-wrapping")
+            val request = HttpRequest
+                .newBuilder()
                 .uri(uri)
                 .setHeader("Accept", "application/json")
                 .setHeader("User-Agent", "Bookshelf-Openlibrary/0.3.1 (${System.getProperty("os.name")}/${System.getProperty("os.version")}; Kotlin/${KotlinVersion.CURRENT})")

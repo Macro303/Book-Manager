@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.bundles.javalin)
     implementation(libs.bundles.jte)
     implementation(libs.hoplite.core)
+    implementation(libs.kotlinx.datetime)
     runtimeOnly(libs.postgres)
 }
 

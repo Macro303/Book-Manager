@@ -32,9 +32,10 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<PublisherInput>()
-            val exists = Publisher.find {
-                PublisherTable.titleCol eq body.title
-            }.firstOrNull()
+            val exists = Publisher
+                .find {
+                    PublisherTable.titleCol eq body.title
+                }.firstOrNull()
             if (exists != null) {
                 throw ConflictResponse("Publisher already exists")
             }
@@ -51,9 +52,10 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<PublisherInput>()
-            val exists = Publisher.find {
-                PublisherTable.titleCol eq body.title
-            }.firstOrNull()
+            val exists = Publisher
+                .find {
+                    PublisherTable.titleCol eq body.title
+                }.firstOrNull()
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Publisher already exists")
             }

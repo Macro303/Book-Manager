@@ -25,14 +25,15 @@ class Creator(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Creator> {
             "summary" to summary,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(
-                compareBy<Credit> { it.book }.thenBy { it.role },
-            ).map {
-                mapOf(
-                    "book" to it.book.toJson(),
-                    "role" to it.role.toJson(),
-                )
-            }
+            output["credits"] = credits
+                .sortedWith(
+                    compareBy<Credit> { it.book }.thenBy { it.role },
+                ).map {
+                    mapOf(
+                        "book" to it.book.toJson(),
+                        "role" to it.role.toJson(),
+                    )
+                }
         }
         return output.toSortedMap()
     }

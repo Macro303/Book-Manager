@@ -1,5 +1,7 @@
 package github.buriedincode.openlibrary.schemas
 
+import github.buriedincode.openlibrary.serializers.LocalDateSerializer
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
@@ -121,10 +123,12 @@ data class SearchResponse<T>(
     data class Author(
         val alternateNames: List<String> = emptyList(),
         @JsonNames("birth_date")
-        val dateOfBirth: String? = null,
+        @Serializable(with = LocalDateSerializer::class)
+        val dateOfBirth: LocalDate? = null,
         val date: String? = null,
         @JsonNames("death_date")
-        val dateOfDeath: String? = null,
+        @Serializable(with = LocalDateSerializer::class)
+        val dateOfDeath: LocalDate? = null,
         val key: String,
         val name: String,
         val topSubjects: List<String> = emptyList(),

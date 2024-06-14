@@ -1,11 +1,14 @@
 @import gg.jte.support.ForSupport
+@import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.ReadBook
+@import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @import java.time.LocalDate
 @import kotlin.collections.Map
 @param resource: User
 @param session: User?
 @param stats: Map<String, Int>
+@param nextBooks: Map<Series, Book?>
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -79,7 +82,28 @@
         <nav class="level is-mobile">
             <div class="level-left level-item has-text-centered">
                 <div>
-                    <p class="title">Last Read Books</p>
+                    <p class="title">Up Next</p>
+                    <p class="heading"></p>
+                </div>
+            </div>
+        </nav>
+        <div class="columns is-multiline is-centered">
+            @for((series, book) in nextBooks)
+                <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
+                    @template.components.book.view(entry = book!!, session = session)
+                </div>
+            @else
+                <div class="column">
+                    <div class="box has-text-centered">
+                        <h5 class="title is-5 has-text-danger">No Books found.</h5>
+                    </div>
+                </div>
+            @endfor
+        </div>
+        <nav class="level is-mobile">
+            <div class="level-left level-item has-text-centered">
+                <div>
+                    <p class="title">Last Read</p>
                     <p class="heading"></p>
                 </div>
             </div>

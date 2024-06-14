@@ -23,14 +23,15 @@ class Role(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Role> {
             "title" to title,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(
-                compareBy<Credit> { it.book }.thenBy { it.creator },
-            ).map {
-                mapOf(
-                    "book" to it.book.toJson(),
-                    "creator" to it.creator.toJson(),
-                )
-            }
+            output["credits"] = credits
+                .sortedWith(
+                    compareBy<Credit> { it.book }.thenBy { it.creator },
+                ).map {
+                    mapOf(
+                        "book" to it.book.toJson(),
+                        "creator" to it.creator.toJson(),
+                    )
+                }
         }
         return output.toSortedMap()
     }

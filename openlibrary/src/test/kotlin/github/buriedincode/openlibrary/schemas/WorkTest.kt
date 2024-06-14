@@ -3,6 +3,7 @@ package github.buriedincode.openlibrary.schemas
 import github.buriedincode.openlibrary.OpenLibrary
 import github.buriedincode.openlibrary.SQLiteCache
 import github.buriedincode.openlibrary.ServiceException
+import kotlinx.datetime.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -34,14 +35,14 @@ class WorkTest {
             assertAll(
                 { assertEquals("/authors/OL2993106A", result.authors[0].author.key) },
                 { assertEquals("/type/author_role", result.authors[0].type.key) },
-                { assertEquals("/type/datetime", result.created.type) },
-                { assertEquals("2024-02-09T08:50:48.712801", result.created.value) },
-                { assertEquals("/type/text", result.description.type) },
+                { assertTrue(result.covers.isEmpty()) },
+                { assertEquals(LocalDateTime(2024, 2, 9, 8, 50, 48, 712801), result.created) },
+                { assertNotNull(result.description) },
                 { assertEquals("/works/OL37805541W", result.key) },
-                { assertEquals("/type/datetime", result.lastModified.type) },
-                { assertEquals("2024-02-09T08:55:31.484103", result.lastModified.value) },
+                { assertEquals(LocalDateTime(2024, 2, 9, 8, 55, 31, 484103), result.created) },
                 { assertEquals(2, result.latestRevision) },
                 { assertEquals(2, result.revision) },
+                { assertTrue(result.subjects.isEmpty()) },
                 { assertEquals("Dr. STONE, Vol. 1", result.title) },
                 { assertEquals("/type/work", result.type.key) },
             )

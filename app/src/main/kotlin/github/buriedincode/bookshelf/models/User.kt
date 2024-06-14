@@ -28,14 +28,15 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
             "username" to username,
         )
         if (showAll) {
-            output["read"] = readBooks.sortedWith(
-                compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.thenBy { it.book },
-            ).map {
-                mapOf(
-                    "book" to it.book.toJson(),
-                    "readDate" to it.readDate?.toString("yyyy-MM-dd"),
-                )
-            }
+            output["read"] = readBooks
+                .sortedWith(
+                    compareBy<ReadBook> { it.readDate ?: LocalDate.of(2000, 1, 1) }.thenBy { it.book },
+                ).map {
+                    mapOf(
+                        "book" to it.book.toJson(),
+                        "readDate" to it.readDate?.toString("yyyy-MM-dd"),
+                    )
+                }
             output["wished"] = wishedBooks.sorted().map { it.toJson() }
         }
         return output.toSortedMap()

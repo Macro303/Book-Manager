@@ -36,9 +36,10 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<SeriesInput>()
-            val exists = Series.find {
-                SeriesTable.titleCol eq body.title
-            }.firstOrNull()
+            val exists = Series
+                .find {
+                    SeriesTable.titleCol eq body.title
+                }.firstOrNull()
             if (exists != null) {
                 throw ConflictResponse("Series already exists")
             }
@@ -55,9 +56,10 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<SeriesInput>()
-            val exists = Series.find {
-                SeriesTable.titleCol eq body.title
-            }.firstOrNull()
+            val exists = Series
+                .find {
+                    SeriesTable.titleCol eq body.title
+                }.firstOrNull()
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Series already exists")
             }
@@ -85,9 +87,10 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
             val body = ctx.bodyAsClass<SeriesInput.Book>()
             val book = Book.findById(body.bookId)
                 ?: throw NotFoundResponse("No Book found.")
-            val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-            }.firstOrNull() ?: BookSeries.new {
+            val bookSeries = BookSeries
+                .find {
+                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
+                }.firstOrNull() ?: BookSeries.new {
                 this.book = book
                 this.series = resource
             }
@@ -103,9 +106,10 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
             val body = ctx.bodyAsClass<IdInput>()
             val book = Book.findById(body.id)
                 ?: throw NotFoundResponse("No Book found.")
-            val bookSeries = BookSeries.find {
-                (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-            }.firstOrNull() ?: throw BadRequestResponse("Book Series not found.")
+            val bookSeries = BookSeries
+                .find {
+                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
+                }.firstOrNull() ?: throw BadRequestResponse("Book Series not found.")
             bookSeries.delete()
 
             ctx.status(HttpStatus.NO_CONTENT)

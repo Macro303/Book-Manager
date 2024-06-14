@@ -41,11 +41,12 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                 resources = resources.filter {
                     (
                         it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
-                    ) || (
-                        it.subtitle?.let {
-                            it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                        } ?: false
-                    )
+                    ) ||
+                        (
+                            it.subtitle?.let {
+                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                            } ?: false
+                        )
                 }
             }
             ctx.render(

@@ -33,9 +33,10 @@ object GenreApiRouter : BaseApiRouter<Genre>(entity = Genre), Logging {
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<GenreInput>()
-            val exists = Genre.find {
-                GenreTable.titleCol eq body.title
-            }.firstOrNull()
+            val exists = Genre
+                .find {
+                    GenreTable.titleCol eq body.title
+                }.firstOrNull()
             if (exists != null) {
                 throw ConflictResponse("Genre already exists")
             }
@@ -52,9 +53,10 @@ object GenreApiRouter : BaseApiRouter<Genre>(entity = Genre), Logging {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<GenreInput>()
-            val exists = Genre.find {
-                GenreTable.titleCol eq body.title
-            }.firstOrNull()
+            val exists = Genre
+                .find {
+                    GenreTable.titleCol eq body.title
+                }.firstOrNull()
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Genre already exists")
             }

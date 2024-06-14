@@ -58,32 +58,35 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
             "title" to title,
         )
         if (showAll) {
-            output["credits"] = credits.sortedWith(
-                compareBy<Credit> { it.creator }.thenBy { it.role },
-            ).map {
-                mapOf(
-                    "creator" to it.creator.toJson(),
-                    "role" to it.role.toJson(),
-                )
-            }
+            output["credits"] = credits
+                .sortedWith(
+                    compareBy<Credit> { it.creator }.thenBy { it.role },
+                ).map {
+                    mapOf(
+                        "creator" to it.creator.toJson(),
+                        "role" to it.role.toJson(),
+                    )
+                }
             output["genres"] = genres.sorted().map { it.toJson() }
             output["publisher"] = publisher?.toJson()
-            output["readers"] = readers.sortedWith(
-                compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
-            ).map {
-                mapOf(
-                    "readDate" to it.readDate?.toString("yyyy-MM-dd"),
-                    "user" to it.user.toJson(),
-                )
-            }
-            output["series"] = series.sortedWith(
-                compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE },
-            ).map {
-                mapOf(
-                    "number" to it.number,
-                    "series" to it.series.toJson(),
-                )
-            }
+            output["readers"] = readers
+                .sortedWith(
+                    compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
+                ).map {
+                    mapOf(
+                        "readDate" to it.readDate?.toString("yyyy-MM-dd"),
+                        "user" to it.user.toJson(),
+                    )
+                }
+            output["series"] = series
+                .sortedWith(
+                    compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE },
+                ).map {
+                    mapOf(
+                        "number" to it.number,
+                        "series" to it.series.toJson(),
+                    )
+                }
             output["wishers"] = wishers.sorted().map { it.toJson() }
         } else {
             output["publisherId"] = publisher?.id?.value

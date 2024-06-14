@@ -9,7 +9,6 @@ import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
-import github.buriedincode.bookshelf.routers.html.BookHtmlRouter.getSession
 import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -50,6 +49,22 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
     override fun viewEndpoint(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
+
+            val nextBooks = mutableMapOf<Series, Book?>()
+            val readBooksBySeries = resource.readBooks
+                .flatMap {
+                    it.book.series.map { it.series to it.number }
+                }.groupBy({ it.first }, { it.second })
+            readBooksBySeries.forEach { (series, readNumbers) ->
+                val maxReadNumber = readNumbers.filterNotNull().maxOrNull() ?: return@forEach
+                val nextBookInSeries = series.books
+                    .filter {
+                        it.number != null && it.number!! > maxReadNumber
+                    }.minByOrNull { it.number!! }
+                    ?.book
+                nextBooks[series] = nextBookInSeries
+            }
+
             ctx.render(
                 filePath = "templates/$name/view.kte",
                 model = mapOf(
@@ -61,6 +76,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                         "unread" to Book.all().count { it.isCollected } - resource.readBooks.count(),
                         "read" to resource.readBooks.count(),
                     ),
+                    "nextBooks" to nextBooks,
                 ),
             )
         }
@@ -73,10 +89,14 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
             if (session == null) {
                 ctx.redirect("/$plural/${resource.id.value}")
             } else {
-                val readBooks = Book.all().toList()
+                val readBooks = Book
+                    .all()
+                    .toList()
                     .filter { it.isCollected }
                     .filterNot { it in resource.readBooks.map { it.book } }
-                val wishedBooks = Book.all().toList()
+                val wishedBooks = Book
+                    .all()
+                    .toList()
                     .filterNot { it.isCollected }
                     .filterNot { it in resource.wishedBooks }
                 ctx.render(
@@ -123,11 +143,12 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                 books = books.filter {
                     (
                         it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
-                    ) || (
-                        it.subtitle?.let {
-                            it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                        } ?: false
-                    )
+                    ) ||
+                        (
+                            it.subtitle?.let {
+                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
+                            } ?: false
+                        )
                 }
             }
             ctx.render(

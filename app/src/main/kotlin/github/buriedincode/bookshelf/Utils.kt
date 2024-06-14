@@ -1,17 +1,8 @@
 package github.buriedincode.bookshelf
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinFeature
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.sksamuel.hoplite.Secret
 import org.apache.logging.log4j.kotlin.Logging
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.DatabaseConfig
-import org.jetbrains.exposed.sql.ExperimentalKeywordApi
-import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
-import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
@@ -42,20 +33,6 @@ object Utils : Logging {
     internal val CONFIG_ROOT = XDG_CONFIG / "bookshelf"
     internal val DATA_ROOT = XDG_DATA / "bookshelf"
     internal const val VERSION = "0.3.1"
-
-    internal val JSON_MAPPER: ObjectMapper = JsonMapper.builder()
-        .addModule(JavaTimeModule())
-        .addModule(
-            KotlinModule.Builder()
-                .withReflectionCacheSize(512)
-                .configure(KotlinFeature.NullToEmptyCollection, true)
-                .configure(KotlinFeature.NullToEmptyMap, true)
-                .configure(KotlinFeature.NullIsSameAsDefault, true)
-                .configure(KotlinFeature.SingletonSupport, false)
-                .configure(KotlinFeature.StrictNullChecks, true)
-                .build(),
-        )
-        .build()
 
     private val DATABASE: Database by lazy {
         val settings = Settings.load()

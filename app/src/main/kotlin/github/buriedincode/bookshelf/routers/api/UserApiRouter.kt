@@ -47,9 +47,10 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<UserInput>()
-            val exists = User.find {
-                UserTable.usernameCol eq body.username
-            }.firstOrNull()
+            val exists = User
+                .find {
+                    UserTable.usernameCol eq body.username
+                }.firstOrNull()
             if (exists != null) {
                 throw ConflictResponse("User already exists")
             }
@@ -66,9 +67,10 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<UserInput>()
-            val exists = User.find {
-                UserTable.usernameCol eq body.username
-            }.firstOrNull()
+            val exists = User
+                .find {
+                    UserTable.usernameCol eq body.username
+                }.firstOrNull()
             if (exists != null && exists != resource) {
                 throw ConflictResponse("User already exists")
             }
@@ -96,9 +98,10 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
             val body = ctx.bodyAsClass<UserInput.ReadBook>()
             val book = Book.findById(body.bookId)
                 ?: throw NotFoundResponse("No Book found.")
-            val readBook = ReadBook.find {
-                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
-            }.firstOrNull() ?: ReadBook.new {
+            val readBook = ReadBook
+                .find {
+                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
+                }.firstOrNull() ?: ReadBook.new {
                 this.book = book
                 this.user = resource
             }
@@ -114,9 +117,10 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
             val body = ctx.bodyAsClass<IdInput>()
             val book = Book.findById(body.id)
                 ?: throw NotFoundResponse("No Book found.")
-            val readBook = ReadBook.find {
-                (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
-            }.firstOrNull() ?: throw BadRequestResponse("Read Book not found.")
+            val readBook = ReadBook
+                .find {
+                    (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq resource.id)
+                }.firstOrNull() ?: throw BadRequestResponse("Read Book not found.")
             readBook.delete()
 
             ctx.status(HttpStatus.NO_CONTENT)

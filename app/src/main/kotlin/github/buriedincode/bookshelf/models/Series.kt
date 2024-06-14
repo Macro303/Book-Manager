@@ -27,14 +27,15 @@ class Series(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Series> {
             "title" to title,
         )
         if (showAll) {
-            output["books"] = books.sortedWith(
-                compareBy<BookSeries> { it.number ?: Int.MAX_VALUE }.thenBy { it.book },
-            ).map {
-                mapOf(
-                    "book" to it.book.toJson(),
-                    "number" to it.number,
-                )
-            }
+            output["books"] = books
+                .sortedWith(
+                    compareBy<BookSeries> { it.number ?: Int.MAX_VALUE }.thenBy { it.book },
+                ).map {
+                    mapOf(
+                        "book" to it.book.toJson(),
+                        "number" to it.number,
+                    )
+                }
         }
         return output.toSortedMap()
     }

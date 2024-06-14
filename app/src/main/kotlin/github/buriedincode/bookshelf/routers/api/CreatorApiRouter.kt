@@ -45,9 +45,10 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
     override fun createEndpoint(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<CreatorInput>()
-            val exists = Creator.find {
-                CreatorTable.nameCol eq body.name
-            }.firstOrNull()
+            val exists = Creator
+                .find {
+                    CreatorTable.nameCol eq body.name
+                }.firstOrNull()
             if (exists != null) {
                 throw ConflictResponse("Creator already exists")
             }
@@ -59,11 +60,12 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
             body.credits.forEach {
                 val book = Book.findById(it.bookId) ?: throw NotFoundResponse("Book not found.")
                 val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
-                Credit.find {
-                    (CreditTable.bookCol eq book.id) and
-                        (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq role.id)
-                }.firstOrNull() ?: Credit.new {
+                Credit
+                    .find {
+                        (CreditTable.bookCol eq book.id) and
+                            (CreditTable.creatorCol eq creator.id) and
+                            (CreditTable.roleCol eq role.id)
+                    }.firstOrNull() ?: Credit.new {
                     this.book = book
                     this.creator = creator
                     this.role = role
@@ -78,9 +80,10 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<CreatorInput>()
-            val exists = Creator.find {
-                CreatorTable.nameCol eq body.name
-            }.firstOrNull()
+            val exists = Creator
+                .find {
+                    CreatorTable.nameCol eq body.name
+                }.firstOrNull()
             if (exists != null && exists != resource) {
                 throw ConflictResponse("Creator already exists")
             }
@@ -90,11 +93,12 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
             body.credits.forEach {
                 val book = Book.findById(it.bookId) ?: throw NotFoundResponse("Book not found.")
                 val role = Role.findById(it.roleId) ?: throw NotFoundResponse("Role not found.")
-                Credit.find {
-                    (CreditTable.bookCol eq book.id) and
-                        (CreditTable.creatorCol eq resource.id) and
-                        (CreditTable.roleCol eq role.id)
-                }.firstOrNull() ?: Credit.new {
+                Credit
+                    .find {
+                        (CreditTable.bookCol eq book.id) and
+                            (CreditTable.creatorCol eq resource.id) and
+                            (CreditTable.roleCol eq role.id)
+                    }.firstOrNull() ?: Credit.new {
                     this.book = book
                     this.creator = resource
                     this.role = role
@@ -123,11 +127,12 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
 
             val book = Book.findById(body.bookId) ?: throw NotFoundResponse("Book not found.")
             val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
-            Credit.find {
-                (CreditTable.bookCol eq book.id) and
-                    (CreditTable.creatorCol eq resource.id) and
-                    (CreditTable.roleCol eq role.id)
-            }.firstOrNull() ?: Credit.new {
+            Credit
+                .find {
+                    (CreditTable.bookCol eq book.id) and
+                        (CreditTable.creatorCol eq resource.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: Credit.new {
                 this.book = book
                 this.creator = resource
                 this.role = role
@@ -144,11 +149,12 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator), Logging {
 
             val book = Book.findById(body.bookId) ?: throw NotFoundResponse("Book not found.")
             val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
-            val credit = Credit.find {
-                (CreditTable.bookCol eq book.id) and
-                    (CreditTable.creatorCol eq resource.id) and
-                    (CreditTable.roleCol eq role.id)
-            }.firstOrNull() ?: throw BadRequestResponse("Unable to find Credit")
+            val credit = Credit
+                .find {
+                    (CreditTable.bookCol eq book.id) and
+                        (CreditTable.creatorCol eq resource.id) and
+                        (CreditTable.roleCol eq role.id)
+                }.firstOrNull() ?: throw BadRequestResponse("Unable to find Credit")
             credit.delete()
 
             ctx.status(HttpStatus.NO_CONTENT)
