@@ -46,5 +46,4 @@ tasks.shadowJar {
     )
     manifest.attributes["Main-Class"] = "github.buriedincode.bookshelf.AppKt"
     mergeServiceFiles()
-    archiveFileName = "Bookshelf-fat.jar"
 }

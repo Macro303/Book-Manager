@@ -56,12 +56,11 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                     it.book.series.map { it.series to it.number }
                 }.groupBy({ it.first }, { it.second })
             readBooksBySeries.forEach { (series, readNumbers) ->
-                val maxReadNumber = readNumbers.filterNotNull().maxOrNull() ?: return@forEach
                 val nextBookInSeries = series.books
-                    .filter {
-                        it.number != null && it.number!! > maxReadNumber
-                    }.minByOrNull { it.number!! }
+                    .filter { it.number != null && it.number!! !in readNumbers }
+                    .minByOrNull { it.number!! }
                     ?.book
+
                 nextBooks[series] = nextBookInSeries
             }
 
@@ -76,7 +75,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                         "unread" to Book.all().count { it.isCollected } - resource.readBooks.count(),
                         "read" to resource.readBooks.count(),
                     ),
-                    "nextBooks" to nextBooks,
+                    "nextBooks" to nextBooks.filterValues { it != null }.mapValues { it.value!! }.toSortedMap(),
                 ),
             )
         }

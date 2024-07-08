@@ -6,10 +6,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Author(
-    val id: Long,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val created: LocalDateTime? = null,
+    val id: Long? = null,
     val key: String,
     @Serializable(with = LocalDateTimeSerializer::class)
     val lastModified: LocalDateTime?,
+    val latestRevision: Int? = null,
     val name: String,
     val revision: Int,
     val type: Resource,

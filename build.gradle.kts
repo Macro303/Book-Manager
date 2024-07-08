@@ -24,7 +24,7 @@ allprojects {
 
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-        version = "1.3.0"
+        version = "1.3.1"
     }
 }
 

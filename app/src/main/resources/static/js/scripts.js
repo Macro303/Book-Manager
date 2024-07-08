@@ -37,14 +37,8 @@ function resetForm(page) {
 }
 
 function setTheme() {
-  const darkCss = document.getElementById("dark-theme");
-  const lightCss = document.getElementById("light-theme");
   const theme = getCookie("bookshelf_theme");
-
-  if (darkCss !== null && lightCss !== null) {
-    darkCss.disabled = theme == "dark";
-    lightCss.disabled = theme == "light";
-  }
+  document.documentElement.setAttribute("data-theme", theme === "dark" ? "villain" : "hero");
 }
 
 function toggleTheme() {

@@ -8,17 +8,17 @@
 @param resource: User
 @param session: User?
 @param stats: Map<String, Int>
-@param nextBooks: Map<Series, Book?>
+@param nextBooks: Map<Series, Book>
 
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en-GB" data-theme="villain">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Bookshelf</title>
     <link href="https://use.fontawesome.com/releases/v6.3.0/css/all.css" rel="stylesheet">
-    <link disabled href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/hero/vegeta.min.css" id="light-theme" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@0.9.4/villain/vegeta.min.css" id="dark-theme" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/Buried-In-Code/Vegeta@4b4167aa9b7a1f3bfc9cf36cfe3eb2a4e2e6ac7f/css/vegeta.min.css" rel="stylesheet">
     <link href="/static/css/styles.css" rel="stylesheet">
     <link href="/static/img/favicon.ico" id="favicon" rel="icon" type="image/x-icon">
 </head>
@@ -63,7 +63,7 @@
                 <div class="columns is-desktop">
                     <div class="column"></div>
                     <div class="column is-one-third-desktop is-one-quarter-fullhd">
-                        <div class="box">
+                        <div class="box has-background-text-soft">
                             <h3 class="title is-3 has-text-centered">Stats</h3>
                             <div class="block">
                                 <p><strong class="has-text-info">Wishlist:</strong> ${stats["wishlist"]}@if(stats["shared"]!! > 0) + ${stats["shared"]}@endif</p>
@@ -94,7 +94,7 @@
                 </div>
             @else
                 <div class="column">
-                    <div class="box has-text-centered">
+                    <div class="box has-text-centered has-background-text-soft">
                         <h5 class="title is-5 has-text-danger">No Books found.</h5>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
                 </div>
             @else
                 <div class="column">
-                    <div class="box has-text-centered">
+                    <div class="box has-text-centered has-background-text-soft">
                         <h5 class="title is-5 has-text-danger">No Books found.</h5>
                     </div>
                 </div>

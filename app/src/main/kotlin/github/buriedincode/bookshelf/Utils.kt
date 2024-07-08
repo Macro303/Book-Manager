@@ -2,7 +2,11 @@ package github.buriedincode.bookshelf
 
 import com.sksamuel.hoplite.Secret
 import org.apache.logging.log4j.kotlin.Logging
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.DatabaseConfig
+import org.jetbrains.exposed.sql.ExperimentalKeywordApi
+import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
+import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path

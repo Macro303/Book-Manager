@@ -153,14 +153,9 @@
                             <div class="block">
                                 <p><strong>Bookshelf:</strong> ${resource.id.value}</p>
                             </div>
-                            @if(resource.isbn != null)
-                                <a class="button is-link is-sized" href="https://blackwells.co.uk/bookshop/product/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                                    <span class="icon">
-                                        <i class="fa-solid fa-link"></i>
-                                    </span>
-                                    <span>Search Blackwells</span>
-                                </a>
-                            @endif
+                            <div class="block">
+                                <p><strong>Isbn:</strong> ${resource.isbn}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -168,6 +163,23 @@
         </div>
         <div class="box">
             <div class="columns is-multiline is-centered">
+                @if(resource.isbn != null)
+                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
+                        <nav class="level is-mobile">
+                            <div class="level-item has-text-centered">
+                                <div>
+                                    <p class="title">Blackwells</p>
+                                    <p class="heading"><a class="has-text-link" href="https://blackwells.co.uk/bookshop/product/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </span>
+                                        <span>Search</span>
+                                    </a></p>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                @endif
                 @if(resource.goodreadsId != null || resource.isbn != null)
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
                         <nav class="level is-mobile">
@@ -205,18 +217,6 @@
                                             <span>Search</span>
                                         </a></p>
                                     @endif
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                @endif
-                @if(resource.isbn != null)
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
-                        <nav class="level is-mobile">
-                            <div class="level-item has-text-centered">
-                                <div>
-                                    <p class="title">Isbn</p>
-                                    <p class="heading">${resource.isbn}</p>
                                 </div>
                             </div>
                         </nav>
