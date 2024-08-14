@@ -40,7 +40,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
 
 object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
-    override fun listEndpoint(ctx: Context) {
+    override fun list(ctx: Context) {
         Utils.query {
             var resources = Book.all().toList()
             ctx.queryParam("creator-id")?.toLongOrNull()?.let {
@@ -130,7 +130,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    override fun createEndpoint(ctx: Context) {
+    override fun create(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<BookInput>()
             val exists = Book
@@ -162,7 +162,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    override fun updateEndpoint(ctx: Context) {
+    override fun update(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<BookInput>()
@@ -192,7 +192,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
         }
     }
 
-    override fun deleteEndpoint(ctx: Context) {
+    override fun delete(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.credits.forEach {
@@ -506,6 +506,8 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
             }
             readBook.readDate = body.readDate
 
+            println(resource.toString())
+            println(readBook.toString())
             ctx.json(resource.toJson(showAll = true))
         }
     }

@@ -13,7 +13,7 @@ import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
 object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), Logging {
-    override fun listEndpoint(ctx: Context) {
+    override fun list(ctx: Context) {
         Utils.query {
             var resources = Book.all().toList().filter { it.isCollected }
             val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let { Creator.findById(it) }
@@ -67,7 +67,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
         }
     }
 
-    override fun createEndpoint(ctx: Context) {
+    override fun create(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
             if (session == null) {
@@ -89,14 +89,14 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
         }
     }
 
-    override fun viewEndpoint(ctx: Context) {
+    override fun view(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val credits = HashMap<Role, List<Creator>>()
-            for (entry in resource.credits) {
-                var temp = credits.getOrDefault(entry.role, ArrayList())
-                temp = temp.plus(entry.creator)
-                credits[entry.role] = temp
+            resource.credits.forEach {
+                var temp = credits.getOrDefault(it.role, ArrayList())
+                temp = temp.plus(it.creator)
+                credits[it.role] = temp
             }
             ctx.render(
                 filePath = "templates/$name/view.kte",
@@ -109,7 +109,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
         }
     }
 
-    override fun updateEndpoint(ctx: Context) {
+    override fun update(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
             val resource = ctx.getResource()
@@ -144,6 +144,19 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), L
                     model = mapOf("session" to session),
                 )
             }
+        }
+    }
+
+    fun search(ctx: Context) {
+        Utils.query {
+            val session = ctx.getSession()
+            if (session == null)
+                ctx.redirect("/$plural")
+            else
+                ctx.render(
+                    filePath = "templates/$name/search.kte",
+                    model = mapOf("session" to session)
+                )
         }
     }
 }

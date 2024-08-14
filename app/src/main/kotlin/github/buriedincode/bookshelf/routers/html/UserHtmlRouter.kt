@@ -13,7 +13,7 @@ import io.javalin.http.Context
 import org.apache.logging.log4j.kotlin.Logging
 
 object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), Logging {
-    override fun listEndpoint(ctx: Context) {
+    override fun list(ctx: Context) {
         Utils.query {
             var resources = User.all().toList()
             val username = ctx.queryParam(key = "username")
@@ -35,7 +35,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
         }
     }
 
-    override fun createEndpoint(ctx: Context) {
+    override fun create(ctx: Context) {
         Utils.query {
             ctx.render(
                 filePath = "templates/$name/create.kte",
@@ -46,7 +46,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
         }
     }
 
-    override fun viewEndpoint(ctx: Context) {
+    override fun view(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
 
@@ -81,7 +81,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
         }
     }
 
-    override fun updateEndpoint(ctx: Context) {
+    override fun update(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
             val resource = ctx.getResource()
@@ -166,44 +166,6 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), L
                     ),
                 ),
             )
-        }
-    }
-
-    fun createBook(ctx: Context) {
-        Utils.query {
-            val session = ctx.getSession()
-            val resource = ctx.getResource()
-            if (session == null) {
-                ctx.redirect("/$plural/${resource.id.value}/wishlist")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/create_book.kte",
-                    model = mapOf(
-                        "session" to session,
-                        "resource" to resource,
-                        "formats" to Format.entries.toList(),
-                        "publishers" to Publisher.all().toList(),
-                    ),
-                )
-            }
-        }
-    }
-
-    fun importBook(ctx: Context) {
-        Utils.query {
-            val session = ctx.getSession()
-            val resource = ctx.getResource()
-            if (session == null) {
-                ctx.redirect("/$plural/${resource.id.value}/wishlist")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/import_book.kte",
-                    model = mapOf(
-                        "session" to session,
-                        "resource" to resource,
-                    ),
-                )
-            }
         }
     }
 }

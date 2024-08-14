@@ -24,19 +24,19 @@ abstract class BaseApiRouter<T : LongEntity>(protected val entity: LongEntityCla
         } ?: throw BadRequestResponse(message = "Invalid $title Id")
     }
 
-    abstract fun listEndpoint(ctx: Context)
+    abstract fun list(ctx: Context)
 
-    abstract fun createEndpoint(ctx: Context)
+    abstract fun create(ctx: Context)
 
-    open fun getEndpoint(ctx: Context) {
+    open fun read(ctx: Context) {
         Utils.query {
             ctx.json((ctx.getResource() as IJson).toJson(showAll = true))
         }
     }
 
-    abstract fun updateEndpoint(ctx: Context)
+    abstract fun update(ctx: Context)
 
-    open fun deleteEndpoint(ctx: Context) {
+    open fun delete(ctx: Context) {
         Utils.query {
             ctx.getResource().delete()
         }

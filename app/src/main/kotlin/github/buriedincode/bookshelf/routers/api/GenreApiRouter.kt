@@ -15,7 +15,7 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.SizedCollection
 
 object GenreApiRouter : BaseApiRouter<Genre>(entity = Genre), Logging {
-    override fun listEndpoint(ctx: Context) {
+    override fun list(ctx: Context) {
         Utils.query {
             var resources = Genre.all().toList()
             ctx.queryParam("book-id")?.toLongOrNull()?.let {
@@ -30,7 +30,7 @@ object GenreApiRouter : BaseApiRouter<Genre>(entity = Genre), Logging {
         }
     }
 
-    override fun createEndpoint(ctx: Context) {
+    override fun create(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<GenreInput>()
             val exists = Genre
@@ -49,7 +49,7 @@ object GenreApiRouter : BaseApiRouter<Genre>(entity = Genre), Logging {
         }
     }
 
-    override fun updateEndpoint(ctx: Context) {
+    override fun update(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<GenreInput>()

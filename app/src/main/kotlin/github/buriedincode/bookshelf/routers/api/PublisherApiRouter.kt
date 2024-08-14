@@ -14,7 +14,7 @@ import io.javalin.http.bodyAsClass
 import org.apache.logging.log4j.kotlin.Logging
 
 object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Logging {
-    override fun listEndpoint(ctx: Context) {
+    override fun list(ctx: Context) {
         Utils.query {
             var resources = Publisher.all().toList()
             ctx.queryParam("book-id")?.toLongOrNull()?.let {
@@ -29,7 +29,7 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
         }
     }
 
-    override fun createEndpoint(ctx: Context) {
+    override fun create(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<PublisherInput>()
             val exists = Publisher
@@ -48,7 +48,7 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Loggin
         }
     }
 
-    override fun updateEndpoint(ctx: Context) {
+    override fun update(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<PublisherInput>()

@@ -18,7 +18,10 @@ data class Work(
     val lastModified: LocalDateTime?,
     val latestRevision: Int,
     val revision: Int,
+    val subjectPeople: List<String> = emptyList(),
+    val subjectTimes: List<String> = emptyList(),
     val subjects: List<String> = emptyList(),
+    val subtitle: String? = null,
     val title: String,
     val type: Resource,
 ) {

@@ -11,11 +11,6 @@ import github.buriedincode.bookshelf.routers.api.RoleApiRouter
 import github.buriedincode.bookshelf.routers.api.SeriesApiRouter
 import github.buriedincode.bookshelf.routers.api.UserApiRouter
 import github.buriedincode.bookshelf.routers.html.BookHtmlRouter
-import github.buriedincode.bookshelf.routers.html.CreatorHtmlRouter
-import github.buriedincode.bookshelf.routers.html.GenreHtmlRouter
-import github.buriedincode.bookshelf.routers.html.PublisherHtmlRouter
-import github.buriedincode.bookshelf.routers.html.RoleHtmlRouter
-import github.buriedincode.bookshelf.routers.html.SeriesHtmlRouter
 import github.buriedincode.bookshelf.routers.html.UserHtmlRouter
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.delete
@@ -75,68 +70,24 @@ object App : Logging {
                             )
                         }
                     }
-                    get("search") { ctx ->
-                        ctx.render(filePath = "templates/book/search.kte")
-                    }
                     path("books") {
-                        get(BookHtmlRouter::listEndpoint)
-                        get("create", BookHtmlRouter::createEndpoint)
+                        get(BookHtmlRouter::list)
+                        get("create", BookHtmlRouter::create)
                         get("import", BookHtmlRouter::import)
+                        get("search", BookHtmlRouter::search)
                         path("{book-id}") {
-                            get(BookHtmlRouter::viewEndpoint)
-                            get("update", BookHtmlRouter::updateEndpoint)
-                        }
-                    }
-                    path("creators") {
-                        get(CreatorHtmlRouter::listEndpoint)
-                        get("create", CreatorHtmlRouter::createEndpoint)
-                        path("{creator-id}") {
-                            get(CreatorHtmlRouter::viewEndpoint)
-                            get("update", CreatorHtmlRouter::updateEndpoint)
-                        }
-                    }
-                    path("genres") {
-                        get(GenreHtmlRouter::listEndpoint)
-                        get("create", GenreHtmlRouter::createEndpoint)
-                        path("{genre-id}") {
-                            get(GenreHtmlRouter::viewEndpoint)
-                            get("update", GenreHtmlRouter::updateEndpoint)
-                        }
-                    }
-                    path("publishers") {
-                        get(PublisherHtmlRouter::listEndpoint)
-                        get("create", PublisherHtmlRouter::createEndpoint)
-                        path("{publisher-id}") {
-                            get(PublisherHtmlRouter::viewEndpoint)
-                            get("update", PublisherHtmlRouter::updateEndpoint)
-                        }
-                    }
-                    path("roles") {
-                        get(RoleHtmlRouter::listEndpoint)
-                        get("create", RoleHtmlRouter::createEndpoint)
-                        path("{role-id}") {
-                            get(RoleHtmlRouter::viewEndpoint)
-                            get("update", RoleHtmlRouter::updateEndpoint)
-                        }
-                    }
-                    path("series") {
-                        get(SeriesHtmlRouter::listEndpoint)
-                        get("create", SeriesHtmlRouter::createEndpoint)
-                        path("{series-id}") {
-                            get(SeriesHtmlRouter::viewEndpoint)
-                            get("update", SeriesHtmlRouter::updateEndpoint)
+                            get(BookHtmlRouter::view)
+                            get("update", BookHtmlRouter::update)
                         }
                     }
                     path("users") {
-                        get(UserHtmlRouter::listEndpoint)
-                        get("create", UserHtmlRouter::createEndpoint)
+                        get(UserHtmlRouter::list)
+                        get("create", UserHtmlRouter::create)
                         path("{user-id}") {
-                            get(UserHtmlRouter::viewEndpoint)
-                            get("update", UserHtmlRouter::updateEndpoint)
+                            get(UserHtmlRouter::view)
+                            get("update", UserHtmlRouter::update)
                             path("wishlist") {
                                 get(UserHtmlRouter::wishlist)
-                                get("create", UserHtmlRouter::createBook)
-                                get("import", UserHtmlRouter::importBook)
                             }
                         }
                     }
@@ -144,13 +95,13 @@ object App : Logging {
                 path("api") {
                     path("books") {
                         post("search", BookApiRouter::search)
-                        get(BookApiRouter::listEndpoint)
-                        post(BookApiRouter::createEndpoint)
+                        get(BookApiRouter::list)
+                        post(BookApiRouter::create)
                         post("import", BookApiRouter::import)
                         path("{book-id}") {
-                            get(BookApiRouter::getEndpoint)
-                            put(BookApiRouter::updateEndpoint)
-                            delete(BookApiRouter::deleteEndpoint)
+                            get(BookApiRouter::read)
+                            put(BookApiRouter::update)
+                            delete(BookApiRouter::delete)
                             put("pull", BookApiRouter::pull)
                             path("collect") {
                                 post(BookApiRouter::collectBook)
@@ -179,12 +130,12 @@ object App : Logging {
                         }
                     }
                     path("creators") {
-                        get(CreatorApiRouter::listEndpoint)
-                        post(CreatorApiRouter::createEndpoint)
+                        get(CreatorApiRouter::list)
+                        post(CreatorApiRouter::create)
                         path("{creator-id}") {
-                            get(CreatorApiRouter::getEndpoint)
-                            put(CreatorApiRouter::updateEndpoint)
-                            delete(CreatorApiRouter::deleteEndpoint)
+                            get(CreatorApiRouter::read)
+                            put(CreatorApiRouter::update)
+                            delete(CreatorApiRouter::delete)
                             path("credits") {
                                 post(CreatorApiRouter::addCredit)
                                 delete(CreatorApiRouter::removeCredit)
@@ -192,12 +143,12 @@ object App : Logging {
                         }
                     }
                     path("genres") {
-                        get(GenreApiRouter::listEndpoint)
-                        post(GenreApiRouter::createEndpoint)
+                        get(GenreApiRouter::list)
+                        post(GenreApiRouter::create)
                         path("{genre-id}") {
-                            get(GenreApiRouter::getEndpoint)
-                            put(GenreApiRouter::updateEndpoint)
-                            delete(GenreApiRouter::deleteEndpoint)
+                            get(GenreApiRouter::read)
+                            put(GenreApiRouter::update)
+                            delete(GenreApiRouter::delete)
                             path("books") {
                                 post(GenreApiRouter::addBook)
                                 delete(GenreApiRouter::removeBook)
@@ -205,12 +156,12 @@ object App : Logging {
                         }
                     }
                     path("publishers") {
-                        get(PublisherApiRouter::listEndpoint)
-                        post(PublisherApiRouter::createEndpoint)
+                        get(PublisherApiRouter::list)
+                        post(PublisherApiRouter::create)
                         path("{publisher-id}") {
-                            get(PublisherApiRouter::getEndpoint)
-                            put(PublisherApiRouter::updateEndpoint)
-                            delete(PublisherApiRouter::deleteEndpoint)
+                            get(PublisherApiRouter::read)
+                            put(PublisherApiRouter::update)
+                            delete(PublisherApiRouter::delete)
                             path("books") {
                                 post(PublisherApiRouter::addBook)
                                 delete(PublisherApiRouter::removeBook)
@@ -218,12 +169,12 @@ object App : Logging {
                         }
                     }
                     path("roles") {
-                        get(RoleApiRouter::listEndpoint)
-                        post(RoleApiRouter::createEndpoint)
+                        get(RoleApiRouter::list)
+                        post(RoleApiRouter::create)
                         path("{role-id}") {
-                            get(RoleApiRouter::getEndpoint)
-                            put(RoleApiRouter::updateEndpoint)
-                            delete(RoleApiRouter::deleteEndpoint)
+                            get(RoleApiRouter::read)
+                            put(RoleApiRouter::update)
+                            delete(RoleApiRouter::delete)
                             path("credits") {
                                 post(RoleApiRouter::addCredit)
                                 delete(RoleApiRouter::removeCredit)
@@ -231,12 +182,12 @@ object App : Logging {
                         }
                     }
                     path("series") {
-                        get(SeriesApiRouter::listEndpoint)
-                        post(SeriesApiRouter::createEndpoint)
+                        get(SeriesApiRouter::list)
+                        post(SeriesApiRouter::create)
                         path("{series-id}") {
-                            get(SeriesApiRouter::getEndpoint)
-                            put(SeriesApiRouter::updateEndpoint)
-                            delete(SeriesApiRouter::deleteEndpoint)
+                            get(SeriesApiRouter::read)
+                            put(SeriesApiRouter::update)
+                            delete(SeriesApiRouter::delete)
                             path("books") {
                                 post(SeriesApiRouter::addBook)
                                 delete(SeriesApiRouter::removeBook)
@@ -244,12 +195,12 @@ object App : Logging {
                         }
                     }
                     path("users") {
-                        get(UserApiRouter::listEndpoint)
-                        post(UserApiRouter::createEndpoint)
+                        get(UserApiRouter::list)
+                        post(UserApiRouter::create)
                         path("{user-id}") {
-                            get(UserApiRouter::getEndpoint)
-                            put(UserApiRouter::updateEndpoint)
-                            delete(UserApiRouter::deleteEndpoint)
+                            get(UserApiRouter::read)
+                            put(UserApiRouter::update)
+                            delete(UserApiRouter::delete)
                             path("read") {
                                 post(UserApiRouter::addReadBook)
                                 delete(UserApiRouter::removeReadBook)

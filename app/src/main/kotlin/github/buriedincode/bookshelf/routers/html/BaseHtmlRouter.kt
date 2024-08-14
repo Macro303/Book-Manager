@@ -29,9 +29,9 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
         }
     }
 
-    abstract fun listEndpoint(ctx: Context)
+    abstract fun list(ctx: Context)
 
-    open fun createEndpoint(ctx: Context) {
+    open fun create(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
             if (session == null) {
@@ -47,7 +47,7 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
         }
     }
 
-    open fun viewEndpoint(ctx: Context) {
+    open fun view(ctx: Context) {
         Utils.query {
             ctx.render(
                 filePath = "templates/$name/view.kte",
@@ -59,7 +59,7 @@ abstract class BaseHtmlRouter<T : LongEntity>(protected val entity: LongEntityCl
         }
     }
 
-    open fun updateEndpoint(ctx: Context) {
+    open fun update(ctx: Context) {
         Utils.query {
             val session = ctx.getSession()
             val resource = ctx.getResource()

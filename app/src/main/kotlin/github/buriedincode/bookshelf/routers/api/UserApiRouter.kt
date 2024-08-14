@@ -19,7 +19,7 @@ import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 
 object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
-    override fun listEndpoint(ctx: Context) {
+    override fun list(ctx: Context) {
         Utils.query {
             var resources = User.all().toList()
             ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
@@ -44,7 +44,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
         }
     }
 
-    override fun createEndpoint(ctx: Context) {
+    override fun create(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<UserInput>()
             val exists = User
@@ -63,7 +63,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
         }
     }
 
-    override fun updateEndpoint(ctx: Context) {
+    override fun update(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<UserInput>()
@@ -81,7 +81,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User), Logging {
         }
     }
 
-    override fun deleteEndpoint(ctx: Context) {
+    override fun delete(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.readBooks.forEach {

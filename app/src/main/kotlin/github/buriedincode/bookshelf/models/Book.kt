@@ -95,6 +95,10 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     }
 
     override fun compareTo(other: Book): Int = comparator.compare(this, other)
+
+    override fun toString(): String {
+        return "Book(publishDate=$publishDate, credits=$credits, format=$format, genres=$genres, goodreadsId=$goodreadsId, googleBooksId=$googleBooksId, imageUrl=$imageUrl, isbn=$isbn, isCollected=$isCollected, libraryThingId=$libraryThingId, openLibraryId=$openLibraryId, publisher=$publisher, readers=$readers, series=$series, subtitle=$subtitle, summary=$summary, title='$title', wishers=$wishers)"
+    }
 }
 
 data class BookInput(

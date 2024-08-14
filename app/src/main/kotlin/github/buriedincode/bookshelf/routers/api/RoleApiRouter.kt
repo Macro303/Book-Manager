@@ -18,7 +18,7 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.and
 
 object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
-    override fun listEndpoint(ctx: Context) {
+    override fun list(ctx: Context) {
         Utils.query {
             var resources = Role.all().toList()
             ctx.queryParam("book-id")?.toLongOrNull()?.let {
@@ -38,7 +38,7 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
         }
     }
 
-    override fun createEndpoint(ctx: Context) {
+    override fun create(ctx: Context) {
         Utils.query {
             val body = ctx.bodyAsClass<RoleInput>()
             val exists = Role
@@ -57,7 +57,7 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
         }
     }
 
-    override fun updateEndpoint(ctx: Context) {
+    override fun update(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             val body = ctx.bodyAsClass<RoleInput>()
@@ -75,7 +75,7 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role), Logging {
         }
     }
 
-    override fun deleteEndpoint(ctx: Context) {
+    override fun delete(ctx: Context) {
         Utils.query {
             val resource = ctx.getResource()
             resource.credits.forEach {
