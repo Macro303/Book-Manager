@@ -1,28 +1,34 @@
 [versions]
-jte = "3.1.12"
-kotlin = "2.0.0"
-
-# Libraries
-exposed = "0.52.0"
+exposed = "0.53.0"
 hoplite = "2.7.5"
-jackson = "2.17.1"
-javalin = "6.1.6"
-junit = "5.10.3"
+jackson = "2.17.2"
+javalin = "6.2.0"
+jte = "3.1.12"
+junit = "5.11.0"
+kotlin = "2.0.10"
+kotlin-logging = "7.0.0"
 kotlinx-datetime = "0.6.0"
 kotlinx-serialization = "1.7.1"
+ktlint = "12.1.1"
 log4j2 = "2.23.1"
-log4j2-kotlin = "1.4.0"
+log4j2-kotlin = "1.5.0"
 postgres = "42.7.3"
-sqlite-jdbc = "3.46.0.0"
+shadow = "8.1.1"
+sqlite-jdbc = "3.46.0.1"
+versions = "0.51.0"
 
-# Plugins
-ktlintPlugin = "12.1.1"
-shadowPlugin = "8.1.1"
-versionsPlugin = "0.51.0"
+[plugins]
+jte = { id = "gg.jte.gradle", version.ref = "jte" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
 
 [libraries]
 # Common
-log4j2-api-kotlin = { group = "org.apache.logging.log4j", name = "log4j-api-kotlin", version.ref = "log4j2-kotlin" }
+kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging-jvm", version.ref = "kotlin-logging" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 log4j2-slf4j2-impl = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j2" }
 sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite-jdbc" }
 
@@ -30,7 +36,7 @@ sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlit
 exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
 exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
 exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
-exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
+exposed-kotlin-datetime = { group = "org.jetbrains.exposed", name = "exposed-kotlin-datetime", version.ref = "exposed" }
 hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.ref = "hoplite" }
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
@@ -45,20 +51,10 @@ postgres = { group = "org.postgresql", name = "postgresql", version.ref = "postg
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
-kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 [bundles]
-exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-java-time"]
+exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-kotlin-datetime"]
 jackson = ["jackson-databind", "jackson-module-kotlin", "jackson-datatype-jsr310"]
 javalin = ["javalin-core", "javalin-rendering"]
 jte = ["jte-core", "jte-kotlin"]
-kotlinx-serialization = ["kotlinx-serialization-json", "kotlinx-datetime"]
-
-[plugins]
-jte = { id = "gg.jte.gradle", version.ref = "jte" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
-shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadowPlugin" }
-versions = { id = "com.github.ben-manes.versions", version.ref = "versionsPlugin" }

@@ -1,7 +1,12 @@
 package github.buriedincode.bookshelf
 
 import com.sksamuel.hoplite.Secret
-import org.apache.logging.log4j.kotlin.Logging
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.Level
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.ExperimentalKeywordApi
@@ -13,48 +18,40 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.sql.Connection
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAccessor
 import java.util.Locale
 import kotlin.io.path.div
 
-object Utils : Logging {
-    private val HOME_ROOT: Path = Paths.get(System.getProperty("user.home"))
-    private val XDG_CACHE: Path = System.getenv("XDG_CACHE_HOME")?.let {
-        Paths.get(it)
-    } ?: (HOME_ROOT / ".cache")
-    private val XDG_CONFIG: Path = System.getenv("XDG_CONFIG_HOME")?.let {
-        Paths.get(it)
-    } ?: (HOME_ROOT / ".config")
-    private val XDG_DATA: Path = System.getenv("XDG_DATA_HOME")?.let {
-        Paths.get(it)
-    } ?: (HOME_ROOT / ".local" / "share")
+object Utils {
+    @JvmStatic
+    private val LOGGER = KotlinLogging.logger { }
+    private val HOME_ROOT: Path by lazy { Paths.get(System.getProperty("user.home")) }
+    private val XDG_CACHE: Path by lazy { System.getenv("XDG_CACHE_HOME")?.let(Paths::get) ?: (HOME_ROOT / ".cache") }
+    private val XDG_CONFIG: Path by lazy { System.getenv("XDG_CONFIG_HOME")?.let(Paths::get) ?: (HOME_ROOT / ".config") }
+    private val XDG_DATA: Path by lazy { System.getenv("XDG_DATA_HOME")?.let(Paths::get) ?: (HOME_ROOT / ".local" / "share") }
 
-    internal val CACHE_ROOT = XDG_CACHE / "bookshelf"
-    internal val CONFIG_ROOT = XDG_CONFIG / "bookshelf"
-    internal val DATA_ROOT = XDG_DATA / "bookshelf"
+    internal val CACHE_ROOT: Path = XDG_CACHE / "bookshelf"
+    internal val CONFIG_ROOT: Path = XDG_CONFIG / "bookshrlf"
+    internal val DATA_ROOT: Path = XDG_DATA / "bookshelf"
     internal const val VERSION = "0.3.1"
 
     private val DATABASE: Database by lazy {
         val settings = Settings.load()
-        if (settings.database.source == Settings.Database.Source.POSTGRES) {
-            return@lazy Database.connect(
-                url = settings.database.url,
-                driver = "org.postgresql.Driver",
-                user = settings.database.user ?: "user",
-                password = settings.database.password ?: "password",
-                databaseConfig = DatabaseConfig {
-                    @OptIn(ExperimentalKeywordApi::class)
-                    preserveKeywordCasing = true
-                },
-            )
-        }
-        return@lazy Database.connect(
-            url = settings.database.url,
-            driver = "org.sqlite.JDBC",
+        Database.connect(
+            url = when (settings.database.source) {
+                Settings.Database.Source.POSTGRES -> "jdbc:postgres:${settings.database.url}"
+                else -> "jdbc:sqlite:${settings.database.url}"
+            },
+            driver = when (settings.database.source) {
+                Settings.Database.Source.POSTGRES -> "org.postgresql.Driver"
+                else -> "org.sqlite.JDBC"
+            },
+            user = settings.database.user ?: "user",
+            password = settings.database.password ?: "password",
             databaseConfig = DatabaseConfig {
                 @OptIn(ExperimentalKeywordApi::class)
                 preserveKeywordCasing = true
@@ -63,14 +60,8 @@ object Utils : Logging {
     }
 
     init {
-        if (!Files.exists(CACHE_ROOT)) {
-            CACHE_ROOT.toFile().mkdirs()
-        }
-        if (!Files.exists(CONFIG_ROOT)) {
-            CONFIG_ROOT.toFile().mkdirs()
-        }
-        if (!Files.exists(DATA_ROOT)) {
-            DATA_ROOT.toFile().mkdirs()
+        listOf(CACHE_ROOT, CONFIG_ROOT, DATA_ROOT).forEach {
+            if (!Files.exists(it)) it.toFile().mkdirs()
         }
     }
 
@@ -80,43 +71,8 @@ object Utils : Logging {
             addLogger(Slf4jSqlDebugLogger)
             block()
         }
-        logger.debug("Took ${ChronoUnit.MILLIS.between(startTime, LocalDateTime.now())}ms")
+        LOGGER.debug { "Took ${ChronoUnit.MILLIS.between(startTime, LocalDateTime.now())}ms" }
         return transaction
-    }
-
-    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
-
-    inline fun <reified T : Enum<T>> T.titlecase(): String {
-        return this.name.lowercase().split("_").joinToString(" ") {
-            it.replaceFirstChar(Char::uppercaseChar)
-        }
-    }
-
-    fun toHumanReadable(milliseconds: Float): String {
-        val duration = Duration.ofMillis(milliseconds.toLong())
-        val minutes = duration.toMinutes()
-        if (minutes > 0) {
-            val seconds = duration.minusMinutes(minutes).toSeconds()
-            val millis = duration.minusMinutes(minutes).minusSeconds(seconds)
-            return "${minutes}min ${seconds}sec ${millis}ms"
-        }
-        val seconds = duration.toSeconds()
-        if (seconds > 0) {
-            val millis = duration.minusSeconds(seconds).toMillis()
-            return "${seconds}sec ${millis}ms"
-        }
-        return "${duration.toMillis()}ms"
-    }
-
-    fun Secret?.isNullOrBlank(): Boolean = this?.value.isNullOrBlank()
-
-    fun String.toLocalDateOrNull(pattern: String): LocalDate? {
-        return try {
-            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)
-            LocalDate.parse(this, formatter)
-        } catch (dtpe: DateTimeParseException) {
-            null
-        }
     }
 
     private fun getDayNumberSuffix(day: Int): String {
@@ -132,12 +88,60 @@ object Utils : Logging {
         }
     }
 
-    fun LocalDate.toHumanReadable(): String {
-        val pattern = "d'${getDayNumberSuffix(this.dayOfMonth)}' MMM yyyy"
-        return this.toString(pattern)
+    internal fun KLogger.log(level: Level, message: () -> Any?) {
+        when (level) {
+            Level.TRACE -> this.trace(message)
+            Level.DEBUG -> this.debug(message)
+            Level.INFO -> this.info(message)
+            Level.WARN -> this.warn(message)
+            Level.ERROR -> this.error(message)
+            else -> return
+        }
+    }
+
+    internal fun toHumanReadable(milliseconds: Float): String {
+        val duration = Duration.ofMillis(milliseconds.toLong())
+        val minutes = duration.toMinutes()
+        val seconds = duration.seconds - minutes * 60
+        val millis = duration.toMillis() - (minutes * 60000 + seconds * 1000)
+        return when {
+            minutes > 0 -> "${minutes}min ${seconds}sec ${millis}ms"
+            seconds > 0 -> "${seconds}sec ${millis}ms"
+            else -> "${millis}ms"
+        }
+    }
+
+    internal fun Secret?.isNullOrBlank(): Boolean = this?.value.isNullOrBlank()
+
+    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
+
+    inline fun <reified T : Enum<T>> T.titlecase(): String = this.name.lowercase().split("_").joinToString(" ") {
+        it.replaceFirstChar(Char::uppercaseChar)
+    }
+
+    fun String.toLocalDateOrNull(pattern: String): LocalDate? {
+        return try {
+            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)
+            java.time.LocalDate.parse(this, formatter).toKotlinLocalDate()
+        } catch (e: DateTimeParseException) {
+            null
+        }
+    }
+
+    fun LocalDate.toHumanReadable(showFull: Boolean = false): String {
+        val pattern = if (showFull) {
+            "EEE, d'${getDayNumberSuffix(this.dayOfMonth)}' MMM yyyy"
+        } else {
+            "d'${getDayNumberSuffix(this.dayOfMonth)}' MMM yyyy"
+        }
+        return this.toJavaLocalDate().formatToPattern(pattern)
     }
 
     fun LocalDate.toString(pattern: String): String {
-        return this.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH))
+        return this.toJavaLocalDate().formatToPattern(pattern)
+    }
+
+    private fun TemporalAccessor.formatToPattern(pattern: String): String {
+        return DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH).format(this)
     }
 }

@@ -5,158 +5,55 @@ import github.buriedincode.bookshelf.Utils.asEnumOrNull
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Format
-import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.models.Series
 import io.javalin.http.Context
-import org.apache.logging.log4j.kotlin.Logging
 
-object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books"), Logging {
-    override fun list(ctx: Context) {
-        Utils.query {
-            var resources = Book.all().toList().filter { it.isCollected }
-            val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let { Creator.findById(it) }
-            creator?.let {
-                resources = resources.filter { creator in it.credits.map { it.creator } }
-            }
-            val format = ctx.queryParam("format")?.asEnumOrNull<Format>()
-            format?.let {
-                resources = resources.filter { format == it.format }
-            }
-            val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let { Genre.findById(it) }
-            genre?.let {
-                resources = resources.filter { genre in it.genres }
-            }
-            val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let { Publisher.findById(it) }
-            publisher?.let {
-                resources = resources.filter { publisher == it.publisher }
-            }
-            val series = ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it) }
-            series?.let {
-                resources = resources.filter { series in it.series.map { it.series } }
-            }
-            val title = ctx.queryParam("title")
-            title?.let {
-                resources = resources.filter {
-                    (
-                        it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
-                    ) ||
-                        (
-                            it.subtitle?.let {
-                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                            } ?: false
-                        )
+object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
+    override fun view(ctx: Context) = Utils.query {
+        renderResource(ctx, "view", mapOf("credits", ctx.getResource().credits.groupBy({ it.role }, { it.creator })), redirect = false)
+    }
+
+    fun import(ctx: Context) = render(ctx, "import")
+
+    fun search(ctx: Context) = render(ctx, "search")
+
+    protected override fun filterResources(ctx: Context): List<Book> {
+        return Book
+            .find { BooksTable.id neq -1 }
+            .apply {
+                ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+                    Creator.findById(it)?.let { andWhere { BookCreditsTable.creator eq it } }
                 }
-            }
-            ctx.render(
-                filePath = "templates/$name/list.kte",
-                model = mapOf(
-                    "session" to ctx.getSession(),
-                    "resources" to resources,
-                    "selected" to mapOf(
-                        "creator" to creator,
-                        "format" to format,
-                        "genre" to genre,
-                        "publisher" to publisher,
-                        "series" to series,
-                        "title" to title,
-                    ),
-                ),
-            )
-        }
+                ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { andWhere { BooksTable.format eq it } }
+                ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+                    Publisher.findById(it)?.let { andWhere { BooksTable.publisher eq it } }
+                }
+                ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it)?.let { andWhere { BookSeriesTable.series eq it } } }
+                ctx.queryParam("title")?.let { title ->
+                    andWhere { (BooksTable.title like "%$title%") or (BooksTable.subtitle like "%$title%") }
+                }
+            }.toList()
     }
 
-    override fun create(ctx: Context) {
-        Utils.query {
-            val session = ctx.getSession()
-            if (session == null) {
-                ctx.redirect("/$plural")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/create.kte",
-                    model = mapOf(
-                        "session" to session,
-                        "creators" to Creator.all().toList(),
-                        "formats" to Format.entries.toList(),
-                        "genres" to Genre.all().toList(),
-                        "publishers" to Publisher.all().toList(),
-                        "roles" to Role.all().toList(),
-                        "series" to Series.all().toList(),
-                    ),
-                )
-            }
-        }
-    }
+    protected override fun filters(ctx: Context): Map<String, Any?> = mapOf(
+        "creator" to ctx.queryParam("creator-id")?.toLongOrNull()?.let { Creator.findById(it) },
+        "format" to ctx.queryParam("format")?.asEnumOrNull<Format>(),
+        "publisher" to ctx.queryParam("publisher-id")?.toLongOrNull()?.let { Publisher.findById(it) },
+        "series" to ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it) },
+        "title" to ctx.queryParam("title"),
+    )
 
-    override fun view(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val credits = HashMap<Role, List<Creator>>()
-            resource.credits.forEach {
-                var temp = credits.getOrDefault(it.role, ArrayList())
-                temp = temp.plus(it.creator)
-                credits[it.role] = temp
-            }
-            ctx.render(
-                filePath = "templates/$name/view.kte",
-                model = mapOf(
-                    "session" to ctx.getSession(),
-                    "resource" to resource,
-                    "credits" to credits,
-                ),
-            )
-        }
-    }
+    protected override fun optionMap(): Map<String, Any?> = mapOf(
+        "creators" to Creator.all().toList(),
+        "formats" to Format.entries.toList(),
+        "publishers" to Publisher.all().toList(),
+        "roles" to Role.all().toList(),
+        "series" to Series.all().toList(),
+    )
 
-    override fun update(ctx: Context) {
-        Utils.query {
-            val session = ctx.getSession()
-            val resource = ctx.getResource()
-            if (session == null) {
-                ctx.redirect("/$plural/${resource.id.value}")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/update.kte",
-                    model = mapOf(
-                        "session" to session,
-                        "resource" to resource,
-                        "creators" to Creator.all().toList(),
-                        "formats" to Format.entries.toList(),
-                        "genres" to Genre.all().toList().filterNot { it in resource.genres },
-                        "publishers" to Publisher.all().toList(),
-                        "roles" to Role.all().toList(),
-                        "series" to Series.all().toList().filterNot { it in resource.series.map { it.series } },
-                    ),
-                )
-            }
-        }
-    }
-
-    fun import(ctx: Context) {
-        Utils.query {
-            val session = ctx.getSession()
-            if (session == null) {
-                ctx.redirect("/$plural")
-            } else {
-                ctx.render(
-                    filePath = "templates/$name/import.kte",
-                    model = mapOf("session" to session),
-                )
-            }
-        }
-    }
-
-    fun search(ctx: Context) {
-        Utils.query {
-            val session = ctx.getSession()
-            if (session == null)
-                ctx.redirect("/$plural")
-            else
-                ctx.render(
-                    filePath = "templates/$name/search.kte",
-                    model = mapOf("session" to session)
-                )
-        }
-    }
+    protected override fun optionMapExclusions(ctx: Context): Map<String, Any?> = mapOf(
+        "series" to Series.find { BookSeriesTable.series notInList ctx.getResource().series.map { it.series } }.distinct().toList(),
+    )
 }

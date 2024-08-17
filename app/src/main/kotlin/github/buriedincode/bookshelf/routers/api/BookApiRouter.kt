@@ -2,14 +2,12 @@ package github.buriedincode.bookshelf.routers.api
 
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.Utils.asEnumOrNull
-import github.buriedincode.bookshelf.Utils.toLocalDateOrNull
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.BookInput
 import github.buriedincode.bookshelf.models.BookSeries
 import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Format
-import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.IdInput
 import github.buriedincode.bookshelf.models.ImportBook
 import github.buriedincode.bookshelf.models.Publisher
@@ -20,657 +18,285 @@ import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.services.OpenLibrary
 import github.buriedincode.bookshelf.services.getId
 import github.buriedincode.bookshelf.tables.BookSeriesTable
-import github.buriedincode.bookshelf.tables.BookTable
-import github.buriedincode.bookshelf.tables.CreatorTable
-import github.buriedincode.bookshelf.tables.CreditTable
-import github.buriedincode.bookshelf.tables.PublisherTable
-import github.buriedincode.bookshelf.tables.ReadBookTable
-import github.buriedincode.bookshelf.tables.RoleTable
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
 import io.javalin.http.NotImplementedResponse
-import io.javalin.http.bodyAsClass
-import kotlinx.datetime.toJavaLocalDate
-import org.apache.logging.log4j.kotlin.Logging
-import org.jetbrains.exposed.sql.SizedCollection
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.SizedCollection
 
-object BookApiRouter : BaseApiRouter<Book>(entity = Book), Logging {
-    override fun list(ctx: Context) {
-        Utils.query {
-            var resources = Book.all().toList()
-            ctx.queryParam("creator-id")?.toLongOrNull()?.let {
-                Creator.findById(it)?.let { creator ->
-                    resources = resources.filter { creator in it.credits.map { it.creator } }
+object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
+    override fun list(ctx: Context) = Utils.query {
+        val resources = Book
+            .find { BookTable.id neq -1 }
+            .apply {
+                ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+                    Creator.findById(it)?.let { andWhere { CreditTable.creatorCol eq it } }
                 }
-            }
-            ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { format ->
-                resources = resources.filter { format == it.format }
-            }
-            ctx.queryParam("genre-id")?.toLongOrNull()?.let {
-                Genre.findById(it)?.let { genre ->
-                    resources = resources.filter { genre in it.genres }
+                ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { andWhere { BookTable.formatCol eq it } }
+                ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+                    Publisher.findById(it)?.let { andWhere { BookTable.publisherCol eq it } }
                 }
-            }
-            ctx.queryParam("has-goodreads")?.lowercase()?.toBooleanStrictOrNull()?.let { goodreads ->
-                resources = resources.filter { it.goodreadsId != null == goodreads }
-            }
-            ctx.queryParam("goodreads-id")?.let { goodreads ->
-                resources = resources.filter { goodreads == it.goodreadsId }
-            }
-            ctx.queryParam("has-google-books")?.lowercase()?.toBooleanStrictOrNull()?.let { googleBooks ->
-                resources = resources.filter { it.googleBooksId != null == googleBooks }
-            }
-            ctx.queryParam("google-books-id")?.let { googleBooks ->
-                resources = resources.filter { googleBooks == it.googleBooksId }
-            }
-            ctx.queryParam("has-image")?.lowercase()?.toBooleanStrictOrNull()?.let { image ->
-                resources = resources.filter { it.imageUrl != null == image }
-            }
-            ctx.queryParam("has-isbn")?.lowercase()?.toBooleanStrictOrNull()?.let { isbn ->
-                resources = resources.filter { it.isbn != null == isbn }
-            }
-            ctx.queryParam("isbn")?.let { isbn ->
-                resources = resources.filter { isbn == it.isbn }
-            }
-            ctx.queryParam("is-collected")?.lowercase()?.toBooleanStrictOrNull()?.let { collected ->
-                resources = resources.filter { collected == it.isCollected }
-            }
-            ctx.queryParam("has-library-thing")?.lowercase()?.toBooleanStrictOrNull()?.let { libraryThing ->
-                resources = resources.filter { it.libraryThingId != null == libraryThing }
-            }
-            ctx.queryParam("library-thing-id")?.let { libraryThing ->
-                resources = resources.filter { libraryThing == it.libraryThingId }
-            }
-            ctx.queryParam("has-open-library")?.lowercase()?.toBooleanStrictOrNull()?.let { openLibrary ->
-                resources = resources.filter { it.openLibraryId != null == openLibrary }
-            }
-            ctx.queryParam("open-library-id")?.let { openLibrary ->
-                resources = resources.filter { openLibrary == it.openLibraryId }
-            }
-            ctx.queryParam("before-publish-date")?.toLocalDateOrNull("yyyy-MM-dd")?.let { publishDate ->
-                resources = resources.filter { it.publishDate?.isBefore(publishDate) ?: false }
-            }
-            ctx.queryParam("after-publish-date")?.toLocalDateOrNull("yyyy-MM-dd")?.let { publishDate ->
-                resources = resources.filter { it.publishDate?.isAfter(publishDate) ?: false }
-            }
-            ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
-                Publisher.findById(it)?.let { publisher ->
-                    resources = resources.filter { publisher == it.publisher }
+                ctx.queryParam("series-id")?.toLongOrNull()?.let {
+                    Series.findById(it)?.let { andWhere { BookSeriesTable.seriesCol eq it } }
                 }
-            }
-            ctx.queryParam("reader-id")?.toLongOrNull()?.let { readerId ->
-                resources = resources.filter { readerId in it.readers.map { it.user.id.value } }
-            }
-            ctx.queryParam("series-id")?.toLongOrNull()?.let {
-                Series.findById(it)?.let { series ->
-                    resources = resources.filter { series in it.series.map { it.series } }
+                ctx.queryParam("title")?.let { title ->
+                    andWhere { (BookTable.titleCol like "%$title%") or (BookTable.subtitleCol like "%$title%") }
                 }
-            }
-            ctx.queryParam("title")?.let { title ->
-                resources = resources.filter {
-                    (
-                        it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
-                    ) ||
-                        (
-                            it.subtitle?.let {
-                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                            } ?: false
-                        )
-                }
-            }
-            ctx.queryParam("wisher-id")?.toLongOrNull()?.let { wisherId ->
-                resources = resources.filter { wisherId in it.wishers.map { it.id.value } }
-            }
-            ctx.json(resources.sorted().map { it.toJson() })
-        }
+            }.toList()
+        ctx.json(resources.sorted().map { it.toJson() })
     }
 
-    override fun create(ctx: Context) {
-        Utils.query {
-            val body = ctx.bodyAsClass<BookInput>()
-            val exists = Book
-                .find {
-                    (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
-                }.firstOrNull()
-            if (exists != null) {
-                throw ConflictResponse("Book already exists")
-            }
-            val resource = Book.new {
-                this.format = body.format
-                this.goodreadsId = body.goodreadsId
-                this.googleBooksId = body.googleBooksId
-                this.imageUrl = body.imageUrl
-                this.isCollected = body.isCollected
-                this.isbn = body.isbn
-                this.libraryThingId = body.libraryThingId
-                this.openLibraryId = body.openLibraryId
-                this.publishDate = body.publishDate
-                this.publisher = body.publisherId?.let {
-                    Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
-                }
-                this.subtitle = body.subtitle
-                this.summary = body.summary
-                this.title = body.title
-            }
-
-            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
+    override fun create(ctx: Context) = ctx.processInput<BookInput> { body ->
+        Book.find(body.title, body.subtitle, body.identifiers?.isbn, body.identifiers?.openLibrary)?.let {
+            throw ConflictResponse("Book already exists")
         }
-    }
-
-    override fun update(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<BookInput>()
-            val exists = Book
-                .find {
-                    (BookTable.titleCol eq body.title) and (BookTable.subtitleCol eq body.subtitle)
-                }.firstOrNull()
-            if (exists != null && exists != resource) {
-                throw ConflictResponse("Book already exists")
+        val resource = Book.findOrCreate(body.title, body.subtitle, body.identifiers?.isbn, body.identifiers?.openLibrary).apply {
+            body.credits.forEach {
+                Credit.new {
+                    this.book = this@apply
+                    this.creator = Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found.")
+                    this.role = Role.findById(id.role) ?: throw NotFoundResponse("Role not found.")
+                }
             }
-            resource.format = body.format
-            resource.goodreadsId = body.goodreadsId
-            resource.googleBooksId = body.googleBooksId
-            resource.imageUrl = body.imageUrl
-            resource.isbn = body.isbn
-            resource.libraryThingId = body.libraryThingId
-            resource.openLibraryId = body.openLibraryId
-            resource.publishDate = body.publishDate
-            resource.publisher = body.publisherId?.let {
+            format = body.format
+            goodreads = body.identifiers?.goodreads
+            googleBooks = body.identifiers?.googleBooks
+            imageUrl = body.imageUrl
+            isCollected = body.isCollected
+            libraryThing = body.identifiers?.libraryThing
+            publishDate = body.publishDate
+            publisher = body.publisher?.let {
                 Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
             }
-            resource.subtitle = body.subtitle
-            resource.summary = body.summary
-            resource.title = body.title
+            body.readers.forEach {
+                ReadBook.new {
+                    this.book = this@apply
+                    this.user = User.findById(it.user) ?: throw NotFoundResponse("User not found.")
+                    this.readDate = it.readDate
+                }
+            }
+            body.series.forEach {
+                BookSeries.new {
+                    this.book = this@apply
+                    this.series = Series.findById(it.series) ?: throw NotFoundResponse("Series not found.")
+                    this.number = number
+                }
+            }
+            summary = body.summary
+            wishers = SizedCollection(
+                body.wishers.map {
+                    User.findById(it) ?: throw NotFoundResponse("User not found.")
+                },
+            )
+        }
+        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
+    }
 
-            ctx.json(resource.toJson(showAll = true))
+    override fun update(ctx: Context) = manage<BookInput>(ctx) { body, book ->
+        Book
+            .find(body.title, body.subtitle, body.identifiers?.isbn, body.identifiers?.openLibrary)
+            ?.takeIf { it != book }
+            ?.let { throw ConflictResponse("Book already exists") }
+
+        book.apply {
+            credits.forEach { it.delete() }
+            body.credits.forEach {
+                Credit.findOrCreate(
+                    this,
+                    Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found."),
+                    Role.findById(id.role) ?: throw NotFoundResponse("Role not found."),
+                )
+            }
+            format = body.format
+            goodreads = body.identifiers?.goodreads
+            googleBooks = body.identifiers?.googleBooks
+            imageUrl = body.imageUrl
+            isbn = body.identifiers?.isbn
+            isCollected = body.isCollected
+            libraryThing = body.identifier?.libraryThing
+            openLibrary = body.identifiers?.openLibrary
+            publishDate = body.publishDate
+            publisher = body.publisher?.let {
+                Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
+            }
+            readers.forEach { it.delete() }
+            body.readers.forEach {
+                ReadBook.findOrCreate(this, User.findById(it.user) ?: throw NotFoundResponse("User not found.")).apply {
+                    readDate = it.readDate
+                }
+            }
+            series.forEach { it.delete() }
+            body.series.forEach {
+                BookSeries.findOrCreate(this, Series.findById(it.series) ?: throw NotFoundResponse("Series not found.")).apply {
+                    number = it.number
+                }
+            }
+            subtitle = body.subtitle
+            summary = body.summary
+            title = body.title
+            wishers = SizedCollection(
+                body.wishers.map {
+                    User.findById(it) ?: throw NotFoundResponse("User not found.")
+                },
+            )
         }
     }
 
-    override fun delete(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            resource.credits.forEach {
-                it.delete()
-            }
-            resource.readers.forEach {
-                it.delete()
-            }
-            resource.series.forEach {
-                it.delete()
-            }
-            resource.delete()
-            ctx.status(HttpStatus.NO_CONTENT)
+    override fun delete(ctx: Context) = Utils.query {
+        ctx.getResource().apply {
+            credits.forEach { it.delete() }
+            readers.forEach { it.delete() }
+            series.forEach { it.delete() }
+            delete()
+        }
+        ctx.status(HttpStatus.NO_CONTENT)
+    }
+
+    private fun manageStatus(ctx: Context, process: (Book) -> Unit) = Utils.query {
+        val resource = ctx.getResource()
+        process(resource)
+        ctx.json(resource.toJson(showAll = true))
+    }
+
+    fun collectBook(ctx: Context) = manageStatus(ctx) { resource ->
+        resource.isCollected = true
+        resource.wishers = SizedCollection()
+    }
+
+    fun discardBook(ctx: Context) = manageStatus(ctx) { resource ->
+        resource.isCollected = false
+        resource.readers.forEach { it.delete() }
+    }
+
+    fun addReader(ctx: Context) = manage<BookInput.Reader>(ctx) { body, book ->
+        val user = User.findById(body.user) ?: throw NotFoundResponse("User not found.")
+        if (!book.isCollected) {
+            throw BadRequestResponse("Book hasn't been collected")
+        }
+        ReadBook.findOrCreate(book, user).apply {
+            readDate = body.readDate
         }
     }
 
-    fun import(ctx: Context) {
-        Utils.query {
-            val body = ctx.bodyAsClass<ImportBook>()
+    fun removeReader(ctx: Context) = manage<IdInput>(ctx) { body, book ->
+        val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
+        if (!book.isCollected) {
+            throw BadRequestResponse("Book hasn't been collected")
+        }
+        ReadBook.find(book, user)?.delete()
+    }
 
-            val edition = body.openLibraryId?.let {
-                OpenLibrary.getEdition(id = it)
-            } ?: body.isbn?.let {
-                OpenLibrary.getEditionByISBN(isbn = it)
-            } ?: throw NotImplementedResponse(message = "Import only available via OpenLibrary editionId or isbn currently.")
-            val work = OpenLibrary.getWork(id = edition.works.first().getId())
-            val editionId = edition.getId()
-            val workId = work.getId()
+    fun addWisher(ctx: Context) = manage<IdInput>(ctx) { body, book ->
+        val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
+        if (book.isCollected) {
+            throw BadRequestResponse("Book has been collected")
+        }
+        book.wishers = SizedCollection(book.wishers + user)
+    }
 
-            val exists = if (edition.isbn13.isEmpty() && edition.isbn10.isEmpty()) {
-                Book
-                    .find {
-                        (
-                            (BookTable.titleCol eq edition.title) and
-                                (BookTable.subtitleCol eq edition.subtitle)
-                        ) or (BookTable.openLibraryCol eq editionId)
-                    }.firstOrNull()
-            } else {
-                Book
-                    .find {
-                        (
-                            (BookTable.titleCol eq edition.title) and
-                                (BookTable.subtitleCol eq edition.subtitle)
-                        ) or (
-                            BookTable.openLibraryCol eq editionId
-                        ) or (
-                            BookTable.isbnCol eq (edition.isbn13.firstOrNull() ?: edition.isbn10.first())
-                        )
-                    }.firstOrNull()
+    fun removeWisher(ctx: Context) = manage<IdInput>(ctx) { body, book ->
+        val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
+        if (book.isCollected) {
+            throw BadRequestResponse("Book has been collected")
+        }
+        book.wishers = SizedCollection(book.wishers - user)
+    }
+
+    fun addCredit(ctx: Context) = manage<BookInput.Credit>(ctx) { body, book ->
+        Credit.findOrCreate(
+            book,
+            Creator.findById(body.creator) ?: throw NotFoundResponse("Creator not found."),
+            Role.findById(body.role) ?: throw NotFoundResponse("Role not found."),
+        )
+    }
+
+    fun removeCredit(ctx: Context) = manage<BookInput.Credit>(ctx) { body, book ->
+        Credit
+            .find(
+                book,
+                Creator.findById(body.creator) ?: throw NotFoundResponse("Creator not found."),
+                Role.findById(body.role) ?: throw NotFoundResponse("Role not found."),
+            )?.delete()
+    }
+
+    fun addSeries(ctx: Context) = manage<BookInput.Series>(ctx) { body, book ->
+        BookSeries
+            .findOrCreate(
+                book,
+                Series.findById(body.series) ?: throw NotFoundResponse("Series not found."),
+            ).apply {
+                number = if (body.number == 0) null else body.number
             }
-            if (exists != null) {
-                throw ConflictResponse("Book already exists")
-            }
+    }
 
-            val resource = Book.new {
-                this.format = Format.PAPERBACK
-//                this.genres = SizedCollection(
-//                    edition.genres.map {
-//                        Genre.find {
-//                            GenreTable.titleCol eq it
-//                        }.firstOrNull() ?: Genre.new {
-//                            this.title = it
-//                        }
-//                    },
-//                )
-                this.goodreadsId = edition.identifiers.goodreads.firstOrNull()
-                this.googleBooksId = edition.identifiers.google.firstOrNull()
-                this.imageUrl = "https://covers.openlibrary.org/b/OLID/$editionId-L.jpg"
-                this.isbn = edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull()
-                this.isCollected = body.isCollected
-                this.libraryThingId = edition.identifiers.librarything.firstOrNull()
-                this.openLibraryId = editionId
-                this.publishDate = edition.publishDate?.toJavaLocalDate()
-                this.publisher = edition.publishers.firstOrNull()?.let {
-                    Publisher
-                        .find {
-                            PublisherTable.titleCol eq it
-                        }.firstOrNull() ?: Publisher.new {
-                        this.title = it
+    fun removeSeries(ctx: Context) = manage<IdInput>(ctx) { body, book ->
+        BookSeries
+            .find(
+                book,
+                Series.findById(body.series) ?: throw NotFoundResponse("Series not found."),
+            )?.delete()
+    }
+
+    private fun Book.applyOpenLibrary(edition: Edition, work: Work): Book = this.apply {
+        val format = edition.physicalFormat.toEnumOrNull()
+        if (format == null) {
+            LOGGER.warning { "Unmapped Format: ${edition.physicalFormat}" }
+        }
+
+        this.format = format ?: Format.PAPERBACK
+        goodreadsId = edition.identifiers.goodreads.firstOrNull()
+        googleBooksId = edition.identifiers.google.firstOrNull()
+        imageUrl = "https://covers.openlibrary.org/b/OLID/$editionId-L.jpg"
+        isbn = edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull()
+        libraryThingId = edition.identifiers.librarything.firstOrNull()
+        openLibraryId = edition.getId()
+        publishDate = edition.publishDate
+        publisher = edition.publishers.firstOrNull()?.let { Publisher.findOrCreate(it) }
+        summary = edition.description
+
+        credits.forEach { it.delete() }
+        work.authors
+            .map { OpenLibrary.getAuthor(it.author.getId()) }
+            .map {
+                Creator.findOrCreate(it.name).apply {
+                    it.photos.firstOrNull()?.let {
+                        imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
                     }
                 }
-                this.subtitle = edition.subtitle
-//                this.summary = edition.description ?: work.description
-                this.title = edition.title
+            }.forEach {
+                Credit.findOrCreate(this, it, Role.findOrCreate("Author"))
             }
-            work.authors
-                .map {
-                    OpenLibrary.getAuthor(id = it.author.getId())
-                }.map {
-                    val creator = Creator
-                        .find {
-                            CreatorTable.nameCol eq it.name
-                        }.firstOrNull() ?: Creator.new {
-                        this.name = it.name
-                    }
-//                it.photos.firstOrNull()?.let {
-//                    creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
-//                }
-                    creator
-                }.forEach {
-                    val role = Role
-                        .find {
-                            RoleTable.titleCol eq "Author"
-                        }.firstOrNull() ?: Role.new {
-                        this.title = "Author"
-                    }
-                    Credit
-                        .find {
-                            (CreditTable.bookCol eq resource.id) and
-                                (CreditTable.creatorCol eq it.id) and
-                                (CreditTable.roleCol eq role.id)
-                        }.firstOrNull() ?: Credit.new {
-                        this.book = resource
-                        this.creator = it
-                        this.role = role
-                    }
-                }
-            edition.contributors.forEach {
-                val creator = Creator
-                    .find {
-                        CreatorTable.nameCol eq it.name
-                    }.firstOrNull() ?: Creator.new {
-                    this.name = it.name
-                }
-                val role = Role
-                    .find {
-                        RoleTable.titleCol eq it.role
-                    }.firstOrNull() ?: Role.new {
-                    this.title = it.role
-                }
-                Credit
-                    .find {
-                        (CreditTable.bookCol eq resource.id) and
-                            (CreditTable.creatorCol eq creator.id) and
-                            (CreditTable.roleCol eq role.id)
-                    }.firstOrNull() ?: Credit.new {
-                    this.book = resource
-                    this.creator = creator
-                    this.role = role
-                }
-            }
-
-            ctx.json(resource.toJson(showAll = true))
+        edition.contributors.forEach {
+            Credit.findOrCreate(this, Creator.findOrCreate(it.name), Role.findOrCreate(it.role))
         }
     }
 
-    fun pull(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-
-            val edition = resource.openLibraryId?.let {
-                OpenLibrary.getEdition(id = it)
-            } ?: resource.isbn?.let {
-                OpenLibrary.getEditionByISBN(isbn = it)
-            } ?: throw NotImplementedResponse(message = "Pull only available via OpenLibrary editionId or isbn currently.")
-            val work = OpenLibrary.getWork(id = edition.works.first().getId())
-            val editionId = edition.getId()
-            val workId = work.getId()
-
-            val exists = if (edition.isbn13.isEmpty() && edition.isbn10.isEmpty()) {
-                Book
-                    .find {
-                        (
-                            (BookTable.titleCol eq edition.title) and
-                                (BookTable.subtitleCol eq edition.subtitle)
-                        ) or (BookTable.openLibraryCol eq editionId)
-                    }.firstOrNull()
-            } else {
-                Book
-                    .find {
-                        (
-                            (BookTable.titleCol eq edition.title) and
-                                (BookTable.subtitleCol eq edition.subtitle)
-                        ) or (
-                            BookTable.openLibraryCol eq editionId
-                        ) or (
-                            BookTable.isbnCol eq (edition.isbn13.firstOrNull() ?: edition.isbn10.first())
-                        )
-                    }.firstOrNull()
-            }
-            if (exists != null && exists != resource) {
-                throw ConflictResponse("Book already exists")
-            }
-
-            // book.format = Format.PAPERBACK
-//            resource.genres = SizedCollection(
-//                edition.genres.map {
-//                    Genre.find {
-//                        GenreTable.titleCol eq it
-//                    }.firstOrNull() ?: Genre.new {
-//                        title = it
-//                    }
-//                },
-//            )
-            resource.goodreadsId = edition.identifiers.goodreads.firstOrNull()
-            resource.googleBooksId = edition.identifiers.google.firstOrNull()
-            resource.imageUrl = "https://covers.openlibrary.org/b/OLID/$editionId-L.jpg"
-            resource.isbn = edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull()
-            resource.libraryThingId = edition.identifiers.librarything.firstOrNull()
-            resource.openLibraryId = editionId
-            resource.publishDate = edition.publishDate?.toJavaLocalDate()
-            edition.publishers.firstOrNull()?.let {
-                resource.publisher = Publisher
-                    .find {
-                        PublisherTable.titleCol eq it
-                    }.firstOrNull() ?: Publisher.new {
-                    title = it
-                }
-            }
-            resource.subtitle = edition.subtitle
-//            resource.summary = edition.description ?: work.description
-            resource.title = edition.title
-            resource.credits.forEach {
-                it.delete()
-            }
-            work.authors
-                .map {
-                    OpenLibrary.getAuthor(id = it.author.getId())
-                }.map {
-                    val creator = Creator
-                        .find {
-                            CreatorTable.nameCol eq it.name
-                        }.firstOrNull() ?: Creator.new {
-                        name = it.name
-                    }
-//                it.photos.firstOrNull()?.let {
-//                    creator.imageUrl = "https://covers.openlibrary.org/a/id/$it-L.jpg"
-//                }
-                    creator
-                }.forEach {
-                    val role = Role
-                        .find {
-                            RoleTable.titleCol eq "Author"
-                        }.firstOrNull() ?: Role.new {
-                        title = "Author"
-                    }
-                    Credit
-                        .find {
-                            (CreditTable.bookCol eq resource.id) and
-                                (CreditTable.creatorCol eq it.id) and
-                                (CreditTable.roleCol eq role.id)
-                        }.firstOrNull() ?: Credit.new {
-                        this.book = resource
-                        this.creator = it
-                        this.role = role
-                    }
-                }
-            edition.contributors.forEach {
-                val creator = Creator
-                    .find {
-                        CreatorTable.nameCol eq it.name
-                    }.firstOrNull() ?: Creator.new {
-                    name = it.name
-                }
-                val role = Role
-                    .find {
-                        RoleTable.titleCol eq it.role
-                    }.firstOrNull() ?: Role.new {
-                    title = it.role
-                }
-                Credit
-                    .find {
-                        (CreditTable.bookCol eq resource.id) and
-                            (CreditTable.creatorCol eq creator.id) and
-                            (CreditTable.roleCol eq role.id)
-                    }.firstOrNull() ?: Credit.new {
-                    this.book = resource
-                    this.creator = creator
-                    this.role = role
-                }
-            }
-
-            ctx.json(resource.toJson(showAll = true))
-        }
+    fun search(ctx: Context) = ctx.processInput<BookInput> { body ->
+        val results = OpenLibrary.search(title = body.title)
+        ctx.json(results)
     }
 
-    fun collectBook(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            resource.isCollected = true
-            resource.wishers = SizedCollection()
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun discardBook(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            resource.isCollected = false
-            resource.readers.forEach {
-                it.delete()
+    fun import(ctx: Context) = ctx.processInput<ImportBook> { body ->
+        val edition = body.openLibraryId?.let {
+            OpenLibrary.getEdition(it)
+        } ?: body.isbn?.let {
+            OpenLibrary.getEditionByISBN(it)
+        } ?: throw NotImplementedResponse("Import only supports OpenLibrary currently")
+        val work = OpenLibrary.getWork(edition.works.first().getId())
+        val resource = Book
+            .findOrCreate(
+                edition.title,
+                edition.subtitle,
+                edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull(),
+                edition.getId(),
+            ).applyOpenLibrary(edition, work)
+            .apply {
+                isCollected = body.isCollected
             }
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun addReader(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            if (!resource.isCollected) {
-                throw BadRequestResponse(message = "Book hasn't been collected to be able to read")
-            }
-            val body = ctx.bodyAsClass<BookInput.Reader>()
-            val user = User.findById(body.userId) ?: throw NotFoundResponse("User not found.")
-            val readBook = ReadBook
-                .find {
-                    (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
-                }.firstOrNull() ?: ReadBook.new {
-                this.book = resource
-                this.user = user
-            }
-            readBook.readDate = body.readDate
-
-            println(resource.toString())
-            println(readBook.toString())
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun removeReader(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            if (!resource.isCollected) {
-                throw BadRequestResponse(message = "Book hasn't been collected to be able to unread")
-            }
-            val body = ctx.bodyAsClass<IdInput>()
-            val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
-            val readBook = ReadBook
-                .find {
-                    (ReadBookTable.bookCol eq resource.id) and (ReadBookTable.userCol eq user.id)
-                }.firstOrNull() ?: throw BadRequestResponse(message = "Book has not been read by this User.")
-            readBook.delete()
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun addWisher(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            if (resource.isCollected) {
-                throw BadRequestResponse(message = "Book has already been collected")
-            }
-            val body = ctx.bodyAsClass<IdInput>()
-            val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
-            val temp = resource.wishers.toMutableSet()
-            temp.add(user)
-            resource.wishers = SizedCollection(temp)
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun removeWisher(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            if (resource.isCollected) {
-                throw BadRequestResponse(message = "Book has already been collected")
-            }
-            val body = ctx.bodyAsClass<IdInput>()
-            val user = User.findById(body.id) ?: throw NotFoundResponse("User not found.")
-            if (!resource.wishers.contains(user)) {
-                throw BadRequestResponse(message = "Book hasn't been wished by User")
-            }
-            val temp = resource.wishers.toMutableList()
-            temp.remove(user)
-            resource.wishers = SizedCollection(temp)
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun addCredit(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<BookInput.Credit>()
-            val creator = Creator.findById(body.creatorId) ?: throw NotFoundResponse("Creator not found.")
-            val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
-            Credit
-                .find {
-                    (CreditTable.bookCol eq resource.id) and
-                        (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq role.id)
-                }.firstOrNull() ?: Credit.new {
-                this.book = resource
-                this.creator = creator
-                this.role = role
-            }
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun removeCredit(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<BookInput.Credit>()
-            val creator = Creator.findById(body.creatorId) ?: throw NotFoundResponse("Creator not found.")
-            val role = Role.findById(body.roleId) ?: throw NotFoundResponse("Role not found.")
-            val credit = Credit
-                .find {
-                    (CreditTable.bookCol eq resource.id) and
-                        (CreditTable.creatorCol eq creator.id) and
-                        (CreditTable.roleCol eq role.id)
-                }.firstOrNull() ?: throw NotFoundResponse(message = "Unable to find Book Creator Role")
-            credit.delete()
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun addGenre(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<IdInput>()
-            val genre = Genre.findById(body.id) ?: throw NotFoundResponse("Genre not found.")
-            val temp = resource.genres.toMutableSet()
-            temp.add(genre)
-            resource.genres = SizedCollection(temp)
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun removeGenre(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<IdInput>()
-            val genre = Genre.findById(body.id) ?: throw NotFoundResponse("Genre not found.")
-            if (!resource.genres.contains(genre)) {
-                throw BadRequestResponse(message = "Genre is already linked to Book")
-            }
-            val temp = resource.genres.toMutableList()
-            temp.remove(genre)
-            resource.genres = SizedCollection(temp)
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun addSeries(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<BookInput.Series>()
-            val series = Series.findById(body.seriesId) ?: throw NotFoundResponse("Series not found.")
-            val bookSeries = BookSeries
-                .find {
-                    (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
-                }.firstOrNull() ?: BookSeries.new {
-                this.book = resource
-                this.series = series
-            }
-            bookSeries.number = if (body.number == 0) null else body.number
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun removeSeries(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<IdInput>()
-            val series = Series.findById(body.id) ?: throw NotFoundResponse("Series not found.")
-            val bookSeries = BookSeries
-                .find {
-                    (BookSeriesTable.bookCol eq resource.id) and (BookSeriesTable.seriesCol eq series.id)
-                }.firstOrNull() ?: throw NotFoundResponse(message = "Book isn't linked to Series")
-            bookSeries.delete()
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun search(ctx: Context) {
-        Utils.query {
-            val body = ctx.bodyAsClass<BookInput>()
-            val results = OpenLibrary.search(title = body.title)
-            ctx.json(results)
-        }
+        ctx.json(resource.toJson(showAll = true))
     }
 }

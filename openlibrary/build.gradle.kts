@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.bundles.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.kotlin.reflect)

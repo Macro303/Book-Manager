@@ -1,6 +1,6 @@
 @import github.buriedincode.bookshelf.models.User
 @import github.buriedincode.bookshelf.Utils.toHumanReadable
-@import java.time.LocalDate
+@import kotlinx.datetime.LocalDate
 @param entry: User
 @param readDate: LocalDate? = null
 

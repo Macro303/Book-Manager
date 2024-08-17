@@ -4,13 +4,14 @@ import github.buriedincode.openlibrary.schemas.Author
 import github.buriedincode.openlibrary.schemas.Edition
 import github.buriedincode.openlibrary.schemas.SearchResponse
 import github.buriedincode.openlibrary.schemas.Work
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.Level
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
 import kotlinx.serialization.json.jsonObject
-import org.apache.logging.log4j.Level
-import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
@@ -64,13 +65,13 @@ class OpenLibrary(
                 in 400 until 500 -> Level.WARN
                 else -> Level.ERROR
             }
-            logger.log(level, "GET: ${response.statusCode()} - $uri")
+            LOGGER.log(level) { "GET: ${response.statusCode()} - $uri" }
             if (response.statusCode() == 200) {
                 return response.body()
             }
 
             val content = JSON.parseToJsonElement(response.body()).jsonObject
-            logger.error(content.toString())
+            LOGGER.error { content.toString() }
             throw ServiceException(content.toString())
         } catch (ioe: IOException) {
             throw ServiceException(cause = ioe)
@@ -87,10 +88,10 @@ class OpenLibrary(
     internal inline fun <reified T> getRequest(uri: URI): T {
         this.cache?.select(url = uri.toString())?.let {
             try {
-                logger.debug("Using cached response for $uri")
+                LOGGER.debug { "Using cached response for $uri" }
                 return JSON.decodeFromString(it)
             } catch (se: SerializationException) {
-                logger.warn("Unable to deserialize cached response", se)
+                LOGGER.warn(se) { "Unable to deserialize cached response" }
                 this.cache.delete(url = uri.toString())
             }
         }
@@ -145,7 +146,9 @@ class OpenLibrary(
     @Throws(ServiceException::class)
     fun getWork(id: String): Work = this.getRequest(uri = this.encodeURI(endpoint = "/work/$id.json"))
 
-    companion object : Logging {
+    companion object {
+        @JvmStatic
+        private val LOGGER = KotlinLogging.logger { }
         private const val BASE_API = "https://openlibrary.org"
 
         @OptIn(ExperimentalSerializationApi::class)
@@ -154,5 +157,16 @@ class OpenLibrary(
             encodeDefaults = true
             namingStrategy = JsonNamingStrategy.SnakeCase
         }
+    }
+}
+
+private fun KLogger.log(level: Level, message: () -> Any?) {
+    when (level) {
+        Level.TRACE -> this.trace(message)
+        Level.DEBUG -> this.debug(message)
+        Level.INFO -> this.info(message)
+        Level.WARN -> this.warn(message)
+        Level.ERROR -> this.error(message)
+        else -> return
     }
 }

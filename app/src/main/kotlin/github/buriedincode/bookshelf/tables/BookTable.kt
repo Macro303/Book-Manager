@@ -2,17 +2,15 @@ package github.buriedincode.bookshelf.tables
 
 import github.buriedincode.bookshelf.Utils
 import github.buriedincode.bookshelf.models.Format
-import org.apache.logging.log4j.kotlin.Logging
+import kotlinx.datetime.LocalDate
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.javatime.date
-import java.time.LocalDate
+import org.jetbrains.exposed.sql.kotlin.datetime.date
 
-object BookTable : LongIdTable(name = "books"), Logging {
-    val summaryCol: Column<String?> = text(name = "summary").nullable()
+object BookTable : LongIdTable(name = "books") {
     val formatCol: Column<Format> = enumerationByName(
         name = "format",
         length = 16,
@@ -33,6 +31,7 @@ object BookTable : LongIdTable(name = "books"), Logging {
         onDelete = ReferenceOption.CASCADE,
     )
     val subtitleCol: Column<String?> = text(name = "subtitle").nullable()
+    val summaryCol: Column<String?> = text(name = "summary").nullable()
     val titleCol: Column<String> = text(name = "title")
 
     init {

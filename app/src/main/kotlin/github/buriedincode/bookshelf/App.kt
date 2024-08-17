@@ -2,16 +2,18 @@ package github.buriedincode.bookshelf
 
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
+import github.buriedincode.bookshelf.Utils.log
 import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.routers.api.BookApiRouter
 import github.buriedincode.bookshelf.routers.api.CreatorApiRouter
-import github.buriedincode.bookshelf.routers.api.GenreApiRouter
 import github.buriedincode.bookshelf.routers.api.PublisherApiRouter
 import github.buriedincode.bookshelf.routers.api.RoleApiRouter
 import github.buriedincode.bookshelf.routers.api.SeriesApiRouter
 import github.buriedincode.bookshelf.routers.api.UserApiRouter
 import github.buriedincode.bookshelf.routers.html.BookHtmlRouter
 import github.buriedincode.bookshelf.routers.html.UserHtmlRouter
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.Level
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.delete
 import io.javalin.apibuilder.ApiBuilder.get
@@ -21,13 +23,14 @@ import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.http.ContentType
 import io.javalin.rendering.FileRenderer
 import io.javalin.rendering.template.JavalinJte
-import org.apache.logging.log4j.Level
-import org.apache.logging.log4j.kotlin.Logging
 import java.nio.file.Path
 import kotlin.io.path.div
 import gg.jte.ContentType as JteType
 
-object App : Logging {
+object App {
+    @JvmStatic
+    private val LOGGER = KotlinLogging.logger { }
+
     private fun createTemplateEngine(environment: Settings.Environment): TemplateEngine {
         return if (environment == Settings.Environment.DEV) {
             val codeResolver = DirectoryCodeResolver(Path.of("src") / "main" / "jte")
@@ -50,7 +53,7 @@ object App : Logging {
                     ctx.statusCode() in (400..<500) -> Level.WARN
                     else -> Level.ERROR
                 }
-                logger.log(level, "${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${Utils.toHumanReadable(ms)}")
+                LOGGER.log(level) { "${ctx.statusCode()}: ${ctx.method()} - ${ctx.path()} => ${Utils.toHumanReadable(ms)}" }
             }
             it.router.ignoreTrailingSlashes = true
             it.router.treatMultipleSlashesAsSingleSlash = true
@@ -102,7 +105,6 @@ object App : Logging {
                             get(BookApiRouter::read)
                             put(BookApiRouter::update)
                             delete(BookApiRouter::delete)
-                            put("pull", BookApiRouter::pull)
                             path("collect") {
                                 post(BookApiRouter::collectBook)
                                 delete(BookApiRouter::discardBook)
@@ -118,10 +120,6 @@ object App : Logging {
                             path("credits") {
                                 post(BookApiRouter::addCredit)
                                 delete(BookApiRouter::removeCredit)
-                            }
-                            path("genres") {
-                                post(BookApiRouter::addGenre)
-                                delete(BookApiRouter::removeGenre)
                             }
                             path("series") {
                                 post(BookApiRouter::addSeries)
@@ -139,19 +137,6 @@ object App : Logging {
                             path("credits") {
                                 post(CreatorApiRouter::addCredit)
                                 delete(CreatorApiRouter::removeCredit)
-                            }
-                        }
-                    }
-                    path("genres") {
-                        get(GenreApiRouter::list)
-                        post(GenreApiRouter::create)
-                        path("{genre-id}") {
-                            get(GenreApiRouter::read)
-                            put(GenreApiRouter::update)
-                            delete(GenreApiRouter::delete)
-                            path("books") {
-                                post(GenreApiRouter::addBook)
-                                delete(GenreApiRouter::removeBook)
                             }
                         }
                     }

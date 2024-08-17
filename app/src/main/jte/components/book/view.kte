@@ -2,7 +2,7 @@
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @import github.buriedincode.bookshelf.Utils.toHumanReadable
-@import java.time.LocalDate
+@import kotlinx.datetime.LocalDate
 @param entry: Book
 @param series: Pair<Series, Int?>? = null
 @param readDate: LocalDate? = null

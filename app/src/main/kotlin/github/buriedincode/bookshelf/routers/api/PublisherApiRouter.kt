@@ -10,83 +10,47 @@ import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
-import io.javalin.http.bodyAsClass
-import org.apache.logging.log4j.kotlin.Logging
 
-object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher), Logging {
-    override fun list(ctx: Context) {
-        Utils.query {
-            var resources = Publisher.all().toList()
-            ctx.queryParam("book-id")?.toLongOrNull()?.let {
-                Book.findById(it)?.let { book ->
-                    resources = resources.filter { book in it.books }
+object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher) {
+    override fun list(ctx: Context) = Utils.query {
+        val resources = Publisher
+            .find { PublisherTable.id neq -1 }
+            .apply {
+                ctx.queryParam("book-id")?.toLongOrNull()?.let {
+                    Book.findById(it)?.let { andWhere { BookTable.id eq it } }
                 }
-            }
-            ctx.queryParam("title")?.let { title ->
-                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
-            }
-            ctx.json(resources.sorted().map { it.toJson() })
+                ctx.queryParam("title")?.let { title ->
+                    andWhere { PublisherTable.titleCol like "%$title%" }
+                }
+            }.toList()
+        ctx.json(resources.sorted().map { it.toJson() })
+    }
+
+    override fun create(ctx: Context) = ctx.processInput<PublisherInput> { body ->
+        Publisher.find(body.title)?.let {
+            throw ConflictResponse("Publisher already exists")
+        }
+        val resource = Publisher.findOrCreate(body.title).apply {
+            summary = body.summary
+        }
+        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
+    }
+
+    override fun update(ctx: Context) = manage<PublisherInput>(ctx) { body, publisher ->
+        Publisher.find(body.title)?.takeIf { it != publisher }?.let { throw ConflictResponse("Publisher already exists") }
+        publisher.apply {
+            summary = body.summary
+            title = body.title
         }
     }
 
-    override fun create(ctx: Context) {
-        Utils.query {
-            val body = ctx.bodyAsClass<PublisherInput>()
-            val exists = Publisher
-                .find {
-                    PublisherTable.titleCol eq body.title
-                }.firstOrNull()
-            if (exists != null) {
-                throw ConflictResponse("Publisher already exists")
-            }
-            val resource = Publisher.new {
-                this.summary = body.summary
-                this.title = body.title
-            }
-
-            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
-        }
+    fun addBook(ctx: Context) = manage<IdInput> { body, publisher ->
+        val book = Book.findById(body.id) ?: throw NotFoundResponse("Book not found.")
+        book.publisher = publisher
     }
 
-    override fun update(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<PublisherInput>()
-            val exists = Publisher
-                .find {
-                    PublisherTable.titleCol eq body.title
-                }.firstOrNull()
-            if (exists != null && exists != resource) {
-                throw ConflictResponse("Publisher already exists")
-            }
-            resource.summary = body.summary
-            resource.title = body.title
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun addBook(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<IdInput>()
-            val book = Book.findById(body.id)
-                ?: throw NotFoundResponse("No Book found.")
-            book.publisher = resource
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun removeBook(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<IdInput>()
-            val book = Book.findById(body.id)
-                ?: throw NotFoundResponse("No Book found.")
-            book.publisher = null
-
-            ctx.status(HttpStatus.NO_CONTENT)
-        }
+    fun removeBook(ctx: Context) = manage<IdInput> { body, publisher ->
+        val book = Book.findById(body.id) ?: throw NotFoundResponse("Book not found.")
+        book.publisher = null
     }
 }

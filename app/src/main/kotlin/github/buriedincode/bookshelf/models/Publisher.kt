@@ -2,14 +2,23 @@ package github.buriedincode.bookshelf.models
 
 import github.buriedincode.bookshelf.tables.BookTable
 import github.buriedincode.bookshelf.tables.PublisherTable
-import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
 class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publisher> {
-    companion object : LongEntityClass<Publisher>(PublisherTable), Logging {
+    companion object : LongEntityClass<Publisher>(PublisherTable) {
         val comparator = compareBy(Publisher::title)
+
+        fun find(title: String): Publisher? {
+            return Publisher.find { PublisherTable.titleCol eq title }.firstOrNull()
+        }
+
+        fun findOrCreate(title: String): Publisher {
+            return find(title) ?: Publisher.new {
+                this.title = title
+            }
+        }
     }
 
     var summary: String? by PublisherTable.summaryCol
@@ -18,15 +27,15 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
     val books by Book optionalReferrersOn BookTable.publisherCol
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
-        val output = mutableMapOf<String, Any?>(
+        return mutableMapOf<String, Any?>(
             "id" to id.value,
             "summary" to summary,
             "title" to title,
-        )
-        if (showAll) {
-            output["books"] = books.sorted().map { it.toJson() }
-        }
-        return output.toSortedMap()
+        ).apply {
+            if (showAll) {
+                put("books", books.sorted().map { it.id.value })
+            }
+        }.toSortedMap()
     }
 
     override fun compareTo(other: Publisher): Int = comparator.compare(this, other)

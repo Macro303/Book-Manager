@@ -2,36 +2,56 @@ package github.buriedincode.bookshelf.models
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import github.buriedincode.bookshelf.Utils.toString
-import github.buriedincode.bookshelf.tables.BookGenreTable
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.BookTable
 import github.buriedincode.bookshelf.tables.CreditTable
 import github.buriedincode.bookshelf.tables.ReadBookTable
 import github.buriedincode.bookshelf.tables.WishedTable
-import org.apache.logging.log4j.kotlin.Logging
+import kotlinx.datetime.LocalDate
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import java.time.LocalDate
 
 class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
-    companion object : LongEntityClass<Book>(BookTable), Logging {
+    companion object : LongEntityClass<Book>(BookTable) {
         val comparator = compareBy<Book> { it.series.firstOrNull()?.series }
             .thenBy { it.series.firstOrNull()?.number ?: Int.MAX_VALUE }
             .thenBy(Book::title)
             .thenBy(nullsFirst(), Book::subtitle)
+
+        fun find(title: String, subtitle: String? = null, isbn: String? = null, openLibraryId: String? = null): Book? {
+            var result: Book? = null
+            if (result == null && openLibraryId != null) {
+                result = Book.find { BookTable.openLibraryCol eq openLibraryId }.firstOrNull()
+            }
+            if (result == null && isbn != null) {
+                result = Book.find { BookTable.isbnCol eq isbn }.firstOrNull()
+            }
+            if (result == null) {
+                result = Book.find { (BookTable.titleCol eq title) and (BookTable.subtitleCol eq subtitle) }.firstOrNull()
+            }
+            return result
+        }
+
+        fun findOrCreate(title: String, subtitle: String? = null, isbn: String? = null, openLibraryId: String? = null): Book {
+            return find(title, subtitle, isbn, openlibrary) ?: Book.new {
+                this.title = title
+                this.subtitle = subtitle
+                this.isbn = isbn
+                this.openLibraryId = openLibraryId
+            }
+        }
     }
 
     val credits by Credit referrersOn CreditTable.bookCol
     var format: Format by BookTable.formatCol
-    var genres by Genre via BookGenreTable
-    var goodreadsId: String? by BookTable.goodreadsCol
-    var googleBooksId: String? by BookTable.googleBooksCol
+    var goodreads: String? by BookTable.goodreadsCol
+    var googleBooks: String? by BookTable.googleBooksCol
     var imageUrl: String? by BookTable.imageUrlCol
     var isbn: String? by BookTable.isbnCol
     var isCollected: Boolean by BookTable.isCollectedCol
-    var libraryThingId: String? by BookTable.libraryThingCol
-    var openLibraryId: String? by BookTable.openLibraryCol
+    var libraryThing: String? by BookTable.libraryThingCol
+    var openLibrary: String? by BookTable.openLibraryCol
     var publishDate: LocalDate? by BookTable.publishDateCol
     var publisher: Publisher? by Publisher optionalReferencedOn BookTable.publisherCol
     val readers by ReadBook referrersOn ReadBookTable.bookCol
@@ -42,93 +62,81 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     var wishers by User via WishedTable
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
-        val output = mutableMapOf<String, Any?>(
-            "id" to id.value,
+        return mutableMapOf<String, Any?>(
             "format" to format.name,
-            "goodreadsId" to goodreadsId,
-            "googleBooksId" to googleBooksId,
+            "identifiers" to mapOf(
+                "bookshelf" to id.value,
+                "goodreads" to goodreads,
+                "googleBooks" to googleBooks,
+                "isbn" to isbn,
+                "libraryThing" to libraryThing,
+                "openLibrary" to openLibrary,
+            ),
             "imageUrl" to imageUrl,
-            "isbn" to isbn,
             "isCollected" to isCollected,
-            "libraryThingId" to libraryThingId,
-            "openLibraryId" to openLibraryId,
             "publishDate" to publishDate?.toString("yyyy-MM-dd"),
+            "publisher" to publisher?.id?.value,
             "subtitle" to subtitle,
             "summary" to summary,
             "title" to title,
-        )
-        if (showAll) {
-            output["credits"] = credits
-                .sortedWith(
-                    compareBy<Credit> { it.creator }.thenBy { it.role },
-                ).map {
-                    mapOf(
-                        "creator" to it.creator.toJson(),
-                        "role" to it.role.toJson(),
-                    )
-                }
-            output["genres"] = genres.sorted().map { it.toJson() }
-            output["publisher"] = publisher?.toJson()
-            output["readers"] = readers
-                .sortedWith(
-                    compareBy<ReadBook> { it.user }.thenBy { it.readDate ?: LocalDate.of(2000, 1, 1) },
-                ).map {
-                    mapOf(
-                        "readDate" to it.readDate?.toString("yyyy-MM-dd"),
-                        "user" to it.user.toJson(),
-                    )
-                }
-            output["series"] = series
-                .sortedWith(
-                    compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE },
-                ).map {
-                    mapOf(
-                        "number" to it.number,
-                        "series" to it.series.toJson(),
-                    )
-                }
-            output["wishers"] = wishers.sorted().map { it.toJson() }
-        } else {
-            output["publisherId"] = publisher?.id?.value
-        }
-        return output.toSortedMap()
+        ).apply {
+            if (showAll) {
+                put("credits", credits.groupBy({ it.role.id.value }, { it.creator.id.value }))
+                put("readers", readers.groupBy({ it.user.id.value }, { it.readDate?.toString("yyyy-MM-dd") }))
+                put("series", series.sortedBy { it.series }.map { it.series.id.value to it.number })
+                put("wishers", wishers.sorted().map { it.id.value })
+            }
+        }.toSortedMap()
     }
 
     override fun compareTo(other: Book): Int = comparator.compare(this, other)
-
-    override fun toString(): String {
-        return "Book(publishDate=$publishDate, credits=$credits, format=$format, genres=$genres, goodreadsId=$goodreadsId, googleBooksId=$googleBooksId, imageUrl=$imageUrl, isbn=$isbn, isCollected=$isCollected, libraryThingId=$libraryThingId, openLibraryId=$openLibraryId, publisher=$publisher, readers=$readers, series=$series, subtitle=$subtitle, summary=$summary, title='$title', wishers=$wishers)"
-    }
 }
 
 data class BookInput(
+    val credits: List<Credit> = emptyList(),
     val format: Format = Format.PAPERBACK,
-    val goodreadsId: String? = null,
-    val googleBooksId: String? = null,
+    val identifiers: Identifiers? = null,
     val imageUrl: String? = null,
     val isCollected: Boolean = false,
-    val isbn: String? = null,
-    val libraryThingId: String? = null,
-    val openLibraryId: String? = null,
     val publishDate: LocalDate? = null,
-    val publisherId: Long? = null,
+    val publisher: Long? = null,
+    val readers: List<Reader> = emptyList(),
+    val series: List<Series> = emptyList(),
     val subtitle: String? = null,
     val summary: String? = null,
     val title: String,
+    val wishers: List<Long> = emptyList(),
 ) {
     data class Credit(
-        val creatorId: Long,
-        val roleId: Long,
+        val creator: Long,
+        val role: Long,
+    )
+
+    data class Identifiers(
+        val goodreads: String? = null,
+        val googleBooks: String? = null,
+        val isbn: String? = null,
+        val libraryThing: String? = null,
+        val openLibrary: String? = null,
     )
 
     data class Reader(
-        val userId: Long,
+        val user: Long,
         @JsonDeserialize(using = LocalDateDeserializer::class)
-        val readDate: LocalDate? = LocalDate.now(),
+        val readDate: LocalDate? = null,
     )
 
     data class Series(
-        val seriesId: Long,
+        val series: Long,
         val number: Int? = null,
     )
 }
+
+data class ImportBook(
+    val goodreadsId: String? = null,
+    val googleBooksId: String? = null,
+    val isbn: String? = null,
+    val isCollected: Boolean = false,
+    val libraryThingId: String? = null,
+    val openLibraryId: String? = null,
+)

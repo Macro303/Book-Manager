@@ -1,14 +1,13 @@
 package github.buriedincode.bookshelf.tables
 
 import github.buriedincode.bookshelf.Utils
-import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.SchemaUtils
 
-object CreditTable : LongIdTable(name = "books__creators__roles"), Logging {
+object CreditTable : LongIdTable(name = "books__creators__roles") {
     val bookCol: Column<EntityID<Long>> = reference(
         name = "book_id",
         foreign = BookTable,

@@ -8,111 +8,84 @@ import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.SeriesInput
 import github.buriedincode.bookshelf.tables.BookSeriesTable
 import github.buriedincode.bookshelf.tables.SeriesTable
-import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
-import io.javalin.http.bodyAsClass
-import org.apache.logging.log4j.kotlin.Logging
-import org.jetbrains.exposed.sql.and
 
-object SeriesApiRouter : BaseApiRouter<Series>(entity = Series), Logging {
-    override fun list(ctx: Context) {
-        Utils.query {
-            var resources = Series.all().toList()
-            ctx.queryParam("book-id")?.toLongOrNull()?.let {
-                Book.findById(it)?.let { book ->
-                    resources = resources.filter { book in it.books.map { it.book } }
+object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
+    override fun list(ctx: Context) = Utils.query {
+        val resources = Series
+            .find { SeriesTable.id neq -1 }
+            .apply {
+                ctx.queryParam("book-id")?.toLongOrNull()?.let {
+                    Book.findById(it)?.let { andWhere { BookSeriesTable.bookCol eq it } }
+                }
+                ctx.queryParam("title")?.let { title ->
+                    andWhere { SeriesTable.titleCol like "%$title%" }
+                }
+            }.toList()
+        ctx.json(resources.sorted().map { it.toJson() })
+    }
+
+    override fun create(ctx: Context) = ctx.processInput<SeriesInput> { body ->
+        Series.find(body.title)?.let {
+            throw ConflictResponse("Series already exists")
+        }
+        val resource = Series.findOrCreate(body.title).apply {
+            body.books.forEach {
+                BookSeries.new {
+                    this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
+                    this.series = this@apply
+                    this.number = if (body.number == 0) null else body.number
                 }
             }
-            ctx.queryParam("title")?.let { title ->
-                resources = resources.filter { it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true) }
+            summary = body.summary
+        }
+        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
+    }
+
+    override fun update(ctx: Context) = manage<SeriesInput>(ctx) { body, series ->
+        Series.find(body.title)?.takeIf { it != series }?.let { throw ConflictResponse("Series already exists") }
+        series.apply {
+            books.forEach { it.delete() }
+            body.books.forEach {
+                BookSeries
+                    .findOrCreate(
+                        Book.findById(it.book) ?: throw NotFoundResponse("Book not found."),
+                        series,
+                    ).apply {
+                        number = if (body.number == 0) null else body.number
+                    }
             }
-            ctx.json(resources.sorted().map { it.toJson() })
+            summary = body.summary
+            title = body.title
         }
     }
 
-    override fun create(ctx: Context) {
-        Utils.query {
-            val body = ctx.bodyAsClass<SeriesInput>()
-            val exists = Series
-                .find {
-                    SeriesTable.titleCol eq body.title
-                }.firstOrNull()
-            if (exists != null) {
-                throw ConflictResponse("Series already exists")
-            }
-            val resource = Series.new {
-                this.summary = body.summary
-                this.title = body.title
-            }
-
-            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
+    override fun delete(ctx: Context) = Utils.query {
+        ctx.getResource().apply {
+            books.forEach { it.delete() }
+            delete()
         }
+        ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    override fun update(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<SeriesInput>()
-            val exists = Series
-                .find {
-                    SeriesTable.titleCol eq body.title
-                }.firstOrNull()
-            if (exists != null && exists != resource) {
-                throw ConflictResponse("Series already exists")
+    fun addBook(ctx: Context) = manage<SeriesInput.Book> { body, series ->
+        BookSeries
+            .findOrCreate(
+                Book.findById(body.book) ?: throw NotFoundResponse("Book not found."),
+                series,
+            ).apply {
+                number = if (body.number == 0) null else body.number
             }
-            resource.summary = body.summary
-            resource.title = body.title
-
-            ctx.json(resource.toJson(showAll = true))
-        }
     }
 
-    override fun delete(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            resource.books.forEach {
-                it.delete()
-            }
-            resource.delete()
-            ctx.status(HttpStatus.NO_CONTENT)
-        }
-    }
-
-    fun addBook(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<SeriesInput.Book>()
-            val book = Book.findById(body.bookId)
-                ?: throw NotFoundResponse("No Book found.")
-            val bookSeries = BookSeries
-                .find {
-                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-                }.firstOrNull() ?: BookSeries.new {
-                this.book = book
-                this.series = resource
-            }
-            bookSeries.number = if (body.number == 0) null else body.number
-
-            ctx.json(resource.toJson(showAll = true))
-        }
-    }
-
-    fun removeBook(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            val body = ctx.bodyAsClass<IdInput>()
-            val book = Book.findById(body.id)
-                ?: throw NotFoundResponse("No Book found.")
-            val bookSeries = BookSeries
-                .find {
-                    (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq resource.id)
-                }.firstOrNull() ?: throw BadRequestResponse("Book Series not found.")
-            bookSeries.delete()
-
-            ctx.status(HttpStatus.NO_CONTENT)
-        }
+    fun removeBook(ctx: Context) = manage<IdInput>(ctx) { body, series ->
+        BookSeries
+            .findOrCreate(
+                Book.findById(body.id) ?: throw NotFoundResponse("Book not found."),
+                series,
+            )?.delete()
     }
 }

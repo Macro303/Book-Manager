@@ -32,7 +32,8 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        implementation(rootProject.libs.log4j2.api.kotlin)
+        implementation(rootProject.libs.kotlin.logging)
+        implementation(rootProject.libs.kotlinx.datetime)
         runtimeOnly(rootProject.libs.log4j2.slf4j2.impl)
         runtimeOnly(rootProject.libs.sqlite.jdbc)
     }

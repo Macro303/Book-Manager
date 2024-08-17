@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.logging.log4j.kotlin.Logging
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toKotlinLocalDate
 import java.io.IOException
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class LocalDateDeserializer : JsonDeserializer<LocalDate?>() {
@@ -19,8 +19,6 @@ class LocalDateDeserializer : JsonDeserializer<LocalDate?>() {
         if (root.isNull || root.asText() == "null") {
             return null
         }
-        return LocalDate.parse(root.asText(), DateTimeFormatter.ISO_DATE)
+        return java.time.LocalDate.parse(root.asText(), DateTimeFormatter.ISO_DATE).toKotlinLocalDate()
     }
-
-    companion object : Logging
 }

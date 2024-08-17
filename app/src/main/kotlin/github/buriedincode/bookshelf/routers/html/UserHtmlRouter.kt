@@ -5,167 +5,100 @@ import github.buriedincode.bookshelf.Utils.asEnumOrNull
 import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Format
-import github.buriedincode.bookshelf.models.Genre
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
+import github.buriedincode.bookshelf.tables.BookTable
+import github.buriedincode.bookshelf.tables.UserTable
+import github.buriedincode.bookshelf.tables.ReadBookTable
+import github.buriedincode.bookshelf.tables.BookSeriesTable
+import github.buriedincode.bookshelf.tables.WishedTable
+import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.like
+import org.jetbrains.exposed.sql.SizedCollection
 import io.javalin.http.Context
-import org.apache.logging.log4j.kotlin.Logging
 
-object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users"), Logging {
-    override fun list(ctx: Context) {
-        Utils.query {
-            var resources = User.all().toList()
-            val username = ctx.queryParam(key = "username")
-            if (username != null) {
-                resources = resources.filter {
-                    it.username.contains(username, ignoreCase = true) || username.contains(it.username, ignoreCase = true)
+object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users") {
+    override fun view(ctx: Context) = Utils.query {
+        val resource = ctx.getResource()
+        val model = mapOf(
+            "stats" to mapOf(
+                "wishlist" to Book.find { (BookTable.isCollected eq false) and (resource.id inList BookTable.wishers) }.count(),
+                "shared" to Book.find { (BookTable.isCollected eq false) and (BookTable.wishers.isEmpty()) }.count(),
+                "unread" to Book.find { (BookTable.isCollected eq true) }.count() - resource.readBooks.count(),
+                "read" to resource.readBooks.count(),
+            ),
+            "nextBooks" to Series
+                .find {
+                    SeriesTable.id inList resource.readBooks.mapNotNull { it.book.series.map { it.series.id }.flatten() }
+                }.associateWith { series ->
+                    series.books
+                        .filter { it.number != null && it.number!! !in resource.readBooks.mapNotNull { it.book.number } }
+                        .minByOrNull { it.number!! }
+                }.filterValues { it != null }
+                .mapValues { it.value!! }
+                .toSortedMap(),
+        )
+        renderResource(ctx, "view", model)
+    }
+
+    fun wishlist(ctx: Context) = Utils.query {
+        render(ctx, "wishlist", mapOf("resources" to filterBooks(ctx), "filters" to bookFilters(ctx)), redirect = false)
+    }
+
+    override fun filterResources(ctx: Context): List<User> {
+        return User
+            .find { UserTable.id neq -1 }
+            .apply {
+                ctx.queryParam("username")?.let { username -> andWhere { UserTable.usernameCol like "%$username%" } }
+            }.toList()
+    }
+
+    override fun filters(ctx: Context): Map<String, Any?> = mapOf(
+        "username" to ctx.queryParam("username"),
+    )
+
+    override fun optionMapExclusions(ctx: Context): Map<String, Any?> = mapOf(
+        "readBooks" to Book
+            .find {
+                (BookTable.isCollectedCol eq true) and (ReadBookTable.bookCol notInList ctx.getResource().readBooks.map { it.book })
+            }.distinct()
+            .toList(),
+        "wishedBooks" to Book
+            .find {
+                (BookTable.isCollectedCol eq true) and (BookTable.id notInList ctx.getResource().wishedBooks.map { it.id })
+            }.distinct()
+            .toList(),
+    )
+    
+    private fun filterBooks(ctx: Context): List<Book> {
+        return Book
+            .find {
+                (BookTable.isCollectedCol eq false) and
+                    ((BookTable.id notInSubQuery WishedTable.slice(WishedTable.bookCol).select { WishedTable.userCol eq ctx.getResource().id }) or
+                      (ctx.getResource().id inSubQuery WishedTable.slice(WishedTable.userCol).select { WishedTable.bookCol eq BookTable.id }))
+            }.apply {
+                ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+                    Creator.findById(it)?.let { andWhere { CreditTable.creatorCol eq it } }
                 }
-            }
-            ctx.render(
-                filePath = "templates/$name/list.kte",
-                model = mapOf(
-                    "session" to ctx.getSession(),
-                    "resources" to resources,
-                    "selected" to mapOf(
-                        "username" to username,
-                    ),
-                ),
-            )
-        }
-    }
-
-    override fun create(ctx: Context) {
-        Utils.query {
-            ctx.render(
-                filePath = "templates/$name/create.kte",
-                model = mapOf(
-                    "session" to ctx.getSession(),
-                ),
-            )
-        }
-    }
-
-    override fun view(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-
-            val nextBooks = mutableMapOf<Series, Book?>()
-            val readBooksBySeries = resource.readBooks
-                .flatMap {
-                    it.book.series.map { it.series to it.number }
-                }.groupBy({ it.first }, { it.second })
-            readBooksBySeries.forEach { (series, readNumbers) ->
-                val nextBookInSeries = series.books
-                    .filter { it.number != null && it.number!! !in readNumbers }
-                    .minByOrNull { it.number!! }
-                    ?.book
-
-                nextBooks[series] = nextBookInSeries
-            }
-
-            ctx.render(
-                filePath = "templates/$name/view.kte",
-                model = mapOf(
-                    "session" to ctx.getSession(),
-                    "resource" to resource,
-                    "stats" to mapOf(
-                        "wishlist" to Book.all().count { !it.isCollected && resource in it.wishers },
-                        "shared" to Book.all().count { !it.isCollected && it.wishers.empty() },
-                        "unread" to Book.all().count { it.isCollected } - resource.readBooks.count(),
-                        "read" to resource.readBooks.count(),
-                    ),
-                    "nextBooks" to nextBooks.filterValues { it != null }.mapValues { it.value!! }.toSortedMap(),
-                ),
-            )
-        }
-    }
-
-    override fun update(ctx: Context) {
-        Utils.query {
-            val session = ctx.getSession()
-            val resource = ctx.getResource()
-            if (session == null) {
-                ctx.redirect("/$plural/${resource.id.value}")
-            } else {
-                val readBooks = Book
-                    .all()
-                    .toList()
-                    .filter { it.isCollected }
-                    .filterNot { it in resource.readBooks.map { it.book } }
-                val wishedBooks = Book
-                    .all()
-                    .toList()
-                    .filterNot { it.isCollected }
-                    .filterNot { it in resource.wishedBooks }
-                ctx.render(
-                    filePath = "templates/$name/update.kte",
-                    model = mapOf(
-                        "session" to session,
-                        "resource" to resource,
-                        "readBooks" to readBooks,
-                        "wishedBooks" to wishedBooks,
-                    ),
-                )
-            }
-        }
-    }
-
-    fun wishlist(ctx: Context) {
-        Utils.query {
-            val resource = ctx.getResource()
-            var books = Book.all().toList().filter {
-                !it.isCollected && (it.wishers.empty() || resource in it.wishers)
-            }
-            val creator = ctx.queryParam("creator-id")?.toLongOrNull()?.let { Creator.findById(it) }
-            creator?.let {
-                books = books.filter { creator in it.credits.map { it.creator } }
-            }
-            val format = ctx.queryParam("format")?.asEnumOrNull<Format>()
-            format?.let {
-                books = books.filter { format == it.format }
-            }
-            val genre = ctx.queryParam("genre-id")?.toLongOrNull()?.let { Genre.findById(it) }
-            genre?.let {
-                books = books.filter { genre in it.genres }
-            }
-            val publisher = ctx.queryParam("publisher-id")?.toLongOrNull()?.let { Publisher.findById(it) }
-            publisher?.let {
-                books = books.filter { publisher == it.publisher }
-            }
-            val series = ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it) }
-            series?.let {
-                books = books.filter { series in it.series.map { it.series } }
-            }
-            val title = ctx.queryParam("title")
-            title?.let {
-                books = books.filter {
-                    (
-                        it.title.contains(title, ignoreCase = true) || title.contains(it.title, ignoreCase = true)
-                    ) ||
-                        (
-                            it.subtitle?.let {
-                                it.contains(title, ignoreCase = true) || title.contains(it, ignoreCase = true)
-                            } ?: false
-                        )
+                ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { andWhere { BookTable.formatCol eq it } }
+                ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+                    Publisher.findById(it)?.let { andWhere { BookTable.publisherCol eq it } }
                 }
-            }
-            ctx.render(
-                filePath = "templates/$name/wishlist.kte",
-                model = mapOf(
-                    "session" to ctx.getSession(),
-                    "resource" to resource,
-                    "books" to books,
-                    "selected" to mapOf(
-                        "creator" to creator,
-                        "format" to format,
-                        "genre" to genre,
-                        "publisher" to publisher,
-                        "series" to series,
-                        "title" to title,
-                    ),
-                ),
-            )
-        }
+                ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it)?.let { andWhere { BookSeriesTable.seriesCol eq it } } }
+                ctx.queryParam("title")?.let { title ->
+                    andWhere { (BookTable.titleCol like "%$title%") or (BookTable.subtitleCol like "%$title%") }
+                }
+            }.toList()
     }
+    
+    private fun bookFilters(ctx: Context): Map<String, Any?> = mapOf(
+        "creator" to ctx.queryParam("creator-id")?.toLongOrNull()?.let { Creator.findById(it) },
+        "format" to ctx.queryParam("format")?.asEnumOrNull<Format>(),
+        "publisher" to ctx.queryParam("publisher-id")?.toLongOrNull()?.let { Publisher.findById(it) },
+        "series" to ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it) },
+        "title" to ctx.queryParam("title"),
+    )
 }
