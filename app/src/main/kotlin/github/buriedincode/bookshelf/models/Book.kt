@@ -23,19 +23,19 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
         fun find(title: String, subtitle: String? = null, isbn: String? = null, openLibraryId: String? = null): Book? {
             var result: Book? = null
             if (result == null && openLibraryId != null) {
-                result = Book.find { BookTable.openLibraryCol eq openLibraryId }.firstOrNull()
+                result = find { BookTable.openLibraryCol eq openLibraryId }.firstOrNull()
             }
             if (result == null && isbn != null) {
-                result = Book.find { BookTable.isbnCol eq isbn }.firstOrNull()
+                result = find { BookTable.isbnCol eq isbn }.firstOrNull()
             }
             if (result == null) {
-                result = Book.find { (BookTable.titleCol eq title) and (BookTable.subtitleCol eq subtitle) }.firstOrNull()
+                result = find { (BookTable.titleCol eq title) and (BookTable.subtitleCol eq subtitle) }.firstOrNull()
             }
             return result
         }
 
         fun findOrCreate(title: String, subtitle: String? = null, isbn: String? = null, openLibraryId: String? = null): Book {
-            return find(title, subtitle, isbn, openlibraryId) ?: Book.new {
+            return find(title, subtitle, isbn, openLibraryId) ?: new {
                 this.title = title
                 this.subtitle = subtitle
                 this.isbn = isbn

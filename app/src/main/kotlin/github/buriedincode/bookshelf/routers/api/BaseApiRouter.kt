@@ -6,6 +6,7 @@ import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
+import io.javalin.http.bodyAsClass
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 
@@ -20,7 +21,9 @@ abstract class BaseApiRouter<T>(protected val entity: LongEntityClass<T>)
         entity.findById(it) ?: throw NotFoundResponse("$title not found")
     } ?: throw BadRequestResponse("Invalid $title Id")
 
-    protected fun <I> Context.processInput(block: (I) -> Unit) = Utils.query { block(this.bodyAsClass<I>()) }
+    protected inline fun <reified I> Context.processInput(crossinline block: (I) -> Unit) {
+        Utils.query { block(bodyAsClass(I::class.java)) }
+    }
 
     protected inline fun <reified I> manage(ctx: Context, crossinline block: (I, T) -> Unit) {
         ctx.processInput<I> { body ->
@@ -30,15 +33,15 @@ abstract class BaseApiRouter<T>(protected val entity: LongEntityClass<T>)
         }
     }
 
-    abstract fun list(ctx: Context): Unit
+    abstract fun list(ctx: Context)
 
-    abstract fun create(ctx: Context): Unit
+    abstract fun create(ctx: Context)
 
     open fun read(ctx: Context) = Utils.query {
         ctx.json(ctx.getResource().toJson(showAll = true))
     }
 
-    abstract fun update(ctx: Context): Unit
+    abstract fun update(ctx: Context)
 
     open fun delete(ctx: Context) = Utils.query {
         ctx.getResource().delete()

@@ -15,7 +15,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher) {
-    override fun list(ctx: Context) = Utils.query {
+    override fun list(ctx: Context): Unit = Utils.query {
         val query = PublisherTable.selectAll()
         ctx.queryParam("book-id")?.toLongOrNull()?.let {
             Book.findById(it)?.let { book -> query.andWhere { BookTable.id eq book.id } }

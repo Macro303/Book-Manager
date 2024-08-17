@@ -38,7 +38,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
     @JvmStatic
     private val LOGGER = KotlinLogging.logger { }
 
-    override fun list(ctx: Context) = Utils.query {
+    override fun list(ctx: Context): Unit = Utils.query {
         val query = BookTable.selectAll()
         ctx.queryParam("creator-id")?.toLongOrNull()?.let {
             Creator.findById(it)?.let { creator -> query.andWhere { CreditTable.creatorCol eq creator.id } }

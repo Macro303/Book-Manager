@@ -65,7 +65,7 @@ object Utils {
         }
     }
 
-    internal fun <T> query(block: () -> T): T {
+    fun <T> query(block: () -> T): T {
         val startTime = LocalDateTime.now()
         val transaction = transaction(transactionIsolation = Connection.TRANSACTION_SERIALIZABLE, db = DATABASE) {
             addLogger(Slf4jSqlDebugLogger)

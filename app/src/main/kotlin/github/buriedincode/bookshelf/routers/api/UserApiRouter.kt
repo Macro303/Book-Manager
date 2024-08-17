@@ -17,7 +17,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object UserApiRouter : BaseApiRouter<User>(entity = User) {
-    override fun list(ctx: Context) = Utils.query {
+    override fun list(ctx: Context): Unit = Utils.query {
         val query = UserTable.selectAll()
         ctx.queryParam("username")?.let { username ->
             query.andWhere { UserTable.usernameCol like "%$username%" }
@@ -99,7 +99,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User) {
     fun addWishedBook(ctx: Context) = manage<IdInput>(ctx) { body, user ->
         val book = Book.findById(body.id) ?: throw NotFoundResponse("No Book found.")
         if (book.isCollected) {
-            throw BadRequestResponse("Book hasn been collected")
+            throw BadRequestResponse("Book has been collected")
         }
         user.wishedBooks = SizedCollection(user.wishedBooks + book)
     }
@@ -107,7 +107,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User) {
     fun removeWishedBook(ctx: Context) = manage<IdInput>(ctx) { body, user ->
         val book = Book.findById(body.id) ?: throw NotFoundResponse("No Book found.")
         if (book.isCollected) {
-            throw BadRequestResponse("Book hasn been collected")
+            throw BadRequestResponse("Book has been collected")
         }
         user.wishedBooks = SizedCollection(user.wishedBooks - book)
     }
