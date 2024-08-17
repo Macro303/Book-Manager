@@ -88,10 +88,9 @@ object App {
                         get("create", UserHtmlRouter::create)
                         path("{user-id}") {
                             get(UserHtmlRouter::view)
+                            get("readlist", UserHtmlRouter::readlist)
                             get("update", UserHtmlRouter::update)
-                            path("wishlist") {
-                                get(UserHtmlRouter::wishlist)
-                            }
+                            get("wishlist", UserHtmlRouter::wishlist)
                         }
                     }
                 }

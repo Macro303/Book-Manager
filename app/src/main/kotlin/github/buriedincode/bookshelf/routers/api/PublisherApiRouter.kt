@@ -5,25 +5,25 @@ import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.IdInput
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.PublisherInput
+import github.buriedincode.bookshelf.tables.BookTable
 import github.buriedincode.bookshelf.tables.PublisherTable
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.selectAll
 
 object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher) {
     override fun list(ctx: Context) = Utils.query {
-        val resources = Publisher
-            .find { PublisherTable.id neq -1 }
-            .apply {
-                ctx.queryParam("book-id")?.toLongOrNull()?.let {
-                    Book.findById(it)?.let { andWhere { BookTable.id eq it } }
-                }
-                ctx.queryParam("title")?.let { title ->
-                    andWhere { PublisherTable.titleCol like "%$title%" }
-                }
-            }.toList()
-        ctx.json(resources.sorted().map { it.toJson() })
+        val query = PublisherTable.selectAll()
+        ctx.queryParam("book-id")?.toLongOrNull()?.let {
+            Book.findById(it)?.let { book -> query.andWhere { BookTable.id eq book.id } }
+        }
+        ctx.queryParam("title")?.let { title ->
+            query.andWhere { PublisherTable.titleCol like "%$title%" }
+        }
+        ctx.json(Publisher.wrapRows(query.withDistinct()).toList().sorted().map { it.toJson() })
     }
 
     override fun create(ctx: Context) = ctx.processInput<PublisherInput> { body ->
@@ -44,12 +44,12 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher) {
         }
     }
 
-    fun addBook(ctx: Context) = manage<IdInput> { body, publisher ->
+    fun addBook(ctx: Context) = manage<IdInput>(ctx) { body, publisher ->
         val book = Book.findById(body.id) ?: throw NotFoundResponse("Book not found.")
         book.publisher = publisher
     }
 
-    fun removeBook(ctx: Context) = manage<IdInput> { body, publisher ->
+    fun removeBook(ctx: Context) = manage<IdInput>(ctx) { body, publisher ->
         val book = Book.findById(body.id) ?: throw NotFoundResponse("Book not found.")
         book.publisher = null
     }

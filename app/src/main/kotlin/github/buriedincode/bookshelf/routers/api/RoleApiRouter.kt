@@ -12,23 +12,22 @@ import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.selectAll
 
 object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
     override fun list(ctx: Context) = Utils.query {
-        val resources = Role
-            .find { RoleTable.id neq -1 }
-            .apply {
-                ctx.queryParam("book-id")?.toLongOrNull()?.let {
-                    Book.findById(it)?.let { andWhere { CreditTable.bookCol eq it } }
-                }
-                ctx.queryParam("creator-id")?.toLongOrNull()?.let {
-                    Creator.findById(it)?.let { andWhere { CreditTable.creatorCol eq it } }
-                }
-                ctx.queryParam("title")?.let { title ->
-                    andWhere { RoleTable.titleCol like "%$title%" }
-                }
-            }.toList()
-        ctx.json(resources.sorted().map { it.toJson() })
+        val query = RoleTable.selectAll()
+        ctx.queryParam("book-id")?.toLongOrNull()?.let {
+            Book.findById(it)?.let { book -> query.andWhere { CreditTable.bookCol eq book.id } }
+        }
+        ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+            Creator.findById(it)?.let { creator -> query.andWhere { CreditTable.creatorCol eq creator.id } }
+        }
+        ctx.queryParam("title")?.let { title ->
+            query.andWhere { RoleTable.titleCol like "%$title%" }
+        }
+        ctx.json(Role.wrapRows(query.withDistinct()).toList().sorted().map { it.toJson() })
     }
 
     override fun create(ctx: Context) = ctx.processInput<RoleInput> { body ->
@@ -72,7 +71,7 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    fun addCredit(ctx: Context) = manage<RoleInput.Credit> { body, role ->
+    fun addCredit(ctx: Context) = manage<RoleInput.Credit>(ctx) { body, role ->
         Credit.findOrCreate(
             Book.findById(body.book) ?: throw NotFoundResponse("Book not found."),
             Creator.findById(body.creator) ?: throw NotFoundResponse("Creator not found."),

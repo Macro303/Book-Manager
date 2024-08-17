@@ -43,7 +43,7 @@ abstract class BaseHtmlRouter<T : LongEntity>(
     protected open fun optionMapExclusions(ctx: Context): Map<String, Any?> = emptyMap()
 
     open fun list(ctx: Context) = Utils.query {
-        render(ctx, "list", mapOf("resources" to filterResources(), "filters" to filters()), redirect = false)
+        render(ctx, "list", mapOf("resources" to filterResources(ctx), "filters" to filters(ctx)), redirect = false)
     }
 
     open fun create(ctx: Context) = Utils.query {
@@ -55,6 +55,6 @@ abstract class BaseHtmlRouter<T : LongEntity>(
     }
 
     open fun update(ctx: Context) = Utils.query {
-        render(ctx, "update", optionMap() + optionMapExclusions())
+        render(ctx, "update", optionMap() + optionMapExclusions(ctx))
     }
 }

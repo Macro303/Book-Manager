@@ -6,30 +6,28 @@ import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.CreatorInput
 import github.buriedincode.bookshelf.models.Credit
 import github.buriedincode.bookshelf.models.Role
-import github.buriedincode.bookshelf.routers.api.BookApiRouter.getResource
 import github.buriedincode.bookshelf.tables.CreatorTable
 import github.buriedincode.bookshelf.tables.CreditTable
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.selectAll
 
 object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
     override fun list(ctx: Context) = Utils.query {
-        val resources = Creator
-            .find { CreatorTable.id neq -1 }
-            .apply {
-                ctx.queryParam("book-id")?.toLongOrNull()?.let {
-                    Book.findById(it)?.let { andWhere { CreditTable.bookCol eq it } }
-                }
-                ctx.queryParam("name")?.let { name ->
-                    andWhere { CreatorTable.nameCol like "%$name%" }
-                }
-                ctx.queryParam("role-id")?.toLongOrNull()?.let {
-                    Role.findById(it)?.let { andWhere { CreditTable.roleCol eq it } }
-                }
-            }.toList()
-        ctx.json(resources.sorted().map { it.toJson() })
+        val query = CreatorTable.selectAll()
+        ctx.queryParam("book-id")?.toLongOrNull()?.let {
+            Book.findById(it)?.let { book -> query.andWhere { CreditTable.bookCol eq book.id } }
+        }
+        ctx.queryParam("name")?.let { name ->
+            query.andWhere { CreatorTable.nameCol like "%$name%" }
+        }
+        ctx.queryParam("role-id")?.toLongOrNull()?.let {
+            Role.findById(it)?.let { role -> query.andWhere { CreditTable.roleCol eq role.id } }
+        }
+        ctx.json(Creator.wrapRows(query.withDistinct()).toList().sorted().map { it.toJson() })
     }
 
     override fun create(ctx: Context) = ctx.processInput<CreatorInput> { body ->
@@ -41,7 +39,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
                 Credit.new {
                     this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
                     this.creator = this@apply
-                    this.role = Role.findById(id.role) ?: throw NotFoundResponse("Role not found.")
+                    this.role = Role.findById(it.role) ?: throw NotFoundResponse("Role not found.")
                 }
             }
             imageUrl = body.imageUrl
@@ -58,7 +56,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
                 Credit.findOrCreate(
                     Book.findById(it.book) ?: throw NotFoundResponse("Book not found."),
                     this,
-                    Role.findById(id.role) ?: throw NotFoundResponse("Role not found."),
+                    Role.findById(it.role) ?: throw NotFoundResponse("Role not found."),
                 )
             }
             imageUrl = body.imageUrl
@@ -75,7 +73,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    fun addCredit(ctx: Context) = manage<CreatorInput.Credit> { body, creator ->
+    fun addCredit(ctx: Context) = manage<CreatorInput.Credit>(ctx) { body, creator ->
         Credit.findOrCreate(
             Book.findById(body.book) ?: throw NotFoundResponse("Book not found."),
             creator,

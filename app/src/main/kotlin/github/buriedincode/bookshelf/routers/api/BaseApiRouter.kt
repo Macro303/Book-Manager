@@ -20,9 +20,9 @@ abstract class BaseApiRouter<T>(protected val entity: LongEntityClass<T>)
         entity.findById(it) ?: throw NotFoundResponse("$title not found")
     } ?: throw BadRequestResponse("Invalid $title Id")
 
-    protected fun <I> Context.processInput(block: (I) -> Unit) = Utils.query { block(bodyAsClass()) }
+    protected fun <I> Context.processInput(block: (I) -> Unit) = Utils.query { block(this.bodyAsClass<I>()) }
 
-    protected inline fun <reified I> manage(ctx: Context, block: (I, T) -> Unit) {
+    protected inline fun <reified I> manage(ctx: Context, crossinline block: (I, T) -> Unit) {
         ctx.processInput<I> { body ->
             val resource = ctx.getResource()
             block(body, resource)
@@ -30,15 +30,15 @@ abstract class BaseApiRouter<T>(protected val entity: LongEntityClass<T>)
         }
     }
 
-    abstract fun list(ctx: Context)
+    abstract fun list(ctx: Context): Unit
 
-    abstract fun create(ctx: Context)
+    abstract fun create(ctx: Context): Unit
 
     open fun read(ctx: Context) = Utils.query {
         ctx.json(ctx.getResource().toJson(showAll = true))
     }
 
-    abstract fun update(ctx: Context)
+    abstract fun update(ctx: Context): Unit
 
     open fun delete(ctx: Context) = Utils.query {
         ctx.getResource().delete()

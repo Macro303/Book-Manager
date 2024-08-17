@@ -12,20 +12,19 @@ import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.selectAll
 
 object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
     override fun list(ctx: Context) = Utils.query {
-        val resources = Series
-            .find { SeriesTable.id neq -1 }
-            .apply {
-                ctx.queryParam("book-id")?.toLongOrNull()?.let {
-                    Book.findById(it)?.let { andWhere { BookSeriesTable.bookCol eq it } }
-                }
-                ctx.queryParam("title")?.let { title ->
-                    andWhere { SeriesTable.titleCol like "%$title%" }
-                }
-            }.toList()
-        ctx.json(resources.sorted().map { it.toJson() })
+        val query = SeriesTable.selectAll()
+        ctx.queryParam("book-id")?.toLongOrNull()?.let {
+            Book.findById(it)?.let { book -> query.andWhere { BookSeriesTable.bookCol eq book.id } }
+        }
+        ctx.queryParam("title")?.let { title ->
+            query.andWhere { SeriesTable.titleCol like "%$title%" }
+        }
+        ctx.json(Series.wrapRows(query.withDistinct()).toList().sorted().map { it.toJson() })
     }
 
     override fun create(ctx: Context) = ctx.processInput<SeriesInput> { body ->
@@ -37,7 +36,7 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
                 BookSeries.new {
                     this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
                     this.series = this@apply
-                    this.number = if (body.number == 0) null else body.number
+                    this.number = if (it.number == 0) null else it.number
                 }
             }
             summary = body.summary
@@ -55,7 +54,7 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
                         Book.findById(it.book) ?: throw NotFoundResponse("Book not found."),
                         series,
                     ).apply {
-                        number = if (body.number == 0) null else body.number
+                        number = if (it.number == 0) null else it.number
                     }
             }
             summary = body.summary
@@ -71,7 +70,7 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    fun addBook(ctx: Context) = manage<SeriesInput.Book> { body, series ->
+    fun addBook(ctx: Context) = manage<SeriesInput.Book>(ctx) { body, series ->
         BookSeries
             .findOrCreate(
                 Book.findById(body.book) ?: throw NotFoundResponse("Book not found."),

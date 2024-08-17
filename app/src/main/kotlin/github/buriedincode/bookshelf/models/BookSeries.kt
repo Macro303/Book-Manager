@@ -4,12 +4,13 @@ import github.buriedincode.bookshelf.tables.BookSeriesTable
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.and
 
 class BookSeries(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<BookSeries>(BookSeriesTable) {
         fun find(book: Book, series: Series): BookSeries? {
             return BookSeries
-                .find { (BookSeriesTable.bookCol eq book) and (BookSeriesTable.seriesCol eq series) }
+                .find { (BookSeriesTable.bookCol eq book.id) and (BookSeriesTable.seriesCol eq series.id) }
                 .firstOrNull()
         }
 

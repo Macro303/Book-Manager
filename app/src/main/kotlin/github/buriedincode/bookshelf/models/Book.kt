@@ -11,6 +11,7 @@ import kotlinx.datetime.LocalDate
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.and
 
 class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     companion object : LongEntityClass<Book>(BookTable) {
@@ -34,11 +35,11 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
         }
 
         fun findOrCreate(title: String, subtitle: String? = null, isbn: String? = null, openLibraryId: String? = null): Book {
-            return find(title, subtitle, isbn, openlibrary) ?: Book.new {
+            return find(title, subtitle, isbn, openlibraryId) ?: Book.new {
                 this.title = title
                 this.subtitle = subtitle
                 this.isbn = isbn
-                this.openLibraryId = openLibraryId
+                this.openLibrary = openLibraryId
             }
         }
     }

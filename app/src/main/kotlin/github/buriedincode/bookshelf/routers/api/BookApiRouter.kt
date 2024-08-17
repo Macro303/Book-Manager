@@ -18,36 +18,44 @@ import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.services.OpenLibrary
 import github.buriedincode.bookshelf.services.getId
 import github.buriedincode.bookshelf.tables.BookSeriesTable
+import github.buriedincode.bookshelf.tables.BookTable
+import github.buriedincode.bookshelf.tables.CreditTable
+import github.buriedincode.openlibrary.schemas.Edition
+import github.buriedincode.openlibrary.schemas.Work
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
 import io.javalin.http.NotImplementedResponse
-import org.jetbrains.exposed.sql.or
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.SizedCollection
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.selectAll
 
 object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
+    @JvmStatic
+    private val LOGGER = KotlinLogging.logger { }
+
     override fun list(ctx: Context) = Utils.query {
-        val resources = Book
-            .find { BookTable.id neq -1 }
-            .apply {
-                ctx.queryParam("creator-id")?.toLongOrNull()?.let {
-                    Creator.findById(it)?.let { andWhere { CreditTable.creatorCol eq it } }
-                }
-                ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { andWhere { BookTable.formatCol eq it } }
-                ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
-                    Publisher.findById(it)?.let { andWhere { BookTable.publisherCol eq it } }
-                }
-                ctx.queryParam("series-id")?.toLongOrNull()?.let {
-                    Series.findById(it)?.let { andWhere { BookSeriesTable.seriesCol eq it } }
-                }
-                ctx.queryParam("title")?.let { title ->
-                    andWhere { (BookTable.titleCol like "%$title%") or (BookTable.subtitleCol like "%$title%") }
-                }
-            }.toList()
-        ctx.json(resources.sorted().map { it.toJson() })
+        val query = BookTable.selectAll()
+        ctx.queryParam("creator-id")?.toLongOrNull()?.let {
+            Creator.findById(it)?.let { creator -> query.andWhere { CreditTable.creatorCol eq creator.id } }
+        }
+        ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { format ->
+            query.andWhere { BookTable.formatCol eq format }
+        }
+        ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
+            Publisher.findById(it)?.let { publisher -> query.andWhere { BookTable.publisherCol eq publisher.id } }
+        }
+        ctx.queryParam("series-id")?.toLongOrNull()?.let {
+            Series.findById(it)?.let { series -> query.andWhere { BookSeriesTable.seriesCol eq series.id } }
+        }
+        ctx.queryParam("title")?.let { title ->
+            query.andWhere { (BookTable.titleCol like "%$title%") or (BookTable.subtitleCol like "%$title%") }
+        }
+        ctx.json(Book.wrapRows(query.withDistinct()).toList().sorted().map { it.toJson() })
     }
 
     override fun create(ctx: Context) = ctx.processInput<BookInput> { body ->
@@ -59,7 +67,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
                 Credit.new {
                     this.book = this@apply
                     this.creator = Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found.")
-                    this.role = Role.findById(id.role) ?: throw NotFoundResponse("Role not found.")
+                    this.role = Role.findById(it.role) ?: throw NotFoundResponse("Role not found.")
                 }
             }
             format = body.format
@@ -83,7 +91,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
                 BookSeries.new {
                     this.book = this@apply
                     this.series = Series.findById(it.series) ?: throw NotFoundResponse("Series not found.")
-                    this.number = number
+                    this.number = it.number
                 }
             }
             summary = body.summary
@@ -108,7 +116,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
                 Credit.findOrCreate(
                     this,
                     Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found."),
-                    Role.findById(id.role) ?: throw NotFoundResponse("Role not found."),
+                    Role.findById(it.role) ?: throw NotFoundResponse("Role not found."),
                 )
             }
             format = body.format
@@ -117,7 +125,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
             imageUrl = body.imageUrl
             isbn = body.identifiers?.isbn
             isCollected = body.isCollected
-            libraryThing = body.identifier?.libraryThing
+            libraryThing = body.identifiers?.libraryThing
             openLibrary = body.identifiers?.openLibrary
             publishDate = body.publishDate
             publisher = body.publisher?.let {
@@ -237,23 +245,23 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
         BookSeries
             .find(
                 book,
-                Series.findById(body.series) ?: throw NotFoundResponse("Series not found."),
+                Series.findById(body.id) ?: throw NotFoundResponse("Series not found."),
             )?.delete()
     }
 
     private fun Book.applyOpenLibrary(edition: Edition, work: Work): Book = this.apply {
-        val format = edition.physicalFormat.toEnumOrNull()
+        val format = edition.physicalFormat?.asEnumOrNull<Format>()
         if (format == null) {
-            LOGGER.warning { "Unmapped Format: ${edition.physicalFormat}" }
+            LOGGER.warn { "Unmapped Format: ${edition.physicalFormat}" }
         }
 
         this.format = format ?: Format.PAPERBACK
-        goodreadsId = edition.identifiers.goodreads.firstOrNull()
-        googleBooksId = edition.identifiers.google.firstOrNull()
-        imageUrl = "https://covers.openlibrary.org/b/OLID/$editionId-L.jpg"
+        goodreads = edition.identifiers.goodreads.firstOrNull()
+        googleBooks = edition.identifiers.google.firstOrNull()
+        imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.getId()}-L.jpg"
         isbn = edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull()
-        libraryThingId = edition.identifiers.librarything.firstOrNull()
-        openLibraryId = edition.getId()
+        libraryThing = edition.identifiers.librarything.firstOrNull()
+        openLibrary = edition.getId()
         publishDate = edition.publishDate
         publisher = edition.publishers.firstOrNull()?.let { Publisher.findOrCreate(it) }
         summary = edition.description

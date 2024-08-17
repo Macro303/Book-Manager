@@ -5,11 +5,12 @@ import kotlinx.datetime.LocalDate
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.and
 
 class ReadBook(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<ReadBook>(ReadBookTable) {
         fun find(book: Book, user: User): ReadBook? {
-            return ReadBook.find { (ReadBookTable.bookCol eq book) and (ReadBookTable.userCol eq user) }.firstOrNull()
+            return ReadBook.find { (ReadBookTable.bookCol eq book.id) and (ReadBookTable.userCol eq user.id) }.firstOrNull()
         }
 
         fun findOrCreate(book: Book, user: User): ReadBook {

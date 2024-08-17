@@ -6,21 +6,23 @@ import github.buriedincode.bookshelf.models.IdInput
 import github.buriedincode.bookshelf.models.ReadBook
 import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.models.UserInput
+import github.buriedincode.bookshelf.tables.UserTable
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.ConflictResponse
 import io.javalin.http.Context
 import io.javalin.http.HttpStatus
 import io.javalin.http.NotFoundResponse
 import org.jetbrains.exposed.sql.SizedCollection
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.selectAll
 
 object UserApiRouter : BaseApiRouter<User>(entity = User) {
     override fun list(ctx: Context) = Utils.query {
-        val resources = User
-            .find { UsersTable.id neq -1 }
-            .apply {
-                ctx.queryParam("username")?.let { username -> andWhere { UsersTable.username like "%$username%" } }
-            }.toList()
-        ctx.json(resources.sorted().map { it.toJson() })
+        val query = UserTable.selectAll()
+        ctx.queryParam("username")?.let { username ->
+            query.andWhere { UserTable.usernameCol like "%$username%" }
+        }
+        ctx.json(User.wrapRows(query.withDistinct()).toList().sorted().map { it.toJson() })
     }
 
     override fun create(ctx: Context) = ctx.processInput<UserInput> { body ->
@@ -32,7 +34,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User) {
                 ReadBook.new {
                     this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
                     this.user = this@apply
-                    this.readDate = body.readDate
+                    this.readDate = it.readDate
                 }
             }
             imageUrl = body.imageUrl
@@ -55,7 +57,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User) {
                         Book.findById(it.book) ?: throw NotFoundResponse("Book not found."),
                         user,
                     ).apply {
-                        readDate = body.readDate
+                        readDate = it.readDate
                     }
             }
             imageUrl = body.imageUrl
@@ -77,7 +79,7 @@ object UserApiRouter : BaseApiRouter<User>(entity = User) {
     }
 
     fun addReadBook(ctx: Context) = manage<UserInput.ReadBook>(ctx) { body, user ->
-        val book = Book.findById(body.bookId) ?: throw NotFoundResponse("No Book found.")
+        val book = Book.findById(body.book) ?: throw NotFoundResponse("No Book found.")
         if (!book.isCollected) {
             throw BadRequestResponse("Book hasn't been collected")
         }
