@@ -11,7 +11,7 @@ object CreatorTable : LongIdTable(name = "creators") {
     val summaryCol: Column<String?> = text(name = "summary").nullable()
 
     init {
-        Utils.query {
+        Utils.queryTransaction {
             SchemaUtils.create(this)
         }
     }

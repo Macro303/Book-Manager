@@ -19,6 +19,7 @@ data class Work(
     val latestRevision: Int,
     val revision: Int,
     val subjectPeople: List<String> = emptyList(),
+    val subjectPlaces: List<String> = emptyList(),
     val subjectTimes: List<String> = emptyList(),
     val subjects: List<String> = emptyList(),
     val subtitle: String? = null,

@@ -39,11 +39,7 @@
         <div class="columns">
             <div class="column is-one-third-tablet is-one-quarter-fullhd">
                 <figure class="image is-2by3">
-                    @if(resource.imageUrl == null)
-                        <img alt="Missing cover image" loading="lazy" src="https://via.placeholder.com/1500x1000"/>
-                    @else
-                        <img alt="${resource.title} cover image" loading="lazy" src="${resource.imageUrl}"/>
-                    @endif
+                    <img alt="${resource.title} cover image" class="rounded" loading="lazy" src="${resource.imageUrl ?: "https://via.placeholder.com/1500x1000"}"/>
                 </figure>
             </div>
             <div class="column">
@@ -112,13 +108,10 @@
                 </nav>
                 <div class="columns is-desktop">
                     <div class="column">
-                        <div class="box">
+                        <div class="box has-background-text-soft is-shadowless">
                             <h3 class="title is-3 has-text-centered">Details</h3>
                             <div class="block">
                                 <p><strong>Format:</strong> ${resource.format.titlecase()}</p>
-                            </div>
-                            <div class="block">
-                                <p><strong>Genres:</strong> @for(entry in ForSupport.of(resource.genres.sorted()))<a class="is-family-primary has-text-link" href="/genres/${entry.get().id.value}">${entry.get().title}</a>@if(!entry.isLast), @endif@endfor</p>
                             </div>
                             <div class="block">
                                 <p><strong>Publish Date:</strong> ${resource.publishDate?.toHumanReadable()}</p>
@@ -140,28 +133,48 @@
                                 </div>
                             @endif
                         </div>
-                        <div class="box">
+                        <div class="box has-background-text-soft is-shadowless">
                             <h3 class="title is-3 has-text-centered">Summary</h3>
                             <div class="block">
-                                <p>${resource.summary}</p>
+                                <p>$unsafe{resource.summary?.replace("\n", "<br>")}</p>
                             </div>
                         </div>
                     </div>
                     <div class="column is-one-third-desktop is-one-quarter-fullhd">
-                        <div class="box">
+                        <div class="box has-background-text-soft is-shadowless">
                             <h3 class="title is-3 has-text-centered">Identifiers</h3>
                             <div class="block">
                                 <p><strong>Bookshelf:</strong> ${resource.id.value}</p>
                             </div>
+                            @if(resource.goodreads != null)
+                                <div class="block">
+                                    <p><strong>Goodreads:</strong> <a class="has-text-link" href="https://goodreads.com/book/show/${resource.goodreads}" rel="noopener noreferrer" target="_blank">${resource.goodreads}</a></p>
+                                </div>
+                            @endif
+                            @if(resource.googleBooks != null)
+                                <div class="block">
+                                    <p><strong>Google Books:</strong> <a class="has-text-link" href="https://books.google.com/books?id=${resource.googleBooks}" rel="noopener noreferrer" target="_blank">${resource.googleBooks}</a></p>
+                                </div>
+                            @endif
                             <div class="block">
                                 <p><strong>Isbn:</strong> ${resource.isbn}</p>
                             </div>
+                            @if(resource.libraryThing != null)
+                                <div class="block">
+                                    <p><strong>LibraryThing:</strong> <a class="has-text-link" href="https://librarything.com/work/${resource.libraryThing}" rel="noopener noreferrer" target="_blank">${resource.libraryThing}</a></p>
+                                </div>
+                            @endif
+                            @if(resource.openLibrary != null)
+                                <div class="block">
+                                    <p><strong>OpenLibrary:</strong> <a class="has-text-link" href="https://openlibrary.org/edition/${resource.openLibrary}" rel="noopener noreferrer" target="_blank">${resource.openLibrary}</a></p>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="box">
+        <div class="box has-background-text-soft is-shadowless">
             <div class="columns is-multiline is-centered">
                 @if(resource.isbn != null)
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
@@ -180,85 +193,69 @@
                         </nav>
                     </div>
                 @endif
-                @if(resource.goodreadsId != null || resource.isbn != null)
+                @if(resource.goodreads == null && resource.isbn != null)
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
                         <nav class="level is-mobile">
                             <div class="level-item has-text-centered">
                                 <div>
                                     <p class="title">Goodreads</p>
-                                    @if(resource.goodreadsId != null)
-                                        <p class="heading"><a class="has-text-link" href="https://goodreads.com/book/show/${resource.goodreadsId}" rel="noopener noreferrer" target="_blank">${resource.goodreadsId}</a></p>
-                                    @else
-                                        <p class="heading"><a class="has-text-link" href="" rel="noopener noreferrer" target="_blank">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-magnifying-glass"></i>
-                                            </span>
-                                            <span>Search</span>
-                                        </a></p>
-                                    @endif
+                                    <p class="heading"><a class="has-text-link" disabled href="" rel="noopener noreferrer" target="_blank">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </span>
+                                        <span>Search</span>
+                                    </a></p>
                                 </div>
                             </div>
                         </nav>
                     </div>
                 @endif
-                @if(resource.googleBooksId != null || resource.isbn != null)
+                @if(resource.googleBooks == null && resource.isbn != null)
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
                         <nav class="level is-mobile">
                             <div class="level-item has-text-centered">
                                 <div>
                                     <p class="title">Google Books</p>
-                                    @if(resource.googleBooksId != null)
-                                        <p class="heading"><a class="has-text-link" href="https://books.google.com/books?id=${resource.googleBooksId}" rel="noopener noreferrer" target="_blank">${resource.googleBooksId}</a></p>
-                                    @else
-                                        <p class="heading"><a class="has-text-link" href="https://books.google.com/books?vid=ISBN${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-magnifying-glass"></i>
-                                            </span>
-                                            <span>Search</span>
-                                        </a></p>
-                                    @endif
+                                    <p class="heading"><a class="has-text-link" href="https://books.google.com/books?vid=ISBN${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </span>
+                                        <span>Search</span>
+                                    </a></p>
                                 </div>
                             </div>
                         </nav>
                     </div>
                 @endif
-                @if(resource.libraryThingId != null || resource.isbn != null)
+                @if(resource.libraryThing == null && resource.isbn != null)
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
                         <nav class="level is-mobile">
                             <div class="level-item has-text-centered">
                                 <div>
                                     <p class="title">LibraryThing</p>
-                                    @if(resource.libraryThingId != null)
-                                        <p class="heading"><a class="has-text-link" href="https://librarything.com/work/${resource.libraryThingId}" rel="noopener noreferrer" target="_blank">${resource.libraryThingId}</a></p>
-                                    @else
-                                        <p class="heading"><a class="has-text-link" href="https://librarything.com/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-magnifying-glass"></i>
-                                            </span>
-                                            <span>Search</span>
-                                        </a></p>
-                                    @endif
+                                    <p class="heading"><a class="has-text-link" href="https://librarything.com/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </span>
+                                        <span>Search</span>
+                                    </a></p>
                                 </div>
                             </div>
                         </nav>
                     </div>
                 @endif
-                @if(resource.openLibraryId != null || resource.isbn != null)
+                @if(resource.openLibrary == null && resource.isbn != null)
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
                         <nav class="level is-mobile">
                             <div class="level-item has-text-centered">
                                 <div>
                                     <p class="title">OpenLibrary</p>
-                                    @if(resource.openLibraryId != null)
-                                        <p class="heading"><a class="has-text-link" href="https://openlibrary.org/edition/${resource.openLibraryId}" rel="noopener noreferrer" target="_blank">${resource.openLibraryId}</a></p>
-                                    @else
-                                        <p class="heading"><a class="has-text-link" href="https://openlibrary.org/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                                            <span class="icon">
-                                                <i class="fa-solid fa-magnifying-glass"></i>
-                                            </span>
-                                            <span>Search</span>
-                                        </a></p>
-                                    @endif
+                                    <p class="heading"><a class="has-text-link" href="https://openlibrary.org/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                        <span class="icon">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </span>
+                                        <span>Search</span>
+                                    </a></p>
                                 </div>
                             </div>
                         </nav>
@@ -268,179 +265,124 @@
         </div>
         @for(role in credits.keys.sorted())
             <nav class="level is-mobile">
-                <div class="level-left level-item has-text-centered">
+                <div class="level-left has-text-centered">
                     <div>
-                        <p class="title">${role.title}</p>
+                        <p class="title mb-0">${role.title}</p>
                         @if(credits[role]!!.count() == 1)
-                            <p class="heading">1 Creator</p>
+                            <p class="heading mt-0">1 ${role.title}</p>
                         @else
-                            <p class="heading">${credits[role]!!.count()} Creators</p>
+                            <p class="heading mt-0">${credits[role]!!.count()} ${role.title}s</p>
                         @endif
                     </div>
                 </div>
             </nav>
             <div class="columns is-multiline is-centered">
                 @for(creator in credits[role]!!.sorted())
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                        @template.components.creator.view(entry = creator)
-                    </div>
-                @else
-                    <div class="column">
-                        <div class="box has-text-centered">
-                            <h5 class="title is-5 has-text-danger">No Creators found.</h5>
-                        </div>
+                    <div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+                        @template.components.views.creator(entry = creator)
                     </div>
                 @endfor
             </div>
         @else
             <nav class="level is-mobile">
-                <div class="level-left level-item has-text-centered">
+                <div class="level-left has-text-centered">
                     <div>
-                        <p class="title">Credit</p>
-                        <p class="heading">0 Credits</p>
+                        <p class="title mb-0">Credit</p>
+                        <p class="heading mt-0">0 Credits</p>
                     </div>
                 </div>
             </nav>
             <div class="columns is-multiline is-centered">
                 <div class="column">
-                    <div class="box has-text-centered">
+                    <div class="box has-text-centered has-background-text-soft is-shadowless">
                         <h5 class="title is-5 has-text-danger">No Credits found.</h5>
                     </div>
                 </div>
             </div>
         @endfor
-        @if(resource.isCollected)
-            <nav class="level is-mobile">
-                <div class="level-left level-item has-text-centered">
-                    <div>
-                        <p class="title">Readers</p>
-                        @if(resource.readers.count() == 1L)
-                            <p class="heading">1 User</p>
-                        @else
-                            <p class="heading">${resource.readers.count()} Users</p>
-                        @endif
-                    </div>
-                </div>
-            </nav>
-            <div class="columns is-multiline is-centered">
-                @for(entry in resource.readers.sortedBy { it.user })
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                        @template.components.user.view(entry = entry.user, readDate = entry.readDate)
-                    </div>
-                @else
-                    <div class="column">
-                        <div class="box has-text-centered">
-                            <h5 class="title is-5 has-text-danger">No Users found.</h5>
-                        </div>
-                    </div>
-                @endfor
-            </div>
-        @else
-            <nav class="level is-mobile">
-                <div class="level-left level-item has-text-centered">
-                    <div>
-                        <p class="title">Wishers</p>
-                        @if(resource.wishers.count() == 1L)
-                            <p class="heading">1 User</p>
-                        @else
-                            <p class="heading">${resource.wishers.count()} Users</p>
-                        @endif
-                    </div>
-                </div>
-            </nav>
-            <div class="columns is-multiline is-centered">
-                @for(entry in resource.wishers.sorted())
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                        @template.components.user.view(entry = entry)
-                    </div>
-                @else
-                    <div class="column">
-                        <div class="box has-text-centered">
-                            <h5 class="title is-5 has-text-danger">No Users found.</h5>
-                        </div>
-                    </div>
-                @endfor
-            </div>
-        @endif
     </div>
 </main>
 @template.components.footer()
 <script src="/static/js/scripts.js" type="text/javascript"></script>
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 <script type="text/javascript">
-  @if (session != null)
-    async function collectBook() {
-      const caller = "collect-book-button";
-
-      addLoading(caller);
-      const response = await submitRequest("/api/books/${resource.id.value}/collect", "POST");
-      if (response !== null)
-        window.location.reload();
-      removeLoading(caller);
-    }
-
+@if (session != null)
+  @if (resource.isCollected)
     async function discardBook() {
       const caller = "discard-book-button";
-
+  
       addLoading(caller);
       const response = await submitRequest("/api/books/${resource.id.value}/collect", "DELETE");
       if (response !== null)
         window.location.reload();
       removeLoading(caller);
     }
-
-    async function readBook() {
-      const caller = "read-book-button";
-      const body = {
-        userId: ${session.id.value},
-      };
-
+    @if(session in resource.readers.map { it.user })
+      async function unreadBook() {
+        const caller = "unread-book-button";
+        const body = {
+          id: ${session.id.value},
+        };
+    
+        addLoading(caller);
+        const response = await submitRequest("/api/books/${resource.id.value}/read", "DELETE", body);
+        if (response !== null)
+          window.location.reload();
+        removeLoading(caller);
+      }
+    @else
+      async function readBook() {
+        const caller = "read-book-button";
+        const body = {
+          user: ${session.id.value},
+        };
+    
+        addLoading(caller);
+        const response = await submitRequest("/api/books/${resource.id.value}/read", "POST", body);
+        if (response !== null)
+          window.location.reload();
+        removeLoading(caller);
+      }
+    @endif
+  @else
+    async function collectBook() {
+      const caller = "collect-book-button";
+  
       addLoading(caller);
-      const response = await submitRequest("/api/books/${resource.id.value}/read", "POST", body);
+      const response = await submitRequest("/api/books/${resource.id.value}/collect", "POST");
       if (response !== null)
         window.location.reload();
       removeLoading(caller);
     }
-
-    async function unreadBook() {
-      const caller = "unread-book-button";
-      const body = {
-        id: ${session.id.value},
-      };
-
-      addLoading(caller);
-      const response = await submitRequest("/api/books/${resource.id.value}/read", "DELETE", body);
-      if (response !== null)
-        window.location.reload();
-      removeLoading(caller);
-    }
-
-    async function wishBook() {
-      const caller = "wish-book-button";
-      const body = {
-        id: ${session.id.value},
-      };
-
-      addLoading(caller);
-      const response = await submitRequest("/api/books/${resource.id.value}/wish", "POST", body);
-      if (response !== null)
-        window.location.reload();
-      removeLoading(caller);
-    }
-
-    async function unwishBook() {
-      const caller = "unwish-book-button";
-      const body = {
-        id: ${session.id.value},
-      };
-
-      addLoading(caller);
-      const response = await submitRequest("/api/books/${resource.id.value}/wish", "DELETE", body);
-      if (response !== null)
-        window.location.reload();
-      removeLoading(caller);
-    }
+    @if(session in resource.wishers)
+      async function unwishBook() {
+        const caller = "unwish-book-button";
+        const body = {
+          id: ${session.id.value},
+        };
+    
+        addLoading(caller);
+        const response = await submitRequest("/api/books/${resource.id.value}/wish", "DELETE", body);
+        if (response !== null)
+          window.location.reload();
+        removeLoading(caller);
+      }
+    @else
+      async function wishBook() {
+        const caller = "wish-book-button";
+        const body = {
+          id: ${session.id.value},
+        };
+    
+        addLoading(caller);
+        const response = await submitRequest("/api/books/${resource.id.value}/wish", "POST", body);
+        if (response !== null)
+          window.location.reload();
+        removeLoading(caller);
+      }
+    @endif
   @endif
+@endif
 </script>
 </body>
 </html>

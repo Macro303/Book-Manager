@@ -23,7 +23,9 @@ data class Edition(
     @Serializable(with = DescriptionSerializer::class)
     val description: String? = null,
     val deweyDecimalClass: List<String> = emptyList(),
+    val firstSentence: String? = null,
     val fullTitle: String? = null,
+    val genres: List<String> = emptyList(),
     val identifiers: Identifiers,
     @JsonNames("isbn_10")
     val isbn10: List<String> = emptyList(),
@@ -43,6 +45,7 @@ data class Edition(
     val oclcNumbers: List<String> = emptyList(),
     val otherTitles: List<String> = emptyList(),
     val pagination: String? = null,
+    val physicalDimensions: String? = null,
     val physicalFormat: String? = null,
     val publishCountry: String? = null,
     @Serializable(with = LocalDateSerializer::class)
@@ -56,8 +59,10 @@ data class Edition(
     val subtitle: String? = null,
     val tableOfContents: List<Content> = emptyList(),
     val translatedFrom: List<Resource> = emptyList(),
+    val translationOf: String? = null,
     val title: String,
     val type: Resource,
+    val weight: String? = null,
     val works: List<Resource> = emptyList(),
 ) {
     @Serializable

@@ -35,7 +35,7 @@ object BookTable : LongIdTable(name = "books") {
     val titleCol: Column<String> = text(name = "title")
 
     init {
-        Utils.query {
+        Utils.queryTransaction {
             uniqueIndex(titleCol, subtitleCol)
             SchemaUtils.create(this)
         }

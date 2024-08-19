@@ -10,7 +10,7 @@ object PublisherTable : LongIdTable(name = "publishers") {
     val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {
-        Utils.query {
+        Utils.queryTransaction {
             SchemaUtils.create(this)
         }
     }

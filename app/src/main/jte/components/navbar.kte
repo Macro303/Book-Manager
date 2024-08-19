@@ -25,6 +25,12 @@
                             </span>
                             <span>My Profile</span>
                         </a>
+                        <a class="navbar-item" href="/users/${session.id.value}/readlist">
+                            <span class="icon">
+                                <i class="fa-solid fa-bookmark"></i>
+                            </span>
+                            <span>My Readlist</span>
+                        </a>
                         <a class="navbar-item" href="/users/${session.id.value}/wishlist">
                             <span class="icon">
                                 <i class="fa-solid fa-star"></i>
@@ -48,12 +54,6 @@
                             <i class="fa-solid fa-file-signature"></i>
                         </span>
                         <span>Creators</span>
-                    </a>
-                    <a class="navbar-item" href="/genres">
-                        <span class="icon">
-                            <i class="fa-solid fa-masks-theater"></i>
-                        </span>
-                        <span>Genres</span>
                     </a>
                     <a class="navbar-item" href="/publishers">
                         <span class="icon">

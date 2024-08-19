@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Author(
+    val alternateNames: List<String> = emptyList(),
     val bio: String? = null,
     val birthDate: String? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
@@ -22,6 +23,7 @@ data class Author(
     val remoteIds: RemoteIds? = null,
     val revision: Int,
     val sourceRecords: List<String> = emptyList(),
+    val title: String? = null,
     val type: Resource,
 ) {
     @Serializable

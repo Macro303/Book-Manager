@@ -32,7 +32,15 @@ class Role(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Role> {
             "title" to title,
         ).apply {
             if (showAll) {
-                put("credits", credits.groupBy({ it.creator.id.value }, { it.book.id.value }))
+                put(
+                    "credits",
+                    credits.groupBy({ it.creator }, { it.book }).toSortedMap().map { (creator, books) ->
+                        mapOf(
+                            "creator" to creator.toJson(),
+                            "books" to books.map { it.toJson() },
+                        )
+                    },
+                )
             }
         }.toSortedMap()
     }

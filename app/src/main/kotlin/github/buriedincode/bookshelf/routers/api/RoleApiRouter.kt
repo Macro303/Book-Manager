@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
-    override fun list(ctx: Context): Unit = Utils.query {
+    override fun list(ctx: Context): Unit = Utils.queryTransaction {
         val query = RoleTable.selectAll()
         ctx.queryParam("book-id")?.toLongOrNull()?.let {
             Book.findById(it)?.let { book -> query.andWhere { CreditTable.bookCol eq book.id } }
@@ -63,7 +63,7 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
         }
     }
 
-    override fun delete(ctx: Context) = Utils.query {
+    override fun delete(ctx: Context) = Utils.queryTransaction {
         ctx.getResource().apply {
             credits.forEach { it.delete() }
             delete()

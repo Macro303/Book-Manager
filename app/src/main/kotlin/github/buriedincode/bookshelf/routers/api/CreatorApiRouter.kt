@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
-    override fun list(ctx: Context): Unit = Utils.query {
+    override fun list(ctx: Context): Unit = Utils.queryTransaction {
         val query = CreatorTable.selectAll()
         ctx.queryParam("book-id")?.toLongOrNull()?.let {
             Book.findById(it)?.let { book -> query.andWhere { CreditTable.bookCol eq book.id } }
@@ -65,7 +65,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
         }
     }
 
-    override fun delete(ctx: Context) = Utils.query {
+    override fun delete(ctx: Context) = Utils.queryTransaction {
         ctx.getResource().apply {
             credits.forEach { it.delete() }
             delete()

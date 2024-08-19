@@ -14,12 +14,12 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
     companion object : LongEntityClass<User>(UserTable) {
         val comparator = compareBy(User::username)
 
-        fun find(username: String): User? {
-            return User.find { UserTable.usernameCol eq username }.firstOrNull()
+        fun findOrNull(username: String): User? {
+            return find { UserTable.usernameCol eq username }.firstOrNull()
         }
 
         fun findOrCreate(username: String): User {
-            return find(username) ?: User.new {
+            return findOrNull(username) ?: new {
                 this.username = username
             }
         }
@@ -37,8 +37,8 @@ class User(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<User> {
             "username" to username,
         ).apply {
             if (showAll) {
-                put("read", readBooks.groupBy({ it.book.id.value }, { it.readDate?.toString("yyyy-MM-dd") }))
-                put("wished", wishedBooks.sorted().map { it.id.value })
+                put("read", readBooks.groupBy({ it.readDate?.toString("yyyy-MM-dd") ?: "null" }, { it.book.toJson() }))
+                put("wished", wishedBooks.sorted().map { it.toJson() })
             }
         }.toSortedMap()
     }

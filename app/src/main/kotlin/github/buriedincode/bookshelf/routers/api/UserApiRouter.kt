@@ -26,30 +26,34 @@ object UserApiRouter : BaseApiRouter<User>(entity = User) {
     }
 
     override fun create(ctx: Context) = ctx.processInput<UserInput> { body ->
-        User.find(body.username)?.let {
-            throw ConflictResponse("User already exists")
-        }
-        val resource = User.findOrCreate(body.username).apply {
-            body.readBooks.forEach {
-                ReadBook.new {
-                    this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
-                    this.user = this@apply
-                    this.readDate = it.readDate
-                }
+        Utils.query {
+            User.findOrNull(body.username)?.let {
+                throw ConflictResponse("User already exists")
             }
-            imageUrl = body.imageUrl
-            wishedBooks = SizedCollection(
-                body.wishedBooks.map {
-                    Book.findById(it) ?: throw NotFoundResponse("Book not found.")
-                },
-            )
+            val resource = User.new User@{
+                body.readBooks.forEach {
+                    ReadBook.new {
+                        this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
+                        this.user = this@User
+                        this.readDate = it.readDate
+                    }
+                }
+                this.imageUrl = body.imageUrl
+                this.username = body.username
+                this.wishedBooks = SizedCollection(
+                    body.wishedBooks.map {
+                        Book.findById(it) ?: throw NotFoundResponse("Book not found.")
+                    },
+                )
+            }
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
-        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
 
     override fun update(ctx: Context) = manage<UserInput>(ctx) { body, user ->
-        User.find(body.username)?.takeIf { it != user }?.let { throw ConflictResponse("User already exists") }
+        User.findOrNull(body.username)?.takeIf { it != user }?.let { throw ConflictResponse("User already exists") }
         user.apply {
+            imageUrl = body.imageUrl
             readBooks.forEach { it.delete() }
             body.readBooks.forEach {
                 ReadBook
@@ -60,7 +64,6 @@ object UserApiRouter : BaseApiRouter<User>(entity = User) {
                         readDate = it.readDate
                     }
             }
-            imageUrl = body.imageUrl
             username = body.username
             wishedBooks = SizedCollection(
                 body.wishedBooks.map {

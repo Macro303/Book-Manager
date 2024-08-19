@@ -75,6 +75,8 @@ object Utils {
         return transaction
     }
 
+    fun <T> queryTransaction(block: () -> T): T = query(block)
+
     private fun getDayNumberSuffix(day: Int): String {
         return if (day in 11..13) {
             "th"

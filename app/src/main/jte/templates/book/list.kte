@@ -1,14 +1,14 @@
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Format
-@import github.buriedincode.bookshelf.models.Genre
 @import github.buriedincode.bookshelf.models.Publisher
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @import kotlin.collections.List
-@param resources: List<Book>
 @param session: User?
-@param selected: Map<String, Any?>
+@param resources: List<Book>
+@param filters: Map<String, Any?>
+@param extras: Map<String, Any> = emptyMap()
 
 <!DOCTYPE html>
 <html lang="en-GB" data-theme="villain">
@@ -27,23 +27,27 @@
 <main class="section">
     <div class="container">
         <header class="block has-text-centered">
-            <h1 class="title is-1">Books</h1>
+            <h1 class="title is-1">${extras.getOrDefault("title", "Books") as String}</h1>
         </header>
         <div class="columns">
             <div class="column is-two-fifths-tablet is-one-quarter-desktop is-one-fifth-fullhd">
-                @template.components.book.filter(
+                @template.components.filters.book(
                     creators = resources.flatMap { it.credits.map { it.creator } }.distinct().sorted(),
-                    creatorSelected = selected["creator"] as Creator?,
+                    creatorSelected = filters["creator"] as Creator?,
                     formats = resources.map { it.format }.distinct().sorted(),
-                    formatSelected = selected["format"] as Format?,
-                    genres = resources.flatMap { it.genres }.distinct().sorted(),
-                    genreSelected = selected["genre"] as Genre?,
+                    formatSelected = filters["format"] as Format?,
+                    hasRead = filters["has-read"] as Boolean?,
+                    readDisabled = extras.getOrDefault("read", false) as Boolean,
+                    hasWished = filters["has-wished"] as Boolean?,
+                    wishedDisabled = extras.getOrDefault("wished", false) as Boolean,
+                    isCollected = filters["is-collected"] as Boolean?,
+                    collectedDisabled = extras.getOrDefault("collected", false) as Boolean,
                     publishers = resources.mapNotNull { it.publisher }.distinct().sorted(),
-                    publisherSelected = selected["publisher"] as Publisher?,
+                    publisherSelected = filters["publisher"] as Publisher?,
                     series = resources.flatMap { it.series.map { it.series } }.distinct().sorted(),
-                    seriesSelected = selected["series"] as Series?,
-                    title = selected["title"] as String?,
-                    resetUrl = "/books",
+                    seriesSelected = filters["series"] as Series?,
+                    title = filters["title"] as String?,
+                    resetUrl = extras.getOrDefault("resetUrl", "/books") as String,
                 )
             </div>
             <div class="column">
@@ -72,18 +76,24 @@
                                     </span>
                                     <span>Import</span>
                                 </a>
+                                <a class="button is-success" href="/books/search">
+                                    <span class="icon">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </span>
+                                    <span>Search</span>
+                                </a>
                             </div>
                         @endif
                     </div>
                 </nav>
                 <div class="columns is-multiline is-centered is-desktop">
                     @for(entry in resources.sorted())
-                        <div class="column is-half-desktop is-one-third-fullhd">
-                            @template.components.book.view(entry = entry, session = session)
+                        <div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+                            @template.components.views.book(entry = entry, session = session)
                         </div>
                     @else
                         <div class="column">
-                            <div class="box has-text-centered">
+                            <div class="box has-text-centered has-background-text-soft is-shadowless">
                                 <h5 class="title is-5 has-text-danger">No Books found.</h5>
                             </div>
                         </div>

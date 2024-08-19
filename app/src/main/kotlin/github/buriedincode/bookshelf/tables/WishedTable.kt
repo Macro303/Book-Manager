@@ -23,7 +23,7 @@ object WishedTable : Table(name = "wished_books") {
     override val primaryKey = PrimaryKey(bookCol, userCol)
 
     init {
-        Utils.query {
+        Utils.queryTransaction {
             SchemaUtils.create(this)
         }
     }

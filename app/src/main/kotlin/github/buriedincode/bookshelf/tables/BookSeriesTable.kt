@@ -23,7 +23,7 @@ object BookSeriesTable : LongIdTable(name = "books__series") {
     val numberCol: Column<Int?> = integer(name = "number").nullable()
 
     init {
-        Utils.query {
+        Utils.queryTransaction {
             uniqueIndex(bookCol, seriesCol)
             SchemaUtils.create(this)
         }

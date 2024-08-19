@@ -61,7 +61,7 @@ object App {
             it.router.apiBuilder {
                 path("/") {
                     get { ctx ->
-                        Utils.query {
+                        Utils.queryTransaction {
                             ctx.render(
                                 filePath = "templates/index.kte",
                                 model = mapOf(
@@ -104,6 +104,7 @@ object App {
                             get(BookApiRouter::read)
                             put(BookApiRouter::update)
                             delete(BookApiRouter::delete)
+                            post("import", BookApiRouter::reimport)
                             path("collect") {
                                 post(BookApiRouter::collectBook)
                                 delete(BookApiRouter::discardBook)

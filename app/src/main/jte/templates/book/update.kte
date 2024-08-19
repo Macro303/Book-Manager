@@ -3,19 +3,17 @@
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Credit
 @import github.buriedincode.bookshelf.models.Format
-@import github.buriedincode.bookshelf.models.Genre
 @import github.buriedincode.bookshelf.models.Publisher
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @import github.buriedincode.bookshelf.Utils.toString
-@import java.time.LocalDate
+@import kotlinx.datetime.LocalDate
 @import kotlin.collections.List
-@param resource: Book
 @param session: User
+@param resource: Book
 @param creators: List<Creator>
 @param formats: List<Format>
-@param genres: List<Genre>
 @param publishers: List<Publisher>
 @param roles: List<Role>
 @param series: List<Series>
@@ -42,7 +40,7 @@
         <form id="update-form" onsubmit="return false;">
             <div class="columns is-multiline is-centered is-desktop">
                 <div class="column is-half-desktop">
-                    <div class="box">
+                    <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.select.format(label = "Format", options = formats.sorted(), selected = resource.format)
                         @template.components.forms.input(label = "Image Url", name = "image-url", icon = "fa-solid fa-image", value = resource.imageUrl)
@@ -53,19 +51,19 @@
                     </div>
                 </div>
                 <div class="column is-half-desktop">
-                    <div class="box">
+                    <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Summary</h3>
                         @template.components.forms.textarea(label = "Summary", name = "summary", value = resource.summary)
                     </div>
                 </div>
                 <div class="column is-half-desktop">
-                    <div class="box">
+                    <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Identifiers</h3>
-                        @template.components.forms.input(label = "Goodreads", name = "goodreads", icon = "fa-brands fa-goodreads", value = resource.goodreadsId)
-                        @template.components.forms.input(label = "Google Books", name = "google-books", icon = "fa-brands fa-google", value = resource.googleBooksId)
+                        @template.components.forms.input(label = "Goodreads", name = "goodreads", icon = "fa-brands fa-goodreads", value = resource.goodreads)
+                        @template.components.forms.input(label = "Google Books", name = "google-books", icon = "fa-brands fa-google", value = resource.googleBooks)
                         @template.components.forms.input(label = "Isbn", name = "isbn", icon = "fa-solid fa-link", value = resource.isbn)
-                        @template.components.forms.input(label = "LibraryThing", name = "library-thing", icon = "fa-solid fa-link", value = resource.libraryThingId)
-                        @template.components.forms.input(label = "OpenLibrary", name = "open-library", icon = "fa-solid fa-link", value = resource.openLibraryId)
+                        @template.components.forms.input(label = "LibraryThing", name = "library-thing", icon = "fa-solid fa-link", value = resource.libraryThing)
+                        @template.components.forms.input(label = "OpenLibrary", name = "open-library", icon = "fa-solid fa-link", value = resource.openLibrary)
                     </div>
                 </div>
             </div>
@@ -73,10 +71,10 @@
         <div class="columns is-multiline is-centered is-desktop">
             <div class="column is-half-desktop">
                 <form id="add-credit-form" onsubmit="return false;">
-                    <div class="box">
+                    <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3 has-text-centered">Credits</h3>
                         <div class="table-container">
-                            <table class="table is-fullwidth">
+                            <table class="table is-fullwidth has-background-text-soft">
                                 <thead>
                                     <tr>
                                         <th class="has-text-info">Role</th>
@@ -122,58 +120,11 @@
                 </form>
             </div>
             <div class="column is-half-desktop">
-                <form id="add-genre-form" onsubmit="return false;">
-                    <div class="box">
-                        <h3 class="title is-3 has-text-centered">Genres</h3>
-                        <div class="table-container">
-                            <table class="table is-fullwidth">
-                                <thead>
-                                    <tr>
-                                        <th class="has-text-info">Genre Title</th>
-                                        <th class="has-text-info">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for(entry in resource.genres.sorted())
-                                        <tr>
-                                            <td>${entry.title}</td>
-                                            <td>
-                                                <div class="buttons is-centered">
-                                                    <button class="button is-danger" id="remove-genre-${entry.id.value}-button" onclick="removeGenre(${entry.id.value})" type="button">
-                                                        <span class="icon">
-                                                            <i class="fa-solid fa-minus"></i>
-                                                        </span>
-                                                        <span>Remove</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endfor
-                                    <tr>
-                                        <td>@template.components.forms.select.genre(label = "", options = genres.sorted())</td>
-                                        <td>
-                                            <div class="buttons is-centered">
-                                                <button class="button is-success" id="add-genre-button" onclick="addGenre()" type="button">
-                                                    <span class="icon">
-                                                        <i class="fa-solid fa-plus"></i>
-                                                    </span>
-                                                    <span>Add</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="column is-half-desktop">
                 <form id="add-series-form" onsubmit="return false;">
-                    <div class="box">
+                    <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3 has-text-centered">Series</h3>
                         <div class="table-container">
-                            <table class="table is-fullwidth">
+                            <table class="table is-fullwidth has-background-text-soft">
                                 <thead>
                                     <tr>
                                         <th class="has-text-info">Series Title</th>
@@ -226,11 +177,11 @@
                 </span>
                 <span>Update</span>
             </button>
-            <button class="button is-warning" id="pull-button" onclick="submitPull(${resource.id.value})" type="button">
+            <button class="button is-warning" id="import-button" onclick="submitImport()" type="button">
                 <span class="icon">
                     <i class="fa-solid fa-rotate-left"></i>
                 </span>
-                <span>Pull Details</span>
+                <span>Re-Import</span>
             </button>
             <button class="button is-danger" id="delete-button" onclick="submitDelete(${resource.id.value})" type="button">
                 <span class="icon">
@@ -253,104 +204,83 @@
 <script src="/static/js/validate.js" type="text/javascript"></script>
 <script src="/static/js/book.js" type="text/javascript"></script>
 <script type="text/javascript">
-  async function addCredit() {
-    const caller = "add-credit-button";
-    const form = document.getElementById("add-credit-form");
-    const jsonData = Object.fromEntries(new FormData(form));
-    const body = {
-      creatorId: jsonData["creator-id"],
-      roleId: jsonData["role-id"],
-    };
+async function addCredit() {
+  const caller = "add-credit-button";
+  const form = document.getElementById("add-credit-form");
+  const jsonData = Object.fromEntries(new FormData(form));
+  const body = {
+    creator: jsonData["creator-id"],
+    role: jsonData["role-id"],
+  };
 
-    addLoading(caller);
-    const response = await submitRequest("/api/books/${resource.id.value}/credits", "POST", body);
-    if (response !== null) {
-      form.reset();
-      window.location.reload();
-    }
-    removeLoading(caller);
+  addLoading(caller);
+  const response = await submitRequest("/api/books/${resource.id.value}/credits", "POST", body);
+  if (response !== null) {
+    form.reset();
+    window.location.reload();
   }
+  removeLoading(caller);
+}
 
-  async function removeCredit(creatorId, roleId) {
-    @raw
-      const caller = `remove-credit-${creatorId}-${roleId}-button`;
-    @endraw
-    const body = {
-      creatorId: creatorId,
-      roleId: roleId,
-    };
+async function removeCredit(creatorId, roleId) {
+  @raw
+    const caller = `remove-credit-${creatorId}-${roleId}-button`;
+  @endraw
+  const body = {
+    creator: creatorId,
+    role: roleId,
+  };
 
-    addLoading(caller);
-    const response = await submitRequest("/api/books/${resource.id.value}/credits", "DELETE", body);
-    if (response !== null)
-      window.location();
-    removeLoading(caller);
+  addLoading(caller);
+  const response = await submitRequest("/api/books/${resource.id.value}/credits", "DELETE", body);
+  if (response !== null)
+    window.location();
+  removeLoading(caller);
+}
+
+async function addSeries() {
+  const caller = "add-series-button";
+  const form = document.getElementById("add-series-form");
+  const formData = Object.fromEntries(new FormData(form));
+  const body = {
+    series: formData["series-id"],
+    number: formData["number"] || null,
+  };
+
+  addLoading(caller);
+  const response = await submitRequest("/api/books/${resource.id.value}/series", "POST", body);
+  if (response !== null) {
+    form.reset();
+    window.location.reload();
   }
+  removeLoading(caller);
+}
 
-  async function addGenre() {
-    const caller = "add-genre-button";
-    const form = document.getElementById("add-genre-form");
-    const formData = Object.fromEntries(new FormData(form));
-    const body = {
-      id: formData["genre-id"],
-    };
+async function removeSeries(seriesId) {
+  @raw
+    const caller = `remove-series-${seriesId}-button`;
+  @endraw
+  const body = {
+    id: seriesId,
+  };
 
-    addLoading(caller);
-    const response = await submitRequest("/api/books/${resource.id.value}/genres", "POST", body);
-    if (response !== null) {
-      form.reset();
-      window.location.reload();
-    }
-    removeLoading(caller);
-  }
+  addLoading(caller);
+  const response = await submitRequest("/api/books/${resource.id.value}/series", "DELETE", body);
+  if (response !== null)
+    window.location.reload();
+  removeLoading(caller);
+}
 
-  async function removeGenre(genreId) {
-    @raw
-      const caller = `remove-genre-${genreId}-button`
-    @endraw
-    const body = {
-      id: genreId,
-    };
+async function submitImport() {
+  const caller = "import-button";
+  addLoading(caller);
 
-    addLoading(caller);
-    const response = await submitRequest("/api/books/${resource.id.value}/genres", "DELETE", body);
-    if (response !== null)
-      window.location.reload();
-    removeLoading(caller);
-  }
+  const response = await submitRequest("/api/books/${resource.id.value}/import", "POST");
+  if (response !== null)
+    window.location = "/books/${resource.id.value}";
 
-  async function addSeries() {
-    const caller = "add-series-button";
-    const form = document.getElementById("add-series-form");
-    const formData = Object.fromEntries(new FormData(form));
-    const body = {
-      seriesId: formData["series-id"],
-      number: formData["number"] || null,
-    };
-
-    addLoading(caller);
-    const response = await submitRequest("/api/books/${resource.id.value}/series", "POST", body);
-    if (response !== null) {
-      form.reset();
-      window.location.reload();
-    }
-    removeLoading(caller);
-  }
-
-  async function removeSeries(seriesId) {
-    @raw
-      const caller = `remove-series-${seriesId}-button`;
-    @endraw
-    const body = {
-      id: seriesId,
-    };
-
-    addLoading(caller);
-    const response = await submitRequest("/api/books/${resource.id.value}/series", "DELETE", body);
-    if (response !== null)
-      window.location.reload();
-    removeLoading(caller);
-  }
+  removeLoading(caller);
+}
 </script>
 </body>
 </html>

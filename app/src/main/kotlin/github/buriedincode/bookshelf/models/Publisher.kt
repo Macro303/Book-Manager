@@ -33,7 +33,7 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
             "title" to title,
         ).apply {
             if (showAll) {
-                put("books", books.sorted().map { it.id.value })
+                put("books", books.sorted().map { it.toJson() })
             }
         }.toSortedMap()
     }

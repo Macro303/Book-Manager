@@ -25,7 +25,7 @@ object ReadBookTable : LongIdTable(name = "read_books") {
     val readDateCol: Column<LocalDate?> = date(name = "read_date").nullable()
 
     init {
-        Utils.query {
+        Utils.queryTransaction {
             uniqueIndex(bookCol, userCol)
             SchemaUtils.create(this)
         }

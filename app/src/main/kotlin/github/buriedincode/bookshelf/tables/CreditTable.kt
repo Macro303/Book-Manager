@@ -28,7 +28,7 @@ object CreditTable : LongIdTable(name = "books__creators__roles") {
     )
 
     init {
-        Utils.query {
+        Utils.queryTransaction {
             uniqueIndex(bookCol, creatorCol, roleCol)
             SchemaUtils.create(this)
         }

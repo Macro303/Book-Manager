@@ -36,7 +36,7 @@ class Series(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Series> {
             "title" to title,
         ).apply {
             if (showAll) {
-                put("books", books.sortedBy { it.book }.map { it.book.id.value to it.number })
+                put("books", books.sortedBy { it.book }.map { mapOf("book" to it.book.toJson(), "number" to it.number) })
             }
         }.toSortedMap()
     }

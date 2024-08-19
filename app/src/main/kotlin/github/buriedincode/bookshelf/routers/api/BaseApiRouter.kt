@@ -21,12 +21,10 @@ abstract class BaseApiRouter<T>(protected val entity: LongEntityClass<T>)
         entity.findById(it) ?: throw NotFoundResponse("$title not found")
     } ?: throw BadRequestResponse("Invalid $title Id")
 
-    protected inline fun <reified I> Context.processInput(crossinline block: (I) -> Unit) {
-        Utils.query { block(bodyAsClass(I::class.java)) }
-    }
+    protected inline fun <reified I> Context.processInput(crossinline block: (I) -> Unit) = block(bodyAsClass(I::class.java))
 
-    protected inline fun <reified I> manage(ctx: Context, crossinline block: (I, T) -> Unit) {
-        ctx.processInput<I> { body ->
+    protected inline fun <reified I> manage(ctx: Context, crossinline block: (I, T) -> Unit) = ctx.processInput<I> { body ->
+        Utils.query {
             val resource = ctx.getResource()
             block(body, resource)
             ctx.json(resource.toJson(showAll = true))

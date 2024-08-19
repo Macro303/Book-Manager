@@ -5,12 +5,6 @@ async function validate() {
   )
 }
 
-async function validateImport() {
-  return (
-    validateAny(["goodreads", "google-books", "isbn", "library-thing", "open-library"])
-  )
-}
-
 async function submitCreate() {
   const caller = "create-button";
   addLoading(caller);
@@ -87,41 +81,3 @@ async function submitDelete(bookId) {
   removeLoading(caller);
 }
 
-async function submitImport() {
-  const caller = "import-button";
-  addLoading(caller);
-
-  if (await validateImport()) {
-    const form = document.getElementById("import-form");
-    const formData = Object.fromEntries(new FormData(form));
-    let body = {
-      goodreadsId: formData["goodreads"].trim() || null,
-      googleBooksId: formData["google-books"].trim() || null,
-      isbn: formData["isbn"].trim() || null,
-      isCollected: true,
-      libraryThingId: formData["library-thing"].trim() || null,
-      openLibraryId: formData["open-library"].trim() || null,
-    };
-
-    const response = await submitRequest("/api/books/import", "POST", body);
-    if (response !== null) {
-      form.reset();
-      window.location = `/books/${response.body.id}`;
-    }
-  } else {
-    alert("Atleast 1 field must be filled.");
-  }
-
-  removeLoading(caller);
-}
-
-async function submitPull(bookId) {
-  const caller = "pull-button";
-  addLoading(caller);
-
-  const response = await submitRequest(`/api/books/${bookId}/pull`, "PUT");
-  if (response !== null)
-    window.location = `/books/${bookId}`;
-
-  removeLoading(caller);
-}

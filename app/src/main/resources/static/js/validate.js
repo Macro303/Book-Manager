@@ -59,3 +59,15 @@ function validateAny(options) {
     return field.value !== "";
   });
 }
+
+async function userValidation() {
+  return (
+    validateText("username", "Please enter a Username.")
+  )
+}
+
+async function importValidation() {
+  return (
+    validateAny(["goodreads", "google-books", "isbn", "library-thing", "open-library"])
+  )
+}

@@ -1,0 +1,23 @@
+@import github.buriedincode.bookshelf.models.User
+@import github.buriedincode.bookshelf.Utils.toHumanReadable
+@import kotlinx.datetime.LocalDate
+@param entry: User
+@param readDate: LocalDate? = null
+
+<a class="box has-text-centered has-background-text-soft is-shadowless" href="/users/${entry.id.value}">
+    <div class="columns is-mobile">
+        <div class="column is-one-third">
+            <figure class="image is-128x128">
+                <img alt="${entry.username} profile image" class="rounded" loading="lazy" src="${entry.imageUrl ?: "https://ui-avatars.com/api/?name=${entry.username}&size=256&uppercase=false"}"/>
+            </figure>
+        </div>
+        <div class="column content">
+            @if(readDate == null)
+                <h4 class="title is-4 has-text-text-bold">${entry.username}</h4>
+            @else
+                <h4 class="title is-4 has-text-text-bold is-spaced">${entry.username}</h4>
+                <h6 class="subtitle is-6">${readDate.toHumanReadable()}</h6>
+            @endif
+        </div>
+    </div>
+</a>

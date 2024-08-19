@@ -6,7 +6,7 @@
 @param selected: Book? = null
 
 <div class="field">
-    <label class="label has-text-info" for="${name}">${label}</label>
+    <label class="label has-text-info-bold" for="${name}">${label}</label>
     <div class="control is-expanded has-icons-left">
         <div class="select is-fullwidth">
             <select class="input" id="${name}" name="${name}">

@@ -82,10 +82,18 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
             "title" to title,
         ).apply {
             if (showAll) {
-                put("credits", credits.groupBy({ it.role.id.value }, { it.creator.id.value }))
-                put("readers", readers.groupBy({ it.user.id.value }, { it.readDate?.toString("yyyy-MM-dd") }))
-                put("series", series.sortedBy { it.series }.map { it.series.id.value to it.number })
-                put("wishers", wishers.sorted().map { it.id.value })
+                put(
+                    "credits",
+                    credits.groupBy({ it.role }, { it.creator }).toSortedMap().map { (role, creators) ->
+                        mapOf(
+                            "role" to role.toJson(),
+                            "creators" to creators.map { it.toJson() },
+                        )
+                    },
+                )
+                put("readers", readers.groupBy({ it.readDate?.toString("yyyy-MM-dd") ?: "null" }, { it.user.toJson() }))
+                put("series", series.sortedBy { it.series }.map { mapOf("series" to it.series.toJson(), "number" to it.number) })
+                put("wishers", wishers.sorted().map { it.toJson() })
             }
         }.toSortedMap()
     }

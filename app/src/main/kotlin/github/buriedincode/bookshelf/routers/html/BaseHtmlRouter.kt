@@ -55,6 +55,6 @@ abstract class BaseHtmlRouter<T : LongEntity>(
     }
 
     open fun update(ctx: Context) = Utils.query {
-        render(ctx, "update", optionMap() + optionMapExclusions(ctx))
+        renderResource(ctx, "update", optionMap() + optionMapExclusions(ctx))
     }
 }

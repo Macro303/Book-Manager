@@ -46,6 +46,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
         ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { format ->
             query.andWhere { BookTable.formatCol eq format }
         }
+        ctx.queryParam("is-collected")?.lowercase()?.toBooleanStrictOrNull()?.let { isCollected ->
+            query.andWhere { BookTable.isCollectedCol eq isCollected }
+        }
         ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
             Publisher.findById(it)?.let { publisher -> query.andWhere { BookTable.publisherCol eq publisher.id } }
         }
@@ -164,9 +167,9 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
         ctx.status(HttpStatus.NO_CONTENT)
     }
 
-    private fun manageStatus(ctx: Context, process: (Book) -> Unit) = Utils.query {
+    private fun manageStatus(ctx: Context, block: (Book) -> Unit) = Utils.query {
         val resource = ctx.getResource()
-        process(resource)
+        block(resource)
         ctx.json(resource.toJson(showAll = true))
     }
 
@@ -264,7 +267,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
         openLibrary = edition.getId()
         publishDate = edition.publishDate
         publisher = edition.publishers.firstOrNull()?.let { Publisher.findOrCreate(it) }
-        summary = edition.description
+        summary = edition.description ?: work.description
 
         credits.forEach { it.delete() }
         work.authors
@@ -289,22 +292,47 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
     }
 
     fun import(ctx: Context) = ctx.processInput<ImportBook> { body ->
-        val edition = body.openLibraryId?.let {
+        Utils.query {
+            val edition = body.openLibraryId?.let {
+                OpenLibrary.getEdition(it)
+            } ?: body.isbn?.let {
+                OpenLibrary.getEditionByISBN(it)
+            } ?: throw NotImplementedResponse("Import only supports OpenLibrary currently")
+            val work = OpenLibrary.getWork(edition.works.first().getId())
+
+            Book.find(edition.title, edition.subtitle, edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull(), edition.getId())?.let {
+                throw ConflictResponse("Book already exists")
+            }
+            val resource = Book
+                .findOrCreate(
+                    edition.title,
+                    edition.subtitle,
+                    edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull(),
+                    edition.getId(),
+                ).applyOpenLibrary(edition, work)
+                .apply {
+                    isCollected = body.isCollected
+                }
+
+            ctx.json(resource.toJson(showAll = true))
+        }
+    }
+
+    fun reimport(ctx: Context) = Utils.query {
+        val resource = ctx.getResource()
+        val edition = resource.openLibrary?.let {
             OpenLibrary.getEdition(it)
-        } ?: body.isbn?.let {
+        } ?: resource.isbn?.let {
             OpenLibrary.getEditionByISBN(it)
         } ?: throw NotImplementedResponse("Import only supports OpenLibrary currently")
         val work = OpenLibrary.getWork(edition.works.first().getId())
-        val resource = Book
-            .findOrCreate(
-                edition.title,
-                edition.subtitle,
-                edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull(),
-                edition.getId(),
-            ).applyOpenLibrary(edition, work)
-            .apply {
-                isCollected = body.isCollected
-            }
+
+        Book
+            .find(edition.title, edition.subtitle, edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull(), edition.getId())
+            ?.takeIf { it != resource }
+            ?.let { throw ConflictResponse("Book already exists") }
+        resource.applyOpenLibrary(edition, work)
+
         ctx.json(resource.toJson(showAll = true))
     }
 }
