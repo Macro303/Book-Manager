@@ -1,6 +1,8 @@
 package github.buriedincode.openlibrary.schemas
 
+import github.buriedincode.openlibrary.serializers.LocalDateSerializer
 import github.buriedincode.openlibrary.serializers.LocalDateTimeSerializer
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -11,6 +13,8 @@ data class Author(
     val birthDate: String? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
     val created: LocalDateTime? = null,
+    @Serializable(with = LocalDateSerializer::class)
+    val deathDate: LocalDate? = null,
     val id: Long? = null,
     val key: String,
     @Serializable(with = LocalDateTimeSerializer::class)
@@ -27,16 +31,9 @@ data class Author(
     val type: Resource,
 ) {
     @Serializable
-    data class Link(
-        val title: String,
-        val type: Resource,
-        val url: String,
-    )
-
-    @Serializable
     data class RemoteIds(
-        val isni: String,
-        val viaf: String,
+        val isni: String? = null,
+        val viaf: String? = null,
         val wikidata: String,
     )
 }

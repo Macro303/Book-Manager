@@ -68,7 +68,7 @@ object App {
                                     "session" to ctx.cookie("bookshelf_session-id")?.toLongOrNull()?.let {
                                         User.findById(it)
                                     },
-                                    "users" to User.all().toList(),
+                                    "users" to User.all().sorted().toList(),
                                 ),
                             )
                         }

@@ -276,9 +276,9 @@
                     </div>
                 </div>
             </nav>
-            <div class="columns is-multiline is-centered">
+            <div class="columns is-multiline is-centered is-mobile">
                 @for(creator in credits[role]!!.sorted())
-                    <div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+                    <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop is-one-fifth-widescreen">
                         @template.components.views.creator(entry = creator)
                     </div>
                 @endfor
@@ -310,7 +310,7 @@
   @if (resource.isCollected)
     async function discardBook() {
       const caller = "discard-book-button";
-  
+
       addLoading(caller);
       const response = await submitRequest("/api/books/${resource.id.value}/collect", "DELETE");
       if (response !== null)
@@ -323,7 +323,7 @@
         const body = {
           id: ${session.id.value},
         };
-    
+
         addLoading(caller);
         const response = await submitRequest("/api/books/${resource.id.value}/read", "DELETE", body);
         if (response !== null)
@@ -336,7 +336,7 @@
         const body = {
           user: ${session.id.value},
         };
-    
+
         addLoading(caller);
         const response = await submitRequest("/api/books/${resource.id.value}/read", "POST", body);
         if (response !== null)
@@ -347,7 +347,7 @@
   @else
     async function collectBook() {
       const caller = "collect-book-button";
-  
+
       addLoading(caller);
       const response = await submitRequest("/api/books/${resource.id.value}/collect", "POST");
       if (response !== null)
@@ -360,7 +360,7 @@
         const body = {
           id: ${session.id.value},
         };
-    
+
         addLoading(caller);
         const response = await submitRequest("/api/books/${resource.id.value}/wish", "DELETE", body);
         if (response !== null)
@@ -373,7 +373,7 @@
         const body = {
           id: ${session.id.value},
         };
-    
+
         addLoading(caller);
         const response = await submitRequest("/api/books/${resource.id.value}/wish", "POST", body);
         if (response !== null)

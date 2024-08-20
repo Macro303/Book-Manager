@@ -81,7 +81,7 @@ async function submitImport() {
     if (response !== null) {
       form.reset();
       @raw
-        window.location = `/books/${response.body.id}`;
+        window.location = `/books/${response.body.identifiers.bookshelf}`;
       @endraw
     }
   } else {

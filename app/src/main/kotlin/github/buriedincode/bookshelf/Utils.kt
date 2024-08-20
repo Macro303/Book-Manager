@@ -35,7 +35,7 @@ object Utils {
     private val XDG_DATA: Path by lazy { System.getenv("XDG_DATA_HOME")?.let(Paths::get) ?: (HOME_ROOT / ".local" / "share") }
 
     internal val CACHE_ROOT: Path = XDG_CACHE / "bookshelf"
-    internal val CONFIG_ROOT: Path = XDG_CONFIG / "bookshrlf"
+    internal val CONFIG_ROOT: Path = XDG_CONFIG / "bookshelf"
     internal val DATA_ROOT: Path = XDG_DATA / "bookshelf"
     internal const val VERSION = "0.3.1"
 
@@ -115,7 +115,7 @@ object Utils {
 
     internal fun Secret?.isNullOrBlank(): Boolean = this?.value.isNullOrBlank()
 
-    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) }
+    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) || it.name.replace("_", " ").equals(this, ignoreCase = true) }
 
     inline fun <reified T : Enum<T>> T.titlecase(): String = this.name.lowercase().split("_").joinToString(" ") {
         it.replaceFirstChar(Char::uppercaseChar)

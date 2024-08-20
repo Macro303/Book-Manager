@@ -86,9 +86,9 @@
                         @endif
                     </div>
                 </nav>
-                <div class="columns is-multiline is-centered is-desktop">
+                <div class="columns is-multiline is-centered">
                     @for(entry in resources.sorted())
-                        <div class="column is-half-tablet is-one-third-widescreen is-one-quarter-fullhd">
+                        <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
                             @template.components.views.book(entry = entry, session = session)
                         </div>
                     @else

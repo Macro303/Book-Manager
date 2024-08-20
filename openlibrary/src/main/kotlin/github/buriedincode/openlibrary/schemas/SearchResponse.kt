@@ -20,6 +20,27 @@ data class SearchResponse<T>(
 ) {
     @OptIn(ExperimentalSerializationApi::class)
     @Serializable
+    data class Author(
+        val alternateNames: List<String> = emptyList(),
+        @JsonNames("birth_date")
+        @Serializable(with = LocalDateSerializer::class)
+        val dateOfBirth: LocalDate? = null,
+        val date: String? = null,
+        @JsonNames("death_date")
+        @Serializable(with = LocalDateSerializer::class)
+        val dateOfDeath: LocalDate? = null,
+        val key: String,
+        val name: String,
+        val topSubjects: List<String> = emptyList(),
+        val topWork: String? = null,
+        val type: String,
+        val workCount: Int,
+        @JsonNames("_version_")
+        val version: Long,
+    )
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Serializable
     data class Work(
         val alreadyReadCount: Int? = null,
         val authorAlternativeName: List<String> = emptyList(),
@@ -118,26 +139,5 @@ data class SearchResponse<T>(
         @JsonNames("_version_")
         val version: Long,
         val wantToReadCount: Int? = null,
-    )
-
-    @OptIn(ExperimentalSerializationApi::class)
-    @Serializable
-    data class Author(
-        val alternateNames: List<String> = emptyList(),
-        @JsonNames("birth_date")
-        @Serializable(with = LocalDateSerializer::class)
-        val dateOfBirth: LocalDate? = null,
-        val date: String? = null,
-        @JsonNames("death_date")
-        @Serializable(with = LocalDateSerializer::class)
-        val dateOfDeath: LocalDate? = null,
-        val key: String,
-        val name: String,
-        val topSubjects: List<String> = emptyList(),
-        val topWork: String? = null,
-        val type: String,
-        val workCount: Int,
-        @JsonNames("_version_")
-        val version: Long,
     )
 }

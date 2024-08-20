@@ -40,7 +40,7 @@ data class Edition(
     val lccn: List<String> = emptyList(),
     val localId: List<String> = emptyList(),
     val notes: String? = null,
-    val numberOfPages: Int,
+    val numberOfPages: Int? = null,
     val ocaid: String? = null,
     val oclcNumbers: List<String> = emptyList(),
     val otherTitles: List<String> = emptyList(),

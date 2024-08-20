@@ -24,14 +24,9 @@ object LocalDateSerializer : KSerializer<LocalDate?> {
         .appendOptional(DateTimeFormatterBuilder().appendPattern("MMMM d, yyyy").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("yyyy-MMM-dd").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("MMM dd, yyyy").toFormatter())
-        .appendOptional(
-            DateTimeFormatterBuilder()
-                .appendPattern(
-                    "yyyy",
-                ).parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
-                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
-                .toFormatter(),
-        ).appendOptional(DateTimeFormatterBuilder().appendPattern("MMMM yyyy").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
+        .appendOptional(DateTimeFormatterBuilder().appendPattern("yyyy.").parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
+        .appendOptional(DateTimeFormatterBuilder().appendPattern("yyyy").parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
+        .appendOptional(DateTimeFormatterBuilder().appendPattern("MMMM yyyy").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("MMM, yyyy").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("d MMMM yyyy").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("dd/MM/yyyy").toFormatter())
@@ -40,26 +35,11 @@ object LocalDateSerializer : KSerializer<LocalDate?> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): LocalDate? {
-        val dateString = when (val jsonElement = decoder.decodeSerializableValue(JsonElement.serializer())) {
-            is JsonObject -> jsonElement["value"]?.jsonPrimitive?.content
-            is JsonPrimitive -> jsonElement.content
-            else -> null
-        } ?: return null
-
-        try {
-            return java.time.LocalDate
-                .parse(dateString, formatter)
-                .toKotlinLocalDate()
-        } catch (dtpe: DateTimeParseException) {
-            throw dtpe
-        }
+        val dateString = (decoder.decodeSerializableValue(JsonElement.serializer()) as? JsonPrimitive)?.content
+        return dateString?.let { java.time.LocalDate.parse(it, formatter).toKotlinLocalDate() }
     }
 
     override fun serialize(encoder: Encoder, value: LocalDate?) {
-        if (value != null) {
-            encoder.encodeString(value.toString())
-        } else {
-            encoder.encodeNull()
-        }
+        encoder.encodeNullableSerializableValue(JsonElement.serializer(), value?.toString()?.let { JsonPrimitive(it) })
     }
 }

@@ -8,41 +8,41 @@
 @param readDate: LocalDate? = null
 @param session: User? = null
 
-<a class="box has-text-centered has-background-text-soft is-shadowless" href="/books/${entry.id.value}">
-    <div class="columns is-mobile">
-        <div class="column is-one-third">
-            <figure class="image is-2by3">
-                @if(entry.isCollected)
-                    <img alt="${entry.title} cover image" class="rounded" loading="lazy" src="${entry.imageUrl ?: "https://via.placeholder.com/750x500"}"/>
-                @else
-                    <img alt="${entry.title} cover image" class="rounded greyscale" loading="lazy" src="${entry.imageUrl ?: "https://via.placeholder.com/750x500"}"/>
-                @endif
-                @if(session != null)
-                    @if(session in entry.readers.map { it.user })
-                        <span class="tag is-primary" style="position: absolute; left: 0; top: 0;">Read</span>
-                    @elseif(session in entry.wishers)
-                        <span class="tag is-primary" style="position: absolute; left: 0; top: 0;">Wished</span>
-                    @endif
-                @endif
-            </figure>
-        </div>
-        <div class="column content">
-            @if(entry.subtitle == null)
-                <h4 class="title is-4 has-text-text-bold">${entry.title}</h4>
+<a class="card" href="/books/${entry.id.value}">
+    <div class="card-image">
+        <figure class="image is-2by3">
+            @if(entry.isCollected)
+                <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl ?: "https://via.placeholder.com/750x500"}"/>
             @else
-                <h4 class="title is-4 has-text-text-bold is-spaced">${entry.title}</h4>
-                <h6 class="subtitle is-6">${entry.subtitle}</h6>
+                <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageUrl ?: "https://via.placeholder.com/750x500"}"/>
             @endif
-            @if(series != null)
-                @if(series.second != null)
-                    <p>${series.first.title} #${series.second}</p>
-                @else
-                    <p>${series.first.title}</p>
+            @if(session != null)
+                @if(session in entry.readers.map { it.user })
+                    <span class="tag is-primary" style="position: absolute; left: 0; top: 0;">Read</span>
+                @elseif(session in entry.wishers)
+                    <span class="tag is-primary" style="position: absolute; left: 0; top: 0;">Wished</span>
                 @endif
             @endif
-            @if(readDate != null)
-                <p>${readDate.toHumanReadable()}</p>
-            @endif
+        </figure>
+    </div>
+    <div class="card-content has-background-text-soft">
+        <div class="media">
+            <div class="media-content">
+                <p class="title is-6">${entry.title}</p>
+                @if(entry.subtitle != null)
+                    <p class="subtitle is-7">${entry.subtitle}</p>
+                @endif
+            </div>
         </div>
+        @if(series != null || readDate != null)
+            <div class="content">
+                @if(series != null)
+                    ${series.first.title}@if(series.second != null) #${series.second}@endif
+                @endif
+                @if(readDate != null)
+                    ${readDate.toHumanReadable()}
+                @endif
+            </div>
+        @endif
     </div>
 </a>
