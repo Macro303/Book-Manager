@@ -91,19 +91,22 @@
                 </div>
             </div>
         </nav>
-        <div class="columns is-multiline is-centered">
-            @for((series, book) in nextBooks)
-                <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                    @template.components.views.book(entry = book!!, session = session)
-                </div>
-            @else
-                <div class="column">
-                    <div class="box has-text-centered has-background-text-soft is-shadowless">
-                        <h5 class="title is-5 has-text-danger">No Books read.</h5>
+        <div class="scrolling-wrapper">
+            <div class="columns is-mobile">
+                @for((series, book) in nextBooks)
+                    <div class="column is-three-quarters-mobile is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
+                        @template.components.views.book(entry = book!!, session = session)
                     </div>
-                </div>
-            @endfor
+                @else
+                    <div class="column">
+                        <div class="box has-text-centered has-background-text-soft is-shadowless">
+                            <h5 class="title is-5 has-text-danger">No Books read.</h5>
+                        </div>
+                    </div>
+                @endfor
+            </div>
         </div>
+        <br/>
         <nav class="level is-mobile">
             <div class="level-left has-text-centered">
                 <div>
@@ -112,21 +115,23 @@
                 </div>
             </div>
         </nav>
-        <div class="columns is-multiline is-centered">
-            @for(entry in ForSupport.of(resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate(2000, 1, 1) }.reversed().thenBy{ it.book })))
-                @if(entry.index >= 5)
-                    !{break}
-                @endif
-                <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                    @template.components.views.book(entry = entry.get().book, readDate = entry.get().readDate, session = session)
-                </div>
-            @else
-                <div class="column">
-                    <div class="box has-text-centered has-background-text-soft is-shadowless">
-                        <h5 class="title is-5 has-text-danger">No Books read.</h5>
+        <div class="scrolling-wrapper">
+            <div class="columns is-mobile">
+                @for(entry in ForSupport.of(resource.readBooks.sortedWith(compareBy<ReadBook> { it.readDate ?: LocalDate(2000, 1, 1) }.reversed().thenBy{ it.book })))
+                    @if(entry.index >= 5)
+                        !{break}
+                    @endif
+                    <div class="column is-three-quarters-mobile is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
+                        @template.components.views.book(entry = entry.get().book, readDate = entry.get().readDate, session = session)
                     </div>
-                </div>
-            @endfor
+                @else
+                    <div class="column">
+                        <div class="box has-text-centered has-background-text-soft is-shadowless">
+                            <h5 class="title is-5 has-text-danger">No Books read.</h5>
+                        </div>
+                    </div>
+                @endfor
+            </div>
         </div>
     </div>
 </main>

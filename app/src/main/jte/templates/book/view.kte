@@ -276,12 +276,14 @@
                     </div>
                 </div>
             </nav>
-            <div class="columns is-multiline is-centered is-mobile">
-                @for(creator in credits[role]!!.sorted())
-                    <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop is-one-fifth-widescreen">
-                        @template.components.views.creator(entry = creator)
-                    </div>
-                @endfor
+            <div class="scrolling-wrapper">
+                <div class="columns is-mobile">
+                    @for(creator in credits[role]!!.sorted())
+                        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop is-one-fifth-widescreen">
+                            @template.components.views.creator(entry = creator)
+                        </div>
+                    @endfor
+                </div>
             </div>
         @else
             <nav class="level is-mobile">

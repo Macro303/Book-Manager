@@ -10,23 +10,40 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
 import java.time.format.DateTimeFormatterBuilder
-import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoField
 
 @OptIn(ExperimentalSerializationApi::class)
 object LocalDateSerializer : KSerializer<LocalDate?> {
     private val formatter = DateTimeFormatterBuilder()
+        .appendOptional(DateTimeFormatterBuilder().appendPattern("dd MMM yyyy").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("MMMM d, yyyy").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("yyyy-MMM-dd").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("MMM dd, yyyy").toFormatter())
-        .appendOptional(DateTimeFormatterBuilder().appendPattern("yyyy.").parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
-        .appendOptional(DateTimeFormatterBuilder().appendPattern("yyyy").parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
-        .appendOptional(DateTimeFormatterBuilder().appendPattern("MMMM yyyy").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
+        .appendOptional(
+            DateTimeFormatterBuilder()
+                .appendPattern(
+                    "yyyy.",
+                ).parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+                .toFormatter(),
+        ).appendOptional(
+            DateTimeFormatterBuilder()
+                .appendPattern(
+                    "yyyy?",
+                ).parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+                .toFormatter(),
+        ).appendOptional(
+            DateTimeFormatterBuilder()
+                .appendPattern(
+                    "yyyy",
+                ).parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+                .toFormatter(),
+        ).appendOptional(DateTimeFormatterBuilder().appendPattern("MMMM yyyy").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("MMM, yyyy").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("d MMMM yyyy").toFormatter())
         .appendOptional(DateTimeFormatterBuilder().appendPattern("dd/MM/yyyy").toFormatter())

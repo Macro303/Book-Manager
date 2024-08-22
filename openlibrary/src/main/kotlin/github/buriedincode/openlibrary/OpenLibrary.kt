@@ -43,7 +43,7 @@ class OpenLibrary(
         val encodedParams = params.entries
             .sortedBy { it.key }
             .joinToString("&") { "${it.key}=${URLEncoder.encode(it.value, StandardCharsets.UTF_8)}" }
-        return URI.create("$BASE_API$endpoint/${if (encodedParams.isNotEmpty()) "?$encodedParams" else ""}")
+        return URI.create("$BASE_API$endpoint${if (encodedParams.isNotEmpty()) "?$encodedParams" else ""}")
     }
 
     @Throws(ServiceException::class)

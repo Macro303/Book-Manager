@@ -29,9 +29,7 @@
         <div class="media">
             <div class="media-content">
                 <p class="title is-6">${entry.title}</p>
-                @if(entry.subtitle != null)
-                    <p class="subtitle is-7">${entry.subtitle}</p>
-                @endif
+                <p class="subtitle is-7@if(entry.subtitle == null) is-invisible@endif">${entry.subtitle ?: "Blank"}</p>
             </div>
         </div>
         @if(series != null || readDate != null)

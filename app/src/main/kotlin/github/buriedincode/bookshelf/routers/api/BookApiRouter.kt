@@ -253,17 +253,21 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
     }
 
     private fun Book.applyOpenLibrary(edition: Edition, work: Work): Book = this.apply {
-        val format = edition.physicalFormat?.asEnumOrNull<Format>()
-        if (format == null) {
+        var format = edition.physicalFormat?.asEnumOrNull<Format>()
+        if (edition.physicalFormat.equals("Hardback", ignoreCase = true)) {
+            format = Format.HARDCOVER
+        } else if (edition.physicalFormat.equals("Mass Market Paperback", ignoreCase = true)) {
+            format = Format.PAPERBACK
+        } else if (format == null) {
             LOGGER.warn { "Unmapped Format: ${edition.physicalFormat}" }
         }
 
         this.format = format ?: Format.PAPERBACK
-        goodreads = edition.identifiers.goodreads.firstOrNull()
-        googleBooks = edition.identifiers.google.firstOrNull()
+        goodreads = edition.identifiers?.goodreads?.firstOrNull()
+        googleBooks = edition.identifiers?.google?.firstOrNull()
         imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.getId()}-L.jpg"
         isbn = edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull()
-        libraryThing = edition.identifiers.librarything.firstOrNull()
+        libraryThing = edition.identifiers?.librarything?.firstOrNull()
         openLibrary = edition.getId()
         publishDate = edition.publishDate
         publisher = edition.publishers.firstOrNull()?.let { Publisher.findOrCreate(it) }

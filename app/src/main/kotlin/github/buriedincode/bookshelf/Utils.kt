@@ -43,7 +43,7 @@ object Utils {
         val settings = Settings.load()
         Database.connect(
             url = when (settings.database.source) {
-                Settings.Database.Source.POSTGRES -> "jdbc:postgres:${settings.database.url}"
+                Settings.Database.Source.POSTGRES -> "jdbc:postgresql://${settings.database.url}"
                 else -> "jdbc:sqlite:${settings.database.url}"
             },
             driver = when (settings.database.source) {
@@ -115,7 +115,10 @@ object Utils {
 
     internal fun Secret?.isNullOrBlank(): Boolean = this?.value.isNullOrBlank()
 
-    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) || it.name.replace("_", " ").equals(this, ignoreCase = true) }
+    inline fun <reified T : Enum<T>> String.asEnumOrNull(): T? = enumValues<T>().firstOrNull {
+        it.name.equals(this, ignoreCase = true) ||
+            it.name.replace("_", " ").equals(this, ignoreCase = true)
+    }
 
     inline fun <reified T : Enum<T>> T.titlecase(): String = this.name.lowercase().split("_").joinToString(" ") {
         it.replaceFirstChar(Char::uppercaseChar)

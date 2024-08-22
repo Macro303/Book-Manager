@@ -8,14 +8,7 @@ import github.buriedincode.bookshelf.models.Format
 import github.buriedincode.bookshelf.models.Publisher
 import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.models.Series
-import github.buriedincode.bookshelf.tables.BookSeriesTable
-import github.buriedincode.bookshelf.tables.BookTable
-import github.buriedincode.bookshelf.tables.CreditTable
-import github.buriedincode.bookshelf.tables.SeriesTable
 import io.javalin.http.Context
-import org.jetbrains.exposed.sql.andWhere
-import org.jetbrains.exposed.sql.or
-import org.jetbrains.exposed.sql.selectAll
 
 object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
     override fun list(ctx: Context) = Utils.query {
@@ -32,47 +25,41 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
     fun search(ctx: Context) = Utils.query { render(ctx, "search") }
 
     override fun filterResources(ctx: Context): List<Book> {
-        val query = BookTable.selectAll()
         val isCollected: Boolean? = ctx.queryParam("is-collected")?.lowercase()?.toBooleanStrictOrNull()
+        var resources = Book.all().toList()
         ctx.queryParam("creator-id")?.toLongOrNull()?.let {
-            Creator.findById(it)?.let { creator -> query.andWhere { CreditTable.creatorCol eq creator.id } }
+            Creator.findById(it)?.let { creator -> resources = resources.filter { it.credits.any { it.creator == creator } } }
         }
         ctx.queryParam("format")?.asEnumOrNull<Format>()?.let { format ->
-            query.andWhere { BookTable.formatCol eq format }
+            resources = resources.filter { format == it.format }
         }
         ctx.getSession()?.let { session ->
             if (isCollected == true || isCollected == null) {
                 ctx.queryParam("has-read")?.lowercase()?.toBooleanStrictOrNull()?.let { hasRead ->
-                    if (hasRead) {
-                        query.andWhere { BookTable.id inList session.readBooks.map { it.book.id } }
-                    } else {
-                        query.andWhere { BookTable.id notInList session.readBooks.map { it.book.id } }
-                    }
+                    resources = resources.filter { session.readBooks.any { it.book == it } == hasRead }
                 }
             }
             if (isCollected == false || isCollected == null) {
                 ctx.queryParam("has-wished")?.lowercase()?.toBooleanStrictOrNull()?.let { hasWished ->
-                    if (hasWished) {
-                        query.andWhere { BookTable.id inList session.wishedBooks.map { it.id } }
-                    } else {
-                        query.andWhere { BookTable.id notInList session.wishedBooks.map { it.id } }
-                    }
+                    resources = resources.filter { (it in session.wishedBooks) == hasWished }
                 }
             }
         }
         isCollected?.let {
-            query.andWhere { BookTable.isCollectedCol eq it }
+            resources = resources.filter { it.isCollected == isCollected!! }
         }
         ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
-            Publisher.findById(it)?.let { publisher -> query.andWhere { BookTable.publisherCol eq publisher.id } }
+            Publisher.findById(it)?.let { publisher -> resources = resources.filter { publisher == it.publisher } }
         }
         ctx.queryParam("series-id")?.toLongOrNull()?.let {
-            Series.findById(it)?.let { series -> query.andWhere { BookSeriesTable.seriesCol eq series.id } }
+            Series.findById(it)?.let { series -> resources = resources.filter { it.series.any { it.series == series } } }
         }
         ctx.queryParam("title")?.let { title ->
-            query.andWhere { (BookTable.titleCol like "%$title%") or (BookTable.subtitleCol like "%$title%") }
+            resources = resources.filter {
+                it.title.contains(title, ignoreCase = true) || (it.subtitle?.contains(title, ignoreCase = true) == true)
+            }
         }
-        return Book.wrapRows(query).toList()
+        return resources
     }
 
     override fun filters(ctx: Context): Map<String, Any?> = mapOf(
@@ -98,12 +85,6 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
     )
 
     override fun optionMapExclusions(ctx: Context): Map<String, Any?> = mapOf(
-        "series" to Series
-            .wrapRows(
-                SeriesTable
-                    .selectAll()
-                    .where { BookSeriesTable.seriesCol notInList ctx.getResource().series.map { it.series.id } }
-                    .withDistinct(),
-            ).toList(),
+        "series" to Series.all().filterNot { series -> ctx.getResource().series.any { it.series == series } }.toList(),
     )
 }

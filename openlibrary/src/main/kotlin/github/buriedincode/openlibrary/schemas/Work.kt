@@ -16,6 +16,7 @@ data class Work(
     val created: LocalDateTime?,
     @Serializable(with = DescriptionSerializer::class)
     val description: String? = null,
+    val deweyNumber: List<String> = emptyList(),
     val excerpts: List<Excerpt> = emptyList(),
     @Serializable(with = LocalDateSerializer::class)
     val firstPublishDate: LocalDate? = null,
@@ -24,6 +25,7 @@ data class Work(
     @Serializable(with = LocalDateTimeSerializer::class)
     val lastModified: LocalDateTime?,
     val latestRevision: Int,
+    val lcClassifications: List<String> = emptyList(),
     val links: List<Link> = emptyList(),
     val location: String? = null,
     val revision: Int,
@@ -43,6 +45,8 @@ data class Work(
 
     @Serializable
     data class Excerpt(
+        val author: Resource? = null,
+        val comment: String? = null,
         val excerpt: String,
     )
 }

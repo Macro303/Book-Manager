@@ -3,7 +3,7 @@
 
 <a class="card" href="/creators/${entry.id.value}">
     <div class="card-image">
-        <figure class="image">
+        <figure class="image is-1by1">
             <img alt="${entry.name} profile image" loading="lazy" src="${entry.imageUrl ?: "https://ui-avatars.com/api/?name=${entry.name}&size=256&uppercase=false"}"/>
         </figure>
     </div>

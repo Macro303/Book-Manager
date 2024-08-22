@@ -6,7 +6,7 @@
 
 <a class="card" href="/users/${entry.id.value}">
     <div class="card-image">
-        <figure class="image">
+        <figure class="image is-1by1">
             <img alt="${entry.username} profile image" loading="lazy" src="${entry.imageUrl ?: "https://ui-avatars.com/api/?name=${entry.username}&size=256&uppercase=false"}"/>
         </figure>
     </div>
