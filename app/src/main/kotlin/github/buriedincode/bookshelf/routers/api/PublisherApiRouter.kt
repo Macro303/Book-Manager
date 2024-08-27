@@ -30,16 +30,13 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher) {
         Publisher.find(body.title)?.let {
             throw ConflictResponse("Publisher already exists")
         }
-        val resource = Publisher.findOrCreate(body.title).apply {
-            summary = body.summary
-        }
+        val resource = Publisher.findOrCreate(body.title)
         ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
 
     override fun update(ctx: Context) = manage<PublisherInput>(ctx) { body, publisher ->
         Publisher.find(body.title)?.takeIf { it != publisher }?.let { throw ConflictResponse("Publisher already exists") }
         publisher.apply {
-            summary = body.summary
             title = body.title
         }
     }

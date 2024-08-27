@@ -17,15 +17,15 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Search for a Book</h1>
         </header>
-        <form id="search-form" onsubmit="return false;">
-            <div class="columns is-multiline is-centered is-desktop">
+        <div class="columns is-multiline is-centered is-desktop">
+            <form id="search-form" onsubmit="return false;">
                 <div class="column is-half-desktop">
-                    <div class="box">
+                    <div class="box has-background-text-soft is-shadowless">
                         @template.components.forms.input(label = "Title", name = "title", icon = "fa-solid fa-heading")
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
         <div class="buttons is-multiline is-centered mt-4">
             <button class="button is-success" id="search-button" onclick="submitSearch()" type="submit">
                 <span class="icon">

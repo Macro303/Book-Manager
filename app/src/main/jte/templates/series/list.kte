@@ -4,7 +4,7 @@
 @import kotlin.collections.Map
 @param resources: List<Series>
 @param session: User?
-@param selected: Map<String, Any?>
+@param filters: Map<String, Any?>
 
 <!DOCTYPE html>
 <html lang="en-GB" data-theme="villain">
@@ -26,38 +26,38 @@
             <h1 class="title is-1">Series</h1>
         </header>
         <div class="columns">
-            <div class="column is-two-fifths-tablet is-one-quarter-desktop is-one-fifth-fullhd">
-                @template.components.series.filter(
-                    title = selected["title"] as String?,
+            <div class="column is-one-third-tablet is-one-quarter-desktop is-one-fifth-fullhd">
+                @template.components.filters.series(
+                    title = filters["title"] as String?,
                     resetUrl = "/series"
                 )
             </div>
             <div class="column">
                 <nav class="level is-mobile">
                     <div class="level-left">
-                        <p class="has-text-centered">
+                        <p class="level-item has-text-centered">
                             <span>${resources.size} Series</span>
                         </p>
                     </div>
                     <div class="level-right">
-                        @if(session != null)
+                        <p class="level-item">
                             <a class="button is-success" href="/series/create">
                                 <span class="icon">
                                     <i class="fa-solid fa-add"></i>
                                 </span>
                                 <span>Create</span>
                             </a>
-                        @endif
+                        </p>
                     </div>
                 </nav>
-                <div class="columns is-multiline is-centered is-desktop">
+                <div class="columns is-multiline is-centered">
                     @for(entry in resources.sorted())
-                        <div class="column is-half-desktop is-one-third-fullhd">
-                            @template.components.series.view(entry = entry)
+                        <div class="column is-narrow">
+                            @template.components.views.series(entry = entry)
                         </div>
                     @else
                         <div class="column">
-                            <div class="box has-text-centered">
+                            <div class="box has-text-centered has-background-text-soft is-shadowless">
                                 <h5 class="title is-5 has-text-danger">No Series found.</h5>
                             </div>
                         </div>

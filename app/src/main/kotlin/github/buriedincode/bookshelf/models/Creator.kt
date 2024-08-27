@@ -24,14 +24,12 @@ class Creator(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Creator> {
     val credits by Credit referrersOn CreditTable.creatorCol
     var imageUrl: String? by CreatorTable.imageUrlCol
     var name: String by CreatorTable.nameCol
-    var summary: String? by CreatorTable.summaryCol
 
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         return mutableMapOf<String, Any?>(
             "id" to id.value,
             "imageUrl" to imageUrl,
             "name" to name,
-            "summary" to summary,
         ).apply {
             if (showAll) {
                 put(
@@ -54,7 +52,6 @@ data class CreatorInput(
     val credits: List<Credit> = emptyList(),
     val imageUrl: String? = null,
     val name: String,
-    val summary: String? = null,
 ) {
     data class Credit(
         val book: Long,

@@ -51,6 +51,9 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
         ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
             Publisher.findById(it)?.let { publisher -> resources = resources.filter { publisher == it.publisher } }
         }
+        ctx.queryParam("role-id")?.toLongOrNull()?.let {
+            Role.findById(it)?.let { role -> resources = resources.filter { it.credits.any { it.role == role } } }
+        }
         ctx.queryParam("series-id")?.toLongOrNull()?.let {
             Series.findById(it)?.let { series -> resources = resources.filter { it.series.any { it.series == series } } }
         }
@@ -69,11 +72,12 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
         "has-wished" to ctx.queryParam("has-wished")?.lowercase()?.toBooleanStrictOrNull(),
         "is-collected" to ctx.queryParam("is-collected")?.lowercase()?.toBooleanStrictOrNull(),
         "publisher" to ctx.queryParam("publisher-id")?.toLongOrNull()?.let { Publisher.findById(it) },
+        "role" to ctx.queryParam("role-id")?.toLongOrNull()?.let { Role.findById(it) },
         "series" to ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it) },
         "title" to ctx.queryParam("title"),
     )
 
-    override fun optionMap(): Map<String, Any?> = mapOf(
+    override fun createOptions(): Map<String, Any?> = mapOf(
         "creators" to Creator.all().toList(),
         "formats" to Format.entries.toList(),
         "has-read" to listOf(true, false),
@@ -84,7 +88,7 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
         "series" to Series.all().toList(),
     )
 
-    override fun optionMapExclusions(ctx: Context): Map<String, Any?> = mapOf(
+    override fun updateOptions(ctx: Context): Map<String, Any?> = mapOf(
         "series" to Series.all().filterNot { series -> ctx.getResource().series.any { it.series == series } }.toList(),
     )
 }

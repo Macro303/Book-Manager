@@ -23,63 +23,39 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">${resource.title}</h1>
         </header>
-        <div class="columns">
-            <div class="column is-one-third-tablet is-one-quarter-fullhd">
-                <figure class="image is-2by3">
-                    @if(resource.firstBook?.book?.imageUrl == null)
-                        <img alt="Missing cover image" loading="lazy" src="https://via.placeholder.com/1500x1000"/>
-                    @else
-                        <img alt="${resource.title} cover image" loading="lazy" src="${resource.firstBook?.book?.imageUrl}"/>
-                    @endif
-                </figure>
-            </div>
-            <div class="column">
-                <nav class="level is-mobile">
-                    <div class="level-left"></div>
-                    <div class="level-right">
-                        @if(session != null)
-                            <a class="button is-warning" href="/series/${resource.id.value}/update">
-                                <span class="icon">
-                                    <i class="fa-solid fa-pencil"></i>
-                                </span>
-                                <span>Update</span>
-                            </a>
-                        @endif
-                    </div>
-                </nav>
-                <div class="columns is-desktop">
-                    <div class="column">
-                        <div class="box">
-                            <h3 class="title is-3 has-text-centered">Summary</h3>
-                            <div class="block">
-                                <p>${resource.summary}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-third-desktop is-one-quarter-fullhd"></div>
-                </div>
-            </div>
-        </div>
         <nav class="level is-mobile">
-            <div class="level-left level-item has-text-centered">
+            <div class="level-left"></div>
+            <div class="level-right">
+                @if(session != null)
+                    <a class="button is-warning" href="/series/${resource.id.value}/update">
+                        <span class="icon">
+                            <i class="fa-solid fa-pencil"></i>
+                        </span>
+                        <span>Update</span>
+                    </a>
+                @endif
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-left has-text-centered">
                 <div>
-                    <p class="title">Books</p>
+                    <p class="title mb-0">Books</p>
                     @if(resource.books.count() == 1L)
-                        <p class="heading">1 Book</p>
+                        <p class="heading mt-0">1 Book</p>
                     @else
-                        <p class="heading">${resource.books.count()} Books</p>
+                        <p class="heading mt-0">${resource.books.count()} Books</p>
                     @endif
                 </div>
             </div>
         </nav>
-        <div class="columns is-multiline is-centered">
+        <div class="columns is-multiline is-centered is-mobile">
             @for(entry in resource.books.sortedWith(compareBy<BookSeries> {it.number ?: Int.MAX_VALUE}.thenBy { it.book }))
-                <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                    @template.components.book.view(entry = entry.book, series = Pair(entry.series, entry.number), session = session)
+                <div class="column is-narrow">
+                    @template.components.views.book(entry = entry.book, series = Pair(entry.series, entry.number), session = session)
                 </div>
             @else
                 <div class="column">
-                    <div class="box has-text-centered">
+                    <div class="box has-text-centered has-background-text-soft is-shadowless">
                         <h5 class="title is-5 has-text-danger">No Books found.</h5>
                     </div>
                 </div>

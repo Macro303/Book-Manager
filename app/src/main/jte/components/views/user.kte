@@ -4,13 +4,13 @@
 @param entry: User
 @param readDate: LocalDate? = null
 
-<a class="card" href="/users/${entry.id.value}">
+<a class="card" href="/users/${entry.id.value}" style="width: 192px">
     <div class="card-image">
         <figure class="image is-1by1">
             <img alt="${entry.username} profile image" loading="lazy" src="${entry.imageUrl ?: "https://ui-avatars.com/api/?name=${entry.username}&size=256&uppercase=false"}"/>
         </figure>
     </div>
-    <div class="card-content has-background-text-soft">
+    <div class="card-content has-background-text-soft" style="width: 192px">
         <div class="media">
             <div class="media-content">
                 <p class="title is-6">${entry.username}</p>

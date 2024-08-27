@@ -17,8 +17,7 @@ data class Edition(
     val classifications: Classification? = null,
     val contributions: List<String> = emptyList(),
     val contributors: List<Contributor> = emptyList(),
-    @Serializable(with = LocalDateSerializer::class)
-    val copyrightDate: LocalDate? = null,
+    val copyrightDate: String? = null,
     val covers: List<Int> = emptyList(),
     @Serializable(with = LocalDateTimeSerializer::class)
     val created: LocalDateTime? = null,

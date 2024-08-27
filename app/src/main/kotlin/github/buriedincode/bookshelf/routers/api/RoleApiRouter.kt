@@ -42,7 +42,6 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
                     this.role = this@apply
                 }
             }
-            summary = body.summary
         }
         ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
@@ -58,7 +57,6 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
                     this,
                 )
             }
-            summary = body.summary
             title = body.title
         }
     }

@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SchemaUtils
 
 object SeriesTable : LongIdTable(name = "series") {
-    val summaryCol: Column<String?> = text(name = "summary").nullable()
     val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {

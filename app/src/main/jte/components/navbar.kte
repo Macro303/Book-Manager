@@ -3,10 +3,17 @@
 
 <nav class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-        <a class="navbar-item" href="/">
-            <img src="/static/img/logo.png" alt="Bookshelf Logo">
-            Bookshelf
-        </a>
+        @if(session == null)
+            <a class="navbar-item" href="/">
+                <img src="/static/img/logo.png" alt="Bookshelf Logo">
+                Bookshelf
+            </a>
+        @else
+            <a class="navbar-item" href="/users/${session.id.value}">
+                <img src="/static/img/logo.png" alt="Bookshelf Logo">
+                Bookshelf
+            </a>
+        @endif
         <span class="navbar-burger burger" data-target="navMenu">
             <span></span>
             <span></span>
@@ -48,24 +55,6 @@
                             <i class="fa-solid fa-book"></i>
                         </span>
                         <span>Books</span>
-                    </a>
-                    <a class="navbar-item" href="/creators">
-                        <span class="icon">
-                            <i class="fa-solid fa-file-signature"></i>
-                        </span>
-                        <span>Creators</span>
-                    </a>
-                    <a class="navbar-item" href="/publishers">
-                        <span class="icon">
-                            <i class="fa-solid fa-shop"></i>
-                        </span>
-                        <span>Publishers</span>
-                    </a>
-                    <a class="navbar-item" href="/roles">
-                        <span class="icon">
-                            <i class="fa-solid fa-tags"></i>
-                        </span>
-                        <span>Roles</span>
                     </a>
                     <a class="navbar-item" href="/series">
                         <span class="icon">

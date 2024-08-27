@@ -43,7 +43,6 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
                 }
             }
             imageUrl = body.imageUrl
-            summary = body.summary
         }
         ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
@@ -61,7 +60,6 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
             }
             imageUrl = body.imageUrl
             name = body.name
-            summary = body.summary
         }
     }
 

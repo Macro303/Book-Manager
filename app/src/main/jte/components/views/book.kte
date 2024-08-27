@@ -8,7 +8,7 @@
 @param readDate: LocalDate? = null
 @param session: User? = null
 
-<a class="card" href="/books/${entry.id.value}">
+<a class="card" href="/books/${entry.id.value}" style="width: 256px">
     <div class="card-image">
         <figure class="image is-2by3">
             @if(entry.isCollected)
@@ -25,7 +25,7 @@
             @endif
         </figure>
     </div>
-    <div class="card-content has-background-text-soft">
+    <div class="card-content has-background-text-soft" style="width: 256px">
         <div class="media">
             <div class="media-content">
                 <p class="title is-6">${entry.title}</p>

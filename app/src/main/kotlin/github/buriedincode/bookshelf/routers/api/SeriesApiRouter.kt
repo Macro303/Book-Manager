@@ -39,7 +39,6 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
                     this.number = if (it.number == 0) null else it.number
                 }
             }
-            summary = body.summary
         }
         ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
@@ -57,7 +56,6 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
                         number = if (it.number == 0) null else it.number
                     }
             }
-            summary = body.summary
             title = body.title
         }
     }

@@ -6,6 +6,7 @@ import github.buriedincode.bookshelf.models.Book
 import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Format
 import github.buriedincode.bookshelf.models.Publisher
+import github.buriedincode.bookshelf.models.Role
 import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.tables.BookTable
@@ -17,24 +18,18 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users") {
     private val LOGGER = KotlinLogging.logger { }
 
     override fun create(ctx: Context) = Utils.query {
-        render(ctx, "create", optionMap(), redirect = false)
+        render(ctx, "create", createOptions(), redirect = false)
     }
 
     override fun view(ctx: Context) = Utils.query {
         val resource = ctx.getResource()
-        var nextBooks = resource.readBooks
-            .flatMap {
-                it.book.series.map { it.series to it.number }
-            }.groupBy({ it.first }, { it.second })
-            .map { (series, readNumbers) ->
-                series to series.books
-                    .filter { it.number != null && it.number!! !in readNumbers }
-                    .minByOrNull { it.number!! }
-                    ?.book
-            }.toMap()
-            .filterValues { it != null }
-            .mapValues { it.value!! }
-            .toSortedMap()
+        val nextBooks = resource.readBooks.flatMap { it.book.series.map { it.series } }.distinct().sorted().mapNotNull {
+            it.books.map { it.book }.sorted().firstOrNull { book ->
+                resource.readBooks.none {
+                    it.book == book
+                }
+            }
+        }
         val model = mapOf(
             "stats" to mapOf<String, Int>(
                 "wishlist" to resource.wishedBooks.count().toInt(),
@@ -96,14 +91,14 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users") {
         "username" to ctx.queryParam("username"),
     )
 
-    override fun optionMapExclusions(ctx: Context): Map<String, Any?> = mapOf(
+    override fun updateOptions(ctx: Context): Map<String, Any?> = mapOf(
         "readBooks" to Book.all().filter { it.isCollected }.filterNot { it in ctx.getResource().readBooks.map { it.book } }.toList(),
         "wishedBooks" to Book.all().filterNot { it.isCollected }.filterNot { it in ctx.getResource().wishedBooks }.toList(),
     )
 
     private fun filterWishlist(ctx: Context): List<Book> {
         val resource = ctx.getResource()
-        var resources = Book.all().filterNot { it.isCollected }
+        var resources = Book.all().filter { resource.wishedBooks.any { book -> it == book } || (!it.isCollected && it.wishers.empty()) }
         ctx.queryParam("creator-id")?.toLongOrNull()?.let {
             Creator.findById(it)?.let { creator -> resources = resources.filter { it.credits.any { it.creator == creator } } }
         }
@@ -115,6 +110,9 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users") {
         }
         ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
             Publisher.findById(it)?.let { publisher -> resources = resources.filter { publisher == it.publisher } }
+        }
+        ctx.queryParam("role-id")?.toLongOrNull()?.let {
+            Role.findById(it)?.let { role -> resources = resources.filter { it.credits.any { it.role == role } } }
         }
         ctx.queryParam("series-id")?.toLongOrNull()?.let {
             Series.findById(it)?.let { series -> resources = resources.filter { it.series.any { it.series == series } } }
@@ -134,13 +132,13 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users") {
         "has-wished" to ctx.queryParam("has-wished")?.lowercase()?.toBooleanStrictOrNull(),
         "is-collected" to false,
         "publisher" to ctx.queryParam("publisher-id")?.toLongOrNull()?.let { Publisher.findById(it) },
+        "role" to ctx.queryParam("role-id")?.toLongOrNull()?.let { Role.findById(it) },
         "series" to ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it) },
         "title" to ctx.queryParam("title"),
     )
 
     private fun filterReadlist(ctx: Context): List<Book> {
-        val resource = ctx.getResource()
-        var resources = Book.all().filter { resource.readBooks.any { it.book == it } }
+        var resources = ctx.getResource().readBooks.map { it.book }
         ctx.queryParam("creator-id")?.toLongOrNull()?.let {
             Creator.findById(it)?.let { creator -> resources = resources.filter { it.credits.any { it.creator == creator } } }
         }
@@ -149,6 +147,9 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users") {
         }
         ctx.queryParam("publisher-id")?.toLongOrNull()?.let {
             Publisher.findById(it)?.let { publisher -> resources = resources.filter { publisher == it.publisher } }
+        }
+        ctx.queryParam("role-id")?.toLongOrNull()?.let {
+            Role.findById(it)?.let { role -> resources = resources.filter { it.credits.any { it.role == role } } }
         }
         ctx.queryParam("series-id")?.toLongOrNull()?.let {
             Series.findById(it)?.let { series -> resources = resources.filter { it.series.any { it.series == series } } }
@@ -168,6 +169,7 @@ object UserHtmlRouter : BaseHtmlRouter<User>(entity = User, plural = "users") {
         "has-wished" to null,
         "is-collected" to true,
         "publisher" to ctx.queryParam("publisher-id")?.toLongOrNull()?.let { Publisher.findById(it) },
+        "role" to ctx.queryParam("role-id")?.toLongOrNull()?.let { Role.findById(it) },
         "series" to ctx.queryParam("series-id")?.toLongOrNull()?.let { Series.findById(it) },
         "title" to ctx.queryParam("title"),
     )

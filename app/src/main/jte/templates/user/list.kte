@@ -55,7 +55,7 @@
                 </nav>
                 <div class="columns is-multiline is-centered is-mobile">
                     @for(entry in resources.sorted())
-                        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop is-one-fifth-widescreen">
+                        <div class="column is-narrow">
                             @template.components.views.user(entry = entry)
                         </div>
                     @else

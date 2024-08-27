@@ -1,8 +1,8 @@
 @param title: String? = null
 @param resetUrl: String
 
-<div class="box">
-    <h4 class="title is-4">Filter Series</h4>
+<div class="box has-background-text-soft is-shadowless">
+    <h4 class="title is-4 has-text-text-bold">Filter Series</h4>
     <form accept-charset="UTF-8" method="GET">
         @template.components.forms.input(label = "Title", name = "title", value = title, icon = "fa-solid fa-heading")
         <div class="buttons is-centered">

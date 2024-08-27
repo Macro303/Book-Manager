@@ -21,15 +21,15 @@
             <h1 class="title is-1">Creating a User</h1>
         </header>
         <div class="columns is-multiline is-centered is-desktop">
-            <div class="column is-half-desktop">
-                <form id="create-form" onsubmit="return false;">
+            <form id="create-form" onsubmit="return false;">
+                <div class="column is-half-desktop">
                     <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.input(label = "Image Url", name = "image-url", icon = "fa-solid fa-image")
                         @template.components.forms.input(label = "Username", name = "username", icon = "fa-solid fa-user")
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
         <div class="buttons is-multiline is-centered">
             <button class="button is-success" id="create-button" onclick="submitCreate()" type="submit">

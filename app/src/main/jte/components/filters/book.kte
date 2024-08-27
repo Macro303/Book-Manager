@@ -1,6 +1,7 @@
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Format
 @import github.buriedincode.bookshelf.models.Publisher
+@import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
 @import kotlin.collections.List
 @param creators: List<Creator>
@@ -15,6 +16,8 @@
 @param collectedDisabled: Boolean = false
 @param publishers: List<Publisher>
 @param publisherSelected: Publisher? = null
+@param roles: List<Role>
+@param roleSelected: Role? = null
 @param series: List<Series>
 @param seriesSelected: Series? = null
 @param title: String? = null
@@ -29,6 +32,7 @@
         @template.components.forms.select.boolean(label = "Wished", name = "has-wished", positive = "Wished", negative = "Not wished", selected = if(isCollected == true) null else hasWished, icon = "fa-solid fa-star", disabled = wishedDisabled || isCollected == true)
         @template.components.forms.select.boolean(label = "Collected", name = "is-collected", positive = "Collected", negative = "Missing", selected = isCollected, icon = "fa-solid fa-box-archive", disabled = collectedDisabled)
         @template.components.forms.select.publisher(options = publishers, selected = publisherSelected)
+        @template.components.forms.select.role(options = roles, selected = roleSelected)
         @template.components.forms.select.series(options = series, selected = seriesSelected)
         @template.components.forms.input(label = "Title", name = "title", value = title, icon = "fa-solid fa-heading")
         <div class="buttons is-centered">

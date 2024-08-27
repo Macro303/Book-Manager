@@ -2,6 +2,7 @@
 @import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Format
 @import github.buriedincode.bookshelf.models.Publisher
+@import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @import kotlin.collections.List
@@ -30,7 +31,7 @@
             <h1 class="title is-1">${extras.getOrDefault("title", "Books") as String}</h1>
         </header>
         <div class="columns">
-            <div class="column is-two-fifths-tablet is-one-quarter-desktop is-one-fifth-fullhd">
+            <div class="column is-one-third-tablet is-one-quarter-desktop is-one-fifth-fullhd">
                 @template.components.filters.book(
                     creators = resources.flatMap { it.credits.map { it.creator } }.distinct().sorted(),
                     creatorSelected = filters["creator"] as Creator?,
@@ -44,6 +45,8 @@
                     collectedDisabled = extras.getOrDefault("collected", false) as Boolean,
                     publishers = resources.mapNotNull { it.publisher }.distinct().sorted(),
                     publisherSelected = filters["publisher"] as Publisher?,
+                    roles = resources.flatMap { it.credits.map { it.role } }.distinct().sorted(),
+                    roleSelected = filters["role"] as Role?,
                     series = resources.flatMap { it.series.map { it.series } }.distinct().sorted(),
                     seriesSelected = filters["series"] as Series?,
                     title = filters["title"] as String?,
@@ -88,7 +91,7 @@
                 </nav>
                 <div class="columns is-multiline is-centered is-mobile">
                     @for(entry in resources.sorted())
-                        <div class="column is-four-fifths-mobile is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
+                        <div class="column is-narrow">
                             @template.components.views.book(entry = entry, session = session)
                         </div>
                     @else

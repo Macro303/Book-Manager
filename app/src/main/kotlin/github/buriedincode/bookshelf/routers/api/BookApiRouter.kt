@@ -266,7 +266,7 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
         goodreads = edition.identifiers?.goodreads?.firstOrNull()
         googleBooks = edition.identifiers?.google?.firstOrNull()
         imageUrl = "https://covers.openlibrary.org/b/OLID/${edition.getId()}-L.jpg"
-        isbn = edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull()
+        isbn = isbn ?: edition.isbn13.firstOrNull() ?: edition.isbn10.firstOrNull()
         libraryThing = edition.identifiers?.librarything?.firstOrNull()
         openLibrary = edition.getId()
         publishDate = edition.publishDate
@@ -297,10 +297,10 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
 
     fun import(ctx: Context) = ctx.processInput<ImportBook> { body ->
         Utils.query {
-            val edition = body.openLibraryId?.let {
-                OpenLibrary.getEdition(it)
-            } ?: body.isbn?.let {
+            val edition = body.isbn?.let {
                 OpenLibrary.getEditionByISBN(it)
+            } ?: body.openLibraryId?.let {
+                OpenLibrary.getEdition(it)
             } ?: throw NotImplementedResponse("Import only supports OpenLibrary currently")
             val work = OpenLibrary.getWork(edition.works.first().getId())
 
@@ -324,10 +324,10 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
 
     fun reimport(ctx: Context) = Utils.query {
         val resource = ctx.getResource()
-        val edition = resource.openLibrary?.let {
-            OpenLibrary.getEdition(it)
-        } ?: resource.isbn?.let {
+        val edition = resource.isbn?.let {
             OpenLibrary.getEditionByISBN(it)
+        } ?: resource.openLibrary?.let {
+            OpenLibrary.getEdition(it)
         } ?: throw NotImplementedResponse("Import only supports OpenLibrary currently")
         val work = OpenLibrary.getWork(edition.works.first().getId())
 

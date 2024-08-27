@@ -21,7 +21,6 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
         }
     }
 
-    var summary: String? by PublisherTable.summaryCol
     var title: String by PublisherTable.titleCol
 
     val books by Book optionalReferrersOn BookTable.publisherCol
@@ -29,7 +28,6 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         return mutableMapOf<String, Any?>(
             "id" to id.value,
-            "summary" to summary,
             "title" to title,
         ).apply {
             if (showAll) {
@@ -42,6 +40,5 @@ class Publisher(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Publishe
 }
 
 data class PublisherInput(
-    val summary: String? = null,
     val title: String,
 )

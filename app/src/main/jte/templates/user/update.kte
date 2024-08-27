@@ -27,15 +27,15 @@
             <h1 class="title is-1">Updating ${resource.username}</h1>
         </header>
         <div class="columns is-multiline is-centered is-desktop">
-            <div class="column is-half-desktop">
-                <form id="update-form" onsubmit="return false;">
+            <form id="update-form" onsubmit="return false;">
+                <div class="column is-half-desktop">
                     <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.input(label = "Image Url", name = "image-url", value = resource.imageUrl, icon = "fa-solid fa-image")
                         @template.components.forms.input(label = "Username", name = "username", value = resource.username, icon = "fa-solid fa-user")
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
         <div class="buttons is-multiline is-centered mt-4">
             <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">

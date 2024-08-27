@@ -3,6 +3,10 @@ package github.buriedincode.bookshelf
 import gg.jte.TemplateEngine
 import gg.jte.resolve.DirectoryCodeResolver
 import github.buriedincode.bookshelf.Utils.log
+import github.buriedincode.bookshelf.models.Creator
+import github.buriedincode.bookshelf.models.Publisher
+import github.buriedincode.bookshelf.models.Role
+import github.buriedincode.bookshelf.models.Series
 import github.buriedincode.bookshelf.models.User
 import github.buriedincode.bookshelf.routers.api.BookApiRouter
 import github.buriedincode.bookshelf.routers.api.CreatorApiRouter
@@ -11,6 +15,10 @@ import github.buriedincode.bookshelf.routers.api.RoleApiRouter
 import github.buriedincode.bookshelf.routers.api.SeriesApiRouter
 import github.buriedincode.bookshelf.routers.api.UserApiRouter
 import github.buriedincode.bookshelf.routers.html.BookHtmlRouter
+import github.buriedincode.bookshelf.routers.html.CreatorHtmlRouter
+import github.buriedincode.bookshelf.routers.html.PublisherHtmlRouter
+import github.buriedincode.bookshelf.routers.html.RoleHtmlRouter
+import github.buriedincode.bookshelf.routers.html.SeriesHtmlRouter
 import github.buriedincode.bookshelf.routers.html.UserHtmlRouter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.Level
@@ -83,6 +91,32 @@ object App {
                             get("update", BookHtmlRouter::update)
                         }
                     }
+                    path("creators") {
+                        path("{creator-id}") {
+                            get(CreatorHtmlRouter::view)
+                            get("update", CreatorHtmlRouter::update)
+                        }
+                    }
+                    path("publishers") {
+                        path("{publisher-id}") {
+                            get(PublisherHtmlRouter::view)
+                            get("update", PublisherHtmlRouter::update)
+                        }
+                    }
+                    path("roles") {
+                        path("{role-id}") {
+                            get(RoleHtmlRouter::view)
+                            get("update", RoleHtmlRouter::update)
+                        }
+                    }
+                    path("series") {
+                        get(SeriesHtmlRouter::list)
+                        get("create", SeriesHtmlRouter::create)
+                        path("{series-id}") {
+                            get(SeriesHtmlRouter::view)
+                            get("update", SeriesHtmlRouter::update)
+                        }
+                    }
                     path("users") {
                         get(UserHtmlRouter::list)
                         get("create", UserHtmlRouter::create)
@@ -95,6 +129,14 @@ object App {
                     }
                 }
                 path("api") {
+                    delete("clean") { ctx ->
+                        Utils.query {
+                            Creator.all().filter { it.credits.empty() }.forEach { it.delete() }
+                            Publisher.all().filter { it.books.empty() }.forEach { it.delete() }
+                            Role.all().filter { it.credits.empty() }.forEach { it.delete() }
+                            Series.all().filter { it.books.empty() }.forEach { it.delete() }
+                        }
+                    }
                     path("books") {
                         post("search", BookApiRouter::search)
                         get(BookApiRouter::list)

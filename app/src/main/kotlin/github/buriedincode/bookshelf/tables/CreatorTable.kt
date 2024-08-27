@@ -8,7 +8,6 @@ import org.jetbrains.exposed.sql.SchemaUtils
 object CreatorTable : LongIdTable(name = "creators") {
     val imageUrlCol: Column<String?> = text(name = "image_url").nullable()
     val nameCol: Column<String> = text(name = "name").uniqueIndex()
-    val summaryCol: Column<String?> = text(name = "summary").nullable()
 
     init {
         Utils.queryTransaction {

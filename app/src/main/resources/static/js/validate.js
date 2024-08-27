@@ -60,14 +60,45 @@ function validateAny(options) {
   });
 }
 
-async function userValidation() {
+async function bookValidation() {
   return (
-    validateText("username", "Please enter a Username.")
+    validateSelect("format", "Please select a Format.") &&
+    validateText("title", "Please enter a Title.")
+  )
+}
+
+async function creatorValidation() {
+  return (
+    validateText("name", "Please enter a Name.")
   )
 }
 
 async function importValidation() {
   return (
     validateAny(["goodreads", "google-books", "isbn", "library-thing", "open-library"])
+  )
+}
+
+async function publisherValidation() {
+  return (
+    validateText("title", "Please enter a Title.")
+  )
+}
+
+async function roleValidation() {
+  return (
+    validateText("title", "Please enter a Title.")
+  )
+}
+
+async function seriesValidation() {
+  return (
+    validateText("title", "Please enter a Title.")
+  )
+}
+
+async function userValidation() {
+  return (
+    validateText("username", "Please enter a Username.")
   )
 }

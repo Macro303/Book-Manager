@@ -29,6 +29,7 @@ data class Work(
     val links: List<Link> = emptyList(),
     val location: String? = null,
     val revision: Int,
+    val series: Series? = null,
     val subjectPeople: List<String> = emptyList(),
     val subjectPlaces: List<String> = emptyList(),
     val subjectTimes: List<String> = emptyList(),
@@ -48,5 +49,11 @@ data class Work(
         val author: Resource? = null,
         val comment: String? = null,
         val excerpt: String,
+    )
+
+    @Serializable
+    data class Series(
+        val name: String,
+        val work: String,
     )
 }

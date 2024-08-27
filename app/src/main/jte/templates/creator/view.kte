@@ -28,13 +28,9 @@
             <h1 class="title is-1">${resource.name}</h1>
         </header>
         <div class="columns">
-            <div class="column is-one-third-tablet is-one-quarter-fullhd has-text-centered">
-                <figure class="image is-256x256 is-inline-block">
-                    @if(resource.imageUrl == null)
-                        <img alt="Missing profile image" class="profile-large" loading="lazy" src="https://via.placeholder.com/512x512"/>
-                    @else
-                        <img alt="${resource.name} profile image" class="profile-large" loading="lazy" src="${resource.imageUrl}"/>
-                    @endif
+            <div class="column is-one-third-tablet is-one-quarter-fullhd">
+                <figure class="image is-256x256">
+                    <img alt="${resource.name} profile image" class="rounded" loading="lazy" src="${resource.imageUrl ?: "https://ui-avatars.com/api/?name=${resource.name}&size=512&uppercase=false"}"/>
                 </figure>
             </div>
             <div class="column">
@@ -51,71 +47,44 @@
                         @endif
                     </div>
                 </nav>
-                <div class="columns is-desktop">
-                    <div class="column">
-                        <div class="box">
-                            <h3 class="title is-3 has-text-centered">Summary</h3>
-                            <div class="block">
-                                <p>${resource.summary}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-one-third-desktop is-one-quarter-fullhd">
-                        <div class="box">
-                            <h3 class="title is-3 has-text-centered">Stats</h3>
-                            <div class="block">
-                                <p><strong class="has-text-info">Roles:</strong> ${credits.size}</p>
-                            </div>
-                            <div class="block">
-                                <p><strong class="has-text-info">Books:</strong> ${credits.flatMap { it.value }.size} (${credits.flatMap { it.value }.distinct().size} Unique)</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
         @for(role in credits.keys.sorted())
-            <nav class="level is-mobile">
-                <div class="level-left level-item has-text-centered">
-                    <div>
-                        <p class="title">${role.title}</p>
-                        @if(credits[role]!!.count() == 1)
-                            <p class="heading">1 Book</p>
-                        @else
-                            <p class="heading">${credits[role]!!.count()} Books</p>
-                        @endif
-                    </div>
+            <div class="media">
+                <div class="media-content">
+                    <a class="title has-text-link" href="/roles/${role.id.value}">${role.title}</a>
+                    @if(credits[role]!!.count() == 1)
+                        <p class="heading">1 Book</p>
+                    @else
+                        <p class="heading">${credits[role]!!.count()} Books</p>
+                    @endif
                 </div>
-            </nav>
-            <div class="columns is-multiline is-centered">
-                @for(book in credits[role]!!.sorted())
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-fullhd">
-                        @template.components.book.view(entry = book, session = session)
-                    </div>
-                @else
-                    <div class="column">
-                        <div class="box has-text-centered">
-                            <h5 class="title is-5 has-text-danger">No Books found.</h5>
-                        </div>
-                    </div>
-                @endfor
             </div>
-        @else
-            <nav class="level is-mobile">
-                <div class="level-left level-item has-text-centered">
-                    <div>
-                        <p class="title">Credit</p>
-                        <p class="heading">0 Credits</p>
-                    </div>
+            <div class="scrolling-wrapper">
+                <div class="columns is-mobile">
+                    @for(book in credits[role]!!.sorted())
+                        <div class="column is-narrow">
+                            @template.components.views.book(entry = book)
+                        </div>
+                    @endfor
                 </div>
-            </nav>
+            </div>
+            <br/>
+        @else
+            <div class="media">
+                <div class="media-content">
+                    <p class="title">Credits</p>
+                    <p class="heading"></p>
+                </div>
+            </div>
             <div class="columns is-multiline is-centered">
                 <div class="column">
-                    <div class="box has-text-centered">
+                    <div class="box has-text-centered has-background-text-soft is-shadowless">
                         <h5 class="title is-5 has-text-danger">No Credits found.</h5>
                     </div>
                 </div>
             </div>
+            <br/>
         @endfor
     </div>
 </main>

@@ -119,19 +119,9 @@
                             <div class="block">
                                 <p><strong>Publisher:</strong> <a class="is-family-primary has-text-link" href="/publishers/${resource.publisher?.id?.value}">${resource.publisher?.title}</a></p>
                             </div>
-                            @if(resource.isCollected)
-                                <div class="block">
-                                    <p><strong>Readers:</strong> @for(entry in ForSupport.of(resource.readers.sortedBy { it.user }))<a class="is-family-primary has-text-link" href="/users/${entry.get().user.id.value}">${entry.get().user.username}</a>@if(!entry.isLast), @endif@endfor</p>
-                                </div>
-                            @endif
                             <div class="block">
                                 <p><strong>Series:</strong> @for(entry in ForSupport.of(resource.series.sortedWith(compareBy<BookSeries> { it.series }.thenBy { it.number ?: Int.MAX_VALUE })))<a class="is-family-primary has-text-link" href="/series/${entry.get().series.id.value}">${entry.get().series.title}@if(entry.get().number != null) #${entry.get().number}@endif</a>@if(!entry.isLast), @endif@endfor</p>
                             </div>
-                            @if(!resource.isCollected)
-                                <div class="block">
-                                    <p><strong>Wishers:</strong> @for(entry in ForSupport.of(resource.wishers.sorted()))<a class="is-family-primary has-text-link" href="/users/${entry.get().id.value}">${entry.get().username}</a>@if(!entry.isLast), @endif@endfor</p>
-                                </div>
-                            @endif
                         </div>
                         <div class="box has-background-text-soft is-shadowless">
                             <h3 class="title is-3 has-text-centered">Summary</h3>
@@ -143,9 +133,6 @@
                     <div class="column is-one-third-desktop is-one-quarter-fullhd">
                         <div class="box has-background-text-soft is-shadowless">
                             <h3 class="title is-3 has-text-centered">Identifiers</h3>
-                            <div class="block">
-                                <p><strong>Bookshelf:</strong> ${resource.id.value}</p>
-                            </div>
                             @if(resource.goodreads != null)
                                 <div class="block">
                                     <p><strong>Goodreads:</strong> <a class="has-text-link" href="https://goodreads.com/book/show/${resource.goodreads}" rel="noopener noreferrer" target="_blank">${resource.goodreads}</a></p>
@@ -264,23 +251,66 @@
             </div>
         </div>
         @for(role in credits.keys.sorted())
+            <div class="media">
+                <div class="media-content">
+                    <a class="title has-text-link" href="/roles/${role.id.value}">${role.title}</a>
+                    @if(credits[role]!!.count() == 1)
+                        <p class="heading">1 Creator</p>
+                    @else
+                        <p class="heading">${credits[role]!!.count()} Creators</p>
+                    @endif
+                </div>
+            </div>
+            <div class="scrolling-wrapper">
+                <div class="columns is-mobile">
+                    @for(creator in credits[role]!!.sorted())
+                        <div class="column is-narrow">
+                            @template.components.views.creator(entry = creator)
+                        </div>
+                    @endfor
+                </div>
+            </div>
+            <br/>
+        @else
+            <div class="media">
+                <div class="media-content">
+                    <p class="title">Credits</p>
+                    <p class="heading"></p>
+                </div>
+            </div>
+            <div class="columns is-multiline is-centered">
+                <div class="column">
+                    <div class="box has-text-centered has-background-text-soft is-shadowless">
+                        <h5 class="title is-5 has-text-danger">No Credits found.</h5>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        @endfor
+        @if(resource.isCollected)
             <nav class="level is-mobile">
                 <div class="level-left has-text-centered">
                     <div>
-                        <p class="title mb-0">${role.title}</p>
-                        @if(credits[role]!!.count() == 1)
-                            <p class="heading mt-0">1 ${role.title}</p>
+                        <p class="title mb-0">Readers</p>
+                        @if(resource.readers.count() == 1L)
+                            <p class="heading mt-0">1 User</p>
                         @else
-                            <p class="heading mt-0">${credits[role]!!.count()} ${role.title}s</p>
+                            <p class="heading mt-0">${resource.readers.count()} Users</p>
                         @endif
                     </div>
                 </div>
             </nav>
             <div class="scrolling-wrapper">
                 <div class="columns is-mobile">
-                    @for(creator in credits[role]!!.sorted())
-                        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop is-one-fifth-widescreen">
-                            @template.components.views.creator(entry = creator)
+                    @for(entry in resource.readers.sortedBy { it.user })
+                        <div class="column is-narrow">
+                            @template.components.views.user(entry=entry.user, readDate=entry.readDate)
+                        </div>
+                    @else
+                        <div class="column">
+                            <div class="box has-text-centered has-background-text-soft is-shadowless">
+                                <h5 class="title is-5 has-text-danger">No Users found.</h5>
+                            </div>
                         </div>
                     @endfor
                 </div>
@@ -289,19 +319,31 @@
             <nav class="level is-mobile">
                 <div class="level-left has-text-centered">
                     <div>
-                        <p class="title mb-0">Credit</p>
-                        <p class="heading mt-0">0 Credits</p>
+                        <p class="title mb-0">Wishers</p>
+                        @if(resource.wishers.count() == 1L)
+                            <p class="heading mt-0">1 User</p>
+                        @else
+                            <p class="heading mt-0">${resource.wishers.count()} Users</p>
+                        @endif
                     </div>
                 </div>
             </nav>
-            <div class="columns is-multiline is-centered">
-                <div class="column">
-                    <div class="box has-text-centered has-background-text-soft is-shadowless">
-                        <h5 class="title is-5 has-text-danger">No Credits found.</h5>
-                    </div>
+            <div class="scrolling-wrapper">
+                <div class="columns is-mobile">
+                    @for(entry in resource.wishers.sorted())
+                        <div class="column is-narrow">
+                            @template.components.views.user(entry=entry)
+                        </div>
+                    @else
+                        <div class="column">
+                            <div class="box has-text-centered has-background-text-soft is-shadowless">
+                                <h5 class="title is-5 has-text-danger">No Users found.</h5>
+                            </div>
+                        </div>
+                    @endfor
                 </div>
             </div>
-        @endfor
+        @endif
     </div>
 </main>
 @template.components.footer()
