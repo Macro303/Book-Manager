@@ -1,15 +1,15 @@
-FROM eclipse-temurin:17-jdk AS builder
+FROM --platform=$BUILDPLATFORM gradle:jdk17 AS builder
 
-WORKDIR /builder
-COPY . /builder/
-RUN ./gradlew build
+WORKDIR /data
+COPY . /data/
+RUN gradle build
 
 
 
-FROM eclipse-temurin:17-jre
+FROM --platform=$TARGETPLATFORM eclipse-temurin:17-jre
 
 WORKDIR /app
-COPY --from=builder /builder/app/build/libs/app-0.4.0-all.jar /app/Bookshelf.jar
+COPY --from=builder /data/app/build/libs/app-0.4.0-all.jar /app/Bookshelf.jar
 ENV XDG_CACHE_HOME=/app/cache \
     XDG_CONFIG_HOME=/app/config \
     XDG_DATA_HOME=/app/data
