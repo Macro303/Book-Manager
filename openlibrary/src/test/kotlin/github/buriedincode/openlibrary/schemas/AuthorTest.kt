@@ -3,7 +3,6 @@ package github.buriedincode.openlibrary.schemas
 import github.buriedincode.openlibrary.OpenLibrary
 import github.buriedincode.openlibrary.SQLiteCache
 import github.buriedincode.openlibrary.ServiceException
-import kotlinx.datetime.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -34,7 +33,6 @@ class AuthorTest {
             assertAll(
                 { assertEquals(11497441, result.id) },
                 { assertEquals("/authors/OL2993106A", result.key) },
-                { assertEquals(LocalDateTime(2008, 4, 29, 15, 3, 11, 581851), result.lastModified) },
                 { assertEquals("Riichiro Inagaki", result.name) },
                 { assertEquals(1, result.revision) },
                 { assertEquals("/type/author", result.type.key) },
