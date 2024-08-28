@@ -1,4 +1,4 @@
-FROM gradle:latest as builder
+FROM gradle:jdk17 AS builder
 
 WORKDIR /builder
 
@@ -15,7 +15,7 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY --from=builder /app/app/build/libs/app-0.4.0-all.jar /app/Bookshelf.jar
+COPY --from=builder /builder/app/build/libs/app-0.4.0-all.jar /app/Bookshelf.jar
 
 ENV XDG_CACHE_HOME /app/cache
 ENV XDG_CONFIG_HOME /app/config
