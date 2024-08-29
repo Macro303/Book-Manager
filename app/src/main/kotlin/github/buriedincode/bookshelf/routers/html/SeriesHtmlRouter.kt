@@ -21,11 +21,7 @@ object SeriesHtmlRouter : BaseHtmlRouter<Series>(entity = Series, plural = "seri
         "title" to ctx.queryParam("title"),
     )
 
-    override fun createOptions(): Map<String, Any?> = mapOf(
-        "books" to Book.all().toList(),
-    )
-
     override fun updateOptions(ctx: Context): Map<String, Any?> = mapOf(
-        "books" to Book.all().filter { book -> ctx.getResource().books.any { it.book == book } }.toList(),
+        "books" to Book.all().filter { book -> ctx.getResource().books.none { it.book == book } }.toList(),
     )
 }

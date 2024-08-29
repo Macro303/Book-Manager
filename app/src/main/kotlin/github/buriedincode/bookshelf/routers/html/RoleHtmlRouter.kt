@@ -1,6 +1,8 @@
 package github.buriedincode.bookshelf.routers.html
 
 import github.buriedincode.bookshelf.Utils
+import github.buriedincode.bookshelf.models.Book
+import github.buriedincode.bookshelf.models.Creator
 import github.buriedincode.bookshelf.models.Role
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.javalin.http.Context
@@ -17,4 +19,9 @@ object RoleHtmlRouter : BaseHtmlRouter<Role>(entity = Role, plural = "roles") {
     override fun view(ctx: Context) = Utils.query {
         renderResource(ctx, "view", mapOf("credits" to ctx.getResource().credits.groupBy({ it.creator }, { it.book })), redirect = false)
     }
+
+    override fun updateOptions(ctx: Context): Map<String, Any?> = mapOf(
+        "books" to Book.all().toList(),
+        "creators" to Creator.all().toList(),
+    )
 }

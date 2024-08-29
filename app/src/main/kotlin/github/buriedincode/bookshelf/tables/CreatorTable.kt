@@ -10,7 +10,7 @@ object CreatorTable : LongIdTable(name = "creators") {
     val nameCol: Column<String> = text(name = "name").uniqueIndex()
 
     init {
-        Utils.queryTransaction {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

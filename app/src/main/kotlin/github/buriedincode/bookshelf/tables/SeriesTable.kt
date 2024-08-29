@@ -9,7 +9,7 @@ object SeriesTable : LongIdTable(name = "series") {
     val titleCol: Column<String> = text(name = "title").uniqueIndex()
 
     init {
-        Utils.queryTransaction {
+        Utils.query {
             SchemaUtils.create(this)
         }
     }

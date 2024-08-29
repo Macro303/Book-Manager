@@ -15,7 +15,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher) {
-    override fun list(ctx: Context): Unit = Utils.queryTransaction {
+    override fun list(ctx: Context): Unit = Utils.query {
         val query = PublisherTable.selectAll()
         ctx.queryParam("book-id")?.toLongOrNull()?.let {
             Book.findById(it)?.let { book -> query.andWhere { BookTable.id eq book.id } }
@@ -27,11 +27,13 @@ object PublisherApiRouter : BaseApiRouter<Publisher>(entity = Publisher) {
     }
 
     override fun create(ctx: Context) = ctx.processInput<PublisherInput> { body ->
-        Publisher.find(body.title)?.let {
-            throw ConflictResponse("Publisher already exists")
+        Utils.query {
+            Publisher.find(body.title)?.let {
+                throw ConflictResponse("Publisher already exists")
+            }
+            val resource = Publisher.findOrCreate(body.title)
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
-        val resource = Publisher.findOrCreate(body.title)
-        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
 
     override fun update(ctx: Context) = manage<PublisherInput>(ctx) { body, publisher ->

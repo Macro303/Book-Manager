@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
-    override fun list(ctx: Context): Unit = Utils.queryTransaction {
+    override fun list(ctx: Context): Unit = Utils.query {
         val query = CreatorTable.selectAll()
         ctx.queryParam("book-id")?.toLongOrNull()?.let {
             Book.findById(it)?.let { book -> query.andWhere { CreditTable.bookCol eq book.id } }
@@ -31,20 +31,22 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
     }
 
     override fun create(ctx: Context) = ctx.processInput<CreatorInput> { body ->
-        Creator.find(body.name)?.let {
-            throw ConflictResponse("Creator already exists")
-        }
-        val resource = Creator.findOrCreate(body.name).apply {
-            body.credits.forEach {
-                Credit.new {
-                    this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
-                    this.creator = this@apply
-                    this.role = Role.findById(it.role) ?: throw NotFoundResponse("Role not found.")
-                }
+        Utils.query {
+            Creator.find(body.name)?.let {
+                throw ConflictResponse("Creator already exists")
             }
-            imageUrl = body.imageUrl
+            val resource = Creator.findOrCreate(body.name).apply {
+                body.credits.forEach {
+                    Credit.new {
+                        this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
+                        this.creator = this@apply
+                        this.role = Role.findById(it.role) ?: throw NotFoundResponse("Role not found.")
+                    }
+                }
+                imageUrl = body.imageUrl
+            }
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
-        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
 
     override fun update(ctx: Context) = manage<CreatorInput>(ctx) { body, creator ->
@@ -63,7 +65,7 @@ object CreatorApiRouter : BaseApiRouter<Creator>(entity = Creator) {
         }
     }
 
-    override fun delete(ctx: Context) = Utils.queryTransaction {
+    override fun delete(ctx: Context) = Utils.query {
         ctx.getResource().apply {
             credits.forEach { it.delete() }
             delete()

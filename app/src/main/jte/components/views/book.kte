@@ -12,9 +12,9 @@
     <div class="card-image">
         <figure class="image is-2by3">
             @if(entry.isCollected)
-                <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl ?: "https://via.placeholder.com/750x500"}"/>
+                <img alt="${entry.title} cover image" loading="lazy" src="${entry.imageUrl ?: "https://placehold.co/750x500.png"}"/>
             @else
-                <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageUrl ?: "https://via.placeholder.com/750x500"}"/>
+                <img alt="${entry.title} cover image" class="greyscale" loading="lazy" src="${entry.imageUrl ?: "https://placehold.co/750x500.png"}"/>
             @endif
             @if(session != null)
                 @if(session in entry.readers.map { it.user })

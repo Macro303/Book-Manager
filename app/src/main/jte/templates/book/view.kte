@@ -39,7 +39,7 @@
         <div class="columns">
             <div class="column is-one-third-tablet is-one-quarter-fullhd">
                 <figure class="image is-2by3">
-                    <img alt="${resource.title} cover image" class="rounded" loading="lazy" src="${resource.imageUrl ?: "https://via.placeholder.com/1500x1000"}"/>
+                    <img alt="${resource.title} cover image" class="rounded" loading="lazy" src="${resource.imageUrl ?: "https://placehold.co/1500x1000.png"}"/>
                 </figure>
             </div>
             <div class="column">
@@ -161,9 +161,9 @@
                 </div>
             </div>
         </div>
-        <div class="box has-background-text-soft is-shadowless">
-            <div class="columns is-multiline is-centered">
-                @if(resource.isbn != null)
+        @if(resource.isbn != null)
+            <div class="box has-background-text-soft is-shadowless">
+                <div class="columns is-multiline is-centered">
                     <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
                         <nav class="level is-mobile">
                             <div class="level-item has-text-centered">
@@ -179,88 +179,90 @@
                             </div>
                         </nav>
                     </div>
-                @endif
-                @if(resource.goodreads == null && resource.isbn != null)
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
-                        <nav class="level is-mobile">
-                            <div class="level-item has-text-centered">
-                                <div>
-                                    <p class="title">Goodreads</p>
-                                    <p class="heading"><a class="has-text-link" disabled href="" rel="noopener noreferrer" target="_blank">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
-                                        </span>
-                                        <span>Search</span>
-                                    </a></p>
+                    @if(resource.goodreads == null)
+                        <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
+                            <nav class="level is-mobile">
+                                <div class="level-item has-text-centered">
+                                    <div>
+                                        <p class="title">Goodreads</p>
+                                        <p class="heading"><a class="has-text-link" disabled href="" rel="noopener noreferrer" target="_blank">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-magnifying-glass"></i>
+                                            </span>
+                                            <span>Search</span>
+                                        </a></p>
+                                    </div>
                                 </div>
-                            </div>
-                        </nav>
-                    </div>
-                @endif
-                @if(resource.googleBooks == null && resource.isbn != null)
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
-                        <nav class="level is-mobile">
-                            <div class="level-item has-text-centered">
-                                <div>
-                                    <p class="title">Google Books</p>
-                                    <p class="heading"><a class="has-text-link" href="https://books.google.com/books?vid=ISBN${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
-                                        </span>
-                                        <span>Search</span>
-                                    </a></p>
+                            </nav>
+                        </div>
+                    @endif
+                    @if(resource.googleBooks == null)
+                        <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
+                            <nav class="level is-mobile">
+                                <div class="level-item has-text-centered">
+                                    <div>
+                                        <p class="title">Google Books</p>
+                                        <p class="heading"><a class="has-text-link" href="https://books.google.com/books?vid=ISBN${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-magnifying-glass"></i>
+                                            </span>
+                                            <span>Search</span>
+                                        </a></p>
+                                    </div>
                                 </div>
-                            </div>
-                        </nav>
-                    </div>
-                @endif
-                @if(resource.libraryThing == null && resource.isbn != null)
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
-                        <nav class="level is-mobile">
-                            <div class="level-item has-text-centered">
-                                <div>
-                                    <p class="title">LibraryThing</p>
-                                    <p class="heading"><a class="has-text-link" href="https://librarything.com/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
-                                        </span>
-                                        <span>Search</span>
-                                    </a></p>
+                            </nav>
+                        </div>
+                    @endif
+                    @if(resource.libraryThing == null)
+                        <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
+                            <nav class="level is-mobile">
+                                <div class="level-item has-text-centered">
+                                    <div>
+                                        <p class="title">LibraryThing</p>
+                                        <p class="heading"><a class="has-text-link" href="https://librarything.com/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-magnifying-glass"></i>
+                                            </span>
+                                            <span>Search</span>
+                                        </a></p>
+                                    </div>
                                 </div>
-                            </div>
-                        </nav>
-                    </div>
-                @endif
-                @if(resource.openLibrary == null && resource.isbn != null)
-                    <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
-                        <nav class="level is-mobile">
-                            <div class="level-item has-text-centered">
-                                <div>
-                                    <p class="title">OpenLibrary</p>
-                                    <p class="heading"><a class="has-text-link" href="https://openlibrary.org/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
-                                        <span class="icon">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
-                                        </span>
-                                        <span>Search</span>
-                                    </a></p>
+                            </nav>
+                        </div>
+                    @endif
+                    @if(resource.openLibrary == null)
+                        <div class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
+                            <nav class="level is-mobile">
+                                <div class="level-item has-text-centered">
+                                    <div>
+                                        <p class="title">OpenLibrary</p>
+                                        <p class="heading"><a class="has-text-link" href="https://openlibrary.org/isbn/${resource.isbn}" rel="noopener noreferrer" target="_blank">
+                                            <span class="icon">
+                                                <i class="fa-solid fa-magnifying-glass"></i>
+                                            </span>
+                                            <span>Search</span>
+                                        </a></p>
+                                    </div>
                                 </div>
-                            </div>
-                        </nav>
-                    </div>
-                @endif
-            </div>
-        </div>
-        @for(role in credits.keys.sorted())
-            <div class="media">
-                <div class="media-content">
-                    <a class="title has-text-link" href="/roles/${role.id.value}">${role.title}</a>
-                    @if(credits[role]!!.count() == 1)
-                        <p class="heading">1 Creator</p>
-                    @else
-                        <p class="heading">${credits[role]!!.count()} Creators</p>
+                            </nav>
+                        </div>
                     @endif
                 </div>
             </div>
+        @endif
+        @for(role in credits.keys.sorted())
+            <nav class="level is-mobile">
+                <div class="level-left has-text-centered">
+                    <div>
+                        <a class="title has-text-link mb-0" href="/roles/${role.id.value}">${role.title}</a>
+                        @if(credits[role]!!.count() == 1)
+                            <p class="heading mt-0">1 Creator</p>
+                        @else
+                            <p class="heading mt-0">${credits[role]!!.count()} Creators</p>
+                        @endif
+                    </div>
+                </div>
+            </nav>
             <div class="scrolling-wrapper">
                 <div class="columns is-mobile">
                     @for(creator in credits[role]!!.sorted())
@@ -272,12 +274,14 @@
             </div>
             <br/>
         @else
-            <div class="media">
-                <div class="media-content">
-                    <p class="title">Credits</p>
-                    <p class="heading"></p>
+            <nav class="level is-mobile">
+                <div class="level-left has-text-centered">
+                    <div>
+                        <p class="title mb-0">Credits</p>
+                        <p class="heading mt-0"></p>
+                    </div>
                 </div>
-            </div>
+            </nav>
             <div class="columns is-multiline is-centered">
                 <div class="column">
                     <div class="box has-text-centered has-background-text-soft is-shadowless">

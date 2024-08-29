@@ -78,17 +78,16 @@ object BookHtmlRouter : BaseHtmlRouter<Book>(entity = Book, plural = "books") {
     )
 
     override fun createOptions(): Map<String, Any?> = mapOf(
-        "creators" to Creator.all().toList(),
         "formats" to Format.entries.toList(),
         "has-read" to listOf(true, false),
         "has-wished" to listOf(true, false),
         "is-collected" to listOf(true, false),
         "publishers" to Publisher.all().toList(),
-        "roles" to Role.all().toList(),
-        "series" to Series.all().toList(),
     )
 
     override fun updateOptions(ctx: Context): Map<String, Any?> = mapOf(
+        "creators" to Creator.all().toList(),
+        "roles" to Role.all().toList(),
         "series" to Series.all().filterNot { series -> ctx.getResource().series.any { it.series == series } }.toList(),
     )
 }

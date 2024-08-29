@@ -1,3 +1,4 @@
+@import github.buriedincode.bookshelf.Utils.toString
 @import github.buriedincode.bookshelf.models.Book
 @import github.buriedincode.bookshelf.models.BookSeries
 @import github.buriedincode.bookshelf.models.Creator
@@ -7,9 +8,8 @@
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
-@import github.buriedincode.bookshelf.Utils.toString
-@import kotlinx.datetime.LocalDate
 @import kotlin.collections.List
+@import kotlinx.datetime.LocalDate
 @param session: User
 @param resource: Book
 @param creators: List<Creator>
@@ -37,18 +37,18 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Updating ${resource.title}</h1>
         </header>
-        <form id="update-form" onsubmit="return false;">
+        <form class="mb-4" id="update-form" onsubmit="return false;">
             <div class="columns is-multiline is-centered is-desktop">
                 <div class="column is-half-desktop">
                     <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.select.format(label = "Format", options = formats.sorted(), selected = resource.format)
                         @template.components.forms.input(label = "Image Url", name = "image-url", icon = "fa-solid fa-image", value = resource.imageUrl)
+                        @template.components.forms.select.boolean(label = "Collected", name = "is-collected", positive = "Collected", negative = "Missing", selected = resource.isCollected, icon = "fa-solid fa-box-archive")
                         @template.components.forms.input_date(label = "Publish Date", name = "publish-date", value = resource.publishDate)
                         @template.components.forms.select.publisher(label = "Publisher", options = publishers.sorted(), selected = resource.publisher)
                         @template.components.forms.input(label = "Subtitle", name = "subtitle", icon = "fa-solid fa-heading", value = resource.subtitle)
                         @template.components.forms.input(label = "Title", name = "title", icon = "fa-solid fa-heading", value = resource.title)
-                        @template.components.forms.select.boolean(label = "Collected", name = "is-collected", positive = "Collected", negative = "Missing", selected = resource.isCollected, icon = "fa-solid fa-box-archive")
                     </div>
                 </div>
                 <div class="column is-half-desktop">
@@ -171,7 +171,7 @@
                 </form>
             </div>
         </div>
-        <div class="buttons is-multiline is-centered mt-4">
+        <div class="buttons is-multiline is-centered">
             <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">
                 <span class="icon">
                     <i class="fa-solid fa-floppy-disk"></i>
@@ -290,18 +290,25 @@ async function submitUpdate() {
     const form = document.getElementById("update-form");
     const formData = Object.fromEntries(new FormData(form));
     const body = {
+      credits: [@for(entry in resource.credits){creator: ${entry.creator.id.value}, role: ${entry.role.id.value}},@endfor],
       format: formData["format"] || "PAPERBACK",
-      goodreadsId: formData["goodreads"].trim() || null,
-      googleBooksId: formData["google-books"].trim() || null,
+      identifiers: {
+        goodreads: formData["goodreads"].trim() || null,
+        googleBooks: formData["google-books"].trim() || null,
+        isbn: formData["isbn"].trim() || null,
+        libraryThing: formData["library-thing"].trim() || null,
+        openLibrary: formData["open-library"].trim() || null,
+      },
       imageUrl: formData["image-url"].trim() || null,
-      isbn: formData["isbn"].trim() || null,
-      libraryThingId: formData["library-thing"].trim() || null,
-      openLibraryId: formData["open-library"].trim() || null,
+      isCollected: formData["is-collected"].trim(),
       publishDate: formData["publish-date"].trim() || null,
-      publisherId: formData["publisher-id"] || null,
+      publisher: formData["publisher-id"] || null,
+      readers: [@for(entry in resource.readers){user: ${entry.user.id.value}, readDate: "${entry.readDate?.toString("yyyy-MM-dd")}" || null},@endfor],
+      series: [@for(entry in resource.series){series: ${entry.series.id.value}, number: "${entry.number}" || null},@endfor],
       subtitle: formData["subtitle"].trim() || null,
       summary: formData["summary"].trim() || null,
       title: formData["title"].trim(),
+      wishers: [@for(entry in resource.wishers)${entry.id.value},@endfor],
     };
 
     const response = await submitRequest("/api/books/${resource.id.value}", "PUT", body);

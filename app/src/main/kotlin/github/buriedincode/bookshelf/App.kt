@@ -69,7 +69,7 @@ object App {
             it.router.apiBuilder {
                 path("/") {
                     get { ctx ->
-                        Utils.queryTransaction {
+                        Utils.query {
                             ctx.render(
                                 filePath = "templates/index.kte",
                                 model = mapOf(

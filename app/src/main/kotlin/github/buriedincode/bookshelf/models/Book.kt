@@ -65,8 +65,8 @@ class Book(id: EntityID<Long>) : LongEntity(id), IJson, Comparable<Book> {
     override fun toJson(showAll: Boolean): Map<String, Any?> {
         return mutableMapOf<String, Any?>(
             "format" to format.name,
+            "id" to id.value,
             "identifiers" to mapOf(
-                "bookshelf" to id.value,
                 "goodreads" to goodreads,
                 "googleBooks" to googleBooks,
                 "isbn" to isbn,
@@ -107,6 +107,7 @@ data class BookInput(
     val identifiers: Identifiers? = null,
     val imageUrl: String? = null,
     val isCollected: Boolean = false,
+    @JsonDeserialize(using = LocalDateDeserializer::class)
     val publishDate: LocalDate? = null,
     val publisher: Long? = null,
     val readers: List<Reader> = emptyList(),
