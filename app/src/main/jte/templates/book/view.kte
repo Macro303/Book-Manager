@@ -39,7 +39,7 @@
         <div class="columns">
             <div class="column is-one-third-tablet is-one-quarter-fullhd">
                 <figure class="image is-2by3">
-                    <img alt="${resource.title} cover image" class="rounded" loading="lazy" src="${resource.imageUrl ?: "https://via.placeholder.com/1500x1000"}"/>
+                    <img alt="${resource.title} cover image" class="rounded" loading="lazy" src="${resource.imageUrl ?: "https://placehold.co/1500x1000.png"}"/>
                 </figure>
             </div>
             <div class="column">
