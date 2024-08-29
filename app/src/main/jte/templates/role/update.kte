@@ -1,7 +1,13 @@
+@import github.buriedincode.bookshelf.models.Book
+@import github.buriedincode.bookshelf.models.Creator
+@import github.buriedincode.bookshelf.models.Credit
 @import github.buriedincode.bookshelf.models.Role
 @import github.buriedincode.bookshelf.models.User
+@import kotlin.collections.List
 @param session: User
 @param resource: Role
+@param books: List<Book>
+@param creators: List<Creator>
 
 <!DOCTYPE html>
 <html lang="en-GB" data-theme="villain">
@@ -22,15 +28,69 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Updating ${resource.title}</h1>
         </header>
-        <div class="columns is-multiline is-centered is-desktop">
-            <form id="update-form" onsubmit="return false;">
+        <form class="mb-4" id="update-form" onsubmit="return false;">
+            <div class="columns is-multiline is-centered is-desktop">
                 <div class="column is-half-desktop">
                     <div class="box has-text-centered has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.input(label = "Title", name = "title", value = resource.title, icon = "fa-solid fa-heading")
                     </div>
                 </div>
-            </form>
+            </div>
+        </form>
+        <div class="columns is-multiline is-centered is-desktop">
+            <div class="column is-half-desktop">
+                <form id="add-credit-form" onsubmit="return false;">
+                    <div class="box has-background-text-soft is-shadowless">
+                        <h3 class="title is-3 has-text-centered">Credits</h3>
+                        <div class="table-container">
+                            <table class="table is-fullwidth has-background-text-soft">
+                                <thead>
+                                    <tr>
+                                        <th class="has-text-info">Creator</th>
+                                        <th class="has-text-info">Book Title</th>
+                                        <th class="has-text-info">Book Subtitle</th>
+                                        <th class="has-text-info">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for(entry in resource.credits.sortedWith(compareBy<Credit> { it.creator }.thenBy { it.book }))
+                                        <tr>
+                                            <td>${entry.creator.name}</td>
+                                            <td>${entry.book.title}</td>
+                                            <td>${entry.book.subtitle}</td>
+                                            <td>
+                                                <div class="buttons is-centered">
+                                                    <button class="button is-danger" id="remove-credit-${entry.creator.id.value}-${entry.role.id.value}-button" onclick="removeCredit(${entry.creator.id.value}, ${entry.role.id.value})" type="button">
+                                                        <span class="icon">
+                                                            <i class="fa-solid fa-minus"></i>
+                                                        </span>
+                                                        <span>Remove</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endfor
+                                    <tr>
+                                        <td>@template.components.forms.select.creator(label = "", options = creators.sorted())</td>
+                                        <td>@template.components.forms.select.book(label = "", options = books.sorted())</td>
+                                        <td>
+                                            <div class="buttons is-centered">
+                                                <button class="button is-success" id="add-credit-button" onclick="addCredit()" type="button">
+                                                    <span class="icon">
+                                                        <i class="fa-solid fa-plus"></i>
+                                                    </span>
+                                                    <span>Add</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
         <div class="buttons is-multiline is-centered">
             <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">
@@ -59,6 +119,40 @@
 <script src="/static/js/bulma-navbar.js" type="text/javascript"></script>
 <script src="/static/js/validate.js" type="text/javascript"></script>
 <script type="text/javascript">
+async function addCredit() {
+  const caller = "add-credit-button";
+  const form = document.getElementById("add-credit-form");
+  const jsonData = Object.fromEntries(new FormData(form));
+  const body = {
+    book: jsonData["book-id"],
+    creator: jsonData["creator-id"],
+  };
+
+  addLoading(caller);
+  const response = await submitRequest("/api/roles/${resource.id.value}/credits", "POST", body);
+  if (response !== null) {
+    form.reset();
+    window.location.reload();
+  }
+  removeLoading(caller);
+}
+
+async function removeCredit(bookId, creatorId) {
+  @raw
+    const caller = `remove-credit-${bookId}-${creatorId}-button`;
+  @endraw
+  const body = {
+    book: bookId,
+    creator: creatorId,
+  };
+
+  addLoading(caller);
+  const response = await submitRequest("/api/roles/${resource.id.value}/credits", "DELETE", body);
+  if (response !== null)
+    window.location();
+  removeLoading(caller);
+}
+
 async function submitUpdate() {
   const caller = "update-button";
   addLoading(caller);
@@ -66,7 +160,8 @@ async function submitUpdate() {
   if (await roleValidation()) {
     const form = document.getElementById("update-form");
     const formData = Object.fromEntries(new FormData(form));
-    const body = {,
+    const body = {
+      credits: [@for(entry in resource.credits){book: ${entry.book.id.value}, creator: ${entry.creator.id.value}},@endfor],
       title: formData["title"].trim(),
     };
 

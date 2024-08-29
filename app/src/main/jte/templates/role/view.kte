@@ -46,16 +46,18 @@
             </div>
         </div>
         @for(creator in credits.keys.sorted())
-            <div class="media">
-                <div class="media-content">
-                    <a class="title has-text-link" href="/creators/${creator.id.value}">${creator.name}</a>
-                    @if(credits[creator]!!.count() == 1)
-                        <p class="heading">1 Book</p>
-                    @else
-                        <p class="heading">${credits[creator]!!.count()} Books</p>
-                    @endif
+            <nav class="level is-mobile">
+                <div class="level-left has-text-centered">
+                    <div>
+                        <a class="title has-text-link mb-0" href="/creators/${creator.id.value}">${creator.name}</a>
+                        @if(credits[creator]!!.count() == 1)
+                            <p class="heading mt-0">1 Book</p>
+                        @else
+                            <p class="heading mt-0">${credits[creator]!!.count()} Books</p>
+                        @endif
+                    </div>
                 </div>
-            </div>
+            </nav>
             <div class="scrolling-wrapper">
                 <div class="columns is-mobile">
                     @for(book in credits[creator]!!.sorted())
@@ -67,12 +69,14 @@
             </div>
             <br/>
         @else
-            <div class="media">
-                <div class="media-content">
-                    <p class="title">Credits</p>
-                    <p class="heading"></p>
+            <nav class="level is-mobile">
+                <div class="level-left has-text-centered">
+                    <div>
+                        <p class="title mb-0">Credits</p>
+                        <p class="heading mt-0"></p>
+                    </div>
                 </div>
-            </div>
+            </nav>
             <div class="columns is-multiline is-centered">
                 <div class="column">
                     <div class="box has-text-centered has-background-text-soft is-shadowless">

@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
-    override fun list(ctx: Context): Unit = Utils.queryTransaction {
+    override fun list(ctx: Context): Unit = Utils.query {
         val query = RoleTable.selectAll()
         ctx.queryParam("book-id")?.toLongOrNull()?.let {
             Book.findById(it)?.let { book -> query.andWhere { CreditTable.bookCol eq book.id } }
@@ -31,19 +31,21 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
     }
 
     override fun create(ctx: Context) = ctx.processInput<RoleInput> { body ->
-        Role.find(body.title)?.let {
-            throw ConflictResponse("Role already exists")
-        }
-        val resource = Role.findOrCreate(body.title).apply {
-            body.credits.forEach {
-                Credit.new {
-                    this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
-                    this.creator = Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found.")
-                    this.role = this@apply
+        Utils.query {
+            Role.find(body.title)?.let {
+                throw ConflictResponse("Role already exists")
+            }
+            val resource = Role.findOrCreate(body.title).apply {
+                body.credits.forEach {
+                    Credit.new {
+                        this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
+                        this.creator = Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found.")
+                        this.role = this@apply
+                    }
                 }
             }
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
-        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
 
     override fun update(ctx: Context) = manage<RoleInput>(ctx) { body, role ->
@@ -61,7 +63,7 @@ object RoleApiRouter : BaseApiRouter<Role>(entity = Role) {
         }
     }
 
-    override fun delete(ctx: Context) = Utils.queryTransaction {
+    override fun delete(ctx: Context) = Utils.query {
         ctx.getResource().apply {
             credits.forEach { it.delete() }
             delete()

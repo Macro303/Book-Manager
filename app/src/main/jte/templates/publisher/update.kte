@@ -22,16 +22,16 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Updating ${resource.title}</h1>
         </header>
-        <div class="columns is-multiline is-centered is-desktop">
-            <form id="update-form" onsubmit="return false;">
+        <form class="mb-4" id="update-form" onsubmit="return false;">
+            <div class="columns is-multiline is-centered is-desktop">
                 <div class="column is-half-desktop">
                     <div class="box has-text-centered has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.input(label = "Title", name = "title", value = resource.title, icon = "fa-solid fa-heading")
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
         <div class="buttons is-multiline is-centered">
             <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">
                 <span class="icon">

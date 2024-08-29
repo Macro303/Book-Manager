@@ -62,49 +62,51 @@ object BookApiRouter : BaseApiRouter<Book>(entity = Book) {
     }
 
     override fun create(ctx: Context) = ctx.processInput<BookInput> { body ->
-        Book.find(body.title, body.subtitle, body.identifiers?.isbn, body.identifiers?.openLibrary)?.let {
-            throw ConflictResponse("Book already exists")
+        Utils.query {
+            Book.find(body.title, body.subtitle, body.identifiers?.isbn, body.identifiers?.openLibrary)?.let {
+                throw ConflictResponse("Book already exists")
+            }
+            val resource = Book.findOrCreate(body.title, body.subtitle, body.identifiers?.isbn, body.identifiers?.openLibrary).apply {
+                body.credits.forEach {
+                    Credit.new {
+                        this.book = this@apply
+                        this.creator = Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found.")
+                        this.role = Role.findById(it.role) ?: throw NotFoundResponse("Role not found.")
+                    }
+                }
+                format = body.format
+                goodreads = body.identifiers?.goodreads
+                googleBooks = body.identifiers?.googleBooks
+                imageUrl = body.imageUrl
+                isCollected = body.isCollected
+                libraryThing = body.identifiers?.libraryThing
+                publishDate = body.publishDate
+                publisher = body.publisher?.let {
+                    Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
+                }
+                body.readers.forEach {
+                    ReadBook.new {
+                        this.book = this@apply
+                        this.user = User.findById(it.user) ?: throw NotFoundResponse("User not found.")
+                        this.readDate = it.readDate
+                    }
+                }
+                body.series.forEach {
+                    BookSeries.new {
+                        this.book = this@apply
+                        this.series = Series.findById(it.series) ?: throw NotFoundResponse("Series not found.")
+                        this.number = it.number
+                    }
+                }
+                summary = body.summary
+                wishers = SizedCollection(
+                    body.wishers.map {
+                        User.findById(it) ?: throw NotFoundResponse("User not found.")
+                    },
+                )
+            }
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
-        val resource = Book.findOrCreate(body.title, body.subtitle, body.identifiers?.isbn, body.identifiers?.openLibrary).apply {
-            body.credits.forEach {
-                Credit.new {
-                    this.book = this@apply
-                    this.creator = Creator.findById(it.creator) ?: throw NotFoundResponse("Creator not found.")
-                    this.role = Role.findById(it.role) ?: throw NotFoundResponse("Role not found.")
-                }
-            }
-            format = body.format
-            goodreads = body.identifiers?.goodreads
-            googleBooks = body.identifiers?.googleBooks
-            imageUrl = body.imageUrl
-            isCollected = body.isCollected
-            libraryThing = body.identifiers?.libraryThing
-            publishDate = body.publishDate
-            publisher = body.publisher?.let {
-                Publisher.findById(it) ?: throw NotFoundResponse("Publisher not found.")
-            }
-            body.readers.forEach {
-                ReadBook.new {
-                    this.book = this@apply
-                    this.user = User.findById(it.user) ?: throw NotFoundResponse("User not found.")
-                    this.readDate = it.readDate
-                }
-            }
-            body.series.forEach {
-                BookSeries.new {
-                    this.book = this@apply
-                    this.series = Series.findById(it.series) ?: throw NotFoundResponse("Series not found.")
-                    this.number = it.number
-                }
-            }
-            summary = body.summary
-            wishers = SizedCollection(
-                body.wishers.map {
-                    User.findById(it) ?: throw NotFoundResponse("User not found.")
-                },
-            )
-        }
-        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
 
     override fun update(ctx: Context) = manage<BookInput>(ctx) { body, book ->

@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.selectAll
 
 object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
-    override fun list(ctx: Context): Unit = Utils.queryTransaction {
+    override fun list(ctx: Context): Unit = Utils.query {
         val query = SeriesTable.selectAll()
         ctx.queryParam("book-id")?.toLongOrNull()?.let {
             Book.findById(it)?.let { book -> query.andWhere { BookSeriesTable.bookCol eq book.id } }
@@ -28,19 +28,21 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
     }
 
     override fun create(ctx: Context) = ctx.processInput<SeriesInput> { body ->
-        Series.find(body.title)?.let {
-            throw ConflictResponse("Series already exists")
-        }
-        val resource = Series.findOrCreate(body.title).apply {
-            body.books.forEach {
-                BookSeries.new {
-                    this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
-                    this.series = this@apply
-                    this.number = if (it.number == 0) null else it.number
+        Utils.query {
+            Series.find(body.title)?.let {
+                throw ConflictResponse("Series already exists")
+            }
+            val resource = Series.findOrCreate(body.title).apply {
+                body.books.forEach {
+                    BookSeries.new {
+                        this.book = Book.findById(it.book) ?: throw NotFoundResponse("Book not found.")
+                        this.series = this@apply
+                        this.number = if (it.number == 0) null else it.number
+                    }
                 }
             }
+            ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
         }
-        ctx.status(HttpStatus.CREATED).json(resource.toJson(showAll = true))
     }
 
     override fun update(ctx: Context) = manage<SeriesInput>(ctx) { body, series ->
@@ -60,7 +62,7 @@ object SeriesApiRouter : BaseApiRouter<Series>(entity = Series) {
         }
     }
 
-    override fun delete(ctx: Context) = Utils.queryTransaction {
+    override fun delete(ctx: Context) = Utils.query {
         ctx.getResource().apply {
             books.forEach { it.delete() }
             delete()

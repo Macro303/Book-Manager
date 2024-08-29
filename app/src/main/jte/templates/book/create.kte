@@ -1,18 +1,11 @@
-@import github.buriedincode.bookshelf.models.Book
-@import github.buriedincode.bookshelf.models.Creator
 @import github.buriedincode.bookshelf.models.Format
 @import github.buriedincode.bookshelf.models.Publisher
-@import github.buriedincode.bookshelf.models.Role
-@import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @import java.time.LocalDate
 @import kotlin.collections.List
 @param session: User
-@param creators: List<Creator>
 @param formats: List<Format>
 @param publishers: List<Publisher>
-@param roles: List<Role>
-@param series: List<Series>
 
 <!DOCTYPE html>
 <html lang="en-GB" data-theme="villain">
@@ -33,18 +26,18 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Creating a Book</h1>
         </header>
-        <div class="columns is-multiline is-centered is-desktop">
-            <form id="create-form" onsubmit="return false;">
+        <form class="mb-4" id="create-form" onsubmit="return false;">
+            <div class="columns is-multiline is-centered is-desktop">
                 <div class="column is-half-desktop">
                     <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.select.format(label = "Format", options = formats.sorted())
                         @template.components.forms.input(label = "Image Url", name = "image-url", icon = "fa-solid fa-image")
+                        @template.components.forms.select.boolean(label = "Collected", name = "is-collected", positive = "Collected", negative = "Missing", selected = false, icon = "fa-solid fa-box-archive")
                         @template.components.forms.input_date(label = "Publish Date", name = "publish-date")
                         @template.components.forms.select.publisher(label = "Publisher", options = publishers.sorted())
                         @template.components.forms.input(label = "Subtitle", name = "subtitle", icon = "fa-solid fa-heading")
                         @template.components.forms.input(label = "Title", name = "title", icon = "fa-solid fa-heading")
-                        @template.components.forms.select.boolean(label = "Collected", name = "is-collected", positive = "Collected", negative = "Missing", selected = false, icon = "fa-solid fa-box-archive")
                     </div>
                 </div>
                 <div class="column is-half-desktop">
@@ -63,8 +56,8 @@
                         @template.components.forms.input(label = "OpenLibrary", name = "open-library", icon = "fa-solid fa-link")
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
         <div class="buttons is-multiline is-centered">
             <button class="button is-success" id="create-button" onclick="submitCreate()" type="submit">
                 <span class="icon">
@@ -105,7 +98,7 @@ async function submitCreate() {
       imageUrl: formData["image-url"].trim() || null,
       isCollected: formData["is-collected"].trim(),
       publishDate: formData["publish-date"].trim() || null,
-      publisherId: formData["publisher-id"] || null,
+      publisher: formData["publisher-id"] || null,
       subtitle: formData["subtitle"].trim() || null,
       summary: formData["summary"].trim() || null,
       title: formData["title"].trim(),
@@ -115,7 +108,7 @@ async function submitCreate() {
     if (response !== null) {
       form.reset();
       @raw
-        window.location = `/books/${response.body.identifiers.bookshelf}`;
+        window.location = `/books/${response.body.id}`;
       @endraw
     }
   }

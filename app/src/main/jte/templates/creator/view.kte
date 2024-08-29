@@ -50,16 +50,18 @@
             </div>
         </div>
         @for(role in credits.keys.sorted())
-            <div class="media">
-                <div class="media-content">
-                    <a class="title has-text-link" href="/roles/${role.id.value}">${role.title}</a>
-                    @if(credits[role]!!.count() == 1)
-                        <p class="heading">1 Book</p>
-                    @else
-                        <p class="heading">${credits[role]!!.count()} Books</p>
-                    @endif
+            <nav class="level is-mobile">
+                <div class="level-left has-text-centered">
+                    <div>
+                        <a class="title has-text-link" href="/roles/${role.id.value}">${role.title}</a>
+                        @if(credits[role]!!.count() == 1)
+                            <p class="heading">1 Book</p>
+                        @else
+                            <p class="heading">${credits[role]!!.count()} Books</p>
+                        @endif
+                    </div>
                 </div>
-            </div>
+            </nav>
             <div class="scrolling-wrapper">
                 <div class="columns is-mobile">
                     @for(book in credits[role]!!.sorted())
@@ -71,12 +73,14 @@
             </div>
             <br/>
         @else
-            <div class="media">
-                <div class="media-content">
-                    <p class="title">Credits</p>
-                    <p class="heading"></p>
+            <nav class="level is-mobile">
+                <div class="level-left has-text-centered">
+                    <div>
+                        <p class="title">Credits</p>
+                        <p class="heading"></p>
+                    </div>
                 </div>
-            </div>
+            </nav>
             <div class="columns is-multiline is-centered">
                 <div class="column">
                     <div class="box has-text-centered has-background-text-soft is-shadowless">

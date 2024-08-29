@@ -3,8 +3,8 @@
 @import github.buriedincode.bookshelf.models.Series
 @import github.buriedincode.bookshelf.models.User
 @import kotlin.collections.List
-@param resource: Series
 @param session: User
+@param resource: Series
 @param books: List<Book>
 
 <!DOCTYPE html>
@@ -26,19 +26,19 @@
         <header class="block has-text-centered">
             <h1 class="title is-1">Updating ${resource.title}</h1>
         </header>
-        <div class="columns is-multiline is-centered is-desktop">
-            <form id="update-form" onsubmit="return false;">
+        <form class="mb-4" id="update-form" onsubmit="return false;">
+            <div class="columns is-multiline is-centered is-desktop">
                 <div class="column is-half-desktop">
-                    <div class="box has-background-text-soft is-shadowless">
+                    <div class="box has-text-centered has-background-text-soft is-shadowless">
                         <h3 class="title is-3">Details</h3>
                         @template.components.forms.input(label = "Title", name = "title", value = resource.title, icon = "fa-solid fa-heading")
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
         <div class="columns is-multiline is-centered is-desktop">
-            <form id="add-book-form" onsubmit="return false;">
-                <div class="column is-half-desktop">
+            <div class="column is-half-desktop">
+                <form id="add-book-form" onsubmit="return false;">
                     <div class="box has-background-text-soft is-shadowless">
                         <h3 class="title is-3 has-text-centered">Books</h3>
                         <div class="table-container">
@@ -87,8 +87,8 @@
                             </table>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
         <div class="buttons is-multiline is-centered">
             <button class="button is-success" id="update-button" onclick="submitUpdate()" type="submit">
@@ -122,7 +122,7 @@
     const form = document.getElementById("add-book-form");
     const formData = Object.fromEntries(new FormData(form));
     const body = {
-        bookId: formData["book-id"],
+        book: formData["book-id"],
         number: formData["number"] || null,
     };
 
@@ -158,6 +158,7 @@ async function submitUpdate() {
     const form = document.getElementById("update-form");
     const formData = Object.fromEntries(new FormData(form));
     const body = {
+      books: [@for(entry in resource.books){book: ${entry.book.id.value}, number: "${entry.number}" || null},@endfor],
       title: formData["title"].trim(),
     };
 
