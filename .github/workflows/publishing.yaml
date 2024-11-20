@@ -24,7 +24,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta
-        uses: docker/metadata-action@v5.5.1
+        uses: docker/metadata-action@v5.6.1
         id: meta
         with:
           images: |
